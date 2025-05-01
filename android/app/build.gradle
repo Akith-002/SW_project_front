@@ -1,0 +1,73 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.land_asset_valuation"
+    compileSdk = 35
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.example.land_asset_valuation"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources true
+            signingConfig = signingConfigs.debug
+        }
+        debug {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+          //  signingConfig signingConfigs.release
+        }
+    }
+
+    flavorDimensions "flavor-type"
+    productFlavors {
+        dev {
+            dimension "flavor-type"
+            resValue "string", "app_name", "Land Asset Valuation DEV"
+        }
+        qa {
+            dimension "flavor-type"
+            resValue "string", "app_name", "Land Asset Valuation QA"
+        }
+        uat {
+            dimension "flavor-type"
+            resValue "string", "app_name", "Land Asset Valuation UAT"
+        }
+        live {
+            dimension "flavor-type"
+            resValue "string", "app_name", "Land Asset Valuation"
+        }
+        sit {
+            dimension "flavor-type"
+            resValue "string", "app_name", "Land Asset Valuation SIT"
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
