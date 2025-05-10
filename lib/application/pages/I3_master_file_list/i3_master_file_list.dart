@@ -47,7 +47,9 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
     switch (index) {
       case 1:
         return 'landAcquisition';
-      case 8:
+      case 2:
+        return 'massRating';
+      case 7:
         return 'landMiscellaneous';
       // Add other cases if TableScaffold is used elsewhere with a specific source needed
       default:
@@ -81,7 +83,7 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
             // *******************************
           ),
         );
-      case 3: // Mass Rating MR
+      case 2: // Mass Rating MR
         return Scaffold(
           appBar: CustomAppBar(
             title: AppString.massRatingMR.localize(context)!,
@@ -95,7 +97,7 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
             table: TableScaffoldMr(), // Assumes this doesn't need the source
           ),
         );
-      case 4: // Rating Assessment RA
+      case 3: // Rating Assessment RA
         return Scaffold(
           appBar: CustomAppBar(
             title: AppString.ratingAssessmentRA.localize(context)!,
@@ -109,13 +111,13 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
             table: TableScaffoldMr(), // Assumes this doesn't need the source
           ),
         );
-      case 5: // Rating Building RB
+      case 4: // Rating Building RB
         return Scaffold(
           appBar: CustomAppBar(
             title: AppString.ratingBuildingRB.localize(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
-         body: FileList(
+          body: FileList(
             breadcrumbItems: [
               AppString.massRating.localize(context)!,
               AppString.ratingBuilding.localize(context)!,
@@ -123,7 +125,7 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
             table: TableScaffoldMr(), // Assumes this doesn't need the source
           ),
         );
-      case 6: // Rating Object RO
+      case 5: // Rating Object RO
         return Scaffold(
           appBar: CustomAppBar(
             title: AppString.ratingObjectRO.localize(context)!,
@@ -137,10 +139,10 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
             table: TableScaffoldMr(), // Assumes this doesn't need the source
           ),
         );
-      case 7: // Map Screen
+      case 6: // Map Screen
         // Usually navigated to directly, not built here unless it's the only content
         return MapScreen();
-      case 8: // Land Miscellaneous
+      case 7: // Land Miscellaneous
         return Scaffold(
           appBar: CustomAppBar(
             title: AppString.landMiscellaneous.localize(context)!,

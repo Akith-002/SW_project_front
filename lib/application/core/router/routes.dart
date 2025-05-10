@@ -70,40 +70,13 @@ class AppRouter {
 
           print("ShellRoute rebuilding with selectedIndex: $selectedIndex");
 
-          // Create a controller for the sidebar with the correct selected index
-          final controller =
-              SidebarXController(selectedIndex: selectedIndex, extended: true);
-
-          return PopScope(
-            canPop: !(_shellNavigatorKey.currentState?.canPop() ?? false),
-            onPopInvoked: (bool didPop) {
-              if (didPop) {
-                return;
-              }
-
-              final NavigatorState? shellNavigator =
-                  _shellNavigatorKey.currentState;
-              if (shellNavigator != null && shellNavigator.canPop()) {
-                shellNavigator.pop();
-              }
+          return SidebarScaffold(
+            selectedIndex: selectedIndex,
+            onIndexChanged: (index) {
+              // Navigate based on selected index
+              _navigateBasedOnIndex(context, index);
             },
-            child: Scaffold(
-              body: Row(
-                children: [
-                  // Shared sidebar across all shell routes
-                  ExampleSidebarX(
-                    controller: controller,
-                    onSelectedIndexChanged: (index) {
-                      // This callback handles navigation based on sidebar selection
-                      _navigateBasedOnIndex(context, index);
-                    },
-                  ),
-
-                  // Page-specific content from child routes
-                  Expanded(child: child),
-                ],
-              ),
-            ),
+            child: child,
           );
         },
         routes: [
@@ -287,20 +260,20 @@ class AppRouter {
       print("DEBUG: MapScreen route with source: '$source'");
 
       if (source == 'MRrentalEvidence') {
-        return 7; // MR Rental Evidence tab
+        return 6; // MR Rental Evidence tab
       }
       if (source == 'landAcquisition') {
         return 1; // Land Acquisition tab
       }
       if (source == 'landMiscellaneous') {
-        return 8; // Land Miscellaneous tab - add this case
+        return 7; // Land Miscellaneous tab - add this case
       }
       if (source == 'massRating') {
         return 2; // Mass Rating tab
       }
 
       // Default to MR Rental Evidence if no specific source
-      return 7;
+      return 6;
     }
 
     // Otherwise map paths to indices
@@ -309,14 +282,12 @@ class AppRouter {
     } else if (path.startsWith(Pages.routeI3MasterFileList.toPath())) {
       // Default to Land Acquisition (1) if no specific index provided
       return 1;
-    } else if (path.startsWith(Pages.routeMapScreen.toPath())) {
-      return 7;
     } else if (path.startsWith(Pages.routeLaSalesEvidence.toPath()) ||
         path.startsWith(Pages.routeLaBuildingRates.toPath())) {
       return 1; // Land Acquisition
     } else if (path.startsWith(Pages.routeRentalEvidence.toPath()) ||
         path.startsWith(Pages.routeI2RentalEvidence.toPath())) {
-      return 7; // MR Rental Evidence
+      return 6; // MR Rental Evidence
     }
 
     // Default
@@ -335,27 +306,27 @@ class AppRouter {
           queryParameters: {'selectedIndex': '1'},
         );
         break;
+      case 2:
       case 3:
       case 4:
       case 5:
-      case 6:
         // Mass Rating section
         context.goNamed(
           Pages.routeI3MasterFileList.toPathName(),
           queryParameters: {'selectedIndex': index.toString()},
         );
         break;
-      case 7:
+      case 6:
         context.goNamed(
           Pages.routeMapScreen.toPathName(),
           queryParameters: {'source': 'MRrentalEvidence'},
         );
         break;
-      case 8:
+      case 7:
         // Land Miscellaneous
         context.goNamed(
           Pages.routeI3MasterFileList.toPathName(),
-          queryParameters: {'selectedIndex': '8'},
+          queryParameters: {'selectedIndex': '7'},
         );
         break;
       default:

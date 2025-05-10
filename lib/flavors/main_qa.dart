@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:land_asset_valuation/application/base_app.dart';
@@ -69,11 +68,10 @@ Future<void> main() async {
   // Call Mapbox setup
   await setupMapbox();
 
-
   SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
   SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+      [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
   runApp(provider.ChangeNotifierProvider<TextScaleFactorModel>(
     create: (_) => TextScaleFactorModel(),
