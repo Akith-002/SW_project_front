@@ -14,7 +14,7 @@ class Breadcrumb extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: colors(context).colorGrey9 ?? Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(6),
+        // borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

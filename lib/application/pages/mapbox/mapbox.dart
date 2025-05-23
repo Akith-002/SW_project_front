@@ -13,7 +13,7 @@ import 'listeners/annotation_listeners.dart';
 import 'managers/annotation_managers.dart';
 import 'managers/drawing_manager.dart';
 import 'managers/sketch_manager.dart';
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 class Mapbox extends StatefulWidget {
   final Function(bool)? onDrawModeChanged;
@@ -21,6 +21,9 @@ class Mapbox extends StatefulWidget {
   final Function(Point)? onMapTapped;
   final Function(PointAnnotation, String?)? onAnnotationClick;
   final Function(PolygonAnnotation)? onPolygonClick;
+  final Function(double area, double distance)?
+      onSketchMetricsUpdated; // <-- ADD THIS PROP
+
   final bool isSketchingMode;
   final String? selectedSketchTool;
   final SketchToolMode? selectedSketchSubMode;
@@ -39,6 +42,7 @@ class Mapbox extends StatefulWidget {
     this.onPolygonClick,
     this.isSketchingMode = false,
     this.isViewInsideMode = false, // <-- Add default value
+    this.onSketchMetricsUpdated, // <-- ADD THIS ARG
 
     this.selectedSketchTool,
     this.selectedSketchSubMode,
@@ -285,8 +289,8 @@ class MapboxState extends State<Mapbox>
       // <-- CHECK PROP HERE
       print(
           "Mapbox: Ignoring polygon click - active View Inside mode (checked via prop).");
-      widget.onFeedbackMessage
-          ?.call("In View Inside mode. Use back button to exit.");
+      // widget.onFeedbackMessage
+      //     ?.call("In View Inside mode. Use back button to exit.");
       return;
     }
 
@@ -437,8 +441,10 @@ class MapboxState extends State<Mapbox>
 
   _onTap(MapContentGestureContext context) async {
     final tappedPoint = context.point;
-    debugPrint(
-        "Mapbox _onTap: ENTERED. Reading widget props: isSketchingMode=${widget.isSketchingMode}, selectedSketchTool=${widget.selectedSketchTool}, selectedSketchSubMode=${widget.selectedSketchSubMode}");
+    print("Mapbox _onTap: ENTERED. Coordinates: ${tappedPoint.coordinates}");
+    print(
+        "Mapbox _onTap: Current state - isSketchingMode=${widget.isSketchingMode}, isViewInsideMode=${widget.isViewInsideMode}, selectedTool=${widget.selectedSketchTool}");
+
     if (mapboxMap == null) {
       debugPrint("Mapbox: Tap ignored, map not ready.");
       return;
@@ -469,6 +475,31 @@ class MapboxState extends State<Mapbox>
           (widget.selectedSketchTool == 'polygon' ||
               widget.selectedSketchTool == 'line')) {
         await addVertexDot(tappedPoint);
+
+        double distance = 0.0;
+        if (currentSketchPoints.length >= 2) {
+          try {
+            Point lastPoint =
+                currentSketchPoints[currentSketchPoints.length - 2];
+            Point newPoint = currentSketchPoints.last;
+            distance =
+                await calculateDistanceBetweenPoints(lastPoint, newPoint);
+            print(
+                "Mapbox _onTap: Points count=${currentSketchPoints.length}, Calculated distance: $distance");
+          } catch (e) {
+            print("Mapbox _onTap: ERROR during distance calculation: $e");
+            distance = -1.0;
+          }
+        }
+
+        double area = 0.0;
+        if (widget.selectedSketchTool == 'polygon' &&
+            currentSketchPoints.length >= 3) {
+          area = await calculateApproxPolygonArea(
+              currentSketchPoints); // Use the approximate calculation
+        }
+        widget.onSketchMetricsUpdated?.call(area, distance);
+
         // Show coordinates of tapped point
         widget.onFeedbackMessage?.call(
             "Point added: (${tappedPoint.coordinates.lng.toStringAsFixed(6)}, ${tappedPoint.coordinates.lat.toStringAsFixed(6)})");
@@ -568,6 +599,67 @@ class MapboxState extends State<Mapbox>
     } catch (e) {
       debugPrint("Error drawing initial lot polygon: $e");
       widget.onFeedbackMessage?.call("Error updating lot boundary.");
+    }
+  }
+
+  Future<double> calculateDistanceBetweenPoints(Point p1, Point p2) async {
+    const double earthRadius = 6371000; // Earth radius in meters
+
+    double lat1 = p1.coordinates.lat * math.pi / 180;
+    double lon1 = p1.coordinates.lng * math.pi / 180;
+    double lat2 = p2.coordinates.lat * math.pi / 180;
+    double lon2 = p2.coordinates.lng * math.pi / 180;
+
+    double dLat = lat2 - lat1;
+    double dLon = lon2 - lon1;
+
+    double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1) *
+            math.cos(lat2) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    return earthRadius * c; // Distance in meters
+  }
+
+  // --- Helper Function: Calculate Polygon Area (Shoelace on Lat/Lon - APPROXIMATE) ---
+  // IMPORTANT: This provides a ROUGH estimate. For accurate geodetic area,
+  // use a dedicated library (GeographicLib, Turf) or project coordinates first.
+  Future<double> calculateApproxPolygonArea(List<Point> points) async {
+    if (points.length < 3) return 0.0;
+
+    double area = 0.0;
+    List<Position> coords = points.map((p) => p.coordinates).toList();
+
+    // Ensure closed loop for calculation
+    if (coords.first.lng != coords.last.lng ||
+        coords.first.lat != coords.last.lat) {
+      coords.add(coords.first);
+    }
+
+    for (int i = 0; i < coords.length - 1; i++) {
+      // Using longitude as 'x' and latitude as 'y' for the formula
+      area += (coords[i].lng * coords[i + 1].lat -
+          coords[i + 1].lng * coords[i].lat);
+    }
+    area = area.abs() / 2.0;
+
+    // This area is in "square degrees" - need to convert roughly to sq meters
+    // This conversion is highly dependent on latitude. Let's use the center point's latitude.
+    if (area > 0) {
+      double centerLat =
+          coords.map((p) => p.lat).reduce((a, b) => a + b) / coords.length;
+      double metersPerDegreeLat =
+          111132.954; // Approx meters per degree latitude
+      double metersPerDegreeLon = 111319.488 *
+          math.cos(centerLat *
+              math.pi /
+              180); // Approx meters per degree longitude at latitude
+
+      return area * metersPerDegreeLat * metersPerDegreeLon;
+    } else {
+      return 0.0;
     }
   }
 
@@ -872,7 +964,7 @@ class MapboxState extends State<Mapbox>
     // Longitude degrees vary with latitude
     // At the equator, 1 meter ≈ 0.000009 degrees of longitude
     // This decreases as you move toward the poles
-    double factor = Math.cos(latitude * Math.pi / 180);
+    double factor = math.cos(latitude * math.pi / 180);
     return meters * 0.000009 / factor;
   }
 

@@ -16,10 +16,13 @@ import 'package:land_asset_valuation/application/core/widgets/lot_action_menu.da
 import 'package:land_asset_valuation/application/core/widgets/sketch_tools_menu.dart';
 import 'package:land_asset_valuation/application/core/widgets/sketch_mode.dart';
 import 'package:land_asset_valuation/application/core/widgets/save_lot.dart';
-
+import 'package:land_asset_valuation/application/core/widgets/lot_area_widget.dart';
 import 'package:land_asset_valuation/application/pages/mapbox/mapbox.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+
+import 'dart:math'
+    as math; // Import for calculations if needed here (likely not)
 
 import './map_marker_loader.dart';
 import './map_mode_banner.dart';
@@ -46,9 +49,9 @@ class _MapScreenState extends State<MapScreen> {
   bool isSketchingMode = false; // For sketching on lots
   String? selectedSketchTool; // Currently selected sketch tool
   SketchToolMode _selectedSketchSubMode = SketchToolMode.marker;
-  PointAnnotation?
-      _selectedMarkerForSketching; // Keep for now, might be used later
-
+  PointAnnotation? _selectedMarkerForSketching;
+  double _currentSketchArea = 0.0;
+  double _lastSegmentDistance = 0.0;
   // Data association
   PolygonAnnotation? _selectedLotForSketching;
   // Field is used temporarily between async steps, ignore 'unused_field' warning - Commenting out for now as it seems unused
@@ -75,6 +78,22 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint("MapScreen: initState called");
     _markerLoader = MapMarkerLoader();
     _loadMarkerImagesAsync();
+  }
+
+  void _onSketchMetricsUpdated(double area, double distance) {
+    if (!mounted) return;
+    // Use debugPrint for detailed logging during development
+    // debugPrint("MapScreen: _onSketchMetricsUpdated - Area: $area, Distance: $distance");
+    // Only update state if values actually changed to avoid unnecessary rebuilds
+    print(
+        "MapScreen: Updating state for Area/Distance"); // Confirm setState is reached
+
+    if (_currentSketchArea != area || _lastSegmentDistance != distance) {
+      setState(() {
+        _currentSketchArea = area;
+        _lastSegmentDistance = distance;
+      });
+    }
   }
 
   /// Asynchronously loads all marker images at startup
@@ -596,7 +615,20 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       isViewInsideMode = false;
       _selectedPolygonForViewInside = null;
+
+      _currentSketchArea = 0.0;
+      _lastSegmentDistance = 0.0;
+
+      isSketchingMode = false; // Assuming exit view inside also exits sketching
+      selectedSketchTool = null;
+      _selectedSketchSubMode = SketchToolMode.marker;
+      _selectedLotForSketching = null; // Ensure context is cleared
+      // _buildingGeometryIdPendingSave = null;
+      _selectedMarkerForSketching = null;
     });
+
+    mapboxKey.currentState
+        ?.clearCurrentSketchGuideAndPoints(); // Clear any leftover guides
 
     _showSnackbar("Exited View Inside mode");
   }
@@ -624,15 +656,24 @@ class _MapScreenState extends State<MapScreen> {
             true; // Automatically enter sketch mode when viewing inside
         isDrawingMode = false;
         isMarkerPlacementMode = false;
-        // _buildingGeometryIdPendingSave = null; // Removed
+
+        _currentSketchArea = 0.0;
+        _lastSegmentDistance = 0.0;
+        selectedSketchTool = null; // Let's default to polygon tool
+        _selectedSketchSubMode =
+            SketchToolMode.marker; // Default to drawing points
+
         debugPrint(
             "MapScreen: Setting isSketchingMode=true, resetting other modes.");
+        _selectedLotForSketching =
+            polygon; // Use the polygon we are viewing inside
       } else {
-        // Exiting view inside mode, also exit sketch mode
-        isSketchingMode = false;
+        isSketchingMode = false; // Ensure sketching is off when exiting
         selectedSketchTool = null;
-        _selectedSketchSubMode = SketchToolMode.marker;
+        _currentSketchArea = 0.0;
+        _lastSegmentDistance = 0.0;
         _selectedLotForSketching = null;
+        _selectedSketchSubMode = SketchToolMode.marker;
         _selectedMarkerForSketching = null;
         mapboxKey.currentState?.clearCurrentSketchGuideAndPoints();
         mapboxKey.currentState?.exitTextPlacementMode();
@@ -644,7 +685,8 @@ class _MapScreenState extends State<MapScreen> {
 
     // Show feedback
     if (isInViewInsideMode) {
-      _showSnackbar("View Inside mode activated. Use back button to exit.");
+      _showSnackbar("View Inside mode: Polygon tool active. Tap to draw.",
+          durationSeconds: 4);
     } else {
       _showSnackbar("Exited View Inside mode");
     }
@@ -845,6 +887,9 @@ class _MapScreenState extends State<MapScreen> {
             onFeedbackMessage: _handleMapFeedback,
             onViewInsideModeChanged: _onViewInsideModeChanged,
             onTextPlacementFinished: _onTextPlacementFinished,
+            onSketchMetricsUpdated:
+                _onSketchMetricsUpdated, // <-- PASS CALLBACK
+
             onDrawModeChanged: (isDrawing) {
               if (mounted && isDrawingMode != isDrawing) {
                 setState(() {
@@ -942,6 +987,20 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
             ),
+          if (isSketchingMode) // Show only when View Inside mode is active
+            Positioned(
+              bottom: 20,
+              left: 20,
+              child: SafeArea(
+                top: false, // No safe area needed at top for bottom widget
+                right: false,
+                child: LotAreaWidget(
+                  area: _currentSketchArea,
+                  lastDistance: _lastSegmentDistance,
+                ),
+              ),
+            ),
+
           if (isSketchingMode)
             Positioned(
               top: 110,

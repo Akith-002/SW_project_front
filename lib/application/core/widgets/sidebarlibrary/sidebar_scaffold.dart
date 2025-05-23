@@ -1,466 +1,487 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
+import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:sidebarx/sidebarx.dart';
 
-class SidebarScaffold extends StatelessWidget {
-  SidebarScaffold({super.key});
+class SidebarScaffold extends StatefulWidget {
+  final Widget child;
+  final int selectedIndex;
+  final Function(int) onIndexChanged;
 
-  final _controller = SidebarXController(selectedIndex: 0, extended: true);
-  final _key = GlobalKey<ScaffoldState>();
+  const SidebarScaffold({
+    super.key,
+    required this.child,
+    required this.selectedIndex,
+    required this.onIndexChanged,
+  });
+
+  @override
+  State<SidebarScaffold> createState() => _SidebarScaffoldState();
+}
+
+class _SidebarScaffoldState extends State<SidebarScaffold> {
+  bool _isExpanded = true;
+  bool _isMassRatingExpanded = false;
+
+  // Add a set of indices that belong to the Mass Rating section
+  final Set<int> _massRatingIndices = {2, 3, 4, 5, 6};
+
+  // Modified onIndexChanged handler to collapse Mass Rating when needed
+  void _handleIndexChanged(int index) {
+    setState(() {
+      // If sidebar is collapsed, expand it when any item is clicked
+      if (!_isExpanded) {
+        _isExpanded = true;
+      }
+
+      // If selecting a non-Mass Rating item, collapse the Mass Rating section
+      if (!_massRatingIndices.contains(index)) {
+        _isMassRatingExpanded = false;
+      } else if (!_isMassRatingExpanded) {
+        // If selecting a Mass Rating item but section is collapsed, expand it
+        _isMassRatingExpanded = true;
+      }
+    });
+
+    // Forward the index change to the parent
+    widget.onIndexChanged(index);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Builder(
-        builder: (context) {
-          final isSmallScreen = MediaQuery.of(context).size.width < 600;
-          return Scaffold(
-            key: _key,
-            drawer: ExampleSidebarX(controller: _controller),
-            body: Row(
+    return Scaffold(
+      body: Row(
+        children: [
+          // Sidebar
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: _isExpanded ? 265 : 56,
+            decoration: BoxDecoration(
+              color: _isExpanded
+                  ? colors(context).colorWhite!
+                  : colors(context).colorPrimary6!,
+              border: _isExpanded
+                  ? Border(
+                      right: BorderSide(
+                        color: colors(context).colorGrey9!,
+                        width: 1.0,
+                      ),
+                    )
+                  : null,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (!isSmallScreen) ExampleSidebarX(controller: _controller),
+                // Logo and title section
+                _buildLogoHeader(),
+
+                // Divider
+                SizedBox(
+                  height: 24,
+                ),
+
+                // Main sidebar content
                 Expanded(
-                  child: Center(
-                    child: _ScreensExample(
-                      controller: _controller,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      spacing: 8,
+                      children: [
+                        // Dashboard
+                        _buildMenuItem(
+                          index: 0,
+                          title: 'Dashboard',
+                          icon: PhosphorIconsBold.squaresFour,
+                        ),
+
+                        // Land Acquisition
+                        _buildMenuItem(
+                          index: 1,
+                          title: 'Land Acquisition',
+                          icon: PhosphorIconsBold.mapTrifold,
+                        ),
+
+                        // Mass Rating with subcategories
+                        _buildExpandableSection(
+                          title: 'Mass Rating',
+                          icon: PhosphorIconsBold.pencilRuler,
+                          isExpanded: _isMassRatingExpanded,
+                          onTap: () {
+                            setState(() {
+                              _isMassRatingExpanded = !_isMassRatingExpanded;
+                              // Only expand sidebar if needed
+                              if (_isMassRatingExpanded) {
+                                _isExpanded = true;
+                              }
+                            });
+                          },
+                          children: [
+                            _buildSubMenuItem(
+                              index: 2,
+                              title: 'Mass Rating',
+                            ),
+                            _buildSubMenuItem(
+                              index: 3,
+                              title: 'Rating Assessment',
+                            ),
+                            _buildSubMenuItem(
+                              index: 4,
+                              title: 'Rating Building',
+                            ),
+                            _buildSubMenuItem(
+                              index: 5,
+                              title: 'Rating Object',
+                            ),
+                            _buildSubMenuItem(
+                              index: 6,
+                              title: 'MR Rental Evidence',
+                            ),
+                          ],
+                        ),
+
+                        // Land Miscellaneous
+                        _buildMenuItem(
+                          index: 7,
+                          title: 'Land Miscellaneous',
+                          icon: PhosphorIconsBold.ticket,
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-          );
-        },
+          ),
+
+          // Main content
+          Expanded(child: widget.child),
+        ],
       ),
     );
   }
-}
 
-//
-// ─── UPDATED SIDEBAR WITH EXPANDABLE SUBMENU ─────────────────────────────
-//
-
-class ExampleSidebarX extends StatefulWidget {
-  final SidebarXController controller;
-  final Function(int)? onSelectedIndexChanged;
-  const ExampleSidebarX(
-      {super.key, required this.controller, this.onSelectedIndexChanged});
-
-  @override
-  _ExampleSidebarXState createState() => _ExampleSidebarXState();
-}
-
-class _ExampleSidebarXState extends State<ExampleSidebarX> {
-  // Track if the Mass Rating item is expanded
-  bool _isMassRatingExpanded = false;
-  bool _isMassRatingSelected = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize expansion state based on selected index
-    _updateExpansionState();
-
-    
-  widget.controller.addListener(() {
-    // Collapse Mass Rating when sidebar is minimized
-    if (!widget.controller.extended && _isMassRatingExpanded) {
-      setState(() {
-        _isMassRatingExpanded = false;
-      });
-    }
-  });
-
-  }
-
-  @override
-  void didUpdateWidget(ExampleSidebarX oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller.selectedIndex != widget.controller.selectedIndex) {
-      _updateExpansionState();
-    }
-  }
-
-  void _updateExpansionState() {
-    // Expand Mass Rating section if selected index is in that range
-    if (widget.controller.selectedIndex >= 3 &&
-        widget.controller.selectedIndex <= 7) {
-      _isMassRatingExpanded = true;
-      _isMassRatingSelected = true;
-    } else {
-      _isMassRatingSelected = false;
-      // Keep expanded if user manually expanded it
-    }
-  }
-
-  void _toggleMassRating() {
-    setState(() {
-      _isMassRatingExpanded = !_isMassRatingExpanded;
-
-      // If expanding and not already selected, select the first item
-      if (_isMassRatingExpanded && !_isMassRatingSelected) {
-        widget.controller.selectIndex(3);
-        if (widget.onSelectedIndexChanged != null) {
-          widget.onSelectedIndexChanged!(3);
-        }
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _isMassRatingSelected = widget.controller.selectedIndex >= 3 &&
-        widget.controller.selectedIndex <= 7;
-
-    debugPrint(
-        "Current sidebar selected index: ${widget.controller.selectedIndex}");
-
-    final items = <SidebarXItem>[
-      SidebarXItem(
-        icon: PhosphorIcons.squaresFour(),
-        label: 'Dashboard',
-        onTap: () {
-          widget.controller.selectIndex(0);
-          if (widget.onSelectedIndexChanged != null) {
-            widget.onSelectedIndexChanged!(0);
-          }
-        },
-      ),
-      SidebarXItem(
-        icon: PhosphorIcons.mapTrifold(),
-        label: 'Land Acquisition',
-        onTap: () {
-          widget.controller.selectIndex(1);
-          if (widget.onSelectedIndexChanged != null) {
-            widget.onSelectedIndexChanged!(1);
-          }
-        },
-      ),
-      SidebarXItem(
-        icon: PhosphorIcons.caretDown(),
-        iconBuilder: (selected, extended) {
-          bool isInMassRatingSection = widget.controller.selectedIndex >= 3 &&
-              widget.controller.selectedIndex <= 7;
-          return Icon(
-            _isMassRatingExpanded && widget.controller.extended
-                ? PhosphorIcons.caretUp()
-                : PhosphorIcons.caretDown(),
-            color: isInMassRatingSection
-                ? const Color(0xff007BCE)
-                : const Color(0xff9EA2AE),
-            size: 16,
-          );
-        },
-        label: 'Mass Rating',
-        onTap: _toggleMassRating,
-      ),
-    ];
-
-    // When expanded, add submenu items with a small indent.
-    if (_isMassRatingExpanded && widget.controller.extended) {
-      items.addAll([
-        SidebarXItem(
-          icon: Icons.space_bar,
-          iconBuilder: (_, __) => const SizedBox.shrink(),
-          label: '   Mass Rating',
-          onTap: () {
-            widget.controller.selectIndex(3);
-            if (widget.onSelectedIndexChanged != null) {
-              widget.onSelectedIndexChanged!(3);
-            }
-          },
-        ),
-        SidebarXItem(
-          icon: Icons.space_bar,
-          iconBuilder: (_, __) => const SizedBox.shrink(),
-          label: '   Rating Assessment',
-          onTap: () {
-            widget.controller.selectIndex(4);
-            if (widget.onSelectedIndexChanged != null) {
-              widget.onSelectedIndexChanged!(4);
-            }
-          },
-        ),
-        SidebarXItem(
-          icon: Icons.space_bar,
-          iconBuilder: (_, __) => const SizedBox.shrink(),
-          label: '   Rating Building',
-          onTap: () {
-            widget.controller.selectIndex(5);
-            if (widget.onSelectedIndexChanged != null) {
-              widget.onSelectedIndexChanged!(5);
-            }
-          },
-        ),
-        SidebarXItem(
-          icon: Icons.space_bar,
-          iconBuilder: (_, __) => const SizedBox.shrink(),
-          label: '   Rating Object',
-          onTap: () {
-            widget.controller.selectIndex(6);
-            if (widget.onSelectedIndexChanged != null) {
-              widget.onSelectedIndexChanged!(6);
-            }
-          },
-        ),
-        SidebarXItem(
-          icon: Icons.space_bar,
-          iconBuilder: (_, __) => const SizedBox.shrink(),
-          label: '   MR Rental Evidence',
-          onTap: () {
-            widget.controller.selectIndex(7);
-            if (widget.onSelectedIndexChanged != null) {
-              print("Sidebar: Selected MR Rental Evidence (index 7)");
-              widget.onSelectedIndexChanged!(7);
-            }
-          },
-        ),
-      ]);
-    }
-
-    // Continue with the remaining items.
-    items.add(
-      SidebarXItem(
-        icon: PhosphorIcons.ticket(),
-        label: 'Land Miscellaneous',
-        onTap: () {
-          print("Land Miscellaneous tab selected manually");
-          widget.controller.selectIndex(8);
-          if (widget.onSelectedIndexChanged != null) {
-            widget.onSelectedIndexChanged!(8);
-          }
-        },
-      ),
-    );
-
-    return GestureDetector(
-        onTap: () {
-          if (!widget.controller.extended) {
-            widget.controller.setExtended(true);
-          }
-        },
-        child: SidebarX(
-          controller: widget.controller,
-          theme: SidebarXTheme(
-            decoration: BoxDecoration(
-              color: const Color(0xff007BCE),
-            ),
-            width: 56,
-            hoverColor: scaffoldBackgroundColor,
-            textStyle: TextStyle(
-              color: Colors.black,
-              fontFamily: 'Roboto',
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-            ),
-            selectedTextStyle: const TextStyle(
-              color: Color(0xff007BCE),
-              fontFamily: 'Roboto',
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-            hoverTextStyle: const TextStyle(
-              color: Color(0xff007BCE),
-              fontWeight: FontWeight.w500,
-            ),
-            itemTextPadding: const EdgeInsets.only(left: 15, top: 2, bottom: 2),
-            selectedItemTextPadding:
-                const EdgeInsets.only(left: 15, top: 2, bottom: 2),
-            selectedItemDecoration: BoxDecoration(
-              color: Colors.white,
-              border: const Border(
-                right: BorderSide(
-                  color: Colors.white,
-                  width: 4,
-                ),
+  Widget _buildLogoHeader() {
+    return Container(
+      height: 90,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          // Logo - Always visible
+          GestureDetector(
+            onTap: _isExpanded
+                ? null
+                : () {
+                    setState(() {
+                      _isExpanded = true;
+                    });
+                  },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: _isExpanded ? 42.54 : 32,
+              height: _isExpanded ? 42 : 32,
+              margin:
+                  _isExpanded ? EdgeInsets.only(right: 8) : EdgeInsets.all(0),
+              child: Image.asset(
+                'images/pngs/logo.png',
+                fit: BoxFit.contain,
               ),
-              gradient: const LinearGradient(
-                colors: [Color(0xff02528A), Color(0xff02528A)],
-              ),
-            ),
-            itemDecoration: BoxDecoration(
-              border: Border(
-                right: BorderSide(
-                  color: widget.controller.selectedIndex >= 3 &&
-                          widget.controller.selectedIndex <= 7
-                      ? Colors.white
-                      : Colors.transparent,
-                  width: 4,
-                ),
-              ),
-            ),
-            iconTheme: IconThemeData(
-              color: Colors.white,
-              size: 24,
-            ),
-            selectedIconTheme: const IconThemeData(
-              color: Colors.white,
-              size: 20,
             ),
           ),
-          extendedTheme: const SidebarXTheme(
-            width: 256,
-            decoration: BoxDecoration(
-              color: Colors.white,
-            ),
-            selectedItemDecoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                right: BorderSide(
-                  color: Color(0xff007BCE),
-                  width: 4,
-                ),
-              ),
-              gradient: LinearGradient(
-                colors: [Color(0xffDFF0FF), Color(0xffDFF0FF)],
-              ),
-            ),
-            iconTheme: IconThemeData(
-              color: Color(0xff9EA2AE),
-              size: 16,
-            ),
-            selectedIconTheme: IconThemeData(
-              color: Color(0xff007BCE),
-              size: 16,
-            ),
-          ),
-          // TODO: Make the below icon disappear when the sidebar is minimized and expanded.
-          // collapseIcon: widget.controller.extended
-          //     ? Icons.keyboard_double_arrow_left
-          //     : Icons.keyboard_double_arrow_right,
 
-          // footerDivider: divider,
-          headerBuilder: (context, extended) {
-            if (!extended) {
-              return Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const SizedBox(height: 24),
-                      Image.asset(
-                        'images/pngs/logo.png',
-                        width: 42,
-                        height: 42,
-                        fit: BoxFit.contain,
-                      ),
-                    ]),
-              );
-            }
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Image.asset(
-                            'images/pngs/logoextended.png',
-                            width: 137,
-                            height: 42,
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          PhosphorIcons.sidebar(
-                            PhosphorIconsStyle.bold,
-                          ),
-                          color: const Color(0xff9EA2AE),
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          widget.controller.toggleExtended();
-                        },
-                      ),
-                    ],
+          // Title - Only visible when expanded
+          if (_isExpanded)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  AppString.valuationDepartment.localize(context)!,
+                  style: TextStyle(
+                    fontFamily: 'Roboto',
+                    color: colors(context).colorBlack!,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    height: 0.9,
                   ),
-                  // const SizedBox(height: 8),
-                ],
-              ),
-            );
-          },
-          items: items,
-        ));
-  }
-}
-
-//
-// ─── OTHER SCREEN CONTENT ────────────────────────────────────────────────────
-//
-
-class _ScreensExample extends StatelessWidget {
-  const _ScreensExample({
-    required this.controller,
-  });
-
-  final SidebarXController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        final pageTitle = _getTitleByIndex(controller.selectedIndex);
-        switch (controller.selectedIndex) {
-          case 0:
-            return Column(
-                children: List.generate(
-              10,
-              (index) => Container(
-                padding: const EdgeInsets.only(top: 10),
-                height: 100,
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Theme.of(context).canvasColor,
-                  boxShadow: const [BoxShadow()],
+                  overflow: TextOverflow.clip,
                 ),
               ),
-            ));
-          default:
-            return Text(
-              pageTitle,
-              style: theme.textTheme.headlineSmall,
-            );
-        }
-      },
+            ),
+
+          // Collapse button - moved from bottom to header
+          if (_isExpanded)
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _isExpanded = !_isExpanded;
+                  // If collapsing, also collapse any open sections
+                  if (!_isExpanded) {
+                    _isMassRatingExpanded = false;
+                  }
+                });
+              },
+              icon: Icon(
+                PhosphorIcons.sidebar(),
+                color: colors(context).colorGrey4!,
+              ),
+              splashRadius: 20,
+            )
+        ],
+      ),
     );
   }
-}
 
-String _getTitleByIndex(int index) {
-  switch (index) {
-    case 0:
-      return 'Home';
-    case 1:
-      return 'Search';
-    case 2:
-      return 'People';
-    case 3:
-      return 'Favorites';
-    case 4:
-      return 'Custom iconWidget';
-    case 5:
-      return 'Profile';
-    case 6:
-      return 'Settings';
-    default:
-      return 'Not found page';
+  Widget _buildMenuItem({
+    required int index,
+    required String title,
+    required IconData icon,
+  }) {
+    final isSelected = widget.selectedIndex == index;
+
+    return InkWell(
+      onTap: () => _handleIndexChanged(index),
+      child: Container(
+        height: 44,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? _isExpanded
+                  ? colors(context).colorPrimary9
+                  : colors(context).colorPrimary4!
+              : Colors.transparent,
+          border: isSelected
+              ? Border(
+                  right: BorderSide(
+                    color: _isExpanded
+                        ? colors(context).colorPrimary6!
+                        : colors(context).colorPrimary9!,
+                    width: 4.0,
+                  ),
+                )
+              : null,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              width: 32,
+              height: 32,
+              margin: _isExpanded
+                  ? EdgeInsets.only(left: 4, right: 8)
+                  : EdgeInsets.only(left: 4),
+              child: Icon(
+                icon,
+                color: isSelected
+                    ? _isExpanded
+                        ? colors(context).colorPrimary5!
+                        : colors(context).colorPrimary7!
+                    : _isExpanded
+                        ? colors(context).colorGrey4!
+                        : colors(context).colorPrimary8!,
+                size: 20,
+              ),
+            ),
+
+            // Title - Only visible when expanded
+            if (_isExpanded)
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: isSelected
+                        ? colors(context).colorPrimary5
+                        : colors(context).colorGrey2!,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandableSection({
+    required String title,
+    required IconData icon,
+    required bool isExpanded,
+    required VoidCallback onTap,
+    required List<Widget> children,
+  }) {
+    // Check if any child of this section is selected
+    final bool hasSelectedChild =
+        _massRatingIndices.contains(widget.selectedIndex);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        InkWell(
+          onTap: () {
+            // Call original onTap function to toggle expansion
+            onTap();
+
+            // If we're expanding and it's the Mass Rating section,
+            // automatically select the first item (index 2)
+            if (!isExpanded && title == 'Mass Rating') {
+              widget.onIndexChanged(2);
+            }
+          },
+          child: Container(
+            height: 48,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: hasSelectedChild && !_isMassRatingExpanded
+                  ? Border(
+                      right: BorderSide(
+                        color: _isExpanded
+                            ? colors(context).colorPrimary6!
+                            : colors(context).colorPrimary9!,
+                        width: 4.0,
+                      ),
+                    )
+                  : null,
+              color: _getExpandableSectionColor(hasSelectedChild),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                const SizedBox(width: 4),
+                Container(
+                  width: 32,
+                  height: 32,
+                  child: Icon(
+                    icon,
+                    color: hasSelectedChild
+                        ? _isExpanded
+                            ? colors(context).colorPrimary5!
+                            : colors(context).colorPrimary7!
+                        : _isExpanded
+                            ? colors(context).colorGrey4!
+                            : colors(context).colorPrimary8!,
+                    size: 20,
+                  ),
+                ),
+                if (_isExpanded) ...[
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        color: hasSelectedChild
+                            ? colors(context).colorPrimary5!
+                            : colors(context).colorGrey2!,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Icon(
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: hasSelectedChild
+                        ? colors(context).colorPrimary5!
+                        : colors(context).colorGrey4!,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+
+        // Collapsible children
+        if (isExpanded && _isExpanded)
+          Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: Column(spacing: 8, children: children),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSubMenuItem({
+    required int index,
+    required String title,
+    IconData? icon,
+  }) {
+    final isSelected = widget.selectedIndex == index;
+
+    return InkWell(
+      onTap: () => _handleIndexChanged(index),
+      child: Container(
+        height: 42,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color:
+              isSelected ? colors(context).colorPrimary9! : Colors.transparent,
+          border: isSelected
+              ? Border(
+                  right: BorderSide(
+                    color: _isExpanded
+                        ? colors(context).colorPrimary6!
+                        : colors(context).colorPrimary9!,
+                    width: 4.0,
+                  ),
+                )
+              : null,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            // Icon
+            if (icon != null)
+              Container(
+                width: 28,
+                height: 28,
+                margin: const EdgeInsets.only(left: 4, right: 8),
+                child: Icon(
+                  icon,
+                  color: isSelected
+                      ? colors(context).colorPrimary5!
+                      : colors(context).colorGrey4!,
+                  size: 18,
+                ),
+              )
+            else
+              const SizedBox(width: 36), // Padding for alignment when no icon
+
+            // Title
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: isSelected
+                      ? colors(context).colorPrimary5!
+                      : colors(context).colorGrey2!,
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getExpandableSectionColor(bool hasSelectedChild) {
+    // If no child is selected, use transparent background
+    if (!hasSelectedChild) {
+      return Colors.transparent;
+    }
+
+    // If sidebar is collapsed, use primary4 color
+    if (!_isExpanded) {
+      return colors(context).colorPrimary4!;
+    }
+
+    // If mass rating section is expanded, use transparent
+    if (_isMassRatingExpanded) {
+      return Colors.transparent;
+    }
+
+    // Otherwise (sidebar expanded, section collapsed, has selected child)
+    return colors(context).colorPrimary9!;
   }
 }
-
-const primaryColor = Color(0xFF685BFF);
-const canvasColor = Color(0xFF2E2E48);
-const scaffoldBackgroundColor = Color(0xFF464667);
-const accentCanvasColor = Color(0xFF3E3E61);
-const white = Colors.white;
-final actionColor = const Color(0xFF5F5FA7).withOpacity(0.6);
-final divider = Divider(color: Colors.red, height: 0);

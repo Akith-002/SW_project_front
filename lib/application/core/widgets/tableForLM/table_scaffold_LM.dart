@@ -71,70 +71,78 @@ class _TableScaffoldState extends State<TableScaffoldLM> {
                 scrollDirection: Axis.horizontal,
                 child: SizedBox(
                   width: 1000, // Consider making width more dynamic if possible
-                  child: DataTable(
-                    // ... other DataTable properties ...
-                    columns: [
-                      DataColumn(label: Text("Master File No")),
-                      DataColumn(label: Text("Plan Type")),
-                      DataColumn(label: Text("Plan No")),
-                      DataColumn(
-                          label: Text("Requesting Authority Reference No")),
-                      DataColumn(label: Center(child: Text("Status"))),
-                      DataColumn(label: Center(child: Text("Action"))),
-                    ],
-                    rows: plans.map((plan) {
-                      return DataRow(cells: [
-                        DataCell(Text(plan.masterFileNo.toString())),
-                        DataCell(Text(plan.planType)),
-                        DataCell(Text(plan.planNo.toString())),
-                        DataCell(Text(plan.authorityReferenceNo)),
-                        DataCell(Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: plan.status.color.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            plan.status.displayName,
-                            style: TextStyle(
-                                color: plan.status.color,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        )),
-                        DataCell(
-                          SizedBox(
-                            height: 52,
-                            child: Row(
-                              children: [
-                                iconButtonWidget(
-                                  color: colors(context).colorGrey8!,
-                                  iconName: PhosphorIconsRegular.eye,
-                                  onPressed: () {
-                                    context.pushNamed(
-                                        Pages.routeMapScreen.toPathName(),
-                                        queryParameters: {
-                                          'source': 'landMiscellaneous'
-                                        });
-                                  },
-                                ),
-                                // SizedBox(width: 8),
-                                // iconButtonWidget(
-                                //   color: colors(context).colorPrimary6!,
-                                //   iconName: PhosphorIconsRegular.downloadSimple,
-                                //   onPressed: () {},
-                                // ),
-                              ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: colors(context).colorGrey3 ??
+                            colors(context).colorGrey9!,
+                        width: 0.5,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: DataTable(
+                      // ... other DataTable properties ...
+                      headingRowColor: WidgetStateProperty.all(
+                        colors(context).colorGrey9!,
+                      ),
+                      columns: [
+                        DataColumn(label: Text("Master File No")),
+                        DataColumn(label: Text("Plan Type")),
+                        DataColumn(label: Text("Plan No")),
+                        DataColumn(
+                            label: Text("Requesting Authority Reference No")),
+                        DataColumn(label: Center(child: Text("Status"))),
+                        DataColumn(label: Center(child: Text("Action"))),
+                      ],
+                      rows: plans.map((plan) {
+                        return DataRow(cells: [
+                          DataCell(Text(plan.masterFileNo.toString())),
+                          DataCell(Text(plan.planType)),
+                          DataCell(Text(plan.planNo.toString())),
+                          DataCell(Text(plan.authorityReferenceNo)),
+                          DataCell(Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: plan.status.color.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              plan.status.displayName,
+                              style: TextStyle(
+                                  color: plan.status.color,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          )),
+                          DataCell(
+                            SizedBox(
+                              height: 52,
+                              child: Row(
+                                children: [
+                                  iconButtonWidget(
+                                    color: colors(context).colorGrey8!,
+                                    iconName: PhosphorIconsRegular.eye,
+                                    onPressed: () {
+                                      context.pushNamed(
+                                          Pages.routeMapScreen.toPathName(),
+                                          queryParameters: {
+                                            'source': widget.pageSource,
+                                            'selectedIndex': '7',
+                                          });
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ]);
-                    }).toList(),
+                        ]);
+                      }).toList(),
+                    ),
                   ),
                 ),
               ),
 
-              // Footer Section
+              SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
