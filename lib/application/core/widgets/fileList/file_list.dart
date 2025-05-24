@@ -9,39 +9,50 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 class FileList extends StatefulWidget {
   final List<String> breadcrumbItems;
   final Widget table;
-  const FileList(
-      {super.key, required this.breadcrumbItems, required this.table});
+  final void Function(String)? onSearch;
+  final int totalCount; // ✅ NEW: total count of records
+
+  const FileList({
+    super.key,
+    required this.breadcrumbItems,
+    required this.table,
+    this.onSearch,
+    this.totalCount = 0, // ✅ Default to 0
+  });
 
   @override
   State<FileList> createState() => _FileListState();
 }
 
 class _FileListState extends State<FileList> {
+  final searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Breadcrumb(items: [
-          // BreadcrumbItem(label: AppString.landAcquisition.localize(context)!),
-          // generate breadcrumb items from the list
-          for (var item in widget.breadcrumbItems) BreadcrumbItem(label: item),
+          for (var item in widget.breadcrumbItems)
+            BreadcrumbItem(label: item),
         ]),
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                "${AppString.all_files.localize(context)!}60",
+                "${AppString.all_files.localize(context)!}${widget.totalCount}", // ✅ Dynamic count
                 style: AppStyling.semiBoldTextSize16
                     .copyWith(color: colors(context).colorBlack),
               ),
-              Spacer(),
+              const Spacer(),
               SizedBox(
                 width: 290,
                 height: 37,
                 child: TextField(
+                  controller: searchController,
+                  onSubmitted: widget.onSearch,
                   decoration: InputDecoration(
                     hintText: AppString.search.localize(context),
                     hintStyle: AppStyling.regularTextSize14,
@@ -53,20 +64,20 @@ class _FileListState extends State<FileList> {
                     ),
                     filled: true,
                     fillColor: colors(context).colorGrey1,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 8,
                     ),
                   ),
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               iconButtonWidget(
                 color: colors(context).colorBlack!,
                 iconName: PhosphorIconsRegular.funnelSimple,
                 onPressed: () {},
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               OutlinedButton(
                 onPressed: () {},
                 style: OutlinedButton.styleFrom(
