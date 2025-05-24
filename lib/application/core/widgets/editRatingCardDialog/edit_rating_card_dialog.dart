@@ -4,9 +4,13 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
+import 'package:land_asset_valuation/application/core/widgets/due_to_difficulties_modal.dart';
+import 'package:land_asset_valuation/application/core/widgets/enter_new_no_modal.dart';
 import 'package:land_asset_valuation/application/core/widgets/invalid_owners_dialogbox.dart';
+import 'package:land_asset_valuation/application/core/widgets/saved_succesfully_dialogbox.dart';
 import 'package:land_asset_valuation/application/core/widgets/sendsuccessfully_dialogbox.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
+import 'package:land_asset_valuation/application/core/widgets/street_name_modal.dart';
 
 import 'package:land_asset_valuation/data/models/asset.dart';
 
@@ -145,7 +149,29 @@ class EditRatingCardDialog {
                           text: AppString.submit.localize(context)!,
                           onPressed: () {
                             Navigator.pop(context);
-                            debugPrint("Selected Option: $selectedValue");
+
+                            // Handle the selected option
+                            switch (selectedValue) {
+                              case 1:
+                                // Division option
+                                _handleDivision(context);
+                                break;
+                              case 2:
+                                // Reconciliation option
+                                _handleReconciliation(context);
+                                break;
+                              case 3:
+                                // Change number option
+                                _handleChangeNumber(context);
+                                break;
+                              case 4:
+                                // Due to difficulties option
+                                _handleDueToDifficulties(context);
+                                break;
+                              default:
+                                debugPrint(
+                                    "Unknown option selected: $selectedValue");
+                            }
                           },
                           backgroundColor: colors(context).colorPrimary5!,
                         ),
@@ -582,43 +608,144 @@ class EditRatingCardDialog {
     );
   }
 
-  // TODO: Implement consolidation functionality for multiple assets
   static void _handleConsolidationForMultiSelect(
       BuildContext context, List<Asset> selectedAssets) {
-    // TODO: Implement consolidation logic
-    // This function should handle the consolidation process for the selected assets
-    // Parameters:
-    // - context: BuildContext for navigation and dialogs
-    // - selectedAssets: List of assets to be consolidated
+    final TextEditingController newNoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: EnterNewNoWidget(
+          controller: newNoController,
+          onSave: () {
+            String newNumber = newNoController.text.trim();
+            if (newNumber.isNotEmpty) {
+              debugPrint("New consolidation number: $newNumber");
+            }
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
 
     debugPrint("Consolidation selected for ${selectedAssets.length} assets");
     debugPrint(
         "Assets to consolidate: ${selectedAssets.map((a) => a.assetNo).join(', ')}");
   }
 
-  // TODO: Implement unidentified functionality for multiple assets
   static void _handleUnidentified(
       BuildContext context, List<Asset> selectedAssets) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.transparent,
-        contentPadding: EdgeInsets.zero,
-        content: SuccessfullySaved(
-          onClose: () => Navigator.pop(context),
-        ),
-      ),
+      builder: (context) =>
+          SavedMessageCard(onClose: () => Navigator.pop(context)),
     );
     debugPrint("Unidentified selected for ${selectedAssets.length} assets");
     debugPrint(
         "Assets to mark as unidentified: ${selectedAssets.map((a) => a.assetNo).join(', ')}");
-
-    // TODO: Add unidentified implementation here
     // Example steps:
     // 1. Validate that assets can be marked as unidentified
     // 2. Show confirmation dialog
     // 3. Call API to update asset status
     // 4. Handle success/error responses
     // 5. Refresh the asset list
+  }
+
+  // TODO: Implement division functionality for single asset
+  static void _handleDivision(BuildContext context) {
+    debugPrint("Division option selected");
+    final TextEditingController newNoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: EnterNewNoWidget(
+          controller: newNoController,
+          onSave: () {
+            String newNumber = newNoController.text.trim();
+            if (newNumber.isNotEmpty) {
+              debugPrint("New consolidation number: $newNumber");
+            }
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  // TODO: Implement reconciliation functionality for single asset
+  static void _handleReconciliation(BuildContext context) {
+    debugPrint("Reconciliation option selected");
+    final TextEditingController newNoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: StreetNameModal(
+          newNoController: newNoController,
+          onSave: () {
+            String newNumber = newNoController.text.trim();
+            if (newNumber.isNotEmpty) {
+              debugPrint("New street number: $newNumber");
+            }
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  // TODO: Implement change number functionality for single asset
+  static void _handleChangeNumber(BuildContext context) {
+    debugPrint("Change number option selected");
+        final TextEditingController newNoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: EnterNewNoWidget(
+          controller: newNoController,
+          onSave: () {
+            String newNumber = newNoController.text.trim();
+            if (newNumber.isNotEmpty) {
+              debugPrint("New consolidation number: $newNumber");
+            }
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  // TODO: Implement due to difficulties functionality for single asset
+  static void _handleDueToDifficulties(BuildContext context) {
+    debugPrint("Due to difficulties option selected");
+      final TextEditingController newNoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: DueToDifficultiesModal(
+          newNoController: newNoController,
+          onSave: () {
+            String newNumber = newNoController.text.trim();
+            if (newNumber.isNotEmpty) {
+              debugPrint("New street number: $newNumber");
+            }
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
   }
 }
