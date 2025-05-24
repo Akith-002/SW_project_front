@@ -58,9 +58,12 @@ class Mapbox extends StatefulWidget {
 
 class MapboxState extends State<Mapbox>
     with AnnotationManagers, DrawingManager, SketchManager, TextLabelManager {
+  @override
   MapboxMap? mapboxMap;
   bool isDrawingMode = false;
+  @override
   List<Point> drawnPoints = [];
+  @override
   PolygonAnnotation? initialLotPolygon;
   PolylineAnnotation? initialLotOutline; // For the thick outline
   PolylineAnnotation? _currentSketchGuidePolyline;
@@ -119,6 +122,7 @@ class MapboxState extends State<Mapbox>
   }
 
   // First, let's update the initializeAnnotationManagers method to ensure proper layer ordering
+  @override
   Future<void> initializeAnnotationManagers(MapboxMap mapboxMap) async {
     try {
       // Create polygon manager first (bottom layer)
@@ -510,8 +514,9 @@ class MapboxState extends State<Mapbox>
     // 2. Initial Lot Drawing Mode Active?
     else if (isDrawingMode) {
       debugPrint("Mapbox: Tap in Initial Drawing Mode.");
-      if (isWaitingForCircleRadiusPoint)
+      if (isWaitingForCircleRadiusPoint) {
         resetInteractiveCircleState(); // Clear sketch temps if switching
+      }
       drawnPoints.add(tappedPoint);
 
       // Add vertex dot at the tapped point
@@ -529,13 +534,15 @@ class MapboxState extends State<Mapbox>
     else {
       debugPrint(
           "Mapbox: Tap in default mode. Forwarding to parent (for marker placement?).");
-      if (isWaitingForCircleRadiusPoint)
+      if (isWaitingForCircleRadiusPoint) {
         resetInteractiveCircleState(); // Clear sketch temps
+      }
       widget.onMapTapped?.call(tappedPoint); // Call parent's generic handler
       return; // Tap handled
     }
   }
 
+  @override
   Future<void> drawOrUpdateInitialLotPolygon() async {
     if (polygonAnnotationManager == null || polylineAnnotationManager == null) {
       debugPrint("Mapbox: Error: Cannot draw initial lot, managers not ready.");
@@ -700,6 +707,7 @@ class MapboxState extends State<Mapbox>
     await ensureLinesOnTop();
   }
 
+  @override
   Future<void> clearDrawing() async {
     debugPrint(
         "Mapbox: clearDrawing (Initial Lot & Current Sketch State) called.");
@@ -727,8 +735,10 @@ class MapboxState extends State<Mapbox>
     }
   }
 
+  @override
   List<Point> currentSketchPoints = [];
 
+  @override
   Future<void> clearCurrentSketchGuideAndPoints() async {
     if (currentSketchPoints.isEmpty &&
         _currentSketchGuidePolyline == null &&
@@ -1074,6 +1084,7 @@ class MapboxState extends State<Mapbox>
   }
 
   // Add this method to expose floor management functionality
+  @override
   Future<void> changeActiveFloor(String floorName) async {
     debugPrint("Mapbox: Changing active floor to: $floorName");
     return super.changeActiveFloor(floorName);

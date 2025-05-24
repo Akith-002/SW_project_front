@@ -9,14 +9,14 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-class RatingCard extends StatelessWidget {
-  const RatingCard({super.key});
+class SpecialRatingCard extends StatelessWidget {
+  const SpecialRatingCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Rating Card-Domestic #1234',
+        title: 'Rating Card-Special',
         leftIcon: (style) => PhosphorIcons.pencilRuler(),
         onLeftIconPressed: () {},
         rightIcon1: (style) => PhosphorIcons.bell(style),
@@ -32,30 +32,31 @@ class RatingCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: double.infinity, // Makes it full width like the App Bar
-                color: colors(context)
-                    .colorGrey9, // Matches the Breadcrumb's background
+                width: double.infinity,
+                color: colors(context).colorGrey9,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
                 child: Breadcrumb(
                   items: [
                     BreadcrumbItem(label: "Mass Rating"),
-                    BreadcrumbItem(label: "Rating Card - Domestic #1234"),
+                    BreadcrumbItem(label: "Rating Card - Special"),
                   ],
                 ),
               ),
               _buildRow([
                 CustomDropdownField(
-                  label: AppString.selectBuilding.localize(context)!,
+                  label: "Special Property Type",
                   items: [
-                    "Select Building",
-                    "Building A",
-                    "Building B",
-                    "Building C"
+                    "Select Special Type",
+                    "Hospital",
+                    "School",
+                    "Temple/Church",
+                    "Industrial",
+                    "Government Building"
                   ],
-                  initialValue: "Select Building",
+                  initialValue: "Select Special Type",
                   onChanged: (value) {
-                    "Building A";
+                    debugPrint(value);
                   },
                 ),
                 LabeledTextField(
@@ -86,26 +87,38 @@ class RatingCard extends StatelessWidget {
               _buildRow([
                 LabeledTextField(
                   label: AppString.owner.localize(context)!,
-                  placeholder: AppString.owner.localize(context)!,
+                  placeholder: "Organization/Institution name",
                 ),
                 LabeledTextField(
                   label: AppString.description.localize(context)!,
-                  placeholder: AppString.description.localize(context)!,
+                  placeholder: "Purpose and function",
                 ),
               ]),
               _buildRow([
                 CustomDropdownField(
-                  label: AppString.selectWalls.localize(context)!,
-                  items: ["Select Walls", "Type 1", "Type 2", "Type 3"],
-                  initialValue: "Select Walls",
+                  label: "Construction Type",
+                  items: [
+                    "Select Construction",
+                    "RCC",
+                    "Steel Frame",
+                    "Mixed",
+                    "Special"
+                  ],
+                  initialValue: "Select Construction",
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
                 CustomDropdownField(
-                  label: AppString.floor.localize(context)!,
-                  items: ["Select Floor", "Type 1", "Type 2", "Type 3"],
-                  initialValue: "Select Floor",
+                  label: "Special Features",
+                  items: [
+                    "Select Features",
+                    "Fire Safety",
+                    "Emergency Access",
+                    "Special Equipment",
+                    "Multiple Floors"
+                  ],
+                  initialValue: "Select Features",
                   onChanged: (value) {
                     debugPrint(value);
                   },
@@ -113,16 +126,29 @@ class RatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 CustomDropdownField(
-                  label: AppString.conveniences.localize(context)!,
-                  items: ["Select Conveniences", "Type 1", "Type 2", "Type 3"],
-                  initialValue: "Select Conveniences",
+                  label: "Usage Classification",
+                  items: [
+                    "Select Usage",
+                    "Public Service",
+                    "Educational",
+                    "Healthcare",
+                    "Religious",
+                    "Industrial"
+                  ],
+                  initialValue: "Select Usage",
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
                 CustomDropdownField(
                   label: AppString.condition.localize(context)!,
-                  items: ["Select Condition", "Type 1", "Type 2", "Type 3"],
+                  items: [
+                    "Select Condition",
+                    "Excellent",
+                    "Good",
+                    "Fair",
+                    "Poor"
+                  ],
                   initialValue: "Select Condition",
                   onChanged: (value) {
                     debugPrint(value);
@@ -132,25 +158,21 @@ class RatingCard extends StatelessWidget {
               _buildRow([
                 LabeledTextField(
                   label: AppString.age.localize(context)!,
-                  placeholder: AppString.age.localize(context)!,
+                  placeholder: "Building age",
                 ),
-                CustomDropdownField(
-                  label: AppString.access.localize(context)!,
-                  items: ["Select Access", "Building B", "Building C"],
-                  initialValue: "Select Access",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
+                LabeledTextField(
+                  label: "Capacity",
+                  placeholder: "Maximum occupancy/capacity",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.tsBop.localize(context)!,
-                  placeholder: AppString.tsBop.localize(context)!,
+                  label: "Special Equipment",
+                  placeholder: "Medical/Industrial equipment",
                 ),
                 LabeledTextField(
                   label: AppString.parkingSpace.localize(context)!,
-                  placeholder: AppString.parkingSpace.localize(context)!,
+                  placeholder: "Parking facilities",
                 ),
               ]),
               _buildRow([
@@ -158,8 +180,10 @@ class RatingCard extends StatelessWidget {
                   label: AppString.propertySubCategory.localize(context)!,
                   items: [
                     "Select Property Sub Category",
-                    "Building B",
-                    "Building C"
+                    "Healthcare Facility",
+                    "Educational Institution",
+                    "Religious Building",
+                    "Government Office"
                   ],
                   initialValue: "Select Property Sub Category",
                   onChanged: (value) {
@@ -167,9 +191,15 @@ class RatingCard extends StatelessWidget {
                   },
                 ),
                 CustomDropdownField(
-                  label: AppString.propertyType.localize(context)!,
-                  items: ["Select Property Type", "Building B", "Building C"],
-                  initialValue: "Select Property Type",
+                  label: "Ownership Type",
+                  items: [
+                    "Select Ownership",
+                    "Government",
+                    "Private",
+                    "Trust",
+                    "NGO"
+                  ],
+                  initialValue: "Select Ownership",
                   onChanged: (value) {
                     debugPrint(value);
                   },
@@ -191,23 +221,33 @@ class RatingCard extends StatelessWidget {
                   placeholder: AppString.date.localize(context)!,
                 ),
                 LabeledTextField(
-                  label: AppString.occupier.localize(context)!,
-                  placeholder: AppString.occupier.localize(context)!,
+                  label: "Administrator",
+                  placeholder: "Current administrator/manager",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.rentPM.localize(context)!,
-                  placeholder: AppString.rentPM.localize(context)!,
+                  label: "Operating Budget",
+                  placeholder: "Annual operating budget",
                 ),
                 LabeledTextField(
-                  label: AppString.terms.localize(context)!,
-                  placeholder: AppString.terms.localize(context)!,
+                  label: "License/Registration",
+                  placeholder: "Official registration number",
+                ),
+              ]),
+              _buildRow([
+                LabeledTextField(
+                  label: "Service Area",
+                  placeholder: "Geographic area served",
+                ),
+                LabeledTextField(
+                  label: "Staff Count",
+                  placeholder: "Number of employees",
                 ),
               ]),
               _buildRow([
                 Text(
-                  'Floor wise Area',
+                  'Special Property Details',
                   style: AppStyling.mediumTextSize14.copyWith(
                       color: colors(context).colorBlack,
                       fontWeight: FontWeight.bold,
@@ -218,22 +258,16 @@ class RatingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .start, // Aligns both elements in the center
+                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.end,
-
                     children: [
-                      // Input Field wrapped inside Flexible
                       Flexible(
                         child: LabeledTextField(
-                          label: AppString.building.localize(context)!,
-                          placeholder: "Enter building name",
+                          label: "Facility Details",
+                          placeholder: "Enter facility specifications",
                         ),
                       ),
-                      SizedBox(
-                          width: 8), // Space between input field and button
-                      // "Set"
-                      // Button with proper alignment
+                      SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
@@ -253,99 +287,88 @@ class RatingCard extends StatelessWidget {
               ),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.totalArea.localize(context)!,
-                  placeholder: AppString.totalArea.localize(context)!,
+                  label: "Total Built Area",
+                  placeholder: "Total building area",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.totalFloorArea.localize(context)!,
-                  placeholder: AppString.totalFloorArea.localize(context)!,
+                  label: "Functional Area",
+                  placeholder: "Area used for primary function",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.suggestedRate.localize(context)!,
-                  placeholder: AppString.suggestedRate.localize(context)!,
+                  label: "Special Valuation Rate",
+                  placeholder: "Rate considering special use",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.notes.localize(context)!,
-                  placeholder: AppString.notes.localize(context)!,
+                  placeholder: "Special considerations and restrictions",
                 ),
               ]),
-              _buildRow([
-                LabeledTextField(
-                  label: AppString.terms.localize(context)!,
-                  placeholder: AppString.terms.localize(context)!,
-                ),
-              ]),
-              // Save & Cancel Buttons (Ensure correct layout)
+              // Save & Cancel Buttons
               Padding(
-                padding: const EdgeInsets.only(
-                    bottom: 16.0), // Ensure space at the bottom
+                padding: const EdgeInsets.only(bottom: 16.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Cancel Button on the left
                     SizedBox(
-                      width:
-                          120, // Ensuring the Cancel button takes up the desired space
+                      width: 120,
                       child: CustomButton(
                         text: AppString.cancel.localize(context)!,
                         backgroundColor: colors(context).colorGrey1!,
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                         width: 120,
                         height: 48,
                       ),
                     ),
-                    // Right section for Save and Send buttons
                     Row(
                       children: [
-                        // Save Button
                         SizedBox(
                           width: 120,
                           child: CustomButton(
                             text: AppString.save.localize(context)!,
                             backgroundColor: colors(context).colorPrimary1!,
-                            onPressed: () {},
+                            onPressed: () {
+                              // TODO: Implement save functionality
+                              debugPrint("Special Rating Card saved");
+                            },
                             width: 120,
                             height: 48,
                           ),
                         ),
-                        SizedBox(width: 8), // Space between the buttons
-                        // Send Button with icon
+                        SizedBox(width: 8),
                         ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            // TODO: Implement send functionality
+                            debugPrint("Special Rating Card sent");
+                          },
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                             backgroundColor: colors(context).colorPrimary5!,
                             foregroundColor: colors(context).colorWhite,
-                            minimumSize: Size(120, 48), // Same width and height
+                            minimumSize: Size(120, 48),
                             padding: EdgeInsets.zero,
                           ),
-                          label: Text(
-                            '',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                          label: Text(''),
                           icon: Row(
-                            mainAxisSize: MainAxisSize
-                                .min, // This keeps the icon's size as small as the content inside it
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 'Send',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),
-                              SizedBox(
-                                  width:
-                                      8), // Add some space between the text and the icon
+                              SizedBox(width: 8),
                               Icon(
-                                PhosphorIcons
-                                    .arrowRight(), // Add the icon you want
+                                PhosphorIcons.arrowRight(),
                                 color: colors(context).colorWhite,
                               ),
                             ],
@@ -364,24 +387,13 @@ class RatingCard extends StatelessWidget {
   }
 }
 
-// // Helper method to create rows of input fields
+// Helper method to create rows of input fields
 Widget _buildRow(List<Widget> children) {
   return Padding(
-    padding: const EdgeInsets.symmetric(
-      vertical: 8.0,
-    ),
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
     child: Row(
-      mainAxisAlignment:
-          MainAxisAlignment.spaceBetween, // Align elements to the start
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: children.map((widget) => Expanded(child: widget)).toList(),
     ),
-  );
-}
-
-// Helper method to create small input fields in "Boundaries"
-Widget _buildSmallInput(String label) {
-  return SizedBox(
-    width: 186,
-    child: LabeledTextField(label: label, placeholder: label),
   );
 }

@@ -68,8 +68,9 @@ class MapModeBanner extends StatelessWidget {
       showBanner = true;
     }
 
-    if (!showBanner)
+    if (!showBanner) {
       return const SizedBox.shrink(); // Hide banner if no mode active
+    }
 
     return Positioned(
       top: 0,

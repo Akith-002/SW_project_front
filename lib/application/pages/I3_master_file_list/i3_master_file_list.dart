@@ -5,13 +5,15 @@ import 'package:http/http.dart' as http;
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
-import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/fileList/file_list.dart';
 import 'package:land_asset_valuation/application/core/widgets/table/table_scaffold.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForLM/table_scaffold_LM.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForMR/table_scaffold_MR.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRA/table_scaffold_RA.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRB/table_scaffold_RB.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRO/table_scaffold_RO.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
@@ -115,8 +117,9 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.massRating.localize(context)!,
             ],
-            totalCount: 0,
-            table: TableScaffoldMr(),
+            table: TableScaffoldMr(
+              pageSource: currentPageSource,
+            ),
           ),
         );
 
@@ -131,8 +134,9 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingAssessment.localize(context)!,
             ],
-            totalCount: 0,
-            table: TableScaffoldMr(),
+            table: TableScaffoldRA(
+              pageSource: currentPageSource,
+            ),
           ),
         );
 
@@ -147,8 +151,9 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingBuilding.localize(context)!,
             ],
-            totalCount: 0,
-            table: TableScaffoldMr(),
+            table: TableScaffoldRB(
+              pageSource: currentPageSource,
+            ),
           ),
         );
 
@@ -163,8 +168,9 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingObject.localize(context)!,
             ],
-            totalCount: 0,
-            table: TableScaffoldMr(),
+            table: TableScaffoldRO(
+              pageSource: currentPageSource,
+            ),
           ),
         );
 

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
-import 'package:land_asset_valuation/application/core/widgets/tableForMR/planMR.dart';
-import 'package:land_asset_valuation/application/core/widgets/tableForMR/planMR_repository.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRO/planRO.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRO/planRO_repository.dart';
 import 'package:land_asset_valuation/application/core/widgets/view_download_button.dart';
 
-class TableScaffoldMr extends StatefulWidget {
+class TableScaffoldRO extends StatefulWidget {
   final int initialPageSize;
   final List<int> pageSizeOptions;
   final String pageSource;
 
-  const TableScaffoldMr({
+  const TableScaffoldRO({
     super.key,
     required this.pageSource,
     this.initialPageSize = 9,
@@ -19,11 +19,11 @@ class TableScaffoldMr extends StatefulWidget {
   });
 
   @override
-  State<TableScaffoldMr> createState() => _TableScaffoldMrState();
+  State<TableScaffoldRO> createState() => _TableScaffoldROState();
 }
 
-class _TableScaffoldMrState extends State<TableScaffoldMr> {
-  late Future<PaginatedResponseMR<Planmr>> _futurePlans;
+class _TableScaffoldROState extends State<TableScaffoldRO> {
+  late Future<PaginatedResponseRO<PlanRO>> _futurePlans;
   String? _nextPageToken;
   late int _pageSize;
   late List<int> _pageSizeOptions;
@@ -38,7 +38,7 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
 
   void _fetchPlans() {
     setState(() {
-      _futurePlans = PlanmrRepository.getPlans(
+      _futurePlans = PlanRORepository.getPlans(
         pageSize: _pageSize,
         pageToken: _nextPageToken,
       );
@@ -48,7 +48,7 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<PaginatedResponseMR<Planmr>>(
+      body: FutureBuilder<PaginatedResponseRO<PlanRO>>(
         future: _futurePlans,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -59,7 +59,7 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
             return Center(child: Text("No records found"));
           }
 
-          List<Planmr> plans = snapshot.data!.items;
+          List<PlanRO> plans = snapshot.data!.items;
 
           return Column(
             children: [
@@ -120,7 +120,7 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                                     onPressed: () {
                                       // Determine the correct sidebar index based on the source
                                       String selectedIndex =
-                                          '2'; // Default to MR
+                                          '5'; // Default to RO
                                       switch (widget.pageSource) {
                                         case 'massRating':
                                           selectedIndex = '2'; // Mass Rating MR
@@ -139,7 +139,7 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                                           break;
                                       }
                                       context.goNamed(
-                                        Pages.routeMrAssetsList.toPathName(),
+                                        Pages.routeRoAssetsList.toPathName(),
                                         queryParameters: {
                                           'selectedIndex': selectedIndex,
                                           'source': widget.pageSource,
@@ -198,33 +198,17 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                         Text(" per page"),
                       ],
                     ),
-                    Text("${plans.length} / 60 Records"),
                     Row(
                       children: [
-                        IconButton(
-                          icon: Icon(Icons.chevron_left),
-                          onPressed: _nextPageToken == null
-                              ? null
-                              : () {
-                                  setState(() {
-                                    _nextPageToken =
-                                        (int.parse(_nextPageToken!) - _pageSize)
-                                            .toString();
-                                    _fetchPlans();
-                                  });
-                                },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.chevron_right),
-                          onPressed: snapshot.data!.nextPageToken == null
-                              ? null
-                              : () {
-                                  setState(() {
-                                    _nextPageToken =
-                                        snapshot.data!.nextPageToken;
-                                    _fetchPlans();
-                                  });
-                                },
+                        Text("Total: ${plans.length}"),
+                        SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: _nextPageToken != null
+                              ? () {
+                                  _fetchPlans();
+                                }
+                              : null,
+                          child: Text("Load More"),
                         ),
                       ],
                     ),
