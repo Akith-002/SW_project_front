@@ -42,6 +42,7 @@ class Dialogbox extends StatelessWidget {
       "approve": "images/pngs/approve.png",
       "delete": "images/pngs/trash.png",
       "edit": "images/pngs/page-edit.png",
+      "add": "images/pngs/add.png",
     };
 
     // Map dialog types to their respective text colors
@@ -49,6 +50,7 @@ class Dialogbox extends StatelessWidget {
       "approve": colors(context).colorBlack,
       "delete": colors(context).colorNegative5,
       "edit": colors(context).colorBlack,
+      "add": colors(context).colorBlack,
     };
 
     // Set default values or use provided ones

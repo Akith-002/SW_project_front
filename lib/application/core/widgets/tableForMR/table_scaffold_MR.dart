@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForMR/planMR.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForMR/planMR_repository.dart';
+import 'package:land_asset_valuation/application/core/widgets/view_download_button.dart';
 
 class TableScaffoldMr extends StatefulWidget {
-  const TableScaffoldMr({super.key});
+  final int initialPageSize;
+  final List<int> pageSizeOptions;
+  final String pageSource;
+
+  const TableScaffoldMr({
+    super.key,
+    required this.pageSource,
+    this.initialPageSize = 9,
+    this.pageSizeOptions = const [9, 15, 30, 60],
+  });
 
   @override
   State<TableScaffoldMr> createState() => _TableScaffoldMrState();
@@ -14,19 +25,23 @@ class TableScaffoldMr extends StatefulWidget {
 class _TableScaffoldMrState extends State<TableScaffoldMr> {
   late Future<PaginatedResponseMR<Planmr>> _futurePlans;
   String? _nextPageToken;
-  int _pageSize = 9;
-  final List<int> _pageSizeOptions = [9, 15, 30, 60];
+  late int _pageSize;
+  late List<int> _pageSizeOptions;
 
   @override
   void initState() {
     super.initState();
+    _pageSize = widget.initialPageSize;
+    _pageSizeOptions = widget.pageSizeOptions;
     _fetchPlans();
   }
 
   void _fetchPlans() {
     setState(() {
       _futurePlans = PlanmrRepository.getPlans(
-          pageSize: _pageSize, pageToken: _nextPageToken);
+        pageSize: _pageSize,
+        pageToken: _nextPageToken,
+      );
     });
   }
 
@@ -48,22 +63,24 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
 
           return Column(
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                    scrollDirection:
-                        Axis.vertical, // Enables vertical scrolling
+              // Table Section
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: 1000,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: colors(context).colorGrey3 ??
+                            colors(context).colorGrey9!,
+                        width: 0.5,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                     child: DataTable(
-                      headingRowColor: WidgetStateProperty.resolveWith(
-                          (states) => Color(0xffF3F4F6)),
-                      headingRowHeight: 38,
-                      dataRowHeight: 52,
-                      headingTextStyle: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff394050)),
+                      headingRowColor: WidgetStateProperty.all(
+                        colors(context).colorGrey9!,
+                      ),
                       columns: [
                         DataColumn(label: Text("Rating Reference No")),
                         DataColumn(label: Text("Local Authority")),
@@ -91,22 +108,57 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                             ),
                           )),
                           DataCell(
-                            Row(
-                              children: [
-                                IconButton(
-                                    icon: Icon(Icons.visibility),
+                            SizedBox(
+                              height: 52,
+                              child: Row(
+                                children: [
+                                  CustomIconButton(
+                                    imagePath: "images/pngs/eye-empty.png",
+                                    backgroundColor: Colors.white,
+                                    borderColor: const Color(0xffd0d5dd),
+                                    iconColor: const Color(0xff4a4a4a),
                                     onPressed: () {
-                                      context.pushNamed(
-                                        Pages.routeMapScreen.toPathName(),
+                                      // Determine the correct sidebar index based on the source
+                                      String selectedIndex =
+                                          '2'; // Default to MR
+                                      switch (widget.pageSource) {
+                                        case 'massRating':
+                                          selectedIndex = '2'; // Mass Rating MR
+                                          break;
+                                        case 'ratingAssessment':
+                                          selectedIndex =
+                                              '3'; // Rating Assessment RA
+                                          break;
+                                        case 'ratingBuilding':
+                                          selectedIndex =
+                                              '4'; // Rating Building RB
+                                          break;
+                                        case 'ratingObject':
+                                          selectedIndex =
+                                              '5'; // Rating Object RO
+                                          break;
+                                      }
+                                      context.goNamed(
+                                        Pages.routeMrAssetsList.toPathName(),
                                         queryParameters: {
-                                          'source': 'massRating',
+                                          'selectedIndex': selectedIndex,
+                                          'source': widget.pageSource,
                                         },
                                       );
-                                    }),
-                                // IconButton(
-                                //     icon: Icon(Icons.download),
-                                //     onPressed: () {}),
-                              ],
+                                    },
+                                  ),
+                                  const SizedBox(width: 12),
+                                  CustomIconButton(
+                                    imagePath: "images/pngs/download.png",
+                                    backgroundColor: const Color(0xFFDFF0FF),
+                                    borderColor: const Color(0xff069bf1),
+                                    iconColor: const Color(0xff007bce),
+                                    onPressed: () {
+                                      debugPrint("Download button pressed");
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ]);
@@ -115,6 +167,8 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                   ),
                 ),
               ),
+
+              SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -135,7 +189,7 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                             if (newSize != null) {
                               setState(() {
                                 _pageSize = newSize;
-                                _nextPageToken = null; // Reset pagination
+                                _nextPageToken = null;
                                 _fetchPlans();
                               });
                             }

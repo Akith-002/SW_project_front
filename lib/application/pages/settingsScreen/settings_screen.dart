@@ -108,7 +108,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Container(
+                      child: SizedBox(
                         width: 700,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -195,7 +195,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                           setState(() {
                             ref
                                 .read(languageProvider.notifier)
-                                .changeLanguage(_languages[value!]!);
+                                .changeLanguage(_languages[value]!);
                           });
                         },
                         width: 322,

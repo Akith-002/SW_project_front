@@ -349,7 +349,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
             child: Row(
               children: [
                 const SizedBox(width: 4),
-                Container(
+                SizedBox(
                   width: 32,
                   height: 32,
                   child: Icon(

@@ -9,6 +9,9 @@ class Pages {
   static const routeLaSalesEvidence = "la-sales-evidence";
   static const routeLaBuildingRates = "la-building-rates";
   static const routeMrAssetsList = "mr-assets-list";
+  static const routeRaAssetsList = "ra-assets-list";
+  static const routeRbAssetsList = "rb-assets-list";
+  static const routeRoAssetsList = "ro-assets-list";
   static const routeRentalEvidence = "rentalevidence";
   static const routeI2RentalEvidence = "i2rentalevidence";
   static const routeMapScreen = "routemap";
@@ -16,6 +19,13 @@ class Pages {
   static const routePastValuation = "past-valuation";
   static const routeInspectionReport = "inspection-report";
   static const routeSketchTool = "sketch-tool";
+
+  // Rating Card Forms
+  static const routeDomesticRatingCard = "domestic-rating-card";
+  static const routeOfficesRatingCard = "offices-rating-card";
+  static const routeAgricultureRatingCard = "agriculture-rating-card";
+  static const routeShopsRatingCard = "shops-rating-card";
+  static const routeSpecialRatingCard = "special-rating-card";
 }
 
 extension PagesExtension on String {
