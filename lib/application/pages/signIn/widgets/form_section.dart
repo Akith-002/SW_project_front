@@ -8,11 +8,39 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
 import 'package:land_asset_valuation/application/core/widgets/labeled_text_field.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:land_asset_valuation/injection.dart';
+import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
+import 'package:land_asset_valuation/data/services/sign_in_service.dart';
 
-class FormSection extends StatelessWidget {
-  const FormSection({
-    super.key,
-  });
+class FormSection extends StatefulWidget {
+  const FormSection({super.key});
+
+  @override
+  State<FormSection> createState() => _FormSectionState();
+}
+
+class _FormSectionState extends State<FormSection> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  Future<void> _login(BuildContext context) async {
+    final appSharedData = injection<AppSharedData>();
+    final signInService = SignInService(sharedData: appSharedData);
+
+    final success = await signInService.login(
+      _usernameController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (success) {
+      context.go(Pages.routeDashboard.toPath());
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Invalid username or password")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +63,8 @@ class FormSection extends StatelessWidget {
                   Text(
                     AppString.welcome.localize(context)!,
                     style: AppStyling.boldTextSize24.copyWith(
-                        color: colors(context).colorGrey2),
+                      color: colors(context).colorGrey2,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -43,48 +72,66 @@ class FormSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 64),
-          Center(
-            child: SizedBox(
-              width: 440,
-              height: 224,
-              child: Column(
-                children: [
-                  LabeledTextField(
-                    placeholder: AppString.username.localize(context)!,
-                    icon: PhosphorIconsRegular.user,
-                    width: 440,
-                    height: 48,
-                  ),
-                  const SizedBox(height: 16),
-                  LabeledTextField(
-                    placeholder: AppString.password.localize(context)!,
-                    icon: PhosphorIconsRegular.lock,
-                    width: 440,
-                    height: 48,
-                  ),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      AppString.forgotPassword.localize(context)!,
-                      style: AppStyling.mediumTextSize16.copyWith(
-                          color: colors(context).colorPrimary5),
+          SizedBox(
+            width: 440,
+            height: 224,
+            child: Column(
+              children: [
+                LabeledTextField(
+                  controller: _usernameController,
+                  placeholder: AppString.username.localize(context)!,
+                  icon: PhosphorIconsRegular.user,
+                  width: 440,
+                  height: 48,
+                ),
+                const SizedBox(height: 16),
+                Stack(
+                  alignment: Alignment.centerRight,
+                  children: [
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: AppString.password.localize(context)!,
+                        prefixIcon: const Icon(Icons.lock),
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    AppString.forgotPassword.localize(context)!,
+                    style: AppStyling.mediumTextSize16.copyWith(
+                      color: colors(context).colorPrimary5,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  CustomButton(
-                    text: AppString.login.localize(context)!,
-                    onPressed: () {
-                      context.go(Pages.routeDashboard.toPath());
-                    },
-                    backgroundColor:
-                        colors(context).colorPrimary5 ??
-                            LightColorList.lightPrimary700,
-                    height: 56,
-                    width: 440,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 16),
+                CustomButton(
+                  text: AppString.login.localize(context)!,
+                  onPressed: () => _login(context),
+                  backgroundColor:
+                      colors(context).colorPrimary5 ?? Colors.blue,
+                  height: 56,
+                  width: 440,
+                ),
+              ],
             ),
           ),
         ],
@@ -92,4 +139,3 @@ class FormSection extends StatelessWidget {
     );
   }
 }
-

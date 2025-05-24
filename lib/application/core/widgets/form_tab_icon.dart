@@ -11,9 +11,15 @@ class FormTabIcons extends StatefulWidget {
   State<FormTabIcons> createState() => _FormTabIconsState();
 }
 
-class _FormTabIconsState extends State<FormTabIcons> with SingleTickerProviderStateMixin {
+class _FormTabIconsState extends State<FormTabIcons>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final List<String> tabTitles = ["Land Info", "Building Info", "Other Constructions", "Signatures"];
+  final List<String> tabTitles = [
+    "Land Info",
+    "Building Info",
+    "Other Constructions",
+    "Signatures"
+  ];
 
   @override
   void initState() {
@@ -36,19 +42,25 @@ class _FormTabIconsState extends State<FormTabIcons> with SingleTickerProviderSt
         Align(
           alignment: Alignment.centerLeft,
           child: Padding(
-            padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 0.0), // Ensures proper alignment
+            padding: const EdgeInsets.only(
+                left: 16.0, top: 8.0, bottom: 0.0), // Ensures proper alignment
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
               indicator: BoxDecoration(
-                color:colors(context).colorPrimary6?? const Color(0xff007bce),
+                color: colors(context).colorPrimary6 ?? const Color(0xff007bce),
                 borderRadius: BorderRadius.circular(20),
               ),
-              indicatorColor:colors(context).colorBlack?? Colors.transparent, // ✅ Removes the tab indicator
-              dividerColor:colors(context).colorBlack??  Colors.transparent, // ✅ Fully removes the unwanted bottom line
-              labelColor: colors(context).colorWhite?? Colors.white,
-              unselectedLabelColor:colors(context).colorBlack?? Colors.black87,
-              overlayColor: WidgetStateProperty.all(Colors.transparent), // Prevents extra layers
+              indicatorColor: colors(context).colorBlack ??
+                  Colors.transparent, // ✅ Removes the tab indicator
+              dividerColor: colors(context).colorBlack ??
+                  Colors
+                      .transparent, // ✅ Fully removes the unwanted bottom line
+              labelColor: colors(context).colorWhite ?? Colors.white,
+              unselectedLabelColor:
+                  colors(context).colorBlack ?? Colors.black87,
+              overlayColor: MaterialStateProperty.all(
+                  Colors.transparent), // Prevents extra layers
               tabs: tabTitles.map((title) {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -56,7 +68,9 @@ class _FormTabIconsState extends State<FormTabIcons> with SingleTickerProviderSt
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(
                     border: Border(
-                      bottom: BorderSide(color: Colors.transparent, width: 0), // ✅ Hides bottom line completely
+                      bottom: BorderSide(
+                          color: Colors.transparent,
+                          width: 0), // ✅ Hides bottom line completely
                     ),
                   ),
                   child: Text(
@@ -82,8 +96,8 @@ class _FormTabIconsState extends State<FormTabIcons> with SingleTickerProviderSt
             controller: _tabController,
             children: [
               LandInfoForm(),
-              ConstructionForm(), // Used for both Building Info & Other Constructions
-              ConstructionForm(),
+              ConstructionForm(tabIndex: 1), // Building Info tab
+              ConstructionForm(tabIndex: 2), // Other Constructions tab
               const SignaturesForm(),
             ],
           ),
