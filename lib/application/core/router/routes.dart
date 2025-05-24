@@ -25,6 +25,13 @@ import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
+// Rating Card Forms imports
+import 'package:land_asset_valuation/application/pages/RatingCardForms/domestic/domestic_rating_card.dart';
+import 'package:land_asset_valuation/application/pages/RatingCardForms/offices/offices_rating_card.dart';
+import 'package:land_asset_valuation/application/pages/RatingCardForms/agriculture/agriculture_rating_card.dart';
+import 'package:land_asset_valuation/application/pages/RatingCardForms/shops/shops_rating_card.dart';
+import 'package:land_asset_valuation/application/pages/RatingCardForms/special/special_rating_card.dart';
+
 class AppRouter {
   final RouterServices routerServices;
 
@@ -230,12 +237,6 @@ class AppRouter {
             path: Pages.routeMapScreen.toPath(),
             name: Pages.routeMapScreen.toPathName(),
             pageBuilder: (context, state) {
-              // Extract source from extra or query parameters
-              final extra = state.extra as Map<String, dynamic>? ?? {};
-              final String source = extra['source'] as String? ??
-                  state.uri.queryParameters['source'] ??
-                  '';
-
               return NoTransitionPage(
                 key: state.pageKey,
                 child: MapScreen(),
@@ -281,6 +282,58 @@ class AppRouter {
                   child: SettingsScreen(),
                 );
               }),
+
+          // Rating Card Forms routes
+          GoRoute(
+            path: Pages.routeDomesticRatingCard.toPath(),
+            name: Pages.routeDomesticRatingCard.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: DomesticRatingCard(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeOfficesRatingCard.toPath(),
+            name: Pages.routeOfficesRatingCard.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: OfficesRatingCard(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeAgricultureRatingCard.toPath(),
+            name: Pages.routeAgricultureRatingCard.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: AgricultureRatingCard(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeShopsRatingCard.toPath(),
+            name: Pages.routeShopsRatingCard.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: ShopsRatingCard(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeSpecialRatingCard.toPath(),
+            name: Pages.routeSpecialRatingCard.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: SpecialRatingCard(),
+              );
+            },
+          ),
         ],
       ),
     ],
@@ -289,7 +342,6 @@ class AppRouter {
       return null;
     },
   );
-
   // Helper method to determine sidebar index from current route
   int _getSelectedIndexFromRoute(GoRouterState state) {
     final String path = state.matchedLocation;
@@ -297,6 +349,36 @@ class AppRouter {
     // Check for selectedIndex in query parameters first
     if (state.uri.queryParameters.containsKey('selectedIndex')) {
       return int.tryParse(state.uri.queryParameters['selectedIndex']!) ?? 0;
+    }
+
+    // Check for rating card form routes and extract source context
+    if (path.startsWith(Pages.routeDomesticRatingCard.toPath()) ||
+        path.startsWith(Pages.routeOfficesRatingCard.toPath()) ||
+        path.startsWith(Pages.routeAgricultureRatingCard.toPath()) ||
+        path.startsWith(Pages.routeShopsRatingCard.toPath()) ||
+        path.startsWith(Pages.routeSpecialRatingCard.toPath())) {
+      String source = state.uri.queryParameters['source'] ?? '';
+      print("DEBUG: Rating card form route with source: '$source'");
+
+      // Map source to appropriate sidebar index
+      switch (source) {
+        case 'massRating':
+          return 2;
+        case 'ratingAssessment':
+          return 3;
+        case 'ratingBuilding':
+          return 4;
+        case 'ratingObject':
+          return 5;
+        case 'landAcquisition':
+          return 1;
+        case 'MRrentalEvidence':
+          return 6;
+        case 'landMiscellaneous':
+          return 7;
+        default:
+          return 2; // Default to Mass Rating if no source specified
+      }
     }
 
     if (path.startsWith(Pages.routeMapScreen.toPath())) {

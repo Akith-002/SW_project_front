@@ -7,7 +7,6 @@ import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/iconButtonWidget/icon_button_widget.dart';
 import 'package:land_asset_valuation/application/core/widgets/editRatingCardDialog/edit_rating_card_dialog.dart';
-import 'package:land_asset_valuation/application/core/widgets/multiSelectDecisionDialog/multi_select_decision_dialog.dart';
 import 'package:land_asset_valuation/data/models/asset.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -73,9 +72,8 @@ class _AssetListTableState extends State<AssetListTable> {
     // Check if all selected assets have rating cards
     return selectedIndices.every((index) =>
         index < widget.assets.length && widget.assets[index].isRatingCard);
-  }
+  } // Helper method to get button text based on selection state
 
-  // Helper method to get button text based on selection state
   String _getButtonText(BuildContext context) {
     // Get selected assets count
     int selectedCount = isChecked.where((checked) => checked).length;
@@ -85,9 +83,7 @@ class _AssetListTableState extends State<AssetListTable> {
       for (int i = 0; i < isChecked.length; i++) {
         if (isChecked[i]) {
           Asset selectedAsset = widget.assets[i];
-          return selectedAsset.isRatingCard
-              ? "Decisions"
-              : "Decisions";
+          return selectedAsset.isRatingCard ? "Decisions" : "Decisions";
         }
       }
     }
@@ -137,9 +133,7 @@ class _AssetListTableState extends State<AssetListTable> {
                         if (isChecked[i]) {
                           selectedAssets.add(widget.assets[i]);
                         }
-                      }
-
-                      // Check number of selected assets
+                      } // Check number of selected assets
                       if (selectedAssets.length == 1) {
                         // Single asset selected
                         Asset selectedAsset = selectedAssets.first;
@@ -149,14 +143,14 @@ class _AssetListTableState extends State<AssetListTable> {
                               context);
                         } else {
                           // Show create rating card dialog for new rating card
-                          EditRatingCardDialog.showAddRatingCardDialog(
-                              context);
+                          EditRatingCardDialog.showAddRatingCardDialog(context,
+                              sourceContext: widget.assetType);
                         }
                       } else {
                         // Multiple assets selected - show multi-select decision dialog
-                           EditRatingCardDialog.showMultiSelectEditRatingCardDialog(
-                              context);
-                        
+                        EditRatingCardDialog
+                            .showMultiSelectEditRatingCardDialog(
+                                context, selectedAssets);
                       }
                     },
                     style: OutlinedButton.styleFrom(

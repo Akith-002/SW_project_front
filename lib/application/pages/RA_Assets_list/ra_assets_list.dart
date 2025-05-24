@@ -42,6 +42,20 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
         isRatingCard: i % 2 == 0, // Alternating pattern for rating cards
       ));
     }
+        for (int i = 1; i <= 6; i++) {
+      assets.add(Asset(
+        id: i,
+        assetNo: 'RA${i.toString().padLeft(3, '0')}',
+        ward: 'Ward ${(i % 3) + 1}',
+        rdSt: 'Assessment Road ${String.fromCharCode(65 + (i % 8))}',
+        description: i % 2 == 0
+            ? 'Assessment Property Type A'
+            : 'Assessment Property Type B',
+        owner: 'Assessment Owner $i',
+        status: i % 4 == 0 ? AssetStatus.completed : AssetStatus.active,
+        isRatingCard: i % 2 == 0, // Alternating pattern for rating cards
+      ));
+    }
 
     return assets;
   }

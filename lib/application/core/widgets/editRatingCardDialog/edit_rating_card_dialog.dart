@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
+import 'package:land_asset_valuation/application/core/widgets/invalid_owners_dialogbox.dart';
+import 'package:land_asset_valuation/application/core/widgets/sendsuccessfully_dialogbox.dart';
+import 'package:land_asset_valuation/application/core/router/pages.dart';
+
+import 'package:land_asset_valuation/data/models/asset.dart';
 
 class EditRatingCardDialog {
   static void showEditRatingCardDialog(BuildContext context) {
@@ -154,7 +160,17 @@ class EditRatingCardDialog {
       },
     );
   }
-   static void showMultiSelectEditRatingCardDialog(BuildContext context) {
+
+  static void showMultiSelectEditRatingCardDialog(
+      BuildContext context, List<Asset> selectedAssets) {
+    // Check if all selected assets have the same owner
+    if (selectedAssets.isEmpty) return;
+
+    String firstOwner = selectedAssets.first.owner;
+    bool hasSameOwner =
+        selectedAssets.every((asset) => asset.owner == firstOwner);
+
+    // Proceed with normal multi-select dialog if owners match
     showDialog(
       context: context,
       builder: (context) {
@@ -209,6 +225,20 @@ class EditRatingCardDialog {
                           activeColor:
                               colors(context).colorPrimary5, // Set blue color
                           onChanged: (value) {
+                            if (!hasSameOwner) {
+                              // Show invalid owners dialog immediately when option is clicked
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  backgroundColor: Colors.transparent,
+                                  contentPadding: EdgeInsets.zero,
+                                  content: InvalidOwners(
+                                    onClose: () => Navigator.pop(context),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
                             setState(() {
                               selectedValue = value as int;
                             });
@@ -229,13 +259,25 @@ class EditRatingCardDialog {
                           activeColor:
                               colors(context).colorPrimary5, // Set blue color
                           onChanged: (value) {
+                            if (!hasSameOwner) {
+                              // Show invalid owners dialog immediately when option is clicked
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  backgroundColor: Colors.transparent,
+                                  contentPadding: EdgeInsets.zero,
+                                  content: InvalidOwners(
+                                    onClose: () => Navigator.pop(context),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
                             setState(() {
                               selectedValue = value as int;
                             });
                           },
                         ),
-                        
-                  
                       ],
                     ),
                     SizedBox(height: 20),
@@ -251,8 +293,38 @@ class EditRatingCardDialog {
                         CustomButton(
                           text: AppString.submit.localize(context)!,
                           onPressed: () {
+                            if (!hasSameOwner) {
+                              // Show invalid owners dialog
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  backgroundColor: Colors.transparent,
+                                  contentPadding: EdgeInsets.zero,
+                                  content: InvalidOwners(
+                                    onClose: () => Navigator.pop(context),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Handle the selected option
                             Navigator.pop(context);
-                            debugPrint("Selected Option: $selectedValue");
+
+                            switch (selectedValue) {
+                              case 1:
+                                // Consolidation option
+                                _handleConsolidationForMultiSelect(
+                                    context, selectedAssets);
+                                break;
+                              case 2:
+                                // Unidentified option
+                                _handleUnidentified(context, selectedAssets);
+                                break;
+                              default:
+                                debugPrint(
+                                    "Unknown option selected: $selectedValue");
+                            }
                           },
                           backgroundColor: colors(context).colorPrimary5!,
                         ),
@@ -268,7 +340,8 @@ class EditRatingCardDialog {
     );
   }
 
-   static void showAddRatingCardDialog(BuildContext context) {
+  static void showAddRatingCardDialog(BuildContext context,
+      {String? sourceContext}) {
     showDialog(
       context: context,
       builder: (context) {
@@ -386,7 +459,7 @@ class EditRatingCardDialog {
                             });
                           },
                         ),
-                          RadioListTile(
+                        RadioListTile(
                           contentPadding: EdgeInsets.only(left: 0),
                           title: Text(
                             'Special',
@@ -420,7 +493,80 @@ class EditRatingCardDialog {
                           text: AppString.submit.localize(context)!,
                           onPressed: () {
                             Navigator.pop(context);
-                            debugPrint("Selected Option: $selectedValue");
+
+                            // Determine appropriate sidebar index based on source context
+                            String? selectedIndex;
+                            if (sourceContext != null) {
+                              switch (sourceContext) {
+                                case 'massRating':
+                                  selectedIndex = '2';
+                                  break;
+                                case 'ratingAssessment':
+                                  selectedIndex = '3';
+                                  break;
+                                case 'ratingBuilding':
+                                  selectedIndex = '4';
+                                  break;
+                                case 'ratingObject':
+                                  selectedIndex = '5';
+                                  break;
+                                case 'landAcquisition':
+                                  selectedIndex = '1';
+                                  break;
+                                case 'MRrentalEvidence':
+                                  selectedIndex = '6';
+                                  break;
+                                case 'landMiscellaneous':
+                                  selectedIndex = '7';
+                                  break;
+                              }
+                            }
+
+                            // Navigate to the appropriate rating card form based on selection
+                            Map<String, String> queryParams = {};
+                            if (selectedIndex != null) {
+                              queryParams['selectedIndex'] = selectedIndex;
+                            }
+                            if (sourceContext != null) {
+                              queryParams['source'] = sourceContext;
+                            }
+
+                            switch (selectedValue) {
+                              case 1:
+                                // Domestic
+                                context.pushNamed(
+                                    Pages.routeDomesticRatingCard.toPathName(),
+                                    queryParameters: queryParams);
+                                break;
+                              case 2:
+                                // Offices
+                                context.pushNamed(
+                                    Pages.routeOfficesRatingCard.toPathName(),
+                                    queryParameters: queryParams);
+                                break;
+                              case 3:
+                                // Agriculture
+                                context.pushNamed(
+                                    Pages.routeAgricultureRatingCard
+                                        .toPathName(),
+                                    queryParameters: queryParams);
+                                break;
+                              case 4:
+                                // Shops
+                                context.pushNamed(
+                                    Pages.routeShopsRatingCard.toPathName(),
+                                    queryParameters: queryParams);
+                                break;
+                              case 5:
+                                // Special
+                                context.pushNamed(
+                                    Pages.routeSpecialRatingCard.toPathName(),
+                                    queryParameters: queryParams);
+                                break;
+                              default:
+                                debugPrint(
+                                    "Unknown rating card type: $selectedValue");
+                            }
                           },
                           backgroundColor: colors(context).colorPrimary5!,
                         ),
@@ -434,5 +580,45 @@ class EditRatingCardDialog {
         );
       },
     );
+  }
+
+  // TODO: Implement consolidation functionality for multiple assets
+  static void _handleConsolidationForMultiSelect(
+      BuildContext context, List<Asset> selectedAssets) {
+    // TODO: Implement consolidation logic
+    // This function should handle the consolidation process for the selected assets
+    // Parameters:
+    // - context: BuildContext for navigation and dialogs
+    // - selectedAssets: List of assets to be consolidated
+
+    debugPrint("Consolidation selected for ${selectedAssets.length} assets");
+    debugPrint(
+        "Assets to consolidate: ${selectedAssets.map((a) => a.assetNo).join(', ')}");
+  }
+
+  // TODO: Implement unidentified functionality for multiple assets
+  static void _handleUnidentified(
+      BuildContext context, List<Asset> selectedAssets) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: SuccessfullySaved(
+          onClose: () => Navigator.pop(context),
+        ),
+      ),
+    );
+    debugPrint("Unidentified selected for ${selectedAssets.length} assets");
+    debugPrint(
+        "Assets to mark as unidentified: ${selectedAssets.map((a) => a.assetNo).join(', ')}");
+
+    // TODO: Add unidentified implementation here
+    // Example steps:
+    // 1. Validate that assets can be marked as unidentified
+    // 2. Show confirmation dialog
+    // 3. Call API to update asset status
+    // 4. Handle success/error responses
+    // 5. Refresh the asset list
   }
 }

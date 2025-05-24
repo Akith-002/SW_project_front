@@ -19,6 +19,13 @@ class Pages {
   static const routePastValuation = "past-valuation";
   static const routeInspectionReport = "inspection-report";
   static const routeSketchTool = "sketch-tool";
+
+  // Rating Card Forms
+  static const routeDomesticRatingCard = "domestic-rating-card";
+  static const routeOfficesRatingCard = "offices-rating-card";
+  static const routeAgricultureRatingCard = "agriculture-rating-card";
+  static const routeShopsRatingCard = "shops-rating-card";
+  static const routeSpecialRatingCard = "special-rating-card";
 }
 
 extension PagesExtension on String {
