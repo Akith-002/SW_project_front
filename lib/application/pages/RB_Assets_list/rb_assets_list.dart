@@ -6,57 +6,39 @@ import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/assetListTable/asset_list_table.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
-import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_cubit.dart';
+import 'package:land_asset_valuation/application/pages/RB_Assets_list/cubit/rb_assets_list_cubit.dart';
 import 'package:land_asset_valuation/data/models/asset.dart';
 import 'package:land_asset_valuation/injection.dart';
 
-class MrAssetsList extends BasePage {
+class RbAssetsList extends BasePage {
   final String? source;
 
-  const MrAssetsList({
+  const RbAssetsList({
     super.key,
     this.source,
   });
 
   @override
-  State<MrAssetsList> createState() => _MrAssetsListState();
+  State<RbAssetsList> createState() => _RbAssetsListState();
 }
 
-class _MrAssetsListState extends BasePageState<MrAssetsList> {
-  final _cubit = injection<MrAssetsListCubit>();
+class _RbAssetsListState extends BasePageState<RbAssetsList> {
+  final _cubit = injection<RbAssetsListCubit>();
 
   // Generate sample assets based on the asset type
   List<Asset> _generateSampleAssets() {
-    List<Asset> assets = [];
-
-    // Determine asset type prefix based on source
-    String typePrefix = '';
-    switch (widget.source) {
-      case 'ratingAssessment':
-        typePrefix = 'RA';
-        break;
-      case 'ratingBuilding':
-        typePrefix = 'RB';
-        break;
-      case 'ratingObject':
-        typePrefix = 'RO';
-        break;
-      case 'massRating':
-      default:
-        typePrefix = 'MR';
-        break;
-    } // Generate sample data
-    for (int i = 1; i <= 8; i++) {
+    List<Asset> assets = []; // Generate RB-specific sample data
+    for (int i = 1; i <= 7; i++) {
       assets.add(Asset(
         id: i,
-        assetNo: '$typePrefix${i.toString().padLeft(3, '0')}',
-        ward: 'Ward ${(i % 5) + 1}',
-        rdSt: 'Road ${String.fromCharCode(65 + (i % 10))}',
+        assetNo: 'RB${i.toString().padLeft(3, '0')}',
+        ward: 'Ward ${(i % 4) + 1}',
+        rdSt: 'Building Road ${String.fromCharCode(65 + (i % 10))}',
         description:
-            i % 2 == 0 ? 'Commercial Property' : 'Residential Property',
-        owner: 'Owner $i',
-        status: i % 3 == 0 ? AssetStatus.completed : AssetStatus.pending,
-        isRatingCard: i % 3 != 0, // Some assets have rating cards, some don't
+            i % 3 == 0 ? 'Building Complex $i' : 'Building Unit $i',
+        owner: 'Building Owner $i',
+        status: i % 3 == 0 ? AssetStatus.completed : AssetStatus.active,
+        isRatingCard: i <= 4, // First 4 assets have rating cards
       ));
     }
 
@@ -64,12 +46,12 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
   }
 
   void _onAssetSelected(Asset asset) {
-    debugPrint('Selected asset: ${asset.assetNo}');
+    debugPrint('Selected RB asset: ${asset.assetNo}');
     // Handle single asset selection
   }
 
   void _onAssetsSelected(List<Asset> assets) {
-    debugPrint('Selected ${assets.length} assets');
+    debugPrint('Selected ${assets.length} RB assets');
     // Handle multiple asset selection
   }
 
@@ -77,7 +59,6 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
   Widget buildView(BuildContext context) {
     // Generate dynamic assets based on source
     List<Asset> assets = _generateSampleAssets();
-
     // Determine title and breadcrumb based on source
     String title;
     List<String> breadcrumbItems;
@@ -109,10 +90,10 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         break;
       case 'massRating':
       default:
-        title = AppString.massRatingMR.localize(context)!;
+        title = AppString.ratingBuildingRB.localize(context)!;
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
-          AppString.massRating.localize(context)!,
+          AppString.ratingBuilding.localize(context)!,
           AppString.request.localize(context)!,
         ];
         break;
@@ -128,7 +109,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
               ]),
               AssetListTable(
                 assets: assets,
-                assetType: widget.source,
+                assetType: 'RB',
                 onAssetSelected: _onAssetSelected,
                 onAssetsSelected: _onAssetsSelected,
               ),

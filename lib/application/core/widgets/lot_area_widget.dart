@@ -61,10 +61,10 @@ class LotAreaWidget extends StatelessWidget {
     final numberFormatFeet = NumberFormat("#,##0", "en_US");
     final formattedAreaSqFeet = numberFormatFeet.format(finalAreaSqFeet);
     // Format Area string like X ft² Y in²
-    final formattedArea = "$formattedAreaSqFeet ft ${finalAreaSqInches} in";
+    final formattedArea = "$formattedAreaSqFeet ft $finalAreaSqInches in";
 
     // Format distance string as X' Y" - Same as before
-    final formattedDistance = "${finalDistFeet}' ${inchesPart}\"";
+    final formattedDistance = "$finalDistFeet' $inchesPart\"";
 
     // Determine if values are meaningful (using original meter thresholds)
     bool showArea = area > 0.01;

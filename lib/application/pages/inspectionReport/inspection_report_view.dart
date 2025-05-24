@@ -113,7 +113,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
               labelColor: colors(context).colorWhite ?? Colors.white,
               unselectedLabelColor:
                   colors(context).colorBlack ?? Colors.black87,
-              overlayColor: MaterialStateProperty.all(Colors.transparent),
+              overlayColor: WidgetStateProperty.all(Colors.transparent),
               tabs: tabTitles.map((title) {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),

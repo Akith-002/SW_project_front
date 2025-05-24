@@ -31,7 +31,9 @@ class iconButtonWidget extends StatelessWidget {
       iconColor = colors(context).colorPrimary6;
       borderColor = colors(context).colorPrimary1;
       backgroundColor = colors(context).colorPrimary9;
-    } else {
+    } 
+    
+    else {
       iconColor = colors(context).colorBlack;
       borderColor = colors(context).colorGrey9;
       backgroundColor = colors(context).colorWhite;

@@ -1,30 +1,44 @@
 import 'dart:async';
-
+import 'package:go_router/go_router.dart';
+import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:flutter/material.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
-import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
-import 'package:land_asset_valuation/application/core/widgets/dialogbox/dialogbox.dart';
 import 'package:land_asset_valuation/application/core/widgets/iconButtonWidget/icon_button_widget.dart';
+import 'package:land_asset_valuation/application/core/widgets/editRatingCardDialog/edit_rating_card_dialog.dart';
+import 'package:land_asset_valuation/application/core/widgets/multiSelectDecisionDialog/multi_select_decision_dialog.dart';
+import 'package:land_asset_valuation/data/models/asset.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 final sidebarExtendedController = StreamController<bool>.broadcast();
 
 class AssetListTable extends StatefulWidget {
-  const AssetListTable({super.key});
+  final List<Asset> assets;
+  final String? assetType;
+  final Function(Asset)? onAssetSelected;
+  final Function(List<Asset>)? onAssetsSelected;
+
+  const AssetListTable({
+    super.key,
+    this.assets = const [],
+    this.assetType,
+    this.onAssetSelected,
+    this.onAssetsSelected,
+  });
 
   @override
   State<AssetListTable> createState() => _AssetListTableState();
 }
 
 class _AssetListTableState extends State<AssetListTable> {
-  List<bool> isChecked = List.generate(5, (index) => false);
+  late List<bool> isChecked;
   bool isSidebarExtended = true;
 
   @override
   void initState() {
     super.initState();
+    isChecked = List.generate(widget.assets.length, (index) => false);
     sidebarExtendedController.stream.listen((extended) {
       setState(() {
         isSidebarExtended = extended;
@@ -32,154 +46,54 @@ class _AssetListTableState extends State<AssetListTable> {
     });
   }
 
-  void _showRatingCardDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        int selectedValue = 1; // Default selected value
+  @override
+  void didUpdateWidget(AssetListTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.assets.length != widget.assets.length) {
+      isChecked = List.generate(widget.assets.length, (index) => false);
+    }
+  }
 
-        return StatefulBuilder(
-          builder: (context, setState) => AlertDialog(
-            backgroundColor: colors(context).colorWhite,
-            contentPadding:
-                EdgeInsets.zero, // Remove default padding to control width
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20), // Adds rounded corners
-            ),
-            content: SizedBox(
-              width: 384, // Fixed width
-              child: Padding(
-                padding: EdgeInsets.all(24), // Internal padding
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Edit your rating card',
-                      style: AppStyling.boldTextSize22.copyWith(
-                        color: colors(context).colorBlack,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      "Select one of the options",
-                      style: AppStyling.regularTextSize16.copyWith(
-                        color: colors(context).colorGrey3,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        RadioListTile(
-                          contentPadding: EdgeInsets.only(
-                            left: 0,
-                          ),
-                          title: Text(
-                            'Division',
-                            style: AppStyling.normalTextSize16.copyWith(
-                              color: colors(context).colorBlack,
-                            ),
-                          ),
-                          value: 1,
-                          groupValue: selectedValue,
-                          activeColor:
-                              colors(context).colorPrimary5, // Set blue color
-                          onChanged: (value) {
-                            setState(() {
-                              selectedValue = value as int;
-                            });
-                          },
-                        ),
-                        RadioListTile(
-                          contentPadding: EdgeInsets.only(
-                            left: 0,
-                          ),
-                          title: Text(
-                            'Reconciliation',
-                            style: AppStyling.normalTextSize16.copyWith(
-                              color: colors(context).colorBlack,
-                            ),
-                          ),
-                          value: 2,
-                          groupValue: selectedValue,
-                          activeColor:
-                              colors(context).colorPrimary5, // Set blue color
-                          onChanged: (value) {
-                            setState(() {
-                              selectedValue = value as int;
-                            });
-                          },
-                        ),
-                        RadioListTile(
-                          contentPadding: EdgeInsets.only(
-                            left: 0,
-                          ),
-                          title: Text(
-                            'Change number',
-                            style: AppStyling.normalTextSize16.copyWith(
-                              color: colors(context).colorBlack,
-                            ),
-                          ),
-                          value: 3,
-                          groupValue: selectedValue,
-                          activeColor:
-                              colors(context).colorPrimary5, // Set blue color
-                          onChanged: (value) {
-                            setState(() {
-                              selectedValue = value as int;
-                            });
-                          },
-                        ),
-                        RadioListTile(
-                          contentPadding: EdgeInsets.only(left: 0),
-                          title: Text(
-                            'Due to difficulties',
-                            style: AppStyling.normalTextSize16.copyWith(
-                              color: colors(context).colorBlack,
-                            ),
-                          ),
-                          value: 4,
-                          groupValue: selectedValue,
-                          activeColor:
-                              colors(context).colorPrimary5, // Set blue color
-                          onChanged: (value) {
-                            setState(() {
-                              selectedValue = value as int;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomButton(
-                          text: AppString.cancel.localize(context)!,
-                          onPressed: () => Navigator.pop(context),
-                          backgroundColor: colors(context).colorGrey1!,
-                        ),
-                        SizedBox(width: 20),
-                        CustomButton(
-                          text: AppString.submit.localize(context)!,
-                          onPressed: () {
-                            Navigator.pop(context);
-                            debugPrint("Selected Option: $selectedValue");
-                          },
-                          backgroundColor: colors(context).colorPrimary5!,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+  // Helper method to check if any assets are selected
+  bool get hasSelectedAssets {
+    return isChecked.any((checked) => checked);
+  }
+
+  // Helper method to check if all selected assets have rating cards
+  bool get selectedAssetsHaveRatingCards {
+    List<int> selectedIndices = [];
+    for (int i = 0; i < isChecked.length; i++) {
+      if (isChecked[i]) {
+        selectedIndices.add(i);
+      }
+    }
+
+    if (selectedIndices.isEmpty) return false;
+
+    // Check if all selected assets have rating cards
+    return selectedIndices.every((index) =>
+        index < widget.assets.length && widget.assets[index].isRatingCard);
+  }
+
+  // Helper method to get button text based on selection state
+  String _getButtonText(BuildContext context) {
+    // Get selected assets count
+    int selectedCount = isChecked.where((checked) => checked).length;
+
+    if (selectedCount == 1) {
+      // Single asset selected - check if it has rating card
+      for (int i = 0; i < isChecked.length; i++) {
+        if (isChecked[i]) {
+          Asset selectedAsset = widget.assets[i];
+          return selectedAsset.isRatingCard
+              ? "Decisions"
+              : "Decisions";
+        }
+      }
+    }
+
+    // Multiple assets selected
+    return AppString.decisions.localize(context)!;
   }
 
   @override
@@ -208,55 +122,64 @@ class _AssetListTableState extends State<AssetListTable> {
             Row(
               children: [
                 Text(
-                  "${AppString.allAssets.localize(context)!}5",
+                  "${AppString.allAssets.localize(context)!}${widget.assets.length}",
                   style: AppStyling.semiBoldTextSize16.copyWith(
                     color: colors(context).colorBlack,
                   ),
                 ),
-                Spacer(),
-                OutlinedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => Dialogbox(
-                        dialogType: "edit",
-                        mainText: "Edit rating card?",
-                        subText:
-                            "Are your sure you want to edit your rating card?",
-                        primaryButtonText: AppString.edit.localize(context)!,
-                        secondaryButtonText:
-                            AppString.cancel.localize(context)!,
-                        onPrimaryButtonPressed: () {
-                          Navigator.pop(
-                              context); // Close the confirmation dialog
-                          _showRatingCardDialog(); // Show the rating card dialog
-                        },
-                        onSecondaryButtonPressed: () {
-                          Navigator.pop(context);
-                        },
+                Spacer(), // Only show Decisions button when assets are selected
+                if (hasSelectedAssets) ...[
+                  OutlinedButton(
+                    onPressed: () {
+                      // Get selected assets
+                      List<Asset> selectedAssets = [];
+                      for (int i = 0; i < isChecked.length; i++) {
+                        if (isChecked[i]) {
+                          selectedAssets.add(widget.assets[i]);
+                        }
+                      }
+
+                      // Check number of selected assets
+                      if (selectedAssets.length == 1) {
+                        // Single asset selected
+                        Asset selectedAsset = selectedAssets.first;
+                        if (selectedAsset.isRatingCard) {
+                          // Show edit rating card dialog for existing rating card
+                          EditRatingCardDialog.showEditRatingCardDialog(
+                              context);
+                        } else {
+                          // Show create rating card dialog for new rating card
+                          EditRatingCardDialog.showAddRatingCardDialog(
+                              context);
+                        }
+                      } else {
+                        // Multiple assets selected - show multi-select decision dialog
+                           EditRatingCardDialog.showMultiSelectEditRatingCardDialog(
+                              context);
+                        
+                      }
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: colors(context).colorPrimary6!,
+                        width: 1,
                       ),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: colors(context).colorPrimary6!,
-                      width: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      backgroundColor: colors(context).colorPrimary8,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    backgroundColor: colors(context).colorPrimary8,
-                  ),
-                  child: Text(
-                    AppString.decisions.localize(context)!,
-                    style: AppStyling.boldTextSize12.copyWith(
-                      color: colors(context).colorPrimary6,
+                    child: Text(
+                      _getButtonText(context),
+                      style: AppStyling.boldTextSize12.copyWith(
+                        color: colors(context).colorPrimary6,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: 12,
-                ),
+                  SizedBox(
+                    width: 12,
+                  ),
+                ],
                 SizedBox(
                   width: 290,
                   height: 37,
@@ -348,9 +271,11 @@ class _AssetListTableState extends State<AssetListTable> {
                           _buildHeaderCell('Owner', context),
                           _buildHeaderCell('Action', context),
                         ],
-                      ),
+                      ), // Dynamic data rows
                       ...List.generate(
-                          5, (index) => _buildDataRow(index, context)),
+                        widget.assets.length,
+                        (index) => _buildDataRow(index, context),
+                      ),
                     ],
                   ),
                 ),
@@ -376,25 +301,41 @@ class _AssetListTableState extends State<AssetListTable> {
   }
 
   TableRow _buildDataRow(int index, BuildContext context) {
+    final Asset asset = widget.assets[index];
+
     return TableRow(
       children: [
         SizedBox(
           height: 52,
-          // padding: EdgeInsets.symmetric(horizontal: 8),
           child: Checkbox(
             value: isChecked[index],
             onChanged: (bool? value) {
               setState(() {
-                isChecked[index] = value!;
+                isChecked[index] = value ?? false;
+
+                // Handle callbacks
+                if (value == true) {
+                  // Asset selected
+                  widget.onAssetSelected?.call(asset);
+                }
+
+                // Get all selected assets
+                List<Asset> selectedAssets = [];
+                for (int i = 0; i < isChecked.length; i++) {
+                  if (isChecked[i]) {
+                    selectedAssets.add(widget.assets[i]);
+                  }
+                }
+                widget.onAssetsSelected?.call(selectedAssets);
               });
             },
           ),
         ),
-        _buildDataCell('Kottawa'),
-        _buildDataCell('1'),
-        _buildDataCell('Kottawa'),
-        _buildDataCell('Domestic'),
-        _buildDataCell('Owner'),
+        _buildDataCell(asset.assetNo),
+        _buildDataCell(asset.ward),
+        _buildDataCell(asset.rdSt),
+        _buildDataCell(asset.description),
+        _buildDataCell(asset.owner),
         SizedBox(
           height: 52,
           child: Row(
@@ -402,13 +343,22 @@ class _AssetListTableState extends State<AssetListTable> {
               iconButtonWidget(
                 color: colors(context).colorGrey8!,
                 iconName: PhosphorIconsRegular.mapPin,
-                onPressed: () {},
+                onPressed: () {
+                  context.go(Pages.routeMapScreen.toPath());
+                },
               ),
               SizedBox(width: 8),
               iconButtonWidget(
                 color: colors(context).colorPrimary6!,
-                iconName: PhosphorIconsRegular.pencilSimpleLine,
-                onPressed: () {},
+                iconName: asset.isRatingCard
+                    ? PhosphorIconsRegular
+                        .pencilSimpleLine // Edit existing rating card
+                    : PhosphorIconsRegular
+                        .folderSimplePlus, // Add new rating card
+                onPressed: () {
+                  // Handle edit action for this specific asset
+                  widget.onAssetSelected?.call(asset);
+                },
               ),
             ],
           ),
@@ -420,8 +370,12 @@ class _AssetListTableState extends State<AssetListTable> {
   Widget _buildDataCell(String text) {
     return Container(
       height: 52,
-      padding: EdgeInsets.symmetric(vertical: 16),
-      child: Text(text),
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      child: Text(
+        text,
+        style: AppStyling.normalTextSize14,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 

@@ -9,6 +9,9 @@ class Pages {
   static const routeLaSalesEvidence = "la-sales-evidence";
   static const routeLaBuildingRates = "la-building-rates";
   static const routeMrAssetsList = "mr-assets-list";
+  static const routeRaAssetsList = "ra-assets-list";
+  static const routeRbAssetsList = "rb-assets-list";
+  static const routeRoAssetsList = "ro-assets-list";
   static const routeRentalEvidence = "rentalevidence";
   static const routeI2RentalEvidence = "i2rentalevidence";
   static const routeMapScreen = "routemap";

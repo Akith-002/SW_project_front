@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 // --- Constants for Sketch Drawing ---
 const int SKETCH_POLYGON_FILL_COLOR = 0x80FFFF80; // Semi-transparent yellow

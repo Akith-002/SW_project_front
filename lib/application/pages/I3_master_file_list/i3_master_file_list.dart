@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
-import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/fileList/file_list.dart';
 import 'package:land_asset_valuation/application/core/widgets/table/table_scaffold.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForLM/table_scaffold_LM.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForMR/table_scaffold_MR.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRA/table_scaffold_RA.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRB/table_scaffold_RB.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRO/table_scaffold_RO.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
@@ -56,7 +57,6 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
         return 'unknown'; // Or a sensible default
     }
   }
-  // **********************************************************
 
   Widget _buildContentForIndex(int index) {
     // *** Determine the source for the current index ***
@@ -94,7 +94,9 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.massRating.localize(context)!,
             ],
-            table: TableScaffoldMr(), // Assumes this doesn't need the source
+            table: TableScaffoldMr(
+              pageSource: currentPageSource,
+            ),
           ),
         );
       case 3: // Rating Assessment RA
@@ -108,7 +110,9 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingAssessment.localize(context)!,
             ],
-            table: TableScaffoldMr(), // Assumes this doesn't need the source
+            table: TableScaffoldRA(
+              pageSource: currentPageSource,
+            ),
           ),
         );
       case 4: // Rating Building RB
@@ -122,7 +126,9 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingBuilding.localize(context)!,
             ],
-            table: TableScaffoldMr(), // Assumes this doesn't need the source
+            table: TableScaffoldRB(
+              pageSource: currentPageSource,
+            ),
           ),
         );
       case 5: // Rating Object RO
@@ -136,11 +142,12 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingObject.localize(context)!,
             ],
-            table: TableScaffoldMr(), // Assumes this doesn't need the source
+            table: TableScaffoldRO(
+              pageSource: currentPageSource,
+            ),
           ),
         );
       case 6: // Map Screen
-        // Usually navigated to directly, not built here unless it's the only content
         return MapScreen();
       case 7: // Land Miscellaneous
         return Scaffold(

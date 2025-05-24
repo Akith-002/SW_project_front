@@ -8,6 +8,9 @@ import 'package:land_asset_valuation/application/pages/I3_master_file_list/i3_ma
 import 'package:land_asset_valuation/application/pages/LA_Building_Rates/la_building_rates.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/la_Sales_Evidence.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/mr_assets_list.dart';
+import 'package:land_asset_valuation/application/pages/RA_Assets_list/ra_assets_list.dart';
+import 'package:land_asset_valuation/application/pages/RB_Assets_list/rb_assets_list.dart';
+import 'package:land_asset_valuation/application/pages/RO_Assets_list/ro_assets_list.dart';
 import 'package:land_asset_valuation/application/pages/ProfileScreen/profile_screen.dart';
 import 'package:land_asset_valuation/application/pages/conditionReport/condition_report_view.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
@@ -19,7 +22,6 @@ import 'package:land_asset_valuation/application/pages/signIn/signin_view.dart';
 import 'package:land_asset_valuation/application/pages/splash/splash_view.dart';
 import 'package:land_asset_valuation/application/pages/RatingCard/rating_card_view.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
-import 'package:sidebarx/sidebarx.dart';
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
@@ -136,9 +138,51 @@ class AppRouter {
             path: Pages.routeMrAssetsList.toPath(),
             name: Pages.routeMrAssetsList.toPathName(),
             pageBuilder: (context, state) {
+              final String source =
+                  state.uri.queryParameters['source'] ?? 'massRating';
+
               return NoTransitionPage(
                 key: state.pageKey,
-                child: MrAssetsList(),
+                child: MrAssetsList(source: source),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeRaAssetsList.toPath(),
+            name: Pages.routeRaAssetsList.toPathName(),
+            pageBuilder: (context, state) {
+              final String source =
+                  state.uri.queryParameters['source'] ?? 'ratingAssessment';
+
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: RaAssetsList(source: source),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeRbAssetsList.toPath(),
+            name: Pages.routeRbAssetsList.toPathName(),
+            pageBuilder: (context, state) {
+              final String source =
+                  state.uri.queryParameters['source'] ?? 'ratingBuilding';
+
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: RbAssetsList(source: source),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeRoAssetsList.toPath(),
+            name: Pages.routeRoAssetsList.toPathName(),
+            pageBuilder: (context, state) {
+              final String source =
+                  state.uri.queryParameters['source'] ?? 'ratingObject';
+
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: RoAssetsList(source: source),
               );
             },
           ),
