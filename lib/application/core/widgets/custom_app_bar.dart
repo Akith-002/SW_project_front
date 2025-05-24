@@ -85,22 +85,28 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildHoverMenuItem(Icons.person, AppString.profile.localize(context)!, () {
+                      _buildHoverMenuItem(
+                          Icons.person, AppString.profile.localize(context)!,
+                          () {
                         _overlayEntry?.remove();
                         _overlayEntry = null;
-                        context.go(Pages.routeProfileScreen.toPath());
+                        context.push(Pages.routeProfileScreen.toPath());
                       }),
                       SizedBox(height: 16),
-                      _buildHoverMenuItem(Icons.settings, AppString.settings.localize(context)!, () {
+                      _buildHoverMenuItem(
+                          Icons.settings, AppString.settings.localize(context)!,
+                          () {
                         _overlayEntry?.remove();
                         _overlayEntry = null;
-                        context.go(Pages.routeSettingsScreen.toPath());
+                        context.push(Pages.routeSettingsScreen.toPath());
                       }),
                       SizedBox(height: 16),
-                      _buildHoverMenuItem(Icons.logout, AppString.logOut.localize(context)!, () {
+                      _buildHoverMenuItem(
+                          Icons.logout, AppString.logOut.localize(context)!,
+                          () {
                         _overlayEntry?.remove();
                         _overlayEntry = null;
-                        context.go(Pages.routeSignIn.toPath());
+                        context.push(Pages.routeSignIn.toPath());
                       }),
                     ],
                   ),
@@ -128,7 +134,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
             children: [
               Icon(icon, size: 24, color: Colors.black87),
               SizedBox(width: 16),
-              Text(text, style: AppStyling.regularTextSize20.copyWith(color: Colors.black87)),
+              Text(text,
+                  style: AppStyling.regularTextSize20
+                      .copyWith(color: Colors.black87)),
             ],
           ),
         ),
@@ -181,7 +189,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
               GestureDetector(
                 onTap: widget.onLeftIconPressed,
                 child: Icon(
-                  (widget.leftIcon ?? (style) => PhosphorIcons.mapTrifold(style))(PhosphorIconsStyle.regular),
+                  (widget.leftIcon ??
+                          (style) => PhosphorIcons.mapTrifold(style))(
+                      PhosphorIconsStyle.regular),
                   size: 24.0,
                   color: appColors.grayColor,
                 ),
@@ -189,7 +199,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
               const SizedBox(width: 8),
               Text(
                 widget.title,
-                style: AppStyling.semiBoldTextSize16.copyWith(color: appColors.labelTextColor),
+                style: AppStyling.semiBoldTextSize16
+                    .copyWith(color: appColors.labelTextColor),
               ),
             ],
           ),
