@@ -104,8 +104,8 @@ class RatingCard extends StatelessWidget {
                 ),
                 CustomDropdownField(
                   label: AppString.floor.localize(context)!,
-                  items: ["Floor", "Type 1", "Type 2", "Type 3"],
-                  initialValue: "Floor",
+                  items: ["Select Floor", "Type 1", "Type 2", "Type 3"],
+                  initialValue: "Select Floor",
                   onChanged: (value) {
                     debugPrint(value);
                   },

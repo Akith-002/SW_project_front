@@ -7,6 +7,9 @@ import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit
 import 'package:land_asset_valuation/application/pages/LA_Building_Rates/cubit/la_building_rates_cubit.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/cubit/la_sales_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_cubit.dart';
+import 'package:land_asset_valuation/application/pages/RA_Assets_list/cubit/ra_assets_list_cubit.dart';
+import 'package:land_asset_valuation/application/pages/RB_Assets_list/cubit/rb_assets_list_cubit.dart';
+import 'package:land_asset_valuation/application/pages/RO_Assets_list/cubit/ro_assets_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/cubit/dashboard_cubit.dart';
 import 'package:land_asset_valuation/application/pages/inspectionReport/cubit/inspection_report_cubit.dart';
 import 'package:land_asset_valuation/application/pages/pastValuation/cubit/past_valuation_cubit.dart';
@@ -58,6 +61,12 @@ Future<void> init() async {
       .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
   injection
       .registerFactory(() => MrAssetsListCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => RaAssetsListCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => RbAssetsListCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => RoAssetsListCubit(appSharedData: injection()));
   injection
       .registerFactory(() => RentalEvidenceCubit(appSharedData: injection()));
   injection

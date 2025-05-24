@@ -33,6 +33,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   ];
   List<dynamic> uploadedImages = [];
 
+  // State for Building Info Tab
+  String? _selectedBuildingName;
+  final List<String> _buildingNames = [
+    'B1',
+    'B2',
+    'B3'
+  ]; // Example building names
+
   @override
   void initState() {
     super.initState();
@@ -63,14 +71,10 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Custom AppBar
           const CustomAppBar(title: "Inspection Report - #56249"),
-
-          // Breadcrumb Navigation (Full Width)
           Container(
-            width: double.infinity, // Makes it full width like the App Bar
-            color:
-                const Color(0xFFF3F4F6), // Matches the Breadcrumb's background
+            width: double.infinity,
+            color: const Color(0xFFF3F4F6),
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Breadcrumb(
@@ -82,8 +86,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
               ],
             ),
           ),
-
-          // Tabs and Tab content
           Expanded(
             child: _buildInspectionReportTabs(),
           ),
@@ -96,11 +98,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Tab Bar Navigation
         Align(
           alignment: Alignment.centerLeft,
           child: Padding(
-            padding: const EdgeInsets.only(top: 8.0, bottom: 0.0),
+            padding: const EdgeInsets.only(
+                top: 8.0,
+                bottom: 0.0,
+                left: 16.0,
+                right: 16.0), // Added padding to match image
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
@@ -113,7 +118,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
               labelColor: colors(context).colorWhite ?? Colors.white,
               unselectedLabelColor:
                   colors(context).colorBlack ?? Colors.black87,
-              overlayColor: MaterialStateProperty.all(Colors.transparent),
+              overlayColor: WidgetStateProperty.all(Colors.transparent),
               tabs: tabTitles.map((title) {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -137,17 +142,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             ),
           ),
         ),
-
-        // Spacing below the tabs
         const SizedBox(height: 24),
-
-        // Tab View Content
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [
               _buildLandInfoTab(),
-              _buildBuildingInfoTab(),
+              _buildBuildingInfoTab(), // This will now be conditional
               _buildOtherConstructionsTab(),
             ],
           ),
@@ -167,13 +168,10 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
               placeholder: "Enter Master File Reference Number"),
           LabeledTextField(
               label: "Inspection Date", placeholder: "Enter Inspection Date"),
-
           LabeledTextField(
               label: "DS Division", placeholder: "Enter DS Division"),
           LabeledTextField(label: "District", placeholder: "Enter District"),
           LabeledTextField(label: "Province", placeholder: "Enter Province"),
-
-          // Village/GN Division - only title with button
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Column(
@@ -198,19 +196,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
               ],
             ),
           ),
-
-          // Spacer to push buttons to bottom
           const SizedBox(height: 24),
-
-          // Divider
           Container(
             height: 1,
             margin: const EdgeInsets.all(16),
             width: double.infinity,
             color: Colors.grey,
           ),
-
-          // Buttons
           Row(
             children: [
               CustomButton(
@@ -232,14 +224,128 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   }
 
   Widget _buildBuildingInfoTab() {
+    // Conditionally show list or form
+    if (_selectedBuildingName == null) {
+      return _buildBuildingList();
+    } else {
+      return _buildBuildingForm();
+    }
+  }
+
+  Widget _buildBuildingList() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Building List",
+            style: TextStyle(
+              fontSize: 20, // Or adjust as per your app's typography
+              fontWeight: FontWeight.bold,
+              color: colors(context).colorBlack,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ListView.builder(
+            shrinkWrap: true,
+            physics:
+                const NeverScrollableScrollPhysics(), // if the list itself shouldn't scroll within its parent
+            itemCount: _buildingNames.length,
+            itemBuilder: (context, index) {
+              final buildingName = _buildingNames[index];
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedBuildingName = buildingName;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Building name:",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color:
+                              colors(context).labelTextColor ?? Colors.black87,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        buildingName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: colors(context).colorBlack,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.chevron_right,
+                        color: colors(context).colorBlack ?? Colors.black54,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBuildingForm() {
+    // This method contains the original content of _buildBuildingInfoTab
     return SingleChildScrollView(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // "Back to list" button/text
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedBuildingName = null;
+                });
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.arrow_back_ios,
+                      size: 16,
+                      color: colors(context).colorPrimary6 ??
+                          Theme.of(context).primaryColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    "Back to Building List",
+                    style: TextStyle(
+                        color: colors(context).colorPrimary6 ??
+                            Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           _buildRow([
             LabeledTextField(
-                label: AppString.buildingId.localize(context) ?? '',
+                label:
+                    "${AppString.buildingId.localize(context) ?? 'Building ID'} ($_selectedBuildingName)", // Show selected building name
                 placeholder: "Enter Building ID"),
             LabeledTextField(
                 label: AppString.buildingName.localize(context) ?? '',
@@ -321,7 +427,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             ),
           ]),
 
-          /// **Roof Details**
           const SizedBox(height: 16),
           Text(
             AppString.roofDetails.localize(context) ?? '',
@@ -360,7 +465,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             ),
           ]),
 
-          /// **Structure Details**
           const SizedBox(height: 16),
           Text(
             AppString.structureDetails.localize(context) ?? '',
@@ -393,7 +497,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             ),
           ]),
 
-          /// **Fixed and Fitting Details**
           Text(
             AppString.fixedAndFittingDetails.localize(context) ?? '',
             style: AppStyling.mediumTextSize14
@@ -456,7 +559,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             ),
           ]),
 
-          /// **Finishers / Service Details**
           const SizedBox(height: 16),
           Text(
             AppString.finishersServiceDetails.localize(context) ?? '',
@@ -495,7 +597,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             ),
           ]),
 
-          /// **Add Owner Button**
           const SizedBox(height: 16),
           Text(
             AppString.finishersServiceDetails.localize(context) ?? '',
@@ -512,7 +613,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             height: 48,
           ),
 
-          /// **Image Capturing and Upload**
           const SizedBox(height: 16),
           Text(
             AppString.imageCapturingUpload.localize(context) ?? '',
@@ -546,7 +646,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             ],
           ),
 
-          /// **Divider**
           const SizedBox(height: 24),
           Container(
             height: 1,
@@ -555,7 +654,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             color: Colors.grey,
           ),
 
-          /// **Buttons**
           Row(
             children: [
               CustomButton(
@@ -582,37 +680,26 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Other construction fields
           LabeledTextField(
               label: "Other Information",
               placeholder: "Enter other information"),
-
           LabeledTextField(
               label: "Other Construction Details",
               placeholder: "Enter construction details"),
-
           LabeledTextField(
               label: "Details of Assets/Inventory Items",
               placeholder: "Enter asset details"),
-
           LabeledTextField(
               label: "Details of Business",
               placeholder: "Enter business details"),
-
           LabeledTextField(label: "Remarks", placeholder: "Enter remarks"),
-
-          // Spacer to push buttons to bottom
           const SizedBox(height: 24),
-
-          // Divider
           Container(
             height: 1,
             margin: const EdgeInsets.all(16),
             width: double.infinity,
             color: Colors.grey,
           ),
-
-          // Buttons
           Row(
             children: [
               CustomButton(
@@ -633,12 +720,17 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     );
   }
 
-  /// Helper method to create rows of input fields
   Widget _buildRow(List<Widget> children) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        children: children.map((widget) => Expanded(child: widget)).toList(),
+        children: children
+            .map((widget) => Expanded(
+                child: Padding(
+                    // Added padding around each item in the row
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: widget)))
+            .toList(),
       ),
     );
   }

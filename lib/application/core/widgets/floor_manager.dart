@@ -6,7 +6,7 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 class FloorManager extends StatefulWidget {
   final Function(String)? onFloorSelected;
 
-  const FloorManager({Key? key, this.onFloorSelected}) : super(key: key);
+  const FloorManager({super.key, this.onFloorSelected});
 
   @override
   State<FloorManager> createState() => _FloorManagerState();
@@ -124,7 +124,7 @@ class _FloorManagerState extends State<FloorManager> {
                       isSelected: _selectedFloor == floor,
                       onTap: () => _selectFloor(floor),
                     ))
-                .toList(),
+                ,
           ],
         ),
       ),
@@ -137,7 +137,7 @@ class FloorItem extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const FloorItem({
+  const FloorItem({super.key, 
     required this.floorName,
     required this.onTap,
     this.isSelected = false,
@@ -212,6 +212,8 @@ class FloorItem extends StatelessWidget {
 }
 
 class AddFloorDialog extends StatefulWidget {
+  const AddFloorDialog({super.key});
+
   @override
   State<AddFloorDialog> createState() => _AddFloorDialogState();
 }
@@ -246,11 +248,11 @@ class _AddFloorDialogState extends State<AddFloorDialog> {
                 dropdownColor: colors(context).colorWhite,
                 items: [
                   DropdownMenuItem(
-                      child: Text(AppString.above.localize(context)!),
-                      value: 'above'),
+                      value: 'above',
+                      child: Text(AppString.above.localize(context)!)),
                   DropdownMenuItem(
-                      child: Text(AppString.below.localize(context)!),
-                      value: 'below'),
+                      value: 'below',
+                      child: Text(AppString.below.localize(context)!)),
                 ],
                 onChanged: (val) {
                   if (val != null) {
