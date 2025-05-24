@@ -1,4 +1,4 @@
-class LandAquisitionMasterFile {
+class LandAcquisitionMasterFile {
   final int id;
   final int masterFileNo;
   final String planType;
@@ -6,7 +6,7 @@ class LandAquisitionMasterFile {
   final String requestingAuthorityReferenceNo;
   final String status;
 
-  LandAquisitionMasterFile({
+  LandAcquisitionMasterFile({
     required this.id,
     required this.masterFileNo,
     required this.planType,
@@ -15,8 +15,8 @@ class LandAquisitionMasterFile {
     required this.status,
   });
 
-  factory LandAquisitionMasterFile.fromJson(Map<String, dynamic> json) {
-    return LandAquisitionMasterFile(
+  factory LandAcquisitionMasterFile.fromJson(Map<String, dynamic> json) {
+    return LandAcquisitionMasterFile(
       id: json['id'],
       masterFileNo: json['masterFileNo'],
       planType: json['planType'],
