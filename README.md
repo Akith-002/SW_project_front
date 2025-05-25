@@ -14,3 +14,11 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Run the app
+
+To run the app in development mode, use the following command:
+
+```bash
+flutter run --flavor prod lib/flavors/main_prod.dart
+```
