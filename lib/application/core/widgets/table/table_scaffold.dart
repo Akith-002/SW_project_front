@@ -4,17 +4,20 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/widgets/iconButtonWidget/icon_button_widget.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'plan.dart';
-import 'plan_repository.dart';
+import 'package:land_asset_valuation/data/models/paginated_response.dart';
+import 'package:land_asset_valuation/data/models/land_acquisition_master_file_model.dart';
+import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
 
 class TableScaffold extends StatefulWidget {
   final int initialPageSize;
   final List<int> pageSizeOptions;
   final String pageSource;
+  final LandAcquisitionRepository repository;
 
   const TableScaffold({
     super.key,
     required this.pageSource,
+    required this.repository,
     this.initialPageSize = 9,
     this.pageSizeOptions = const [9, 15, 30, 60],
   });
@@ -24,9 +27,9 @@ class TableScaffold extends StatefulWidget {
 }
 
 class TableScaffoldState extends State<TableScaffold> {
-  late Future<PaginatedResponse<Plan>> _futurePlans;
-  List<Plan>? _searchResults;
-  String? _nextPageToken;
+  late Future<PaginatedResponse<LandAcquisitionMasterFile>> _futurePlans;
+  List<LandAcquisitionMasterFile>? _searchResults;
+  int _currentPage = 1;
   late int _pageSize;
   late List<int> _pageSizeOptions;
 
@@ -40,22 +43,20 @@ class TableScaffoldState extends State<TableScaffold> {
 
   void _fetchPlans() {
     setState(() {
-      _futurePlans = PlanRepository.getPlans(
+      _futurePlans = widget.repository.getPaginatedMasterFiles(
+        page: _currentPage,
         pageSize: _pageSize,
-        pageToken: _nextPageToken,
-        source: widget.pageSource,
       );
-      _searchResults = null;
     });
   }
 
   void search(String query) async {
     if (widget.pageSource == 'landAcquisition') {
       try {
-        final results = await PlanRepository.searchPlans(query);
+        final results = await widget.repository.searchMasterFiles(query);
         setState(() {
           _searchResults = results;
-          _nextPageToken = null;
+          _currentPage = 1;
         });
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -68,11 +69,11 @@ class TableScaffoldState extends State<TableScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<PaginatedResponse<Plan>>(
+      body: FutureBuilder<PaginatedResponse<LandAcquisitionMasterFile>>(
         future: _futurePlans,
         builder: (context, snapshot) {
           if (_searchResults != null) {
-            return _buildTable(_searchResults!);
+            return _buildTable(_searchResults!, null);
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -83,13 +84,20 @@ class TableScaffoldState extends State<TableScaffold> {
             return const Center(child: Text("No records found"));
           }
 
-          return _buildTable(snapshot.data!.items, snapshot.data!.nextPageToken);
+          return _buildTable(snapshot.data!.items, snapshot.data);
         },
       ),
     );
   }
 
-  Widget _buildTable(List<Plan> plans, [String? nextPageToken]) {
+  Widget _buildTable(List<LandAcquisitionMasterFile> plans,
+      PaginatedResponse<LandAcquisitionMasterFile>? paginationData) {
+    final int startRecord = paginationData != null
+        ? (paginationData.currentPage * paginationData.pageSize) + 1
+        : 1;
+    final int endRecord = startRecord + plans.length - 1;
+    final int totalCount = paginationData?.totalCount ?? plans.length;
+
     return Column(
       children: [
         // Table Section
@@ -111,17 +119,18 @@ class TableScaffoldState extends State<TableScaffold> {
                   DataCell(Text(plan.masterFileNo.toString())),
                   DataCell(Text(plan.planType)),
                   DataCell(Text(plan.planNo.toString())),
-                  DataCell(Text(plan.authorityReferenceNo)),
+                  DataCell(Text(plan.requestingAuthorityReferenceNo)),
                   DataCell(Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: plan.status.color.withOpacity(0.2),
+                      color: _getStatusColor(plan.status).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      plan.status.displayName,
+                      plan.status,
                       style: TextStyle(
-                        color: plan.status.color,
+                        color: _getStatusColor(plan.status),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -172,7 +181,7 @@ class TableScaffoldState extends State<TableScaffold> {
                       if (newSize != null) {
                         setState(() {
                           _pageSize = newSize;
-                          _nextPageToken = null;
+                          _currentPage = 1;
                           _fetchPlans();
                         });
                       }
@@ -181,31 +190,30 @@ class TableScaffoldState extends State<TableScaffold> {
                   const Text(" per page"),
                 ],
               ),
-              Text("${plans.length} Records"),
+              Text("$startRecord-$endRecord of $totalCount Records"),
               Row(
                 children: [
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
-                    onPressed: _nextPageToken == null
-                        ? null
-                        : () {
+                    onPressed: paginationData?.hasPrevious == true
+                        ? () {
                             setState(() {
-                              _nextPageToken =
-                                  (int.parse(_nextPageToken!) - _pageSize).toString();
+                              _currentPage--;
                               _fetchPlans();
                             });
-                          },
+                          }
+                        : null,
                   ),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
-                    onPressed: _searchResults != null || nextPageToken == null
-                        ? null
-                        : () {
+                    onPressed: paginationData?.hasNext == true
+                        ? () {
                             setState(() {
-                              _nextPageToken = nextPageToken;
+                              _currentPage++;
                               _fetchPlans();
                             });
-                          },
+                          }
+                        : null,
                   ),
                 ],
               ),
@@ -214,5 +222,18 @@ class TableScaffoldState extends State<TableScaffold> {
         ),
       ],
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'success':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'rejected':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }
