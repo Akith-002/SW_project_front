@@ -8,6 +8,7 @@ class CustomDropdownField extends StatefulWidget {
   final String initialValue;
   final Function(String) onChanged;
   final double? width;
+  final FormFieldValidator<String>? validator;
 
   const CustomDropdownField({
     super.key,
@@ -16,10 +17,11 @@ class CustomDropdownField extends StatefulWidget {
     required this.initialValue,
     required this.onChanged,
     this.width,
+    this.validator,
   });
 
   @override
-  _CustomDropdownFieldState createState() => _CustomDropdownFieldState();
+  State<CustomDropdownField> createState() => _CustomDropdownFieldState();
 }
 
 class _CustomDropdownFieldState extends State<CustomDropdownField> {
@@ -66,30 +68,33 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               width: 1.5,
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedValue.isNotEmpty ? _selectedValue : null,
-              icon: Icon(Icons.keyboard_arrow_down, color: borderColor),
-              style: AppStyling.normalTextSize14
-                  .copyWith(color: colors(context).labelTextColor),
-              dropdownColor: colors(context).colorWhite,
-              isExpanded: true,
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    _selectedValue = newValue;
-                  });
-                  widget.onChanged(newValue);
-                }
-              },
-              items: widget.items.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
+          child: DropdownButtonFormField<String>(
+            value: _selectedValue.isNotEmpty ? _selectedValue : null,
+            icon: Icon(Icons.keyboard_arrow_down, color: borderColor),
+            style: AppStyling.normalTextSize14
+                .copyWith(color: colors(context).labelTextColor),
+            dropdownColor: colors(context).colorWhite,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
+            validator: widget.validator,
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  _selectedValue = newValue;
+                });
+                widget.onChanged(newValue);
+              }
+            },
+            items: widget.items.map((String item) {
+              return DropdownMenuItem<String>(
+                value: item,
+                child: Text(item),
+              );
+            }).toList(),
           ),
         ),
       ],
