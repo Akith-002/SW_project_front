@@ -4,7 +4,6 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 
 class InvalidOwners extends StatelessWidget {
   final VoidCallback onClose;
-
   const InvalidOwners({super.key, required this.onClose});
 
   @override
@@ -12,7 +11,7 @@ class InvalidOwners extends StatelessWidget {
     return Center(
       child: Container(
         width: 320,
-        height: 212,
+        constraints: const BoxConstraints(minHeight: 212),
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -26,46 +25,49 @@ class InvalidOwners extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              PhosphorIcons.xCircle(PhosphorIconsStyle.regular),
-              size: 64,
-              color: colors(context).colorNegative5,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Invalid Owners!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ).copyWith(color: colors(context).colorNegative5),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: 87,
-              height: 40,
-              child: OutlinedButton(
-                onPressed: onClose,
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                      color: colors(context).colorGrey5 ?? Colors.grey),
-                  backgroundColor: colors(context).colorGrey1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                PhosphorIcons.xCircle(PhosphorIconsStyle.regular),
+                size: 64,
+                color: colors(context).colorNegative5,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Invalid Owners!',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ).copyWith(color: colors(context).colorNegative5),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: 87,
+                height: 40,
+                child: OutlinedButton(
+                  onPressed: onClose,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                        color: colors(context).colorGrey5 ?? Colors.grey),
+                    backgroundColor: colors(context).colorGrey1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Close',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w500,
+                  child: const Text(
+                    'Close',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

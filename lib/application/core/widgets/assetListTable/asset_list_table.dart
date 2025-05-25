@@ -92,6 +92,24 @@ class _AssetListTableState extends State<AssetListTable> {
     return AppString.decisions.localize(context)!;
   }
 
+  // Helper method to determine selectedIndex for sidebar navigation based on assetType
+  String _getSelectedIndexForAssetType(String? assetType) {
+    switch (assetType) {
+      case 'massRating':
+        return '2';
+      case 'RA':
+        return '3';
+      case 'RB':
+        return '4';
+      case 'RO':
+        return '5';
+  
+    
+      default:
+        return '2'; // Default to Mass Rating
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Calculate available width based on sidebar state
@@ -338,7 +356,13 @@ class _AssetListTableState extends State<AssetListTable> {
                 color: colors(context).colorGrey8!,
                 iconName: PhosphorIconsRegular.mapPin,
                 onPressed: () {
-                  context.go(Pages.routeMapScreen.toPath());
+                  // Determine the selectedIndex based on assetType
+                  String selectedIndex =
+                      _getSelectedIndexForAssetType(widget.assetType);
+                     debugPrint('Selected Index: $selectedIndex');
+                     debugPrint('Asset Type: ${widget.assetType}');
+                  context.go(
+                      '${Pages.routeAssetMapScreen.toPath()}?selectedIndex=$selectedIndex&source=${widget.assetType ?? 'massRating'}');
                 },
               ),
               SizedBox(width: 8),

@@ -22,6 +22,7 @@ import 'package:land_asset_valuation/application/pages/signIn/signin_view.dart';
 import 'package:land_asset_valuation/application/pages/splash/splash_view.dart';
 import 'package:land_asset_valuation/application/pages/RatingCard/rating_card_view.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
+import 'package:land_asset_valuation/application/pages/AssetMapScreen/asset_map_screen.dart';
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
@@ -244,6 +245,16 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: Pages.routeAssetMapScreen.toPath(),
+            name: Pages.routeAssetMapScreen.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: AssetMapScreen(),
+              );
+            },
+          ),
+          GoRoute(
             path: Pages.routeInspectionReport.toPath(),
             name: Pages.routeInspectionReport.toPathName(),
             pageBuilder: (context, state) {
@@ -380,7 +391,6 @@ class AppRouter {
           return 2; // Default to Mass Rating if no source specified
       }
     }
-
     if (path.startsWith(Pages.routeMapScreen.toPath())) {
       String source = state.uri.queryParameters['source'] ?? '';
       print("DEBUG: MapScreen route with source: '$source'");
@@ -400,6 +410,31 @@ class AppRouter {
 
       // Default to MR Rental Evidence if no specific source
       return 6;
+    }
+
+    if (path.startsWith(Pages.routeAssetMapScreen.toPath())) {
+      String source = state.uri.queryParameters['source'] ?? '';
+      print("DEBUG: AssetMapScreen route with source: '$source'");
+
+      // Map source to appropriate sidebar index
+      switch (source) {
+        case 'massRating':
+          return 2;
+        case 'ratingAssessment':
+          return 3;
+        case 'ratingBuilding':
+          return 4;
+        case 'ratingObject':
+          return 5;
+        case 'MRrentalEvidence':
+          return 6;
+        case 'landAcquisition':
+          return 1;
+        case 'landMiscellaneous':
+          return 7;
+        default:
+          return 2; // Default to Mass Rating if no source specified
+      }
     }
 
     // Otherwise map paths to indices
@@ -444,7 +479,7 @@ class AppRouter {
         break;
       case 6:
         context.goNamed(
-          Pages.routeMapScreen.toPathName(),
+          Pages.routeAssetMapScreen.toPathName(),
           queryParameters: {'source': 'MRrentalEvidence'},
         );
         break;
