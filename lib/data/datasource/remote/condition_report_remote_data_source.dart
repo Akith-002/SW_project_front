@@ -20,17 +20,17 @@ class ConditionReportRemoteDataSourceImpl
   Future<bool> sendConditionReport(ConditionReportModel report) async {
     try {
       // Get the full API URL for debugging
-      final String endpoint = '/ConditionReport/submit';
-      final String fullUrl =
-          '${AppConfig.apiBaseUrl}${endpoint.startsWith('/') ? endpoint.substring(1) : endpoint}';
+      final String endpoint = '/ConditionReport';
+      // final String fullUrl =
+      //     '${AppConfig.apiBaseUrl}${endpoint.startsWith('/') ? endpoint.substring(1) : endpoint}';
 
-      // Debug: Log API call details
-      _logger.d('======= REMOTE DATA SOURCE: MAKING API CALL =======');
-      _logger.d('Base URL: ${AppConfig.apiBaseUrl}');
-      _logger.d('Endpoint: $endpoint');
-      _logger.d('FULL URL: $fullUrl');
-      _logger.d('Report data: ${report.toJson()}');
-      _logger.d('===========================================');
+      // // Debug: Log API call details
+      // _logger.d('======= REMOTE DATA SOURCE: MAKING API CALL =======');
+      // _logger.d('Base URL: ${AppConfig.apiBaseUrl}');
+      // _logger.d('Endpoint: $endpoint');
+      // _logger.d('FULL URL: $fullUrl');
+      // _logger.d('Report data: ${report.toJson()}');
+      // _logger.d('===========================================');
 
       final response = await dioClient.post(
         endpoint,

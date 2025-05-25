@@ -11,6 +11,7 @@ class LabeledTextField extends StatefulWidget {
   final double? height;
   // Add validator property
   final FormFieldValidator<String>? validator;
+  final Function(bool)? onErrorChange; // Add this new property
 
   const LabeledTextField({
     super.key,
@@ -22,6 +23,7 @@ class LabeledTextField extends StatefulWidget {
     this.height,
     // Include validator in constructor
     this.validator,
+    this.onErrorChange, // Add this to constructor
   });
 
   @override
@@ -31,6 +33,7 @@ class LabeledTextField extends StatefulWidget {
 class _LabeledTextFieldState extends State<LabeledTextField> {
   late TextEditingController _controller;
   bool _isTyping = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -45,6 +48,15 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
       _controller.dispose();
     }
     super.dispose();
+  }
+
+  void _clearError() {
+    if (_errorMessage != null) {
+      setState(() {
+        _errorMessage = null;
+      });
+      widget.onErrorChange?.call(false);
+    }
   }
 
   @override
@@ -72,7 +84,9 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: colors(context).dropDownBorderColor!,
+              color: _errorMessage != null
+                  ? Colors.red
+                  : colors(context).dropDownBorderColor!,
               width: 1.5,
             ),
           ),
@@ -82,35 +96,58 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
               Expanded(
                 child: TextFormField(
                   controller: _controller,
-                  // Temporarily remove maxLength
-                  // maxLength: 255,
-                  // Explicitly enable and make not read-only
                   enabled: true,
                   readOnly: false,
-                  // Temporarily remove inputFormatters
-                  // inputFormatters: [
-                  //   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9 ]')),
-                  // ],
-                  // Temporarily set hardcoded style
                   style: const TextStyle(color: Colors.black, fontSize: 14),
-                  // style: AppStyling.normalTextSize14
-                  //     .copyWith(color: colors(context).labelTextColor),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    isDense: false, // Changed from true to false
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14), // Increased padding for better centering
                     counterText: "",
-                    hintText: _isTyping ? "" : widget.placeholder,
+                    // Show error message as hint text if there's an error and field is empty
+                    // Otherwise show normal placeholder when field is empty
+                    hintText: _controller.text.isEmpty 
+                        ? (_errorMessage ?? widget.placeholder) 
+                        : null,
+                    // Explicitly set errorText to null to prevent showing error below
+                    errorText: null,
+                    // Set errorStyle with height 0 to completely hide any error text
+                    errorStyle: const TextStyle(height: 0, fontSize: 0),
                     hintStyle: TextStyle(
-                      color: colors(context).labelTextColor,
+                      // Use red color for error message, normal color for placeholder
+                      color: _errorMessage != null 
+                          ? Colors.red 
+                          : colors(context).labelTextColor,
+                      fontSize: 14, // Ensure consistent font size
+                      height: 1.0, // Consistent line height
                     ),
                   ),
+                  onTap: () {
+                    setState(() {
+                      _isTyping = _controller.text.isNotEmpty;
+                    });
+                    _clearError();
+                  },
                   onChanged: (value) {
                     setState(() {
                       _isTyping = value.isNotEmpty;
+                      _errorMessage = null; // Clear error on change
                     });
+                    widget.onErrorChange?.call(false);
                   },
-                  validator: widget.validator,
+                  validator: (value) {
+                    if (!mounted) return null;
+
+                    final result = widget.validator?.call(value);
+                    if (mounted) {
+                      setState(() {
+                        _errorMessage = result;
+                      });
+                      widget.onErrorChange?.call(result != null);
+                    }
+                    // Return null instead of the error to prevent Flutter from showing it below
+                    return null;
+                  },
                 ),
               ),
               if (widget.icon != null) // Add icon if provided
