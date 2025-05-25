@@ -198,7 +198,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                 .changeLanguage(_languages[value]!);
                           });
                         },
-                        width: 322,
+                        width: 322, label: '',
                       ),
                     ),
                     SizedBox(
@@ -238,7 +238,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                           }
                           _textScaleFactorModel.setTextScaleFactor(scaleFactor);
                         },
-                        width: 322,
+                        width: 322, label: '',
                       ),
                     ),
                   ],
