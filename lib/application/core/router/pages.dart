@@ -15,6 +15,7 @@ class Pages {
   static const routeRentalEvidence = "rentalevidence";
   static const routeI2RentalEvidence = "i2rentalevidence";
   static const routeMapScreen = "routemap";
+  static const routeAssetMapScreen = "asset-map-screen";
   static const routeSettingsScreen = "settings";
   static const routePastValuation = "past-valuation";
   static const routeInspectionReport = "inspection-report";
