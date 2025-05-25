@@ -8,6 +8,7 @@ import 'package:land_asset_valuation/application/pages/conditionReport/cubit/con
 import 'package:land_asset_valuation/application/pages/conditionReport/cubit/condition_report_state.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
 import 'package:land_asset_valuation/application/core/services/condition_report_form_service.dart';
+import 'package:land_asset_valuation/application/core/validators/signature_form_validator.dart';
 import 'dart:typed_data';
 
 class SignaturesForm extends StatefulWidget {
@@ -28,6 +29,34 @@ class _SignaturesFormState extends State<SignaturesForm> {
   Uint8List? chiefValuersRepSignature;
   bool _isSubmitting = false;
 
+  String? acquiringOfficerError;
+  String? gramaSevekaError;
+  String? chiefValuersRepError;
+
+  void _validateAndSubmitForm() {
+    setState(() {
+      acquiringOfficerError = SignatureFormValidator.validateSignature(
+        acquiringOfficerSignature, "Acquiring Officer");
+      gramaSevekaError = SignatureFormValidator.validateSignature(
+        gramaSevekaSignature, "Gramasewa Niladhari");
+      chiefValuersRepError = SignatureFormValidator.validateSignature(
+        chiefValuersRepSignature, "Chief Valuer’s Representative");
+    });
+
+    if (acquiringOfficerError == null &&
+        gramaSevekaError == null &&
+        chiefValuersRepError == null) {
+      _submitForm();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please provide all required signatures."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<ConditionReportCubit, BaseState<ConditionReportState>>(
@@ -42,9 +71,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
               backgroundColor: Colors.green,
             ),
           );
-          if (widget.onSubmitSuccess != null) {
-            widget.onSubmitSuccess!();
-          }
+          widget.onSubmitSuccess?.call();
         } else if (state is ConditionReportSubmitFailure) {
           setState(() {
             _isSubmitting = false;
@@ -71,14 +98,15 @@ class _SignaturesFormState extends State<SignaturesForm> {
               children: [
                 const SizedBox(height: 24),
 
-                // Signature Fields
                 SignatureBox(
                   title: AppString.acquiringOfficer.localize(context)!,
                   onSignatureChanged: (Uint8List? signature) {
                     setState(() {
                       acquiringOfficerSignature = signature;
+                      acquiringOfficerError = null;
                     });
                   },
+                  errorMessage: acquiringOfficerError,
                 ),
                 const SizedBox(height: 16),
 
@@ -87,33 +115,33 @@ class _SignaturesFormState extends State<SignaturesForm> {
                   onSignatureChanged: (Uint8List? signature) {
                     setState(() {
                       gramaSevekaSignature = signature;
+                      gramaSevekaError = null;
                     });
                   },
+                  errorMessage: gramaSevekaError,
                 ),
                 const SizedBox(height: 16),
 
                 SignatureBox(
-                  title:
-                      AppString.chiefValuersRepresentative.localize(context)!,
+                  title: AppString.chiefValuersRepresentative.localize(context)!,
                   onSignatureChanged: (Uint8List? signature) {
                     setState(() {
                       chiefValuersRepSignature = signature;
+                      chiefValuersRepError = null;
                     });
                   },
+                  errorMessage: chiefValuersRepError,
                 ),
 
                 const SizedBox(height: 24),
 
-                // Divider Section
                 Container(
                   width: formWidth,
                   height: 1.5,
                   color: colors(context).colorGrey5,
                 ),
-
                 const SizedBox(height: 16),
 
-                // Save & Cancel Buttons
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: Row(
@@ -122,11 +150,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
                       CustomButton(
                         text: AppString.cancel.localize(context)!,
                         backgroundColor: colors(context).colorGrey1!,
-                        onPressed: _isSubmitting
-                            ? null
-                            : () {
-                                Navigator.pop(context);
-                              },
+                        onPressed: _isSubmitting ? null : () => Navigator.pop(context),
                         width: 120,
                         height: 48,
                       ),
@@ -135,7 +159,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
                           : CustomButton(
                               text: AppString.save.localize(context)!,
                               backgroundColor: colors(context).colorPrimary5!,
-                              onPressed: _submitForm,
+                              onPressed: _validateAndSubmitForm,
                               width: 120,
                               height: 48,
                             ),
@@ -151,37 +175,25 @@ class _SignaturesFormState extends State<SignaturesForm> {
   }
 
   void _submitForm() {
-    // Get the form data service
     final formService = ConditionReportFormService();
 
-    // Update signatures in the form data
     formService.updateSignatures(
-      acquiringOfficerSignature:
-          acquiringOfficerSignature != null ? 'Signature present' : '',
-      gramasewakaSignature:
-          gramaSevekaSignature != null ? 'Signature present' : '',
-      chiefValuerRepresentativeSignature:
-          chiefValuersRepSignature != null ? 'Signature present' : '',
+      acquiringOfficerSignature: acquiringOfficerSignature != null ? 'Signature present' : '',
+      gramasewakaSignature: gramaSevekaSignature != null ? 'Signature present' : '',
+      chiefValuerRepresentativeSignature: chiefValuersRepSignature != null ? 'Signature present' : '',
     );
 
-    // Debug print statements to see what data is being sent
     print('======= SENDING CONDITION REPORT DATA =======');
     print('Master File ID: 56249');
     print('Form Data Summary:');
     print(formService.formData.generateDetailedNotes());
-    print(
-        'Signatures collected: ${acquiringOfficerSignature != null ? "Yes" : "No"} (Acquiring Officer), '
+    print('Signatures collected: ${acquiringOfficerSignature != null ? "Yes" : "No"} (Acquiring Officer), '
         '${gramaSevekaSignature != null ? "Yes" : "No"} (Grama Seveka), '
         '${chiefValuersRepSignature != null ? "Yes" : "No"} (Chief Valuer\'s Rep)');
     print('===========================================');
 
-    // Use the BLoC to submit the condition report
     final conditionReportCubit = context.read<ConditionReportCubit>();
-
-    // Get the master file ID from the breadcrumb in ConditionReportView
     const masterFileId = "56249";
-
-    // Send the report
     conditionReportCubit.sendConditionReport(masterFileId);
   }
 }
