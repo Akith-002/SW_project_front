@@ -10,7 +10,6 @@ class CustomDropdownField extends StatefulWidget {
   final bool required;
   final String? Function(String?)? validator;
   final double? width;
-  final FormFieldValidator<String>? validator;
 
   const CustomDropdownField({
     super.key,
@@ -21,7 +20,6 @@ class CustomDropdownField extends StatefulWidget {
     this.required = true,
     this.validator,
     this.width,
-    this.validator,
   });
 
   @override
