@@ -6,13 +6,12 @@ class SavedMessageCard extends StatelessWidget {
   final VoidCallback onClose;
 
   const SavedMessageCard({super.key, required this.onClose});
-
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
         width: 320,
-        height: 212,
+        constraints: const BoxConstraints(minHeight: 212),
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -27,6 +26,7 @@ class SavedMessageCard extends StatelessWidget {
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(

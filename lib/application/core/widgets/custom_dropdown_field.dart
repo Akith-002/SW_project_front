@@ -10,6 +10,7 @@ class CustomDropdownField extends StatefulWidget {
   final bool required;
   final String? Function(String?)? validator;
   final double? width;
+  final FormFieldValidator<String>? validator;
 
   const CustomDropdownField({
     super.key,
@@ -20,10 +21,11 @@ class CustomDropdownField extends StatefulWidget {
     this.required = true,
     this.validator,
     this.width,
+    this.validator,
   });
 
   @override
-  _CustomDropdownFieldState createState() => _CustomDropdownFieldState();
+  State<CustomDropdownField> createState() => _CustomDropdownFieldState();
 }
 
 class _CustomDropdownFieldState extends State<CustomDropdownField> {
@@ -69,9 +71,8 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               width: 1.5,
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: DropdownButtonFormField<String>(
-            value: _selectedValue,
+            value: _selectedValue!.isNotEmpty ? _selectedValue : null,
             icon: Icon(Icons.keyboard_arrow_down, color: borderColor),
             style: AppStyling.normalTextSize14
                 .copyWith(color: colors(context).labelTextColor),
@@ -79,7 +80,8 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
             isExpanded: true,
             decoration: const InputDecoration(
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 8),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
             validator: widget.validator ??
                 (widget.required
@@ -88,10 +90,10 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
                         : null
                     : null),
             onChanged: (String? newValue) {
-              setState(() {
-                _selectedValue = newValue;
-              });
-              if (widget.onChanged != null) {
+              if (newValue != null) {
+                setState(() {
+                  _selectedValue = newValue;
+                });
                 widget.onChanged!(newValue);
               }
             },
