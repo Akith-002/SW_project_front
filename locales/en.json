@@ -289,5 +289,6 @@
   "add": "Add",
   "floor_name": "Floor Name",
   "above": "Upper",
-  "below": "Lower"
+  "below": "Lower",
+  "desciption": "Description"
 }
