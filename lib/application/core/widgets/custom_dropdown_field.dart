@@ -23,7 +23,7 @@ class CustomDropdownField extends StatefulWidget {
   });
 
   @override
-  _CustomDropdownFieldState createState() => _CustomDropdownFieldState();
+  State<CustomDropdownField> createState() => _CustomDropdownFieldState();
 }
 
 class _CustomDropdownFieldState extends State<CustomDropdownField> {
@@ -71,9 +71,8 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               width: 1.5,
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: DropdownButtonFormField<String>(
-            value: _selectedValue,
+            value: _selectedValue!.isNotEmpty ? _selectedValue : null,
             icon: Icon(Icons.keyboard_arrow_down, color: borderColor),
             style: AppStyling.normalTextSize14
                 .copyWith(color: colors(context).labelTextColor),
@@ -81,7 +80,8 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
             isExpanded: true,
             decoration: InputDecoration(
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              contentPadding: const
+                  EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               errorStyle: const TextStyle(height: 0, fontSize: 0),
               errorText: null,
             ),
@@ -96,11 +96,11 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               return error;
             },
             onChanged: (String? newValue) {
-              setState(() {
-                _selectedValue = newValue;
+              if (newValue != null) {
+                setState(() {
+                  _selectedValue = newValue;
                 _errorMessage = null;
-              });
-              if (widget.onChanged != null) {
+                });
                 widget.onChanged!(newValue);
               }
             },

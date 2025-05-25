@@ -204,5 +204,6 @@
   "add": "Add",
   "floor_name": "Floor Name",
   "above": "Above",
-  "below": "Below"
+  "below": "Below",
+  "description": "Description"
 }
