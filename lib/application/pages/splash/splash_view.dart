@@ -26,7 +26,7 @@ class _SplashViewState extends BasePageState<SplashView> {
 
     Future.delayed(Duration(seconds: 3), () {
       // context.go(Pages.routeI3MasterFileList.toPath());
-      context.go(Pages.routeDashboard.toPath());
+      context.go(Pages.routeSignIn.toPath());
     });
   }
 
