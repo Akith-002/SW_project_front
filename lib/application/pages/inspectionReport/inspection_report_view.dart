@@ -13,6 +13,7 @@ import 'package:land_asset_valuation/application/core/widgets/custom_dropdown_fi
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/pages/inspectionReport/cubit/inspection_report_cubit.dart';
+import 'package:land_asset_valuation/application/core/validators/inspection_validator.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 class InspectionReportView extends BasePage {
@@ -33,6 +34,18 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   ];
   List<dynamic> uploadedImages = [];
 
+  // Form keys for validation
+  final _landInfoFormKey = GlobalKey<FormState>();
+  final _buildingInfoFormKey = GlobalKey<FormState>();
+  final _otherConstructionsFormKey = GlobalKey<FormState>();
+
+  // Controllers for form fields
+  final _masterFileRefController = TextEditingController();
+  final _inspectionDateController = TextEditingController();
+  final _dsDivisionController = TextEditingController();
+  final _districtController = TextEditingController();
+  final _provinceController = TextEditingController();
+
   // State for Building Info Tab
   String? _selectedBuildingName;
   final List<String> _buildingNames = [
@@ -40,6 +53,27 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     'B2',
     'B3'
   ]; // Example building names
+
+  // Add controllers for building info form
+  final _buildingIdController = TextEditingController();
+  final _buildingNameController = TextEditingController();
+  final _buildingDetailsController = TextEditingController();
+  final _noOfFloorsGPlusController = TextEditingController();
+  final _noOfFloorsGMinusController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _expectedLifePeriodController = TextEditingController();
+  final _parkingSpaceController = TextEditingController();
+  final _designController = TextEditingController();
+  final _conveniencesController = TextEditingController();
+  final _structureController = TextEditingController();
+  final _buildingConditionsController = TextEditingController();
+
+  // Add controllers for other constructions form
+  final _otherInfoController = TextEditingController();
+  final _otherConstructionDetailsController = TextEditingController();
+  final _assetDetailsController = TextEditingController();
+  final _businessDetailsController = TextEditingController();
+  final _remarksController = TextEditingController();
 
   @override
   void initState() {
@@ -50,6 +84,28 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   @override
   void dispose() {
     _tabController.dispose();
+    _masterFileRefController.dispose();
+    _inspectionDateController.dispose();
+    _dsDivisionController.dispose();
+    _districtController.dispose();
+    _provinceController.dispose();
+    _buildingIdController.dispose();
+    _buildingNameController.dispose();
+    _buildingDetailsController.dispose();
+    _noOfFloorsGPlusController.dispose();
+    _noOfFloorsGMinusController.dispose();
+    _ageController.dispose();
+    _expectedLifePeriodController.dispose();
+    _parkingSpaceController.dispose();
+    _designController.dispose();
+    _conveniencesController.dispose();
+    _structureController.dispose();
+    _buildingConditionsController.dispose();
+    _otherInfoController.dispose();
+    _otherConstructionDetailsController.dispose();
+    _assetDetailsController.dispose();
+    _businessDetailsController.dispose();
+    _remarksController.dispose();
     super.dispose();
   }
 
@@ -158,67 +214,100 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   }
 
   Widget _buildLandInfoTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LabeledTextField(
+    return Form(
+      key: _landInfoFormKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LabeledTextField(
               label: "Master File Ref No",
-              placeholder: "Enter Master File Reference Number"),
-          LabeledTextField(
-              label: "Inspection Date", placeholder: "Enter Inspection Date"),
-          LabeledTextField(
-              label: "DS Division", placeholder: "Enter DS Division"),
-          LabeledTextField(label: "District", placeholder: "Enter District"),
-          LabeledTextField(label: "Province", placeholder: "Enter Province"),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Village/GN Division",
-                  style: AppStyling.mediumTextSize14.copyWith(
-                    color: colors(context).labelTextColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+              placeholder: "Enter Master File Reference Number",
+              controller: _masterFileRefController,
+              validator: (value) => InspectionValidator.required(
+                  value, "Master File Reference Number"),
+            ),
+            LabeledTextField(
+              label: "Inspection Date",
+              placeholder: "Enter Inspection Date",
+              controller: _inspectionDateController,
+              validator: (value) =>
+                  InspectionValidator.required(value, "Inspection Date"),
+            ),
+            LabeledTextField(
+              label: "DS Division",
+              placeholder: "Enter DS Division",
+              controller: _dsDivisionController,
+              validator: (value) => InspectionValidator.optionalAlphaNum(
+                  value, 50, "DS Division"),
+            ),
+            LabeledTextField(
+              label: "District",
+              placeholder: "Enter District",
+              controller: _districtController,
+              validator: (value) =>
+                  InspectionValidator.required(value, "District"),
+            ),
+            LabeledTextField(
+              label: "Province",
+              placeholder: "Enter Province",
+              controller: _provinceController,
+              validator: (value) =>
+                  InspectionValidator.required(value, "Province"),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Village/GN Division",
+                    style: AppStyling.mediumTextSize14.copyWith(
+                      color: colors(context).labelTextColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
+                  const SizedBox(height: 8),
+                  CustomButton(
+                    text: "GN Division and Village",
+                    onPressed: () {},
+                    width: 380,
+                    height: 48,
+                    backgroundColor: colors(context).colorPrimary1!,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              height: 1,
+              margin: const EdgeInsets.all(16),
+              width: double.infinity,
+              color: Colors.grey,
+            ),
+            Row(
+              children: [
                 CustomButton(
-                  text: "GN Division and Village",
-                  onPressed: () {},
-                  width: 380,
-                  height: 48,
+                  text: AppString.cancel.localize(context) ?? 'Cancel',
+                  onPressed: () => Navigator.pop(context),
+                  backgroundColor: colors(context).colorGrey1!,
+                ),
+                const Spacer(),
+                CustomButton(
+                  text: AppString.save.localize(context) ?? 'Save',
+                  onPressed: () {
+                    if (_landInfoFormKey.currentState?.validate() ?? false) {
+                      // Handle save logic here
+                    }
+                  },
                   backgroundColor: colors(context).colorPrimary1!,
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            height: 1,
-            margin: const EdgeInsets.all(16),
-            width: double.infinity,
-            color: Colors.grey,
-          ),
-          Row(
-            children: [
-              CustomButton(
-                text: AppString.cancel.localize(context) ?? 'Cancel',
-                onPressed: () => Navigator.pop(context),
-                backgroundColor: colors(context).colorGrey1!,
-              ),
-              const Spacer(),
-              CustomButton(
-                text: AppString.save.localize(context) ?? 'Save',
-                onPressed: () {},
-                backgroundColor: colors(context).colorPrimary1!,
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -306,416 +395,474 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   }
 
   Widget _buildBuildingForm() {
-    // This method contains the original content of _buildBuildingInfoTab
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // "Back to list" button/text
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _selectedBuildingName = null;
-                });
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.arrow_back_ios,
-                      size: 16,
-                      color: colors(context).colorPrimary6 ??
-                          Theme.of(context).primaryColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Back to Building List",
-                    style: TextStyle(
-                        color: colors(context).colorPrimary6 ??
-                            Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-          ),
+    return Form(
+      key: _buildingInfoFormKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Back button section remains the same...
 
-          _buildRow([
-            LabeledTextField(
+            _buildRow([
+              LabeledTextField(
                 label:
-                    "${AppString.buildingId.localize(context) ?? 'Building ID'} ($_selectedBuildingName)", // Show selected building name
-                placeholder: "Enter Building ID"),
-            LabeledTextField(
+                    "${AppString.buildingId.localize(context) ?? 'Building ID'} ($_selectedBuildingName)",
+                placeholder: "Enter Building ID",
+                controller: _buildingIdController,
+                validator: (value) =>
+                    InspectionValidator.required(value, "Building ID"),
+              ),
+              LabeledTextField(
                 label: AppString.buildingName.localize(context) ?? '',
-                placeholder: "Enter Building Name"),
-          ]),
+                placeholder: "Enter Building Name",
+                controller: _buildingNameController,
+                validator: (value) =>
+                    InspectionValidator.required(value, "Building Name"),
+              ),
+            ]),
 
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.buildingCategory.localize(context) ?? '',
-              items: ["Residential", "Commercial", "Industrial"],
-              initialValue: "Select Building Category",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.buildingClass.localize(context) ?? '',
-              items: ["Class A", "Class B", "Class C"],
-              initialValue: "Select Building Class",
-              onChanged: (value) {},
-            ),
-          ]),
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.buildingCategory.localize(context) ?? '',
+                items: ["Residential", "Commercial", "Industrial"],
+                initialValue: "Select Building Category",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label: AppString.buildingClass.localize(context) ?? '',
+                items: ["Class A", "Class B", "Class C"],
+                initialValue: "Select Building Class",
+                onChanged: (value) {},
+              ),
+            ]),
 
-          _buildRow([
-            LabeledTextField(
+            _buildRow([
+              LabeledTextField(
                 label: AppString.detailOfBuilding.localize(context) ?? '',
-                placeholder: "Enter Details"),
-            LabeledTextField(
+                placeholder: "Enter Details",
+                controller: _buildingDetailsController,
+                validator: (value) => InspectionValidator.optionalAlphaNum(
+                    value, 200, "Building Details"),
+              ),
+              LabeledTextField(
                 label: AppString.noOfFloorsGPlus.localize(context) ?? '',
-                placeholder: "Enter Number of Floors"),
-          ]),
+                placeholder: "Enter Number of Floors",
+                controller: _noOfFloorsGPlusController,
+                validator: (value) => InspectionValidator.required(
+                    value, "Number of Floors (G+)"),
+              ),
+            ]),
 
-          _buildRow([
-            LabeledTextField(
+            _buildRow([
+              LabeledTextField(
                 label: AppString.noOfFloorsGMinus.localize(context) ?? '',
-                placeholder: "Enter Number of Floors"),
-            LabeledTextField(
+                placeholder: "Enter Number of Floors",
+                controller: _noOfFloorsGMinusController,
+                validator: (value) => InspectionValidator.required(
+                    value, "Number of Floors (G-)"),
+              ),
+              LabeledTextField(
                 label: AppString.age.localize(context) ?? '',
-                placeholder: "Enter Age"),
-          ]),
+                placeholder: "Enter Age",
+                controller: _ageController,
+                validator: (value) =>
+                    InspectionValidator.required(value, "Age"),
+              ),
+            ]),
 
-          _buildRow([
-            LabeledTextField(
+            _buildRow([
+              LabeledTextField(
                 label: AppString.expectedLifePeriod.localize(context) ?? '',
-                placeholder: "Enter Expected Life Period"),
-            LabeledTextField(
+                placeholder: "Enter Expected Life Period",
+                controller: _expectedLifePeriodController,
+                validator: (value) =>
+                    InspectionValidator.required(value, "Expected Life Period"),
+              ),
+              LabeledTextField(
                 label: AppString.parkingSpace.localize(context) ?? '',
-                placeholder: "Enter Parking Space"),
-          ]),
+                placeholder: "Enter Parking Space",
+                controller: _parkingSpaceController,
+                validator: (value) => InspectionValidator.optionalAlphaNum(
+                    value, 100, "Parking Space"),
+              ),
+            ]),
 
-          _buildRow([
-            LabeledTextField(
+            _buildRow([
+              LabeledTextField(
                 label: AppString.design.localize(context) ?? '',
-                placeholder: "Design"),
-            LabeledTextField(
+                placeholder: "Design",
+                controller: _designController,
+                validator: (value) =>
+                    InspectionValidator.optionalAlphaNum(value, 100, "Design"),
+              ),
+              LabeledTextField(
                 label: AppString.conveniences.localize(context) ?? '',
-                placeholder: "Conveniences"),
-          ]),
+                placeholder: "Conveniences",
+                controller: _conveniencesController,
+                validator: (value) => InspectionValidator.optionalAlphaNum(
+                    value, 100, "Conveniences"),
+              ),
+            ]),
 
-          _buildRow([
-            LabeledTextField(
+            _buildRow([
+              LabeledTextField(
                 label: AppString.structure.localize(context) ?? '',
-                placeholder: "Structure"),
-            LabeledTextField(
+                placeholder: "Structure",
+                controller: _structureController,
+                validator: (value) =>
+                    InspectionValidator.required(value, "Structure"),
+              ),
+              LabeledTextField(
                 label: AppString.buildingConditions.localize(context) ?? '',
-                placeholder: "Building Conditions"),
-          ]),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.natureOfConstruction.localize(context) ?? '',
-              items: ["New", "Good", "Needs Repair", "Poor"],
-              initialValue: "Select Nature of Building",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.condition.localize(context) ?? '',
-              items: ["New", "Good", "Needs Repair", "Poor"],
-              initialValue: "Select Building Condition",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          const SizedBox(height: 16),
-          Text(
-            AppString.roofDetails.localize(context) ?? '',
-            style: AppStyling.mediumTextSize14
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.roofMaterial.localize(context) ?? '',
-              items: ["Concrete", "Metal", "Tiles"],
-              initialValue: "Select Roof Material",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.roofFrame.localize(context) ?? '',
-              items: ["Steel", "Wood", "Concrete"],
-              initialValue: "Select Roof Frame",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.roofFinisher.localize(context) ?? '',
-              items: ["Painted", "Varnished", "Other"],
-              initialValue: "Select Roof Finisher",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.ceiling.localize(context) ?? '',
-              items: ["Plasterboard", "Wood", "PVC"],
-              initialValue: "Select Ceiling",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          const SizedBox(height: 16),
-          Text(
-            AppString.structureDetails.localize(context) ?? '',
-            style: AppStyling.mediumTextSize14
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.foundationStructure.localize(context) ?? '',
-              items: ["Pile", "Raft", "Pad"],
-              initialValue: "Select Foundation Structure",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.wallStructure.localize(context) ?? '',
-              items: ["Brick", "Concrete", "Wood"],
-              initialValue: "Select Wall Structure",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.floorStructure.localize(context) ?? '',
-              items: ["Concrete", "Wood", "Tile"],
-              initialValue: "Select Floor Structure",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          Text(
-            AppString.fixedAndFittingDetails.localize(context) ?? '',
-            style: AppStyling.mediumTextSize14
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.door.localize(context) ?? '',
-              items: ["Wooden", "Glass", "Metal"],
-              initialValue: "Select Door",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.window.localize(context) ?? '',
-              items: ["Sliding", "Casement", "Fixed"],
-              initialValue: "Select Window",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.windowProtection.localize(context) ?? '',
-              items: ["Grills", "Shutters", "None"],
-              initialValue: "Select Window Protection",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label:
-                  AppString.doorsBathroomToiletFittings.localize(context) ?? '',
-              items: ["Standard", "Luxury", "Basic"],
-              initialValue: "Select Doors Bathroom and Toilet Fittings",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.doorsHandRail.localize(context) ?? '',
-              items: ["Steel", "Wood", "Glass"],
-              initialValue: "Select Doors Hand Rail",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.doorsPantryCupboard.localize(context) ?? '',
-              items: ["Laminated", "Wood", "PVC"],
-              initialValue: "Select Doors Pantry Cupboard",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.doorsOther.localize(context) ?? '',
-              items: ["Double Door", "Sliding", "Automatic"],
-              initialValue: "Select Doors Other",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          const SizedBox(height: 16),
-          Text(
-            AppString.finishersServiceDetails.localize(context) ?? '',
-            style: AppStyling.mediumTextSize14
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.wallFinisher.localize(context) ?? '',
-              items: ["Paint", "Tiles", "Wallpaper"],
-              initialValue: "Select Wall Finisher",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.floorFinisher.localize(context) ?? '',
-              items: ["Tile", "Carpet", "Wood"],
-              initialValue: "Select Floor Finisher",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          _buildRow([
-            CustomDropdownField(
-              label: AppString.bathroomToilet.localize(context) ?? '',
-              items: ["Tiled", "PVC", "Concrete"],
-              initialValue: "Select Bathroom and Toilet",
-              onChanged: (value) {},
-            ),
-            CustomDropdownField(
-              label: AppString.services.localize(context) ?? '',
-              items: ["Electricity", "Plumbing", "HVAC"],
-              initialValue: "Select Services",
-              onChanged: (value) {},
-            ),
-          ]),
-
-          const SizedBox(height: 16),
-          Text(
-            AppString.finishersServiceDetails.localize(context) ?? '',
-            style: AppStyling.mediumTextSize14
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-
-          CustomButton(
-            text: AppString.addOwner.localize(context) ?? '',
-            onPressed: () {},
-            backgroundColor: colors(context).colorGrey1!,
-            width: 150,
-            height: 48,
-          ),
-
-          const SizedBox(height: 16),
-          Text(
-            AppString.imageCapturingUpload.localize(context) ?? '',
-            style: AppStyling.mediumTextSize14
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: [
-              ...List.generate(
-                uploadedImages.length,
-                (index) {
-                  final image = uploadedImages[index];
-                  return ImageUpload(
-                    imageFile: image is File ? image : null,
-                    imagePath: image is String ? image : null,
-                    onDelete: () => _deleteImage(index),
-                    size: 128,
-                  );
-                },
+                placeholder: "Building Conditions",
+                controller: _buildingConditionsController,
+                validator: (value) =>
+                    InspectionValidator.required(value, "Building Conditions"),
               ),
-              ImageUpload(
-                isUploadButton: true,
-                onImagePicked: _onImagePicked,
-                onDelete: () {},
-                size: 128,
-              ),
-            ],
-          ),
+            ]),
 
-          const SizedBox(height: 24),
-          Container(
-            height: 1,
-            margin: const EdgeInsets.all(16),
-            width: double.infinity,
-            color: Colors.grey,
-          ),
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.natureOfConstruction.localize(context) ?? '',
+                items: ["New", "Good", "Needs Repair", "Poor"],
+                initialValue: "Select Nature of Building",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label: AppString.condition.localize(context) ?? '',
+                items: ["New", "Good", "Needs Repair", "Poor"],
+                initialValue: "Select Building Condition",
+                onChanged: (value) {},
+              ),
+            ]),
 
-          Row(
-            children: [
-              CustomButton(
-                text: AppString.cancel.localize(context) ?? '',
-                onPressed: () => Navigator.pop(context),
-                backgroundColor: colors(context).colorGrey1!,
+            const SizedBox(height: 16),
+            Text(
+              AppString.roofDetails.localize(context) ?? '',
+              style: AppStyling.mediumTextSize14
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.roofMaterial.localize(context) ?? '',
+                items: ["Concrete", "Metal", "Tiles"],
+                initialValue: "Select Roof Material",
+                onChanged: (value) {},
               ),
-              const Spacer(),
-              CustomButton(
-                text: AppString.save.localize(context) ?? '',
-                onPressed: () {},
-                backgroundColor: colors(context).colorPrimary1!,
+              CustomDropdownField(
+                label: AppString.roofFrame.localize(context) ?? '',
+                items: ["Steel", "Wood", "Concrete"],
+                initialValue: "Select Roof Frame",
+                onChanged: (value) {},
               ),
-            ],
-          ),
-        ],
+            ]),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.roofFinisher.localize(context) ?? '',
+                items: ["Painted", "Varnished", "Other"],
+                initialValue: "Select Roof Finisher",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label: AppString.ceiling.localize(context) ?? '',
+                items: ["Plasterboard", "Wood", "PVC"],
+                initialValue: "Select Ceiling",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            const SizedBox(height: 16),
+            Text(
+              AppString.structureDetails.localize(context) ?? '',
+              style: AppStyling.mediumTextSize14
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.foundationStructure.localize(context) ?? '',
+                items: ["Pile", "Raft", "Pad"],
+                initialValue: "Select Foundation Structure",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label: AppString.wallStructure.localize(context) ?? '',
+                items: ["Brick", "Concrete", "Wood"],
+                initialValue: "Select Wall Structure",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.floorStructure.localize(context) ?? '',
+                items: ["Concrete", "Wood", "Tile"],
+                initialValue: "Select Floor Structure",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            Text(
+              AppString.fixedAndFittingDetails.localize(context) ?? '',
+              style: AppStyling.mediumTextSize14
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.door.localize(context) ?? '',
+                items: ["Wooden", "Glass", "Metal"],
+                initialValue: "Select Door",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label: AppString.window.localize(context) ?? '',
+                items: ["Sliding", "Casement", "Fixed"],
+                initialValue: "Select Window",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.windowProtection.localize(context) ?? '',
+                items: ["Grills", "Shutters", "None"],
+                initialValue: "Select Window Protection",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label:
+                    AppString.doorsBathroomToiletFittings.localize(context) ??
+                        '',
+                items: ["Standard", "Luxury", "Basic"],
+                initialValue: "Select Doors Bathroom and Toilet Fittings",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.doorsHandRail.localize(context) ?? '',
+                items: ["Steel", "Wood", "Glass"],
+                initialValue: "Select Doors Hand Rail",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label: AppString.doorsPantryCupboard.localize(context) ?? '',
+                items: ["Laminated", "Wood", "PVC"],
+                initialValue: "Select Doors Pantry Cupboard",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.doorsOther.localize(context) ?? '',
+                items: ["Double Door", "Sliding", "Automatic"],
+                initialValue: "Select Doors Other",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            const SizedBox(height: 16),
+            Text(
+              AppString.finishersServiceDetails.localize(context) ?? '',
+              style: AppStyling.mediumTextSize14
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.wallFinisher.localize(context) ?? '',
+                items: ["Paint", "Tiles", "Wallpaper"],
+                initialValue: "Select Wall Finisher",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label: AppString.floorFinisher.localize(context) ?? '',
+                items: ["Tile", "Carpet", "Wood"],
+                initialValue: "Select Floor Finisher",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            _buildRow([
+              CustomDropdownField(
+                label: AppString.bathroomToilet.localize(context) ?? '',
+                items: ["Tiled", "PVC", "Concrete"],
+                initialValue: "Select Bathroom and Toilet",
+                onChanged: (value) {},
+              ),
+              CustomDropdownField(
+                label: AppString.services.localize(context) ?? '',
+                items: ["Electricity", "Plumbing", "HVAC"],
+                initialValue: "Select Services",
+                onChanged: (value) {},
+              ),
+            ]),
+
+            const SizedBox(height: 16),
+            Text(
+              AppString.finishersServiceDetails.localize(context) ?? '',
+              style: AppStyling.mediumTextSize14
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            CustomButton(
+              text: AppString.addOwner.localize(context) ?? '',
+              onPressed: () {},
+              backgroundColor: colors(context).colorGrey1!,
+              width: 150,
+              height: 48,
+            ),
+
+            const SizedBox(height: 16),
+            Text(
+              AppString.imageCapturingUpload.localize(context) ?? '',
+              style: AppStyling.mediumTextSize14
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                ...List.generate(
+                  uploadedImages.length,
+                  (index) {
+                    final image = uploadedImages[index];
+                    return ImageUpload(
+                      imageFile: image is File ? image : null,
+                      imagePath: image is String ? image : null,
+                      onDelete: () => _deleteImage(index),
+                      size: 128,
+                    );
+                  },
+                ),
+                ImageUpload(
+                  isUploadButton: true,
+                  onImagePicked: _onImagePicked,
+                  onDelete: () {},
+                  size: 128,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+            Container(
+              height: 1,
+              margin: const EdgeInsets.all(16),
+              width: double.infinity,
+              color: Colors.grey,
+            ),
+
+            Row(
+              children: [
+                CustomButton(
+                  text: AppString.cancel.localize(context) ?? '',
+                  onPressed: () => Navigator.pop(context),
+                  backgroundColor: colors(context).colorGrey1!,
+                ),
+                const Spacer(),
+                CustomButton(
+                  text: AppString.save.localize(context) ?? '',
+                  onPressed: () {
+                    if (_buildingInfoFormKey.currentState?.validate() ??
+                        false) {
+                      // Handle save logic here
+                    }
+                  },
+                  backgroundColor: colors(context).colorPrimary1!,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildOtherConstructionsTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LabeledTextField(
+    return Form(
+      key: _otherConstructionsFormKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LabeledTextField(
               label: "Other Information",
-              placeholder: "Enter other information"),
-          LabeledTextField(
+              placeholder: "Enter other information",
+              controller: _otherInfoController,
+              validator: (value) => InspectionValidator.optionalAlphaNum(
+                  value, 200, "Other Information"),
+            ),
+            LabeledTextField(
               label: "Other Construction Details",
-              placeholder: "Enter construction details"),
-          LabeledTextField(
+              placeholder: "Enter construction details",
+              controller: _otherConstructionDetailsController,
+              validator: (value) => InspectionValidator.optionalAlphaNum(
+                  value, 200, "Other Construction Details"),
+            ),
+            LabeledTextField(
               label: "Details of Assets/Inventory Items",
-              placeholder: "Enter asset details"),
-          LabeledTextField(
+              placeholder: "Enter asset details",
+              controller: _assetDetailsController,
+              validator: (value) => InspectionValidator.optionalAlphaNum(
+                  value, 200, "Asset Details"),
+            ),
+            LabeledTextField(
               label: "Details of Business",
-              placeholder: "Enter business details"),
-          LabeledTextField(label: "Remarks", placeholder: "Enter remarks"),
-          const SizedBox(height: 24),
-          Container(
-            height: 1,
-            margin: const EdgeInsets.all(16),
-            width: double.infinity,
-            color: Colors.grey,
-          ),
-          Row(
-            children: [
-              CustomButton(
-                text: AppString.cancel.localize(context) ?? 'Cancel',
-                onPressed: () => Navigator.pop(context),
-                backgroundColor: colors(context).colorGrey1!,
-              ),
-              const Spacer(),
-              CustomButton(
-                text: AppString.save.localize(context) ?? 'Save',
-                onPressed: () {},
-                backgroundColor: colors(context).colorPrimary1!,
-              ),
-            ],
-          ),
-        ],
+              placeholder: "Enter business details",
+              controller: _businessDetailsController,
+              validator: (value) => InspectionValidator.optionalAlphaNum(
+                  value, 200, "Business Details"),
+            ),
+            LabeledTextField(
+              label: "Remarks",
+              placeholder: "Enter remarks",
+              controller: _remarksController,
+              validator: (value) =>
+                  InspectionValidator.optionalAlphaNum(value, 500, "Remarks"),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              height: 1,
+              margin: const EdgeInsets.all(16),
+              width: double.infinity,
+              color: Colors.grey,
+            ),
+            Row(
+              children: [
+                CustomButton(
+                  text: AppString.cancel.localize(context) ?? 'Cancel',
+                  onPressed: () => Navigator.pop(context),
+                  backgroundColor: colors(context).colorGrey1!,
+                ),
+                const Spacer(),
+                CustomButton(
+                  text: AppString.save.localize(context) ?? 'Save',
+                  onPressed: () {
+                    if (_otherConstructionsFormKey.currentState?.validate() ??
+                        false) {
+                      // Handle save logic here
+                    }
+                  },
+                  backgroundColor: colors(context).colorPrimary1!,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
