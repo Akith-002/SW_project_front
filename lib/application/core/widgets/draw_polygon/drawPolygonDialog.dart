@@ -116,7 +116,7 @@ class _DrawPolygonDialogState extends State<DrawPolygonDialog> {
                         onChanged: (value) {
                           _saveSideValues(); // Save current values
                           setState(() {
-                            selectedSide = _stringToSide(value);
+                            selectedSide = _stringToSide(value!);
                             // Load values for the new side
                             feetController.text =
                                 measurements[selectedSide]!['feet']!.toString();

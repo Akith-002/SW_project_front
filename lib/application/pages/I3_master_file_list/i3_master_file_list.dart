@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:land_asset_valuation/app/base_view.dart';
-import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
-import 'package:land_asset_valuation/app/cubit/base_state.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/fileList/file_list.dart';
@@ -20,7 +18,7 @@ import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-class I3MasterFileList extends BasePage {
+class I3MasterFileList extends StatefulWidget {
   final int number;
 
   const I3MasterFileList({
@@ -32,8 +30,7 @@ class I3MasterFileList extends BasePage {
   State<I3MasterFileList> createState() => _I3MasterFileListState();
 }
 
-class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
-  final _cubit = injection<I3MasterFileListCubit>();
+class _I3MasterFileListState extends State<I3MasterFileList> {
   final searchController = TextEditingController();
   final GlobalKey<TableScaffoldState> _tableKey = GlobalKey<TableScaffoldState>();
 
@@ -61,9 +58,13 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
   }
 
   @override
-  Widget buildView(BuildContext context) {
-    debugPrint("Building content for index: ${widget.number}");
-    return _buildContentForIndex(widget.number);
+  Widget build(BuildContext context) {
+    return BlocProvider<I3MasterFileListCubit>(
+      create: (_) => injection<I3MasterFileListCubit>(),
+      child: Builder( // ✅ fixes the context issue
+        builder: (context) => _buildContentForIndex(widget.number),
+      ),
+    );
   }
 
   String _determinePageSource(int index) {
@@ -95,7 +96,7 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
             breadcrumbItems: [
               AppString.landAcquisition.localize(context)!,
             ],
-            totalCount: _masterFileCount, // ✅ dynamic file count
+            totalCount: _masterFileCount,
             onSearch: (query) {
               _tableKey.currentState?.search(query);
             },
@@ -117,9 +118,8 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.massRating.localize(context)!,
             ],
-            table: TableScaffoldMr(
-              pageSource: currentPageSource,
-            ),
+            totalCount: 0,
+            table: TableScaffoldMr(pageSource: currentPageSource),
           ),
         );
 
@@ -134,9 +134,8 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingAssessment.localize(context)!,
             ],
-            table: TableScaffoldRA(
-              pageSource: currentPageSource,
-            ),
+            totalCount: 0,
+            table: TableScaffoldRA(pageSource: currentPageSource),
           ),
         );
 
@@ -151,9 +150,8 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingBuilding.localize(context)!,
             ],
-            table: TableScaffoldRB(
-              pageSource: currentPageSource,
-            ),
+            totalCount: 0,
+            table: TableScaffoldRB(pageSource: currentPageSource),
           ),
         );
 
@@ -168,16 +166,15 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.massRating.localize(context)!,
               AppString.ratingObject.localize(context)!,
             ],
-            table: TableScaffoldRO(
-              pageSource: currentPageSource,
-            ),
+            totalCount: 0,
+            table: TableScaffoldRO(pageSource: currentPageSource),
           ),
         );
 
-      case 6: // Map Screen
+      case 6:
         return MapScreen();
 
-      case 7: // Land Miscellaneous
+      case 7:
         return Scaffold(
           appBar: CustomAppBar(
             title: AppString.landMiscellaneous.localize(context)!,
@@ -188,19 +185,12 @@ class _I3MasterFileListState extends BasePageState<I3MasterFileList> {
               AppString.landMiscellaneous.localize(context)!,
             ],
             totalCount: 0,
-            table: TableScaffoldLM(
-              pageSource: currentPageSource,
-            ),
+            table: TableScaffoldLM(pageSource: currentPageSource),
           ),
         );
 
       default:
-        return Center(child: Text("Content not available for index $index"));
+        return const Center(child: Text("Content not available for this index."));
     }
-  }
-
-  @override
-  BaseCubit<BaseState> getCubit() {
-    return _cubit;
   }
 }
