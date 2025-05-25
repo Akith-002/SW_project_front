@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/light_color_list.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
@@ -49,6 +51,9 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
 
   // List to store uploaded images.
   List<dynamic> uploadedImages = [];
+
+  // Track submission state
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -143,19 +148,31 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
       bloc: _cubit,
       listener: (context, state) {
         if (state is RentalEvidenceSubmitSuccess) {
+          setState(() {
+            _isSubmitting = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Rental evidence submitted successfully!'),
               backgroundColor: Colors.green,
             ),
           );
+          // Navigate to map screen after successful submission
+          context.go(Pages.routeMapScreen.toPath());
         } else if (state is RentalEvidenceSubmitFailure) {
+          setState(() {
+            _isSubmitting = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${state.errorMessage}'),
               backgroundColor: Colors.red,
             ),
           );
+        } else if (state is RentalEvidenceLoading) {
+          setState(() {
+            _isSubmitting = true;
+          });
         }
       },
       child: Scaffold(
@@ -373,34 +390,37 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                               // Cancel button.
                               CustomButton(
                                 text: AppString.cancel.localize(context) ?? '',
-                                onPressed: () {},
+                                onPressed: _isSubmitting ? null : () {},
                                 backgroundColor: colors(context).colorGrey1 ??
                                     LightColorList.lightGrey50,
                               ),
-                              Row(
-                                children: [
-                                  // Save button.
-                                  CustomButton(
-                                    text:
-                                        AppString.save.localize(context) ?? '',
-                                    onPressed: _validateAndSubmit,
-                                    backgroundColor:
-                                        colors(context).colorPrimary5 ??
-                                            LightColorList.lightPrimary700,
-                                  ),
-                                  const SizedBox(width: 40),
-                                  // Send data button.
-                                  CustomButton(
-                                    text:
-                                        AppString.sendData.localize(context) ??
-                                            '',
-                                    onPressed: _validateAndSubmit,
-                                    backgroundColor:
-                                        colors(context).colorPrimary1 ??
-                                            LightColorList.lightPrimary500,
-                                  ),
-                                ],
-                              ),
+                              _isSubmitting
+                                  ? const CircularProgressIndicator()
+                                  : Row(
+                                      children: [
+                                        // Save button.
+                                        CustomButton(
+                                          text: AppString.save
+                                                  .localize(context) ??
+                                              '',
+                                          onPressed: _validateAndSubmit,
+                                          backgroundColor: colors(context)
+                                                  .colorPrimary5 ??
+                                              LightColorList.lightPrimary700,
+                                        ),
+                                        const SizedBox(width: 40),
+                                        // Send data button.
+                                        CustomButton(
+                                          text: AppString.sendData
+                                                  .localize(context) ??
+                                              '',
+                                          onPressed: _validateAndSubmit,
+                                          backgroundColor: colors(context)
+                                                  .colorPrimary1 ??
+                                              LightColorList.lightPrimary500,
+                                        ),
+                                      ],
+                                    ),
                             ],
                           ),
                         ],
