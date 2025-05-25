@@ -1,5 +1,4 @@
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
-import 'package:land_asset_valuation/application/core/error/failures.dart';
 
 abstract class ConditionReportState extends BaseState<ConditionReportState> {}
 
