@@ -1,9 +1,6 @@
-
-
 class ServerException implements Exception {
-  // final ErrorResponseModel errorResponseModel;
-
-  // ServerException(this.errorResponseModel);
+  final String message;
+  ServerException({this.message = 'Server error occurred'});
 }
 
 class APIFailException implements Exception {
@@ -12,7 +9,10 @@ class APIFailException implements Exception {
   // APIFailException(this.errorResponseModel);
 }
 
-class CacheException implements Exception {}
+class CacheException implements Exception {
+  final String message;
+  CacheException({this.message = 'Cache error occurred'});
+}
 
 class UnAuthorizedException implements Exception {
   // final ErrorResponseModel errorResponseModel;
@@ -21,7 +21,6 @@ class UnAuthorizedException implements Exception {
 }
 
 class DioErrorException implements Exception {
-  // final ErrorResponseModel errorResponseModel;
-  //
-  // DioErrorException({required this.errorResponseModel});
+  final String message;
+  DioErrorException({this.message = 'Network error occurred'});
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/cubit/lm_masterfile_list_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 // App setup
 import 'package:land_asset_valuation/application/core/router/routes.dart';
@@ -75,6 +76,9 @@ import 'package:land_asset_valuation/application/pages/settingsScreen/cubit/sett
 import 'package:land_asset_valuation/application/pages/signIn/cubit/signin_cubit.dart';
 import 'package:land_asset_valuation/application/pages/splash/cubit/splash_cubit.dart';
 import 'package:land_asset_valuation/application/pages/conditionReport/cubit/condition_report_cubit.dart';
+import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
+import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
+import 'package:land_asset_valuation/data/services/sign_in_service.dart';
 
 final injection = GetIt.I;
 
@@ -87,7 +91,11 @@ Future<void> init() async {
   injection.registerSingleton(AppRouter(routerServices: injection()));
 
   // Register Dio and DioClient
-  injection.registerLazySingleton(() => Dio());
+  injection.registerLazySingleton(() {
+    final dio = Dio();
+    dio.options.baseUrl = AppConfig.apiBaseUrl;
+    return dio;
+  });
   injection.registerLazySingleton(() => DioClient(injection()));
 
   // ------------------------------
@@ -194,7 +202,10 @@ Future<void> init() async {
   // ------------------------------
   injection.registerFactory(() => SplashCubit(appSharedData: injection()));
   injection.registerFactory(() => DashboardCubit(appSharedData: injection()));
-  injection.registerFactory(() => SigninCubit(appSharedData: injection()));
+  injection.registerFactory(() => SigninCubit(
+        appSharedData: injection(),
+        authRepository: injection(),
+      ));
   injection
       .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
   injection.registerFactory(() => MrAssetsListCubit(
@@ -231,6 +242,17 @@ Future<void> init() async {
       .registerFactory(() => PastValuationCubit(appSharedData: injection()));
   injection
       .registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+
+  // ------------------------------
+  // Auth Dependencies
+  // ------------------------------
+  injection.registerLazySingleton(() => SecureStorage());
+  injection.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(injection(), injection()),
+  );
+  injection.registerLazySingleton(
+    () => SignInService(authRepository: injection()),
+  );
   injection.registerFactory(() => I3MasterFileListCubit(
         appSharedData: injection(),
         getPaginatedUseCase: injection(),
