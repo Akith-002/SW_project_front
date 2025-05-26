@@ -12,6 +12,7 @@ import 'package:land_asset_valuation/application/core/widgets/custom_dropdown_fi
 import 'package:land_asset_valuation/application/core/widgets/labeled_text_field.dart';
 import 'package:land_asset_valuation/application/core/widgets/image_upload.dart';
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
+import 'package:land_asset_valuation/application/core/validators/i2_rental_evidence_validator.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 /// Main page widget for displaying rental evidence.
@@ -56,34 +57,116 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     super.dispose();
   }
 
-  // Validation methods
-  String? _validateString(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    return null;
+  // Helper method to show error messages
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
-  String? _validateDropdown(String? value) {
-    if (value == null ||
-        value.isEmpty ||
-        value.startsWith('Select') ||
-        value.startsWith('Choose')) {
-      return 'Please select an option';
-    }
-    return null;
+  // Helper method to show success messages
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   void _validateAndSubmit() {
     if (_formKey.currentState!.validate()) {
-      // Form is valid, proceed with submission
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Form is valid!')),
-      );
+      // All form validation passed, now perform additional data type validation
+      try {
+        // Create a map to track all validation issues
+        Map<String, String> validationErrors = {};
+
+        // Validate dropdowns are selected properly
+        String? buildingError =
+            I2RentalEvidenceValidator.dropdown(_selectedBuilding, 'Building');
+        if (buildingError != null) {
+          validationErrors['Building'] = buildingError;
+        }
+
+        String? categoryError = I2RentalEvidenceValidator.dropdown(
+            _selectedPropertyCategory, 'Property Category');
+        if (categoryError != null) {
+          validationErrors['Property Category'] = categoryError;
+        }
+
+        String? subcategoryError = I2RentalEvidenceValidator.dropdown(
+            _selectedPropertySubcategory, 'Property Subcategory');
+        if (subcategoryError != null) {
+          validationErrors['Property Subcategory'] = subcategoryError;
+        }
+
+        String? type1Error = I2RentalEvidenceValidator.dropdown(
+            _selectedPropertyType1, 'Property Type');
+        if (type1Error != null) {
+          validationErrors['Property Type 1'] = type1Error;
+        }
+
+        String? type2Error = I2RentalEvidenceValidator.dropdown(
+            _selectedPropertyType2, 'Property Type');
+        if (type2Error != null) {
+          validationErrors['Property Type 2'] = type2Error;
+        }
+
+        // Validate text fields for proper content
+        String? assessmentError = I2RentalEvidenceValidator.alphanumeric(
+            _assessmentNoController.text, 'Assessment Number');
+        if (assessmentError != null) {
+          validationErrors['Assessment Number'] = assessmentError;
+        }
+
+        String? ownerError = I2RentalEvidenceValidator.alphanumeric(
+            _ownerNameController.text, 'Owner Name');
+        if (ownerError != null) {
+          validationErrors['Owner Name'] = ownerError;
+        }
+
+        String? occupierError = I2RentalEvidenceValidator.alphanumeric(
+            _occupierNameController.text, 'Occupier Name');
+        if (occupierError != null) {
+          validationErrors['Occupier Name'] = occupierError;
+        }
+
+        String? descriptionError = I2RentalEvidenceValidator.required(
+            _descriptionController.text, 'Description');
+        if (descriptionError != null) {
+          validationErrors['Description'] = descriptionError;
+        }
+
+        // If there are validation errors, show them and stop
+        if (validationErrors.isNotEmpty) {
+          String errorMessage = 'Validation errors:\n';
+          validationErrors.forEach((field, error) {
+            errorMessage += '• $field: $error\n';
+          });
+          _showErrorMessage(errorMessage);
+          return;
+        }
+
+        // Form is valid, proceed with submission
+        _showSuccessMessage(
+            'Form validated successfully. Ready to submit data!');
+
+        // Here you would normally send the data to your backend
+        // _cubit.sendRentalEvidence(...);
+      } catch (e) {
+        _showErrorMessage('Error validating form data: $e');
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fix the errors in the form')),
-      );
+      _showErrorMessage('Please fix the errors in the form');
     }
   }
 
@@ -154,7 +237,11 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                               });
                             },
                             width: fieldWidth,
-                            validator: _validateDropdown,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredDropdown(
+                                    value,
+                                    AppString.selectBuilding
+                                        .localize(context)!),
                           ),
                           // Dropdown field for selecting a property category.
                           CustomDropdownField(
@@ -174,7 +261,11 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                               });
                             },
                             width: fieldWidth,
-                            validator: _validateDropdown,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredDropdown(
+                                    value,
+                                    AppString.propertyCategory
+                                        .localize(context)!),
                           ),
                           // Dropdown field for selecting a property subcategory.
                           CustomDropdownField(
@@ -194,7 +285,11 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                               });
                             },
                             width: fieldWidth,
-                            validator: _validateDropdown,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredDropdown(
+                                    value,
+                                    AppString.propertySubcategory
+                                        .localize(context)!),
                           ),
                           // Dropdown field for selecting a property type.
                           CustomDropdownField(
@@ -212,7 +307,10 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                               });
                             },
                             width: fieldWidth,
-                            validator: _validateDropdown,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredDropdown(
+                                    value,
+                                    AppString.propertyType.localize(context)!),
                           ),
                           // Text field for inputting assessment number.
                           LabeledTextField(
@@ -221,7 +319,11 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                 AppString.assesmentNo.localize(context)!,
                             width: fieldWidth,
                             controller: _assessmentNoController,
-                            validator: _validateString,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredAlphaNum(
+                                    value,
+                                    50,
+                                    AppString.assesmentNo.localize(context)!),
                           ),
                           // Text field for inputting owner name.
                           LabeledTextField(
@@ -229,7 +331,11 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                             placeholder: AppString.ownerName.localize(context)!,
                             width: fieldWidth,
                             controller: _ownerNameController,
-                            validator: _validateString,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredAlphaNum(
+                                    value,
+                                    100,
+                                    AppString.ownerName.localize(context)!),
                           ),
                           // Dropdown field for selecting property type.
                           CustomDropdownField(
@@ -247,7 +353,10 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                               });
                             },
                             width: fieldWidth,
-                            validator: _validateDropdown,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredDropdown(
+                                    value,
+                                    AppString.propertyType.localize(context)!),
                           ),
                           // Text field for inputting occupier name.
                           LabeledTextField(
@@ -256,7 +365,11 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                 AppString.occupierName.localize(context)!,
                             width: fieldWidth,
                             controller: _occupierNameController,
-                            validator: _validateString,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredAlphaNum(
+                                    value,
+                                    100,
+                                    AppString.occupierName.localize(context)!),
                           ),
                           // Text field for describing the property.
                           LabeledTextField(
@@ -266,15 +379,33 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                 .localize(context)!,
                             width: fieldWidth,
                             controller: _descriptionController,
-                            validator: _validateString,
+                            validator: (value) =>
+                                I2RentalEvidenceValidator.requiredAlphaNum(
+                                    value,
+                                    255,
+                                    AppString.descriptionOfProperty
+                                        .localize(context)!),
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
                       // Labeling section for the image capturing area.
-                      Text(
-                        AppString.imageCapturing.localize(context)!,
-                        style: Theme.of(context).textTheme.titleMedium,
+                      Row(
+                        children: [
+                          Text(
+                            AppString.imageCapturing.localize(context)!,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '(Optional)',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                       // Wrap widget for displaying uploaded images and an upload button.
