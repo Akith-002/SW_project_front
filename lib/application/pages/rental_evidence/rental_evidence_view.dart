@@ -10,6 +10,7 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/light_col
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
+import 'package:land_asset_valuation/application/core/validators/rental_evidence_validator.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
@@ -50,9 +51,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
   final _remarksController = TextEditingController();
 
   // List to store uploaded images.
-  List<dynamic> uploadedImages = [];
-
-  // Track submission state
+  List<dynamic> uploadedImages = []; // Track submission state
   bool _isSubmitting = false;
 
   @override
@@ -74,57 +73,155 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
     super.dispose();
   }
 
-  // Validation methods
-  String? _validateString(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    return null;
+  // Helper method to show error messages
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
-  String? _validateInt(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    if (int.tryParse(value) == null) {
-      return 'Please enter a valid integer';
-    }
-    return null;
-  }
-
-  String? _validateFloat(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    if (double.tryParse(value) == null) {
-      return 'Please enter a valid number';
-    }
-    return null;
+  // Helper method to show success messages
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   void _validateAndSubmit() {
     if (_formKey.currentState!.validate()) {
-      // Send data to the backend
-      _cubit.sendRentalEvidence(
-        masterFileId: "56249", // You can get this dynamically
-        masterFileRefNo: _masterFileRefNoController.text,
-        assessmentNo: _assessmentNoController.text,
-        owner: _ownerController.text,
-        occupier: _occupierController.text,
-        description: _descriptionController.text,
-        floorRateSQFT: _floorRateController.text,
-        ratePerSqft: _ratePerSqftController.text,
-        ratePerMonth: _ratePerMonthController.text,
-        locationLongitude: _longitudeController.text,
-        locationLatitude: _latitudeController.text,
-        headOfTerms: _headOfTermsController.text,
-        situation: _situationController.text,
-        remarks: _remarksController.text,
-      );
+      // All form validation passed, now perform additional data type validation
+      try {
+        // Create a map to track all validation issues
+        Map<String, String> validationErrors = {};
+
+        // Validate numeric fields
+        _validateNumericField(
+            _floorRateController.text, 'Floor Rate', validationErrors);
+        _validateNumericField(
+            _ratePerSqftController.text, 'Rate Per Sqft', validationErrors);
+        _validateNumericField(
+            _ratePerMonthController.text, 'Rate Per Month', validationErrors);
+
+        // Validate coordinate fields
+        _validateCoordinateField(
+            _longitudeController.text, 'Longitude', validationErrors);
+        _validateCoordinateField(
+            _latitudeController.text, 'Latitude', validationErrors);
+
+        // If there are validation errors, show them and stop
+        if (validationErrors.isNotEmpty) {
+          String errorMessage = 'Validation errors:\n';
+          validationErrors.forEach((field, error) {
+            errorMessage += '• $field: $error\n';
+          });
+          _showErrorMessage(errorMessage);
+          return;
+        }
+
+        // Double-check numeric conversions before sending to the backend
+        // This ensures that even if validation passes, we're sending the correct data types
+        try {
+          // Ensure these are valid numbers before sending
+          double.parse(_floorRateController.text);
+          double.parse(_ratePerSqftController.text);
+          double.parse(_ratePerMonthController.text);
+          double.parse(_longitudeController.text);
+          double.parse(_latitudeController.text);
+        } catch (e) {
+          _showErrorMessage('Error converting numeric values: $e');
+          return;
+        }
+
+        // Send data to the backend
+        _cubit.sendRentalEvidence(
+          masterFileId: "56249", // You can get this dynamically
+          masterFileRefNo: _masterFileRefNoController.text,
+          assessmentNo: _assessmentNoController.text,
+          owner: _ownerController.text,
+          occupier: _occupierController.text,
+          description: _descriptionController.text,
+          floorRateSQFT: _floorRateController.text,
+          ratePerSqft: _ratePerSqftController.text,
+          ratePerMonth: _ratePerMonthController.text,
+          locationLongitude: _longitudeController.text,
+          locationLatitude: _latitudeController.text,
+          headOfTerms: _headOfTermsController.text,
+          situation: _situationController.text,
+          remarks: _remarksController.text,
+        );
+
+        // Display a temporary success message for form validation
+        _showSuccessMessage('Form validated successfully. Submitting data...');
+      } catch (e) {
+        _showErrorMessage('Error validating form data: $e');
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fix the errors in the form')),
-      );
+      _showErrorMessage('Please fix the errors in the form');
+    }
+  }
+
+  // Improved validation method for numeric fields
+  void _validateNumericField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    // Try to parse as double first
+    double? numericValue = double.tryParse(value);
+    if (numericValue == null) {
+      errors[fieldName] = 'Must be a valid number';
+      return;
+    }
+
+    // Check for negative values where it doesn't make sense
+    if (fieldName.toLowerCase().contains('rate') && numericValue < 0) {
+      errors[fieldName] = 'Cannot be negative';
+      return;
+    }
+
+    // Check for reasonableness (add custom validation rules as needed)
+    if (fieldName.contains('Rate Per') && numericValue > 1000000) {
+      errors[fieldName] = 'Value seems too high, please verify';
+    }
+  }
+
+  // Improved validation method for coordinate fields
+  void _validateCoordinateField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    double? coordinate = double.tryParse(value);
+    if (coordinate == null) {
+      errors[fieldName] = 'Must be a valid coordinate value';
+      return;
+    }
+
+    // Detailed coordinate validation
+    if (fieldName == 'Latitude') {
+      if (coordinate < -90 || coordinate > 90) {
+        errors[fieldName] = 'Must be between -90 and 90 degrees';
+      }
+    } else if (fieldName == 'Longitude') {
+      if (coordinate < -180 || coordinate > 180) {
+        errors[fieldName] = 'Must be between -180 and 180 degrees';
+      }
     }
   }
 
@@ -222,7 +319,13 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         '',
                                 width: fieldWidth,
                                 controller: _assessmentNoController,
-                                validator: _validateString,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredAlphaNum(
+                                        value,
+                                        50,
+                                        AppString.assesmentNo
+                                                .localize(context) ??
+                                            'Assessment No'),
                               ),
                               LabeledTextField(
                                 placeholder: AppString
@@ -233,7 +336,13 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                     '',
                                 width: fieldWidth,
                                 controller: _masterFileRefNoController,
-                                validator: _validateString,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredAlphaNum(
+                                        value,
+                                        50,
+                                        AppString.masterFileRefNo
+                                                .localize(context) ??
+                                            'Master File Ref No'),
                               ),
                               LabeledTextField(
                                 placeholder:
@@ -241,7 +350,12 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                 label: AppString.owner.localize(context)!,
                                 width: fieldWidth,
                                 controller: _ownerController,
-                                validator: _validateString,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredAlphaNum(
+                                        value,
+                                        100,
+                                        AppString.owner.localize(context) ??
+                                            'Owner'),
                               ),
                               LabeledTextField(
                                 placeholder:
@@ -249,7 +363,12 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                 label: AppString.occupier.localize(context)!,
                                 width: fieldWidth,
                                 controller: _occupierController,
-                                validator: _validateString,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredAlphaNum(
+                                        value,
+                                        100,
+                                        AppString.occupier.localize(context) ??
+                                            'Occupier'),
                               ),
                               LabeledTextField(
                                 placeholder:
@@ -260,7 +379,13 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         '',
                                 width: fieldWidth,
                                 controller: _descriptionController,
-                                validator: _validateString,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredAlphaNum(
+                                        value,
+                                        255,
+                                        AppString.description
+                                                .localize(context) ??
+                                            'Description'),
                               ),
                               LabeledTextField(
                                 placeholder: AppString.floorRatePlaceholder
@@ -269,7 +394,12 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                     AppString.floorRate.localize(context) ?? '',
                                 width: fieldWidth,
                                 controller: _floorRateController,
-                                validator: _validateInt,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredInteger(
+                                        value,
+                                        20,
+                                        AppString.floorRate.localize(context) ??
+                                            'Floor Rate'),
                               ),
                               LabeledTextField(
                                 placeholder:
@@ -280,7 +410,13 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         '',
                                 width: fieldWidth,
                                 controller: _ratePerSqftController,
-                                validator: _validateInt,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredNumeric(
+                                        value,
+                                        20,
+                                        AppString.ratePerSqft
+                                                .localize(context) ??
+                                            'Rate Per Sqft'),
                               ),
                               LabeledTextField(
                                 placeholder:
@@ -291,7 +427,13 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         '',
                                 width: fieldWidth,
                                 controller: _ratePerMonthController,
-                                validator: _validateInt,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredNumeric(
+                                        value,
+                                        20,
+                                        AppString.ratePerMonth
+                                                .localize(context) ??
+                                            'Rate Per Month'),
                               ),
                               LabeledTextField(
                                 placeholder: AppString
@@ -302,7 +444,12 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                     '',
                                 width: fieldWidth,
                                 controller: _longitudeController,
-                                validator: _validateFloat,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredCoordinate(
+                                        value,
+                                        AppString.locationLongitude
+                                                .localize(context) ??
+                                            'Longitude'),
                               ),
                               LabeledTextField(
                                 placeholder: AppString
@@ -313,7 +460,12 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                     '',
                                 width: fieldWidth,
                                 controller: _latitudeController,
-                                validator: _validateFloat,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredCoordinate(
+                                        value,
+                                        AppString.locationLatitude
+                                                .localize(context) ??
+                                            'Latitude'),
                               ),
                               LabeledTextField(
                                 placeholder:
@@ -324,7 +476,13 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         '',
                                 width: fieldWidth,
                                 controller: _headOfTermsController,
-                                validator: _validateString,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredAlphaNum(
+                                        value,
+                                        255,
+                                        AppString.headOfTerms
+                                                .localize(context) ??
+                                            'Head of Terms'),
                               ),
                               LabeledTextField(
                                 placeholder:
@@ -333,7 +491,12 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                     AppString.situation.localize(context) ?? '',
                                 width: fieldWidth,
                                 controller: _situationController,
-                                validator: _validateString,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredAlphaNum(
+                                        value,
+                                        255,
+                                        AppString.situation.localize(context) ??
+                                            'Situation'),
                               ),
                               // Full width text field for remarks.
                               LabeledTextField(
@@ -343,15 +506,32 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                     AppString.remarks.localize(context) ?? '',
                                 width: fullWidth,
                                 controller: _remarksController,
-                                validator: _validateString,
+                                validator: (value) =>
+                                    RentalEvidenceValidator.requiredAlphaNum(
+                                        value,
+                                        500,
+                                        AppString.remarks.localize(context) ??
+                                            'Remarks'),
                               ),
                             ],
                           ),
                           const SizedBox(height: 24),
                           // Section title for image uploads.
-                          Text(
-                            AppString.uploadImgs.localize(context) ?? '',
-                            style: AppStyling.mediumTextSize14,
+                          Row(
+                            children: [
+                              Text(
+                                AppString.uploadImgs.localize(context) ?? '',
+                                style: AppStyling.mediumTextSize14,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '(Optional)',
+                                style: AppStyling.regularTextSize12.copyWith(
+                                  color: Colors.grey,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
                           // Image upload section using Wrap for responsive image display.
