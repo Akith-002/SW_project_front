@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
@@ -7,15 +8,18 @@ import 'package:land_asset_valuation/application/core/widgets/assetListTable/ass
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_cubit.dart';
+import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_state.dart';
 import 'package:land_asset_valuation/data/models/asset.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 class MrAssetsList extends BasePage {
   final String? source;
+  final int? requestId; // Add requestId parameter
 
   const MrAssetsList({
     super.key,
     this.source,
+    this.requestId,
   });
 
   @override
@@ -25,42 +29,49 @@ class MrAssetsList extends BasePage {
 class _MrAssetsListState extends BasePageState<MrAssetsList> {
   final _cubit = injection<MrAssetsListCubit>();
 
-  // Generate sample assets based on the asset type
-  List<Asset> _generateSampleAssets() {
-    List<Asset> assets = [];
+  @override
+  void initState() {
+    super.initState();
+    // Load assets with requestType = 1 for MR assets
+    _loadAssets();
+  }
 
-    // Determine asset type prefix based on source
-    String typePrefix = '';
-    switch (widget.source) {
-      case 'ratingAssessment':
-        typePrefix = 'RA';
-        break;
-      case 'ratingBuilding':
-        typePrefix = 'RB';
-        break;
-      case 'ratingObject':
-        typePrefix = 'RO';
-        break;
-      case 'massRating':
-      default:
-        typePrefix = 'MR';
-        break;
-    } // Generate sample data
-    for (int i = 1; i <= 8; i++) {
-      assets.add(Asset(
-        id: i,
-        assetNo: '$typePrefix${i.toString().padLeft(3, '0')}',
-        ward: 'Ward ${(i % 5) + 1}',
-        rdSt: 'Road ${String.fromCharCode(65 + (i % 10))}',
-        description:
-            i % 2 == 0 ? 'Commercial Property' : 'Residential Property',
-        owner: 'Owner $i',
-        status: i % 3 == 0 ? AssetStatus.completed : AssetStatus.pending,
-        isRatingCard: i % 3 != 0, // Some assets have rating cards, some don't
-      ));
+  void _loadAssets() {
+    // Use the provided requestId or default to 1
+    final requestIdToUse = widget.requestId ?? 1;
+
+    _cubit.loadAssets(
+      requestId: requestIdToUse,
+      requestType: 'MR',
+    );
+  }
+
+  void _searchAssets(String query) {
+    final requestIdToUse = widget.requestId ?? 1;
+
+    if (query.trim().isEmpty) {
+      _loadAssets();
+      return;
     }
 
-    return assets;
+    _cubit.searchAssets(
+      requestId: requestIdToUse,
+      requestType: 'MR',
+      query: query,
+    );
+  }
+
+  void _loadMoreAssets(String? nextPageToken) {
+    if (nextPageToken == null) return;
+
+    final requestIdToUse = widget.requestId ?? 1;
+
+    _cubit.loadMoreAssets(
+      requestId: requestIdToUse,
+      requestType: 'MR',
+      pageSize: 20,
+      nextPageToken: nextPageToken,
+    );
   }
 
   void _onAssetSelected(Asset asset) {
@@ -75,9 +86,6 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
 
   @override
   Widget buildView(BuildContext context) {
-    // Generate dynamic assets based on source
-    List<Asset> assets = _generateSampleAssets();
-
     // Determine title and breadcrumb based on source
     String title;
     List<String> breadcrumbItems;
@@ -119,22 +127,78 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
     }
 
     return Scaffold(
-        appBar: CustomAppBar(title: title),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Breadcrumb(items: [
-                for (var item in breadcrumbItems) BreadcrumbItem(label: item),
-              ]),
-              AssetListTable(
-                assets: assets,
-                assetType: widget.source,
-                onAssetSelected: _onAssetSelected,
-                onAssetsSelected: _onAssetsSelected,
-              ),
-            ],
-          ),
-        ));
+      appBar: CustomAppBar(title: title),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Breadcrumb(items: [
+              for (var item in breadcrumbItems) BreadcrumbItem(label: item),
+            ]),
+            BlocBuilder<MrAssetsListCubit, BaseState<MrAssetsListState>>(
+              bloc: _cubit,
+              builder: (context, state) {
+                if (state is MrAssetsListLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (state is MrAssetsListError) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Error loading assets: ${state.message}',
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _loadAssets,
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                } else if (state is MrAssetsListLoaded) {
+                  return AssetListTable(
+                    assets: state.assets,
+                    assetType: widget.source,
+                    onAssetSelected: _onAssetSelected,
+                    onAssetsSelected: _onAssetsSelected,
+                  );
+                } else if (state is MrAssetsListSearchLoaded) {
+                  return AssetListTable(
+                    assets: state.searchResults,
+                    assetType: widget.source,
+                    onAssetSelected: _onAssetSelected,
+                    onAssetsSelected: _onAssetsSelected,
+                  );
+                } else {
+                  // Initial state - show empty state or loading
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Text('Loading assets...'),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
