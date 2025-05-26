@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
@@ -98,9 +99,22 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
 
   void _validateAndSubmit() {
     if (_formKey.currentState!.validate()) {
-      // Form is valid, proceed with submission
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Form is valid!')),
+      // Send data to the backend
+      _cubit.sendRentalEvidence(
+        masterFileId: "56249", // You can get this dynamically
+        masterFileRefNo: _masterFileRefNoController.text,
+        assessmentNo: _assessmentNoController.text,
+        owner: _ownerController.text,
+        occupier: _occupierController.text,
+        description: _descriptionController.text,
+        floorRateSQFT: _floorRateController.text,
+        ratePerSqft: _ratePerSqftController.text,
+        ratePerMonth: _ratePerMonthController.text,
+        locationLongitude: _longitudeController.text,
+        locationLatitude: _latitudeController.text,
+        headOfTerms: _headOfTermsController.text,
+        situation: _situationController.text,
+        remarks: _remarksController.text,
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -125,247 +139,281 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
 
   @override
   Widget buildView(BuildContext context) {
-    return Scaffold(
-      // Custom app bar with a localized title.
-      appBar: CustomAppBar(
-        title: AppString.rentalEvidence.localize(context) ?? '',
-      ),
-      // Allows the entire view to be scrollable.
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Breadcrumb navigation.
-            Breadcrumb(items: [
-              BreadcrumbItem(
-                  label: AppString.landAcquisition.localize(context) ?? ''),
-              BreadcrumbItem(label: AppString.masterFile.localize(context)!),
-              BreadcrumbItem(
-                  label: AppString.rentalEvidenceForm.localize(context) ?? ''),
-            ]),
-            // LayoutBuilder used to determine the width constraints for form fields.
-            LayoutBuilder(
-              builder: (context, constraints) {
-                double fieldWidth = constraints.maxWidth * 0.47;
-                double fullWidth = constraints.maxWidth * 0.96;
-
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Wrap widget to arrange text fields responsively.
-                        Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          alignment: WrapAlignment.start,
-                          children: [
-                            // Each LabeledTextField represents a form field with a label and placeholder.
-                            LabeledTextField(
-                              placeholder: AppString.assesmentNoPlaceholder
-                                  .localize(context)!,
-                              label:
-                                  AppString.assesmentNo.localize(context) ?? '',
-                              width: fieldWidth,
-                              controller: _assessmentNoController,
-                              validator: _validateString,
-                            ),
-                            LabeledTextField(
-                              placeholder: AppString.masterFileRefNoPlaceholder
-                                  .localize(context)!,
-                              label:
-                                  AppString.masterFileRefNo.localize(context) ??
-                                      '',
-                              width: fieldWidth,
-                              controller: _masterFileRefNoController,
-                              validator: _validateString,
-                            ),
-                            LabeledTextField(
-                              placeholder:
-                                  AppString.owner.localize(context) ?? '',
-                              label: AppString.owner.localize(context)!,
-                              width: fieldWidth,
-                              controller: _ownerController,
-                              validator: _validateString,
-                            ),
-                            LabeledTextField(
-                              placeholder:
-                                  AppString.occupier.localize(context) ?? '',
-                              label: AppString.occupier.localize(context)!,
-                              width: fieldWidth,
-                              controller: _occupierController,
-                              validator: _validateString,
-                            ),
-                            LabeledTextField(
-                              placeholder:
-                                  AppString.description.localize(context) ?? '',
-                              label:
-                                  AppString.description.localize(context) ?? '',
-                              width: fieldWidth,
-                              controller: _descriptionController,
-                              validator: _validateString,
-                            ),
-                            LabeledTextField(
-                              placeholder: AppString.floorRatePlaceholder
-                                  .localize(context)!,
-                              label:
-                                  AppString.floorRate.localize(context) ?? '',
-                              width: fieldWidth,
-                              controller: _floorRateController,
-                              validator: _validateInt,
-                            ),
-                            LabeledTextField(
-                              placeholder:
-                                  AppString.ratePerSqft.localize(context) ?? '',
-                              label:
-                                  AppString.ratePerSqft.localize(context) ?? '',
-                              width: fieldWidth,
-                              controller: _ratePerSqftController,
-                              validator: _validateInt,
-                            ),
-                            LabeledTextField(
-                              placeholder:
-                                  AppString.ratePerMonth.localize(context) ??
-                                      '',
-                              label: AppString.ratePerMonth.localize(context) ??
-                                  '',
-                              width: fieldWidth,
-                              controller: _ratePerMonthController,
-                              validator: _validateInt,
-                            ),
-                            LabeledTextField(
-                              placeholder: AppString
-                                  .locationLongitudePlaceholder
-                                  .localize(context)!,
-                              label: AppString.locationLongitude
-                                      .localize(context) ??
-                                  '',
-                              width: fieldWidth,
-                              controller: _longitudeController,
-                              validator: _validateFloat,
-                            ),
-                            LabeledTextField(
-                              placeholder: AppString.locationLatitudePlaceholder
-                                  .localize(context)!,
-                              label: AppString.locationLatitude
-                                      .localize(context) ??
-                                  '',
-                              width: fieldWidth,
-                              controller: _latitudeController,
-                              validator: _validateFloat,
-                            ),
-                            LabeledTextField(
-                              placeholder:
-                                  AppString.headOfTerms.localize(context) ?? '',
-                              label:
-                                  AppString.headOfTerms.localize(context) ?? '',
-                              width: fieldWidth,
-                              controller: _headOfTermsController,
-                              validator: _validateString,
-                            ),
-                            LabeledTextField(
-                              placeholder:
-                                  AppString.situation.localize(context) ?? '',
-                              label:
-                                  AppString.situation.localize(context) ?? '',
-                              width: fieldWidth,
-                              controller: _situationController,
-                              validator: _validateString,
-                            ),
-                            // Full width text field for remarks.
-                            LabeledTextField(
-                              placeholder:
-                                  AppString.remarks.localize(context) ?? '',
-                              label: AppString.remarks.localize(context) ?? '',
-                              width: fullWidth,
-                              controller: _remarksController,
-                              validator: _validateString,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        // Section title for image uploads.
-                        Text(
-                          AppString.uploadImgs.localize(context) ?? '',
-                          style: AppStyling.mediumTextSize14,
-                        ),
-                        const SizedBox(height: 16),
-                        // Image upload section using Wrap for responsive image display.
-                        Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          alignment: WrapAlignment.start,
-                          children: [
-                            // Display each uploaded image with a delete button.
-                            ...List.generate(
-                              uploadedImages.length,
-                              (index) {
-                                final image = uploadedImages[index];
-                                return ImageUpload(
-                                  imageFile: image is File ? image : null,
-                                  imagePath: image is String ? image : null,
-                                  onDelete: () => _deleteImage(index),
-                                  size: 128,
-                                );
-                              },
-                            ),
-                            // Button to upload a new image.
-                            ImageUpload(
-                              isUploadButton: true,
-                              onImagePicked: _onImagePicked,
-                              onDelete: () {},
-                              size: 128,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        // Row for Cancel, Save, and Send Data buttons.
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Cancel button.
-                            CustomButton(
-                              text: AppString.cancel.localize(context) ?? '',
-                              onPressed: () {},
-                              backgroundColor: colors(context).colorGrey1 ??
-                                  LightColorList.lightGrey50,
-                            ),
-                            Row(
-                              children: [
-                                // Save button.
-                                CustomButton(
-                                  text: AppString.save.localize(context) ?? '',
-                                  onPressed: _validateAndSubmit,
-                                  backgroundColor:
-                                      colors(context).colorPrimary5 ??
-                                          LightColorList.lightPrimary700,
-                                ),
-                                const SizedBox(width: 40),
-                                // Send data button.
-                                CustomButton(
-                                  text: AppString.sendData.localize(context) ??
-                                      '',
-                                  onPressed: _validateAndSubmit,
-                                  backgroundColor:
-                                      colors(context).colorPrimary1 ??
-                                          LightColorList.lightPrimary500,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+    return BlocListener<RentalEvidenceCubit, BaseState<RentalEvidenceState>>(
+      bloc: _cubit,
+      listener: (context, state) {
+        if (state is RentalEvidenceSubmitSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Rental evidence submitted successfully!'),
+              backgroundColor: Colors.green,
             ),
-          ],
+          );
+        } else if (state is RentalEvidenceSubmitFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${state.errorMessage}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        // Custom app bar with a localized title.
+        appBar: CustomAppBar(
+          title: AppString.rentalEvidence.localize(context) ?? '',
         ),
-      ),
-    );
+        // Allows the entire view to be scrollable.
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Breadcrumb navigation.
+              Breadcrumb(items: [
+                BreadcrumbItem(
+                    label: AppString.landAcquisition.localize(context) ?? ''),
+                BreadcrumbItem(label: AppString.masterFile.localize(context)!),
+                BreadcrumbItem(
+                    label:
+                        AppString.rentalEvidenceForm.localize(context) ?? ''),
+              ]),
+              // LayoutBuilder used to determine the width constraints for form fields.
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  double fieldWidth = constraints.maxWidth * 0.47;
+                  double fullWidth = constraints.maxWidth * 0.96;
+
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Wrap widget to arrange text fields responsively.
+                          Wrap(
+                            spacing: 16,
+                            runSpacing: 16,
+                            alignment: WrapAlignment.start,
+                            children: [
+                              // Each LabeledTextField represents a form field with a label and placeholder.
+                              LabeledTextField(
+                                placeholder: AppString.assesmentNoPlaceholder
+                                    .localize(context)!,
+                                label:
+                                    AppString.assesmentNo.localize(context) ??
+                                        '',
+                                width: fieldWidth,
+                                controller: _assessmentNoController,
+                                validator: _validateString,
+                              ),
+                              LabeledTextField(
+                                placeholder: AppString
+                                    .masterFileRefNoPlaceholder
+                                    .localize(context)!,
+                                label: AppString.masterFileRefNo
+                                        .localize(context) ??
+                                    '',
+                                width: fieldWidth,
+                                controller: _masterFileRefNoController,
+                                validator: _validateString,
+                              ),
+                              LabeledTextField(
+                                placeholder:
+                                    AppString.owner.localize(context) ?? '',
+                                label: AppString.owner.localize(context)!,
+                                width: fieldWidth,
+                                controller: _ownerController,
+                                validator: _validateString,
+                              ),
+                              LabeledTextField(
+                                placeholder:
+                                    AppString.occupier.localize(context) ?? '',
+                                label: AppString.occupier.localize(context)!,
+                                width: fieldWidth,
+                                controller: _occupierController,
+                                validator: _validateString,
+                              ),
+                              LabeledTextField(
+                                placeholder:
+                                    AppString.description.localize(context) ??
+                                        '',
+                                label:
+                                    AppString.description.localize(context) ??
+                                        '',
+                                width: fieldWidth,
+                                controller: _descriptionController,
+                                validator: _validateString,
+                              ),
+                              LabeledTextField(
+                                placeholder: AppString.floorRatePlaceholder
+                                    .localize(context)!,
+                                label:
+                                    AppString.floorRate.localize(context) ?? '',
+                                width: fieldWidth,
+                                controller: _floorRateController,
+                                validator: _validateInt,
+                              ),
+                              LabeledTextField(
+                                placeholder:
+                                    AppString.ratePerSqft.localize(context) ??
+                                        '',
+                                label:
+                                    AppString.ratePerSqft.localize(context) ??
+                                        '',
+                                width: fieldWidth,
+                                controller: _ratePerSqftController,
+                                validator: _validateInt,
+                              ),
+                              LabeledTextField(
+                                placeholder:
+                                    AppString.ratePerMonth.localize(context) ??
+                                        '',
+                                label:
+                                    AppString.ratePerMonth.localize(context) ??
+                                        '',
+                                width: fieldWidth,
+                                controller: _ratePerMonthController,
+                                validator: _validateInt,
+                              ),
+                              LabeledTextField(
+                                placeholder: AppString
+                                    .locationLongitudePlaceholder
+                                    .localize(context)!,
+                                label: AppString.locationLongitude
+                                        .localize(context) ??
+                                    '',
+                                width: fieldWidth,
+                                controller: _longitudeController,
+                                validator: _validateFloat,
+                              ),
+                              LabeledTextField(
+                                placeholder: AppString
+                                    .locationLatitudePlaceholder
+                                    .localize(context)!,
+                                label: AppString.locationLatitude
+                                        .localize(context) ??
+                                    '',
+                                width: fieldWidth,
+                                controller: _latitudeController,
+                                validator: _validateFloat,
+                              ),
+                              LabeledTextField(
+                                placeholder:
+                                    AppString.headOfTerms.localize(context) ??
+                                        '',
+                                label:
+                                    AppString.headOfTerms.localize(context) ??
+                                        '',
+                                width: fieldWidth,
+                                controller: _headOfTermsController,
+                                validator: _validateString,
+                              ),
+                              LabeledTextField(
+                                placeholder:
+                                    AppString.situation.localize(context) ?? '',
+                                label:
+                                    AppString.situation.localize(context) ?? '',
+                                width: fieldWidth,
+                                controller: _situationController,
+                                validator: _validateString,
+                              ),
+                              // Full width text field for remarks.
+                              LabeledTextField(
+                                placeholder:
+                                    AppString.remarks.localize(context) ?? '',
+                                label:
+                                    AppString.remarks.localize(context) ?? '',
+                                width: fullWidth,
+                                controller: _remarksController,
+                                validator: _validateString,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          // Section title for image uploads.
+                          Text(
+                            AppString.uploadImgs.localize(context) ?? '',
+                            style: AppStyling.mediumTextSize14,
+                          ),
+                          const SizedBox(height: 16),
+                          // Image upload section using Wrap for responsive image display.
+                          Wrap(
+                            spacing: 16,
+                            runSpacing: 16,
+                            alignment: WrapAlignment.start,
+                            children: [
+                              // Display each uploaded image with a delete button.
+                              ...List.generate(
+                                uploadedImages.length,
+                                (index) {
+                                  final image = uploadedImages[index];
+                                  return ImageUpload(
+                                    imageFile: image is File ? image : null,
+                                    imagePath: image is String ? image : null,
+                                    onDelete: () => _deleteImage(index),
+                                    size: 128,
+                                  );
+                                },
+                              ),
+                              // Button to upload a new image.
+                              ImageUpload(
+                                isUploadButton: true,
+                                onImagePicked: _onImagePicked,
+                                onDelete: () {},
+                                size: 128,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          // Row for Cancel, Save, and Send Data buttons.
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Cancel button.
+                              CustomButton(
+                                text: AppString.cancel.localize(context) ?? '',
+                                onPressed: () {},
+                                backgroundColor: colors(context).colorGrey1 ??
+                                    LightColorList.lightGrey50,
+                              ),
+                              Row(
+                                children: [
+                                  // Save button.
+                                  CustomButton(
+                                    text:
+                                        AppString.save.localize(context) ?? '',
+                                    onPressed: _validateAndSubmit,
+                                    backgroundColor:
+                                        colors(context).colorPrimary5 ??
+                                            LightColorList.lightPrimary700,
+                                  ),
+                                  const SizedBox(width: 40),
+                                  // Send data button.
+                                  CustomButton(
+                                    text:
+                                        AppString.sendData.localize(context) ??
+                                            '',
+                                    onPressed: _validateAndSubmit,
+                                    backgroundColor:
+                                        colors(context).colorPrimary1 ??
+                                            LightColorList.lightPrimary500,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ), // Closing Scaffold
+    ); // Closing BlocListener
   }
 
   // Returns the cubit instance for managing state.
