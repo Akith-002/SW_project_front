@@ -161,7 +161,8 @@ class _AssetListTableState extends State<AssetListTable> {
                         } else {
                           // Show create rating card dialog for new rating card
                           EditRatingCardDialog.showAddRatingCardDialog(context,
-                              sourceContext: widget.assetType);
+                              sourceContext: widget.assetType,
+                              asset: selectedAsset);
                         }
                       } else {
                         // Multiple assets selected - show multi-select decision dialog
