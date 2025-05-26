@@ -1,13 +1,7 @@
 import '../../domain/repositories/mr_request_repository.dart';
 import '../models/mr_request_model.dart';
+import '../models/paginated_response_mr.dart';
 import '../datasource/remote/mr_request_remote_datasource.dart';
-
-class PaginatedResponse<T> {
-  final List<T> items;
-  final String? nextPageToken;
-
-  PaginatedResponse({required this.items, this.nextPageToken});
-}
 
 class MrRepositoryImpl implements MrRequestRepository {
   final MRRequestRemoteDataSource _remoteDataSource;

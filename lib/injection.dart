@@ -42,6 +42,12 @@ import 'package:land_asset_valuation/data/repositories/mr_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/mr_request_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/mr_requests_usecases.dart';
 
+// Asset Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/asset_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/asset_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/asset_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/asset_usecases.dart';
+
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
@@ -139,10 +145,24 @@ Future<void> init() async {
   injection.registerLazySingleton<MrRequestRepository>(
     () => MrRepositoryImpl(remoteDataSource: injection()),
   );
-
   injection.registerLazySingleton(() => GetMrRequestsUseCase(injection()));
   injection
       .registerLazySingleton(() => GetMrRequestsPaginatedUseCase(injection()));
+
+  // ------------------------------
+  // Asset Feature (Clean Architecture)
+  // ------------------------------
+  injection.registerLazySingleton<AssetRemoteDataSource>(
+    () => AssetRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<AssetRepository>(
+    () => AssetRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(() => GetAssetsUseCase(injection()));
+  injection.registerLazySingleton(() => GetAssetsPaginatedUseCase(injection()));
+  injection.registerLazySingleton(() => SearchAssetsUseCase(injection()));
 
   // ------------------------------
   // Cubits (UI Layer)
@@ -152,8 +172,12 @@ Future<void> init() async {
   injection.registerFactory(() => SigninCubit(appSharedData: injection()));
   injection
       .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => MrAssetsListCubit(appSharedData: injection()));
+  injection.registerFactory(() => MrAssetsListCubit(
+        appSharedData: injection(),
+        getAssetsUseCase: injection(),
+        getAssetsPaginatedUseCase: injection(),
+        searchAssetsUseCase: injection(),
+      ));
   injection
       .registerFactory(() => RaAssetsListCubit(appSharedData: injection()));
   injection

@@ -28,7 +28,22 @@ class Asset {
       assetNo: json['assetNo'] ?? '',
       ward: json['ward'] ?? '',
       rdSt: json['rdSt'] ?? '',
-      description: json['description'] ?? '',
+      description: json['description']?.toString() ?? '',
+      owner: json['owner'] ?? '',
+      status: AssetStatusExtension.fromString(json['status'] ?? 'pending'),
+      isRatingCard: json['isRatingCard'] ?? false,
+      area: json['area']?.toDouble(),
+      location: json['location'],
+    );
+  }
+  // Factory method for API responses that use 'assetId' instead of 'id'
+  factory Asset.fromApiJson(Map<String, dynamic> json) {
+    return Asset(
+      id: json['assetId'] ?? json['id'] ?? 0,
+      assetNo: json['assetNo'] ?? '',
+      ward: json['ward'] ?? '',
+      rdSt: json['rdSt'] ?? '',
+      description: json['description']?.toString() ?? '',
       owner: json['owner'] ?? '',
       status: AssetStatusExtension.fromString(json['status'] ?? 'pending'),
       isRatingCard: json['isRatingCard'] ?? false,

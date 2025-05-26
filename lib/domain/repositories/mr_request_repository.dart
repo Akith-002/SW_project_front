@@ -1,5 +1,5 @@
 import '../../data/models/mr_request_model.dart';
-import '../../data/repositories/mr_repository_impl.dart'; // For PaginatedResponse
+import '../../data/models/paginated_response_mr.dart';
 
 abstract class MrRequestRepository {
   Future<List<MrRequest>> getMrRequests({

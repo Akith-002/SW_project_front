@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 import 'package:land_asset_valuation/domain/usecases/mr_requests_usecases.dart';
 import 'package:land_asset_valuation/data/models/mr_request_model.dart';
-import 'package:land_asset_valuation/data/repositories/mr_repository_impl.dart';
+import 'package:land_asset_valuation/data/models/paginated_response_mr.dart';
 
 part 'mr_requests_state.dart';
 
