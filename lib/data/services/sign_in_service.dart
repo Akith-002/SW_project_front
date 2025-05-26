@@ -1,34 +1,20 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
+import 'package:land_asset_valuation/data/models/auth/login_request.dart';
+import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
 
 class SignInService {
-  final AppSharedData sharedData;
+  final AuthRepository _authRepository;
 
-  SignInService({required this.sharedData});
+  SignInService({required AuthRepository authRepository})
+      : _authRepository = authRepository;
 
   Future<bool> login(String username, String password) async {
-    final url = Uri.parse('http://10.0.2.2:5221/api/Auth/login');
-
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'password': password}),
+    final result = await _authRepository.login(
+      LoginRequest(username: username, password: password),
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      // Store token using your AppSharedData
-      sharedData.setData("accessToken", data["token"]);
-
-      // You can also store additional info if needed
-      sharedData.setData("username", data["username"]);
-      sharedData.setData("empName", data["empName"]);
-
-      return true;
-    } else {
-      return false;
-    }
+    return result.fold(
+      (failure) => false,
+      (response) => true,
+    );
   }
 }

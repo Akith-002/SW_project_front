@@ -17,6 +17,7 @@ import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.
 import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class I3MasterFileList extends StatefulWidget {
   final int number;
@@ -35,29 +36,19 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
   final GlobalKey<TableScaffoldState> _tableKey =
       GlobalKey<TableScaffoldState>();
   late final LandAcquisitionRepository _repository;
-
-  int _masterFileCount = 0;
+  int _totalCount = 0;
 
   @override
   void initState() {
     super.initState();
     _repository = injection<LandAcquisitionRepository>();
-    _loadMasterFileCount();
   }
 
-  void _loadMasterFileCount() async {
-    try {
-      final response =
-          await http.get(Uri.parse("http://10.0.2.2:5221/api/LAMasterfile"));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> list = data['masterFiles'];
-        setState(() {
-          _masterFileCount = list.length;
-        });
-      }
-    } catch (e) {
-      print("Failed to load master file count: $e");
+  void _updateTotalCount(int count) {
+    if (mounted && _totalCount != count) {
+      setState(() {
+        _totalCount = count;
+      });
     }
   }
 
@@ -95,7 +86,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             breadcrumbItems: [
               AppString.landAcquisition.localize(context)!,
             ],
-            totalCount: _masterFileCount,
+            totalCount: _totalCount,
             onSearch: (query) {
               _tableKey.currentState?.search(query);
             },
@@ -103,6 +94,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
               key: _tableKey,
               pageSource: currentPageSource,
               repository: _repository,
+              onTotalCountChanged: _updateTotalCount,
             ),
           ),
         );
