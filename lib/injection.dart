@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/cubit/lm_masterfile_list_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // App setup
@@ -47,6 +48,14 @@ import 'package:land_asset_valuation/data/datasource/remote/asset_remote_data_so
 import 'package:land_asset_valuation/data/repositories/asset_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/asset_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/asset_usecases.dart';
+
+// Land Miscellaneous Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/land_miscellaneous_remote_datasource.dart';
+import 'package:land_asset_valuation/data/repositories/land_miscellaneous_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/get_all_lm_master_files_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_paginated_lm_master_files_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/search_lm_master_files_usecase.dart';
 
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
@@ -121,7 +130,6 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => SendRentalEvidenceUseCase(injection()),
   );
-
   // ------------------------------
   // Land Acquisition Feature (Clean Architecture)
   // ------------------------------
@@ -134,6 +142,23 @@ Future<void> init() async {
   injection
       .registerLazySingleton(() => GetPaginatedMasterFilesUseCase(injection()));
   injection.registerLazySingleton(() => SearchMasterFilesUseCase(injection()));
+
+  // ------------------------------
+  // Land Miscellaneous Feature (Clean Architecture)
+  // ------------------------------
+  injection.registerLazySingleton<LandMiscellaneousRemoteDatasource>(
+    () => LandMiscellaneousRemoteDatasource(injection()),
+  );
+
+  injection.registerLazySingleton<LandMiscellaneousRepository>(
+    () => LandMiscellaneousRepositoryImpl(injection()),
+  );
+  injection
+      .registerLazySingleton(() => GetAllLmMasterFilesUseCase(injection()));
+  injection.registerLazySingleton(
+      () => GetPaginatedLMMasterFilesUseCase(injection()));
+  injection
+      .registerLazySingleton(() => SearchLmMasterFilesUseCase(injection()));
 
   // ------------------------------
   // MR Requests Feature (Clean Architecture)
@@ -220,5 +245,11 @@ Future<void> init() async {
   injection.registerFactory(() => AssetDivisionCubit(
         divideAssetUseCase: injection(),
         validateAssetDivisionUseCase: injection(),
+      ));
+  injection.registerFactory(() => LmMasterfileListCubit(
+        appSharedData: injection(),
+        getAllUseCase: injection(),
+        getPaginatedUseCase: injection(),
+        searchUseCase: injection(),
       ));
 }
