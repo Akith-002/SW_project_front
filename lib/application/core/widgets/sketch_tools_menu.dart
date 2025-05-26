@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:land_asset_valuation/application/core/utils/app_colors/light_color_list.dart'; // Assuming this path is correct
-import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart'; // Assuming this path is correct
-import 'package:land_asset_valuation/application/core/utils/app_strings.dart'; // Assuming this path is correct
-import 'package:land_asset_valuation/application/core/utils/app_styling.dart'; // Assuming this path is correct
+import 'package:land_asset_valuation/application/core/utils/app_colors/light_color_list.dart';
+import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
+import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
+import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-// For debugPrint
 
 class SketchToolsMenu extends StatefulWidget {
   final Function(String)? onToolSelected;
@@ -12,7 +11,7 @@ class SketchToolsMenu extends StatefulWidget {
   final bool isViewInsideMode;
 
   const SketchToolsMenu({
-    super.key, // Use super.key for modern Flutter conventions
+    super.key,
     this.onToolSelected,
     this.initialTool,
     this.isViewInsideMode = false,
@@ -41,14 +40,6 @@ class _SketchToolsMenuState extends State<SketchToolsMenu> {
     // Debug print update triggers
     debugPrint(
         "SketchToolsMenu didUpdateWidget: New isViewInside=${widget.isViewInsideMode}, Old=${oldWidget.isViewInsideMode}, New initialTool=${widget.initialTool}, Old=${oldWidget.initialTool}, Current internal tool=$_selectedTool");
-
-    // --- State Synchronization Logic ---
-    // Because the parent (MapScreen) now uses a ValueKey that changes *only* when
-    // `isViewInsideMode` changes, this `didUpdateWidget` will primarily be called
-    // when other properties change *without* the mode changing (e.g., `initialTool`
-    // is updated by the parent for reasons other than entering/exiting view inside).
-    // The mode change itself usually triggers a widget replacement (initState).
-    // However, we keep robust checks here for safety and flexibility.
 
     bool needsSetState = false;
 

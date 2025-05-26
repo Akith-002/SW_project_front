@@ -18,7 +18,4 @@ class SessionExpireState<K> extends BaseState<K> {
   SessionExpireState({required this.error});
 }
 
-class ConnectionFailureState<K> extends BaseState<K> {
-
-}
-
+class ConnectionFailureState<K> extends BaseState<K> {}

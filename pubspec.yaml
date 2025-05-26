@@ -70,10 +70,19 @@ dependencies:
   dropdown_search: ^6.0.2
   dio: ^5.8.0+1
   dartz: ^0.10.1
+  json_serializable: ^6.9.5
+  json_annotation: ^4.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mockito: ^5.4.4 # Explicitly use the latest stable version
+  build_runner: ^2.4.9 # Keep recent stable build_runner
+  bloc_test: ^9.1.7 # Add bloc_test dependency
+
+dependency_overrides:
+  analyzer: ^6.4.1 # Override analyzer to a version compatible with mockito 5.4.4
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.
@@ -82,12 +91,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
   assets:
     - .env
     - images/pngs/
-    - images/svgs/
-    - images/animations/
     - locales/
     - fonts/
   # To add assets to your application, add an assets section, like this:
