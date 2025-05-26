@@ -1,5 +1,6 @@
 import '../../domain/repositories/land_acquisition_repository.dart';
 import '../models/land_acquisition_master_file_model.dart';
+import '../models/paginated_response.dart';
 import '../datasource/remote/land_acquisition_remote_datasource.dart';
 
 class LandAcquisitionRepositoryImpl implements LandAcquisitionRepository {
@@ -8,8 +9,14 @@ class LandAcquisitionRepositoryImpl implements LandAcquisitionRepository {
   LandAcquisitionRepositoryImpl(this.remoteDatasource);
 
   @override
-  Future<List<LandAcquisitionMasterFile>> getAllMasterFiles() {
-    return remoteDatasource.getAllMasterFiles();
+  Future<PaginatedResponse<LandAcquisitionMasterFile>> getPaginatedMasterFiles({
+    required int page,
+    required int pageSize,
+  }) {
+    return remoteDatasource.getPaginatedMasterFiles(
+      page: page,
+      pageSize: pageSize,
+    );
   }
 
   @override

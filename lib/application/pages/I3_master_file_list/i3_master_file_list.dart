@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
@@ -16,6 +15,7 @@ import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
 import 'package:land_asset_valuation/application/pages/mr_requests/cubit/mr_requests_cubit.dart';
+import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -35,12 +35,14 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
   final searchController = TextEditingController();
   final GlobalKey<TableScaffoldState> _tableKey =
       GlobalKey<TableScaffoldState>();
+  late final LandAcquisitionRepository _repository;
 
   int _masterFileCount = 0;
 
   @override
   void initState() {
     super.initState();
+    _repository = injection<LandAcquisitionRepository>();
     _loadMasterFileCount();
   }
 
@@ -107,6 +109,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             table: TableScaffold(
               key: _tableKey,
               pageSource: currentPageSource,
+              repository: _repository,
             ),
           ),
         );

@@ -425,15 +425,29 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.buildingCategory.localize(context) ?? '',
-                items: ["Residential", "Commercial", "Industrial"],
+                items: [
+                  "Select Building Category",
+                  "Residential",
+                  "Commercial",
+                  "Industrial"
+                ],
                 initialValue: "Select Building Category",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Building Category"),
               ),
               CustomDropdownField(
                 label: AppString.buildingClass.localize(context) ?? '',
-                items: ["Class A", "Class B", "Class C"],
+                items: [
+                  "Select Building Class",
+                  "Class A",
+                  "Class B",
+                  "Class C"
+                ],
                 initialValue: "Select Building Class",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Building Class"),
               ),
             ]),
 
@@ -525,15 +539,31 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.natureOfConstruction.localize(context) ?? '',
-                items: ["New", "Good", "Needs Repair", "Poor"],
+                items: [
+                  "Select Nature of Building",
+                  "New",
+                  "Good",
+                  "Needs Repair",
+                  "Poor"
+                ],
                 initialValue: "Select Nature of Building",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Nature of Building"),
               ),
               CustomDropdownField(
                 label: AppString.condition.localize(context) ?? '',
-                items: ["New", "Good", "Needs Repair", "Poor"],
+                items: [
+                  "Select Building Condition",
+                  "New",
+                  "Good",
+                  "Needs Repair",
+                  "Poor"
+                ],
                 initialValue: "Select Building Condition",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Building Condition"),
               ),
             ]),
 
@@ -548,30 +578,43 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.roofMaterial.localize(context) ?? '',
-                items: ["Concrete", "Metal", "Tiles"],
+                items: ["Select Roof Material", "Concrete", "Metal", "Tiles"],
                 initialValue: "Select Roof Material",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Roof Material"),
               ),
               CustomDropdownField(
                 label: AppString.roofFrame.localize(context) ?? '',
-                items: ["Steel", "Wood", "Concrete"],
+                items: ["Select Roof Frame", "Steel", "Wood", "Concrete"],
                 initialValue: "Select Roof Frame",
                 onChanged: (value) {},
+                validator: (value) =>
+                    InspectionValidator.validateDropdown(value, "Roof Frame"),
               ),
             ]),
 
             _buildRow([
               CustomDropdownField(
                 label: AppString.roofFinisher.localize(context) ?? '',
-                items: ["Painted", "Varnished", "Other"],
+                items: [
+                  "Select Roof Finisher",
+                  "Painted",
+                  "Varnished",
+                  "Other"
+                ],
                 initialValue: "Select Roof Finisher",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Roof Finisher"),
               ),
               CustomDropdownField(
                 label: AppString.ceiling.localize(context) ?? '',
-                items: ["Plasterboard", "Wood", "PVC"],
+                items: ["Select Ceiling", "Plasterboard", "Wood", "PVC"],
                 initialValue: "Select Ceiling",
                 onChanged: (value) {},
+                validator: (value) =>
+                    InspectionValidator.validateDropdown(value, "Ceiling"),
               ),
             ]),
 
@@ -586,24 +629,30 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.foundationStructure.localize(context) ?? '',
-                items: ["Pile", "Raft", "Pad"],
+                items: ["Select Foundation Structure", "Pile", "Raft", "Pad"],
                 initialValue: "Select Foundation Structure",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Foundation Structure"),
               ),
               CustomDropdownField(
                 label: AppString.wallStructure.localize(context) ?? '',
-                items: ["Brick", "Concrete", "Wood"],
+                items: ["Select Wall Structure", "Brick", "Concrete", "Wood"],
                 initialValue: "Select Wall Structure",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Wall Structure"),
               ),
             ]),
 
             _buildRow([
               CustomDropdownField(
                 label: AppString.floorStructure.localize(context) ?? '',
-                items: ["Concrete", "Wood", "Tile"],
+                items: ["Select Floor Structure", "Concrete", "Wood", "Tile"],
                 initialValue: "Select Floor Structure",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Floor Structure"),
               ),
             ]),
 
@@ -617,56 +666,90 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.door.localize(context) ?? '',
-                items: ["Wooden", "Glass", "Metal"],
+                items: ["Select Door", "Wooden", "Glass", "Metal"],
                 initialValue: "Select Door",
                 onChanged: (value) {},
+                validator: (value) =>
+                    InspectionValidator.validateDropdown(value, "Door"),
               ),
               CustomDropdownField(
                 label: AppString.window.localize(context) ?? '',
-                items: ["Sliding", "Casement", "Fixed"],
+                items: ["Select Window", "Sliding", "Casement", "Fixed"],
                 initialValue: "Select Window",
                 onChanged: (value) {},
+                validator: (value) =>
+                    InspectionValidator.validateDropdown(value, "Window"),
               ),
             ]),
 
             _buildRow([
               CustomDropdownField(
                 label: AppString.windowProtection.localize(context) ?? '',
-                items: ["Grills", "Shutters", "None"],
+                items: [
+                  "Select Window Protection",
+                  "Grills",
+                  "Shutters",
+                  "None"
+                ],
                 initialValue: "Select Window Protection",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Window Protection"),
               ),
               CustomDropdownField(
                 label:
                     AppString.doorsBathroomToiletFittings.localize(context) ??
                         '',
-                items: ["Standard", "Luxury", "Basic"],
+                items: [
+                  "Select Doors Bathroom and Toilet Fittings",
+                  "Standard",
+                  "Luxury",
+                  "Basic"
+                ],
                 initialValue: "Select Doors Bathroom and Toilet Fittings",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Doors Bathroom and Toilet Fittings"),
               ),
             ]),
 
             _buildRow([
               CustomDropdownField(
                 label: AppString.doorsHandRail.localize(context) ?? '',
-                items: ["Steel", "Wood", "Glass"],
+                items: ["Select Doors Hand Rail", "Steel", "Wood", "Glass"],
                 initialValue: "Select Doors Hand Rail",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Doors Hand Rail"),
               ),
               CustomDropdownField(
                 label: AppString.doorsPantryCupboard.localize(context) ?? '',
-                items: ["Laminated", "Wood", "PVC"],
+                items: [
+                  "Select Doors Pantry Cupboard",
+                  "Laminated",
+                  "Wood",
+                  "PVC"
+                ],
                 initialValue: "Select Doors Pantry Cupboard",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Doors Pantry Cupboard"),
               ),
             ]),
 
             _buildRow([
               CustomDropdownField(
                 label: AppString.doorsOther.localize(context) ?? '',
-                items: ["Double Door", "Sliding", "Automatic"],
+                items: [
+                  "Select Doors Other",
+                  "Double Door",
+                  "Sliding",
+                  "Automatic"
+                ],
                 initialValue: "Select Doors Other",
                 onChanged: (value) {},
+                validator: (value) =>
+                    InspectionValidator.validateDropdown(value, "Doors Other"),
               ),
             ]),
 
@@ -681,30 +764,43 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.wallFinisher.localize(context) ?? '',
-                items: ["Paint", "Tiles", "Wallpaper"],
+                items: ["Select Wall Finisher", "Paint", "Tiles", "Wallpaper"],
                 initialValue: "Select Wall Finisher",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Wall Finisher"),
               ),
               CustomDropdownField(
                 label: AppString.floorFinisher.localize(context) ?? '',
-                items: ["Tile", "Carpet", "Wood"],
+                items: ["Select Floor Finisher", "Tile", "Carpet", "Wood"],
                 initialValue: "Select Floor Finisher",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Floor Finisher"),
               ),
             ]),
 
             _buildRow([
               CustomDropdownField(
                 label: AppString.bathroomToilet.localize(context) ?? '',
-                items: ["Tiled", "PVC", "Concrete"],
+                items: [
+                  "Select Bathroom and Toilet",
+                  "Tiled",
+                  "PVC",
+                  "Concrete"
+                ],
                 initialValue: "Select Bathroom and Toilet",
                 onChanged: (value) {},
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Bathroom and Toilet"),
               ),
               CustomDropdownField(
                 label: AppString.services.localize(context) ?? '',
-                items: ["Electricity", "Plumbing", "HVAC"],
+                items: ["Select Services", "Electricity", "Plumbing", "HVAC"],
                 initialValue: "Select Services",
                 onChanged: (value) {},
+                validator: (value) =>
+                    InspectionValidator.validateDropdown(value, "Services"),
               ),
             ]),
 

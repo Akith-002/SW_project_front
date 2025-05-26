@@ -33,7 +33,7 @@ import 'package:land_asset_valuation/domain/usecases/send_rental_evidence_usecas
 import 'package:land_asset_valuation/data/datasource/remote/land_acquisition_remote_datasource.dart';
 import 'package:land_asset_valuation/data/repositories/land_acquisition_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
-import 'package:land_asset_valuation/domain/usecases/get_all_master_files_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_paginated_master_files_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/search_master_files_usecase.dart';
 
 // MR Requests Feature (Clean Architecture)
@@ -101,7 +101,6 @@ Future<void> init() async {
     () => AssetDivisionRepositoryImpl(remoteDataSource: injection()),
   );
 
-
   // ------------------------------
   // Rental Evidence Feature
   // ------------------------------
@@ -123,11 +122,11 @@ Future<void> init() async {
   injection.registerLazySingleton<LandAcquisitionRemoteDatasource>(
     () => LandAcquisitionRemoteDatasource(injection()),
   );
-
   injection.registerLazySingleton<LandAcquisitionRepository>(
     () => LandAcquisitionRepositoryImpl(injection()),
   );
-  injection.registerLazySingleton(() => GetAllMasterFilesUseCase(injection()));
+  injection
+      .registerLazySingleton(() => GetPaginatedMasterFilesUseCase(injection()));
   injection.registerLazySingleton(() => SearchMasterFilesUseCase(injection()));
 
   // ------------------------------
@@ -141,17 +140,9 @@ Future<void> init() async {
     () => MrRepositoryImpl(remoteDataSource: injection()),
   );
 
-  injection.registerLazySingleton<MrRepositoryImpl>(
-    () => MrRepositoryImpl(remoteDataSource: injection()),
-  );
-
-  injection.registerLazySingleton(
-    () => GetMrRequestsUseCase(injection<MrRequestRepository>()),
-  );
-
-  injection.registerLazySingleton(
-    () => GetMrRequestsPaginatedUseCase(injection<MrRepositoryImpl>()),
-  );
+  injection.registerLazySingleton(() => GetMrRequestsUseCase(injection()));
+  injection
+      .registerLazySingleton(() => GetMrRequestsPaginatedUseCase(injection()));
 
   // ------------------------------
   // Cubits (UI Layer)
@@ -159,31 +150,41 @@ Future<void> init() async {
   injection.registerFactory(() => SplashCubit(appSharedData: injection()));
   injection.registerFactory(() => DashboardCubit(appSharedData: injection()));
   injection.registerFactory(() => SigninCubit(appSharedData: injection()));
-  injection.registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
-  injection.registerFactory(() => MrAssetsListCubit(appSharedData: injection()));
-  injection.registerFactory(() => RaAssetsListCubit(appSharedData: injection()));
-  injection.registerFactory(() => RbAssetsListCubit(appSharedData: injection()));
-  injection.registerFactory(() => RoAssetsListCubit(appSharedData: injection()));
-  
+  injection
+      .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => MrAssetsListCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => RaAssetsListCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => RbAssetsListCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => RoAssetsListCubit(appSharedData: injection()));
+
   injection.registerFactory(() => RentalEvidenceCubit(
         appSharedData: injection(),
         sendRentalEvidenceUseCase: injection(),
       ));
-  
-  injection.registerFactory(() => I2RentalEvidenceCubit(appSharedData: injection()));
-  injection.registerFactory(() => SettingsScreenCubit(appSharedData: injection()));
-  injection.registerFactory(() => LaSalesEvidenceCubit(appSharedData: injection()));
-  
+
+  injection
+      .registerFactory(() => I2RentalEvidenceCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => SettingsScreenCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => LaSalesEvidenceCubit(appSharedData: injection()));
+
   injection.registerFactory(() => ConditionReportCubit(
         appSharedData: injection(),
         sendConditionReportUseCase: injection(),
       ));
-  
-  injection.registerFactory(() => PastValuationCubit(appSharedData: injection()));
-  injection.registerFactory(() => InspectionReportCubit(appSharedData: injection()));
-    injection.registerFactory(() => I3MasterFileListCubit(
+
+  injection
+      .registerFactory(() => PastValuationCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+  injection.registerFactory(() => I3MasterFileListCubit(
         appSharedData: injection(),
-        getAllUseCase: injection(),
+        getPaginatedUseCase: injection(),
         searchUseCase: injection(),
       ));
 
