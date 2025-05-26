@@ -10,8 +10,12 @@ abstract class LandMiscellaneousRepository {
     required int page,
     required int limit,
   });
-  Future<Either<Failure, List<LandMiscellaneousMasterFile>>>
+  Future<Either<Failure, PaginatedResponse<LandMiscellaneousMasterFile>>>
       getAllMasterFiles();
-  Future<Either<Failure, List<LandMiscellaneousMasterFile>>> searchMasterFiles(
-      String query);
+  Future<Either<Failure, PaginatedResponse<LandMiscellaneousMasterFile>>>
+      searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+  });
 }
