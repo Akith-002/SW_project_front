@@ -69,23 +69,30 @@ class TableScaffoldState extends State<TableScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<PaginatedResponse<LandAcquisitionMasterFile>>(
-        future: _futurePlans,
-        builder: (context, snapshot) {
-          if (_searchResults != null) {
-            return _buildTable(_searchResults!, null);
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: FutureBuilder<PaginatedResponse<LandAcquisitionMasterFile>>(
+              future: _futurePlans,
+              builder: (context, snapshot) {
+                if (_searchResults != null) {
+                  return _buildTable(_searchResults!, null);
+                }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error loading data: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
-            return const Center(child: Text("No records found"));
-          }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                      child: Text("Error loading data: ${snapshot.error}"));
+                } else if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
+                  return const Center(child: Text("No records found"));
+                }
 
-          return _buildTable(snapshot.data!.items, snapshot.data);
-        },
+                return _buildTable(snapshot.data!.items, snapshot.data);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -101,44 +108,48 @@ class TableScaffoldState extends State<TableScaffold> {
     return Column(
       children: [
         // Table Section
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: 1000,
-            child: DataTable(
-              columns: const [
-                DataColumn(label: Text("Master File No")),
-                DataColumn(label: Text("Plan Type")),
-                DataColumn(label: Text("Plan No")),
-                DataColumn(label: Text("Requesting Authority Reference No")),
-                DataColumn(label: Center(child: Text("Status"))),
-                DataColumn(label: Center(child: Text("Action"))),
-              ],
-              rows: plans.map((plan) {
-                return DataRow(cells: [
-                  DataCell(Text(plan.masterFileNo.toString())),
-                  DataCell(Text(plan.planType)),
-                  DataCell(Text(plan.planNo.toString())),
-                  DataCell(Text(plan.requestingAuthorityReferenceNo)),
-                  DataCell(Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(plan.status).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      plan.status,
-                      style: TextStyle(
-                        color: _getStatusColor(plan.status),
-                        fontWeight: FontWeight.bold,
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columnSpacing: 20,
+                horizontalMargin: 12,
+                columns: const [
+                  DataColumn(label: Text("Master File No")),
+                  DataColumn(label: Text("Plan Type")),
+                  DataColumn(label: Text("Plan No")),
+                  DataColumn(label: Text("Requesting Authority Ref No")),
+                  DataColumn(label: Center(child: Text("Status"))),
+                  DataColumn(label: Center(child: Text("Action"))),
+                ],
+                rows: plans.map((plan) {
+                  return DataRow(cells: [
+                    DataCell(Text(plan.masterFileNo.toString())),
+                    DataCell(Text(plan.planType)),
+                    DataCell(Text(plan.planNo.toString())),
+                    DataCell(Text(plan.requestingAuthorityReferenceNo)),
+                    DataCell(Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(plan.status).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          plan.status,
+                          style: TextStyle(
+                            color: _getStatusColor(plan.status),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  )),
-                  DataCell(
-                    SizedBox(
-                      height: 52,
-                      child: Row(
+                    )),
+                    DataCell(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           iconButtonWidget(
                             color: colors(context).colorGrey8!,
@@ -153,20 +164,21 @@ class TableScaffoldState extends State<TableScaffold> {
                         ],
                       ),
                     ),
-                  ),
-                ]);
-              }).toList(),
+                  ]);
+                }).toList(),
+              ),
             ),
           ),
         ),
 
         // Footer Section
-        Padding(
+        Container(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text("Show "),
                   DropdownButton<int>(
@@ -192,6 +204,7 @@ class TableScaffoldState extends State<TableScaffold> {
               ),
               Text("$startRecord-$endRecord of $totalCount Records"),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
