@@ -2,35 +2,32 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:land_asset_valuation/application/core/error/exceptions.dart';
 import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
-import 'package:land_asset_valuation/data/models/condition_report_model.dart';
+import 'package:land_asset_valuation/data/models/rental_evidence_model.dart';
 import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
-abstract class ConditionReportRemoteDataSource {
-  Future<bool> sendConditionReport(ConditionReportModel report);
+abstract class RentalEvidenceRemoteDataSource {
+  Future<bool> sendRentalEvidence(RentalEvidenceModel report);
 }
 
-class ConditionReportRemoteDataSourceImpl
-    implements ConditionReportRemoteDataSource {
+class RentalEvidenceRemoteDataSourceImpl
+    implements RentalEvidenceRemoteDataSource {
   final DioClient dioClient;
   final Logger _logger = Logger();
 
-  ConditionReportRemoteDataSourceImpl({required this.dioClient});
+  RentalEvidenceRemoteDataSourceImpl({required this.dioClient});
 
   @override
-  Future<bool> sendConditionReport(ConditionReportModel report) async {
+  Future<bool> sendRentalEvidence(RentalEvidenceModel report) async {
     try {
       // Get the full API URL for debugging
-      final String endpoint = '/ConditionReport';
-      // final String fullUrl =
-      //     '${AppConfig.apiBaseUrl}${endpoint.startsWith('/') ? endpoint.substring(1) : endpoint}';
+      final String endpoint = '/RentalEvidenceLA';
 
-      // // Debug: Log API call details
-      // _logger.d('======= REMOTE DATA SOURCE: MAKING API CALL =======');
-      // _logger.d('Base URL: ${AppConfig.apiBaseUrl}');
-      // _logger.d('Endpoint: $endpoint');
-      // _logger.d('FULL URL: $fullUrl');
-      // _logger.d('Report data: ${report.toJson()}');
-      // _logger.d('===========================================');
+      // Debug: Log API call details
+      _logger.d('======= REMOTE DATA SOURCE: MAKING API CALL =======');
+      _logger.d('Base URL: ${AppConfig.apiBaseUrl}');
+      _logger.d('Endpoint: $endpoint');
+      _logger.d('Report data: ${report.toJson()}');
+      _logger.d('===========================================');
 
       final response = await dioClient.post(
         endpoint,
@@ -49,22 +46,20 @@ class ConditionReportRemoteDataSourceImpl
         _logger.e(
             '======= REMOTE DATA SOURCE: API ERROR - UNEXPECTED STATUS CODE =======');
         _logger.e('Status Code: ${response.statusCode}');
+        _logger.e('Response Data: ${response.data}');
         _logger.e('===========================================');
         throw ServerException();
       }
     } on DioException catch (e) {
       _logger.e('======= REMOTE DATA SOURCE: DIO EXCEPTION =======');
-      _logger.e('Error type: ${e.type}');
-      _logger.e('Error message: ${e.message}');
-      _logger.e('Request URL: ${e.requestOptions.uri}');
-      _logger.e('Request Method: ${e.requestOptions.method}');
-      _logger.e('Request Headers: ${e.requestOptions.headers}');
-      _logger.e('Response: ${e.response?.statusCode}');
-      _logger.e('Response data: ${e.response?.data}');
+      _logger.e('Error Type: ${e.type}');
+      _logger.e('Error Message: ${e.message}');
+      _logger.e('Response Status Code: ${e.response?.statusCode}');
+      _logger.e('Response Data: ${e.response?.data}');
       _logger.e('===========================================');
       throw DioErrorException();
     } catch (e) {
-      _logger.e('======= REMOTE DATA SOURCE: UNEXPECTED EXCEPTION =======');
+      _logger.e('======= REMOTE DATA SOURCE: UNEXPECTED ERROR =======');
       _logger.e('Error: $e');
       _logger.e('===========================================');
       throw ServerException();

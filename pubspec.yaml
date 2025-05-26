@@ -70,6 +70,8 @@ dependencies:
   dropdown_search: ^6.0.2
   dio: ^5.8.0+1
   dartz: ^0.10.1
+  json_serializable: ^6.9.5
+  json_annotation: ^4.9.0
 
 dev_dependencies:
   flutter_test:
