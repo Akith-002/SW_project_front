@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
@@ -12,8 +11,11 @@ import 'package:land_asset_valuation/application/core/widgets/tableForMR/table_s
 import 'package:land_asset_valuation/application/core/widgets/tableForRA/table_scaffold_RA.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRB/table_scaffold_RB.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRO/table_scaffold_RO.dart';
+import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
+import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/LM_Masterfile_list.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
+import 'package:land_asset_valuation/application/pages/mr_requests/cubit/mr_requests_cubit.dart';
 import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -54,7 +56,13 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildContentForIndex(widget.number);
+    return BlocProvider<I3MasterFileListCubit>(
+      create: (_) => injection<I3MasterFileListCubit>(),
+      child: Builder(
+        // ✅ fixes the context issue
+        builder: (context) => _buildContentForIndex(widget.number),
+      ),
+    );
   }
 
   String _determinePageSource(int index) {
@@ -111,7 +119,10 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
               AppString.massRating.localize(context)!,
             ],
             totalCount: 0,
-            table: TableScaffoldMr(pageSource: currentPageSource),
+            table: BlocProvider<MrRequestsCubit>(
+              create: (context) => injection<MrRequestsCubit>(),
+              child: TableScaffoldMr(pageSource: currentPageSource),
+            ),
           ),
         );
 
@@ -167,18 +178,8 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
         return MapScreen();
 
       case 7:
-        return Scaffold(
-          appBar: CustomAppBar(
-            title: AppString.landMiscellaneous.localize(context)!,
-            leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
-          ),
-          body: FileList(
-            breadcrumbItems: [
-              AppString.landMiscellaneous.localize(context)!,
-            ],
-            totalCount: 0,
-            table: TableScaffoldLM(pageSource: currentPageSource),
-          ),
+        return LmMasterfileList(
+          currentPageSource: currentPageSource,
         );
 
       default:

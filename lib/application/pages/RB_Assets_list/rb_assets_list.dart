@@ -24,7 +24,6 @@ class RbAssetsList extends BasePage {
 
 class _RbAssetsListState extends BasePageState<RbAssetsList> {
   final _cubit = injection<RbAssetsListCubit>();
-
   // Generate sample assets based on the asset type
   List<Asset> _generateSampleAssets() {
     List<Asset> assets = []; // Generate RB-specific sample data
@@ -34,11 +33,14 @@ class _RbAssetsListState extends BasePageState<RbAssetsList> {
         assetNo: 'RB${i.toString().padLeft(3, '0')}',
         ward: 'Ward ${(i % 4) + 1}',
         rdSt: 'Building Road ${String.fromCharCode(65 + (i % 10))}',
-        description:
-            i % 3 == 0 ? 'Building Complex $i' : 'Building Unit $i',
+        description: i % 3 == 0 ? 'Building Complex $i' : 'Building Unit $i',
         owner: 'Building Owner $i',
         status: i % 3 == 0 ? AssetStatus.completed : AssetStatus.active,
         isRatingCard: i <= 4, // First 4 assets have rating cards
+        area: (i * 650.0) +
+            (i * 75.5), // Area in square meters, ranging from 725.5 to 5078.5
+        location:
+            'Lat: ${10.2 + (i * 0.025)}, Lng: ${76.2 + (i * 0.02)}', // Sample coordinates for building area
       ));
     }
 

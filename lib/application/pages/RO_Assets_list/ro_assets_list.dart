@@ -24,7 +24,6 @@ class RoAssetsList extends BasePage {
 
 class _RoAssetsListState extends BasePageState<RoAssetsList> {
   final _cubit = injection<RoAssetsListCubit>();
-
   // Generate sample assets based on the asset type
   List<Asset> _generateSampleAssets() {
     List<Asset> assets = []; // Generate RO-specific sample data
@@ -40,6 +39,11 @@ class _RoAssetsListState extends BasePageState<RoAssetsList> {
         status: i % 5 == 0 ? AssetStatus.completed : AssetStatus.active,
         isRatingCard: i % 4 !=
             1, // Most assets have rating cards except every 4th starting from 1
+        area: (i * 900.0) +
+            (i *
+                125.75), // Area in square meters, ranging from 1025.75 to 8206.0
+        location:
+            'Lat: ${9.8 + (i * 0.03)}, Lng: ${76.8 + (i * 0.025)}', // Sample coordinates for object area
       ));
     }
 

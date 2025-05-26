@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:land_asset_valuation/application/base_app.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:provider/provider.dart' as provider;
 import 'package:land_asset_valuation/application/pages/mapbox/mapbox_setup.dart';
-
 
 // @pragma('vm:entry-point')
 // Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage? message) async {
