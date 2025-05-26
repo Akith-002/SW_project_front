@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
-import 'package:land_asset_valuation/application/core/widgets/iconButtonWidget/icon_button_widget.dart';
-import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForLM/planLM.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForLM/planLM_repository.dart';
 
@@ -11,12 +8,11 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 class TableScaffoldLM extends StatefulWidget {
   final int initialPageSize;
   final List<int> pageSizeOptions;
-  // *** ADDED: Required parameter to know the source context ***
-  final String pageSource;
+  final String pageSource; // Keep this if it's used for other logic not shown
 
   const TableScaffoldLM({
     super.key,
-    required this.pageSource, // Make it required
+    required this.pageSource,
     this.initialPageSize = 9,
     this.pageSizeOptions = const [9, 15, 30, 60],
   });
@@ -26,10 +22,12 @@ class TableScaffoldLM extends StatefulWidget {
 }
 
 class _TableScaffoldState extends State<TableScaffoldLM> {
-  late Future<PaginatedResponseLM<Planlm>> _futurePlans;
-  String? _nextPageToken;
+  // Store the whole PaginatedResponseLM object to access pagination info
+  Future<PaginatedResponseLM<Planlm>>? _futurePlansResponse;
+  int _currentPageNumber = 1;
   late int _pageSize;
   late List<int> _pageSizeOptions;
+  bool _isLoading = false; // To prevent multiple simultaneous fetches
 
   @override
   void initState() {
@@ -40,29 +38,70 @@ class _TableScaffoldState extends State<TableScaffoldLM> {
   }
 
   void _fetchPlans() {
+    if (_isLoading) return;
     setState(() {
-      _futurePlans = PlanlmRepository.getPlans(
+      _isLoading = true;
+      // Pass current page number and page size to the repository
+      _futurePlansResponse = PlanlmRepository.getPlans(
+        pageNumber: _currentPageNumber,
         pageSize: _pageSize,
-        pageToken: _nextPageToken,
+        // searchQuery and sortBy can be added here if needed later
       );
     });
+    // Reset loading state after fetch completes (success or error)
+    _futurePlansResponse
+        ?.whenComplete(() => setState(() => _isLoading = false));
+  }
+
+  void _changePageSize(int newSize) {
+    if (_pageSize == newSize) return;
+    setState(() {
+      _pageSize = newSize;
+      _currentPageNumber = 1; // Reset to first page when page size changes
+    });
+    _fetchPlans();
+  }
+
+  void _goToPage(int pageNumber) {
+    // Assuming PaginatedResponseLM will have totalPages
+    // Add checks if pageNumber is valid before fetching
+    setState(() {
+      _currentPageNumber = pageNumber;
+    });
+    _fetchPlans();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<PaginatedResponseLM<Planlm>>(
-        future: _futurePlans,
+        future: _futurePlansResponse,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (_isLoading && !snapshot.hasData) {
+            // Show loader if loading and no data yet
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
+            // This condition might be redundant if _isLoading is handled well
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error loading data"));
+            return Center(child: Text("Error loading data: ${snapshot.error}"));
           } else if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
             return Center(child: Text("No records found"));
           }
 
+          // Access plans and pagination data from the snapshot
           List<Planlm> plans = snapshot.data!.items;
+          PaginatedResponseLM<Planlm> paginationData = snapshot.data!;
+
+          final int startRecord =
+              (paginationData.pageNumber - 1) * paginationData.pageSize + 1;
+          final int endRecord = startRecord + plans.length - 1;
+          final int totalCount = paginationData.totalCount;
+          final bool canGoNext =
+              paginationData.pageNumber < paginationData.totalPages;
+          final bool canGoPrevious = paginationData.pageNumber > 1;
 
           return Column(
             children: [
@@ -87,7 +126,7 @@ class _TableScaffoldState extends State<TableScaffoldLM> {
                         headingRowColor: WidgetStateProperty.all(
                           colors(context).colorGrey9!,
                         ),
-                        columns: [
+                        columns: const [
                           DataColumn(label: Text("Master File No")),
                           DataColumn(label: Text("Plan Type")),
                           DataColumn(label: Text("Plan No")),
@@ -100,41 +139,48 @@ class _TableScaffoldState extends State<TableScaffoldLM> {
                           return DataRow(cells: [
                             DataCell(Text(plan.masterFileNo.toString())),
                             DataCell(Text(plan.planType)),
-                            DataCell(Text(plan.planNo.toString())),
+                            DataCell(Text(plan.planNo)), // planNo is now String
                             DataCell(Text(plan.authorityReferenceNo)),
-                            DataCell(Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: plan.status.color.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                plan.status.displayName,
-                                style: TextStyle(
-                                    color: plan.status.color,
-                                    fontWeight: FontWeight.bold),
+                            DataCell(Center(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                    color: PlanStatusLMHelper.color(plan.status)
+                                        .withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(
+                                        color: PlanStatusLMHelper.color(
+                                            plan.status))),
+                                child: Text(
+                                  PlanStatusLMHelper.displayName(plan.status),
+                                  style: TextStyle(
+                                      color: PlanStatusLMHelper.color(
+                                          plan.status)),
+                                ),
                               ),
                             )),
                             DataCell(
-                              SizedBox(
-                                height: 52,
-                                child: Row(
-                                  children: [
-                                    iconButtonWidget(
-                                      color: colors(context).colorGrey8!,
-                                      iconName: PhosphorIconsRegular.eye,
-                                      onPressed: () {
-                                        context.pushNamed(
-                                            Pages.routeMapScreen.toPathName(),
-                                            queryParameters: {
-                                              'source': widget.pageSource,
-                                              'selectedIndex': '7',
-                                            });
-                                      },
-                                    ),
-                                  ],
-                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(PhosphorIcons.eye(
+                                        PhosphorIconsStyle.regular)),
+                                    onPressed: () {
+                                      print("View plan ${plan.id}");
+                                      // Example: context.go('/${AppPages.lAMasterFileView}/${plan.id}');
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(PhosphorIcons.pencilSimple(
+                                        PhosphorIconsStyle.regular)),
+                                    onPressed: () {
+                                      print("Edit plan ${plan.id}");
+                                      // Example: context.go('/${AppPages.lAMasterFileEdit}/${plan.id}');
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
                           ]);
@@ -153,55 +199,40 @@ class _TableScaffoldState extends State<TableScaffoldLM> {
                   children: [
                     Row(
                       children: [
-                        Text("Show "),
+                        const Text("Show "),
                         DropdownButton<int>(
                           value: _pageSize,
                           items: _pageSizeOptions.map((size) {
                             return DropdownMenuItem<int>(
                               value: size,
-                              child: Text("$size"),
+                              child: Text(size.toString()),
                             );
                           }).toList(),
                           onChanged: (newSize) {
                             if (newSize != null) {
-                              setState(() {
-                                _pageSize = newSize;
-                                _nextPageToken = null; // Reset pagination
-                                _fetchPlans();
-                              });
+                              _changePageSize(newSize);
                             }
                           },
                         ),
-                        Text(" per page"),
+                        const Text(" per page"),
                       ],
                     ),
-                    Text("${plans.length} / 60 Records"),
+                    Text("$startRecord-$endRecord of $totalCount Records"),
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.chevron_left),
-                          onPressed: _nextPageToken == null
-                              ? null
-                              : () {
-                                  setState(() {
-                                    _nextPageToken =
-                                        (int.parse(_nextPageToken!) - _pageSize)
-                                            .toString();
-                                    _fetchPlans();
-                                  });
-                                },
+                          icon: const Icon(Icons.chevron_left),
+                          onPressed: canGoPrevious
+                              ? () => _goToPage(_currentPageNumber - 1)
+                              : null, // Disable if no previous page
                         ),
+                        Text(
+                            "Page $_currentPageNumber of ${paginationData.totalPages}"),
                         IconButton(
-                          icon: Icon(Icons.chevron_right),
-                          onPressed: snapshot.data!.nextPageToken == null
-                              ? null
-                              : () {
-                                  setState(() {
-                                    _nextPageToken =
-                                        snapshot.data!.nextPageToken;
-                                    _fetchPlans();
-                                  });
-                                },
+                          icon: const Icon(Icons.chevron_right),
+                          onPressed: canGoNext
+                              ? () => _goToPage(_currentPageNumber + 1)
+                              : null, // Disable if no next page
                         ),
                       ],
                     ),

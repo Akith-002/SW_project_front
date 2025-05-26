@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/LM_Masterfile_list.dart';
+import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/cubit/lm_masterfile_list_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // App setup
@@ -146,4 +148,6 @@ Future<void> init() async {
       .registerFactory(() => PastValuationCubit(appSharedData: injection()));
   injection
       .registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+  injection
+      .registerFactory(() => LmMasterfileListCubit(appSharedData: injection()));
 }

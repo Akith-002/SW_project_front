@@ -12,6 +12,7 @@ import 'package:land_asset_valuation/application/core/widgets/tableForMR/table_s
 import 'package:land_asset_valuation/application/core/widgets/tableForRA/table_scaffold_RA.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRB/table_scaffold_RB.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRO/table_scaffold_RO.dart';
+import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/LM_Masterfile_list.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
 import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
@@ -175,18 +176,8 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
         return MapScreen();
 
       case 7:
-        return Scaffold(
-          appBar: CustomAppBar(
-            title: AppString.landMiscellaneous.localize(context)!,
-            leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
-          ),
-          body: FileList(
-            breadcrumbItems: [
-              AppString.landMiscellaneous.localize(context)!,
-            ],
-            totalCount: 0,
-            table: TableScaffoldLM(pageSource: currentPageSource),
-          ),
+        return LmMasterfileList(
+          currentPageSource: currentPageSource,
         );
 
       default:
