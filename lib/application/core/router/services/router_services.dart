@@ -1,7 +1,7 @@
 
 
 import 'package:flutter/cupertino.dart';
-import 'package:land_asset_valuation/data/datasources/shared_preference.dart';
+import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 
 import '../../utils/app_constants.dart';
 

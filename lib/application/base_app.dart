@@ -7,7 +7,7 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/app_theme
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_constants.dart';
 import 'package:land_asset_valuation/application/core/utils/app_localizations.dart';
-import 'package:land_asset_valuation/data/datasources/shared_preference.dart';
+import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';

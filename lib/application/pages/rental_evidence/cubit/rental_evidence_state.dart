@@ -1,4 +1,4 @@
-part of 'rental_evidence_cubit.dart';
+import 'package:land_asset_valuation/app/cubit/base_state.dart';
 
 abstract class RentalEvidenceState extends BaseState<RentalEvidenceState> {}
 

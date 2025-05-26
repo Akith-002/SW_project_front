@@ -13,7 +13,7 @@ import 'package:land_asset_valuation/application/core/utils/app_constants.dart';
 import 'package:land_asset_valuation/application/core/utils/device_info.dart';
 import 'package:land_asset_valuation/application/core/utils/enums.dart';
 import 'package:land_asset_valuation/application/pages/security/security_failure_view.dart';
-import 'package:land_asset_valuation/data/datasources/shared_preference.dart';
+import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 import 'package:land_asset_valuation/flavors/flavor_banner.dart';
 import 'package:land_asset_valuation/injection.dart';
 

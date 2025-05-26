@@ -10,7 +10,7 @@ import 'package:land_asset_valuation/application/core/widgets/labeled_text_field
 import 'package:land_asset_valuation/application/core/widgets/password_text_field.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:land_asset_valuation/injection.dart';
-import 'package:land_asset_valuation/data/datasources/shared_preference.dart';
+import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 import 'package:land_asset_valuation/data/services/sign_in_service.dart';
 
 class FormSection extends StatefulWidget {

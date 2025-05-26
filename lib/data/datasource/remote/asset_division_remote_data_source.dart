@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:land_asset_valuation/application/core/error/exceptions.dart';
-import 'package:land_asset_valuation/data/datasources/remote/api/dio_client.dart';
+import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
 import 'package:land_asset_valuation/data/models/asset_division.dart';
 import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 

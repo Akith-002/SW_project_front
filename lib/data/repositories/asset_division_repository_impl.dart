@@ -1,4 +1,4 @@
-import 'package:land_asset_valuation/data/datasources/remote/asset_division_remote_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/remote/asset_division_remote_data_source.dart';
 import 'package:land_asset_valuation/data/models/asset_division.dart';
 import 'package:land_asset_valuation/domain/repositories/asset_division_repository.dart';
 

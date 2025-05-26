@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:logger/logger.dart';
 import 'package:land_asset_valuation/application/core/error/exceptions.dart';
 import 'package:land_asset_valuation/application/core/error/failures.dart';
-import 'package:land_asset_valuation/data/datasources/remote/condition_report_remote_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/remote/condition_report_remote_data_source.dart';
 import 'package:land_asset_valuation/data/models/condition_report_model.dart';
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart';
 

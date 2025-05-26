@@ -16,6 +16,13 @@ import 'package:land_asset_valuation/data/repositories/condition_report_reposito
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart';
 
+// Asset Division Feature (ADD THESE MISSING IMPORTS)
+import 'package:land_asset_valuation/data/datasource/remote/asset_division_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/asset_division_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/asset_division_repository.dart';
+
+import 'package:land_asset_valuation/application/pages/asset_division/cubit/asset_division_cubit.dart';
+
 // Rental Evidence Feature
 import 'package:land_asset_valuation/data/datasource/remote/rental_evidence_remote_data_source.dart';
 import 'package:land_asset_valuation/data/repositories/rental_evidence_repository_impl.dart';
@@ -76,7 +83,9 @@ Future<void> init() async {
     () => SendConditionReportUseCase(injection()),
   );
 
+  // ------------------------------
   // Asset Division Feature
+  // ------------------------------
   injection.registerLazySingleton<AssetDivisionRemoteDataSource>(
     () => AssetDivisionRemoteDataSourceImpl(dioClient: injection()),
   );
@@ -85,18 +94,6 @@ Future<void> init() async {
     () => AssetDivisionRepositoryImpl(remoteDataSource: injection()),
   );
 
-  injection.registerLazySingleton(
-    () => DivideAssetUseCase(injection()),
-  );
-
-  injection.registerLazySingleton(
-    () => ValidateAssetDivisionUseCase(injection()),
-  );
-
-  injection.registerFactory(() => AssetDivisionCubit(
-        divideAssetUseCase: injection(),
-        validateAssetDivisionUseCase: injection(),
-      ));
 
   // ------------------------------
   // Rental Evidence Feature
@@ -127,44 +124,43 @@ Future<void> init() async {
   injection.registerLazySingleton(() => GetAllMasterFilesUseCase(injection()));
   injection.registerLazySingleton(() => SearchMasterFilesUseCase(injection()));
 
-  injection.registerFactory(() => I3MasterFileListCubit(
-        appSharedData: injection(),
-        getAllUseCase: injection(),
-        searchUseCase: injection(),
-      ));
-
   // ------------------------------
   // Cubits (UI Layer)
   // ------------------------------
   injection.registerFactory(() => SplashCubit(appSharedData: injection()));
   injection.registerFactory(() => DashboardCubit(appSharedData: injection()));
   injection.registerFactory(() => SigninCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => MrAssetsListCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => RaAssetsListCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => RbAssetsListCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => RoAssetsListCubit(appSharedData: injection()));
+  injection.registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
+  injection.registerFactory(() => MrAssetsListCubit(appSharedData: injection()));
+  injection.registerFactory(() => RaAssetsListCubit(appSharedData: injection()));
+  injection.registerFactory(() => RbAssetsListCubit(appSharedData: injection()));
+  injection.registerFactory(() => RoAssetsListCubit(appSharedData: injection()));
+  
   injection.registerFactory(() => RentalEvidenceCubit(
         appSharedData: injection(),
         sendRentalEvidenceUseCase: injection(),
       ));
-  injection
-      .registerFactory(() => I2RentalEvidenceCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => SettingsScreenCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => LaSalesEvidenceCubit(appSharedData: injection()));
+  
+  injection.registerFactory(() => I2RentalEvidenceCubit(appSharedData: injection()));
+  injection.registerFactory(() => SettingsScreenCubit(appSharedData: injection()));
+  injection.registerFactory(() => LaSalesEvidenceCubit(appSharedData: injection()));
+  
   injection.registerFactory(() => ConditionReportCubit(
         appSharedData: injection(),
         sendConditionReportUseCase: injection(),
       ));
-  injection
-      .registerFactory(() => PastValuationCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+  
+  injection.registerFactory(() => PastValuationCubit(appSharedData: injection()));
+  injection.registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+  
+  injection.registerFactory(() => I3MasterFileListCubit(
+        appSharedData: injection(),
+        getAllUseCase: injection(),
+        searchUseCase: injection(),
+      ));
+
+  injection.registerFactory(() => AssetDivisionCubit(
+        divideAssetUseCase: injection(),
+        validateAssetDivisionUseCase: injection(),
+      ));
 }
