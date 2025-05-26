@@ -7,6 +7,7 @@ import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dar
 import 'package:land_asset_valuation/application/core/widgets/fileList/file_list.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForLM/table_scaffold_LM.dart';
 import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/cubit/lm_masterfile_list_cubit.dart';
+import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repository.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -20,6 +21,7 @@ class LmMasterfileList extends BasePage {
 
 class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
   final _cubit = injection<LmMasterfileListCubit>();
+  final _repository = injection<LandMiscellaneousRepository>();
 
   @override
   Widget buildView(BuildContext context) {
@@ -33,7 +35,10 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
           AppString.landMiscellaneous.localize(context)!,
         ],
         totalCount: 0,
-        table: TableScaffoldLM(pageSource: widget.currentPageSource),
+        table: TableScaffoldLM(
+          pageSource: widget.currentPageSource,
+          repository: _repository,
+        ),
       ),
     );
   }
