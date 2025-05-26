@@ -26,7 +26,7 @@ import 'package:land_asset_valuation/domain/usecases/send_rental_evidence_usecas
 import 'package:land_asset_valuation/data/datasource/remote/land_acquisition_remote_datasource.dart';
 import 'package:land_asset_valuation/data/repositories/land_acquisition_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
-import 'package:land_asset_valuation/domain/usecases/get_all_master_files_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_paginated_master_files_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/search_master_files_usecase.dart';
 
 // Cubits
@@ -102,12 +102,13 @@ Future<void> init() async {
     () => LandAcquisitionRepositoryImpl(injection()),
   );
 
-  injection.registerLazySingleton(() => GetAllMasterFilesUseCase(injection()));
+  injection
+      .registerLazySingleton(() => GetPaginatedMasterFilesUseCase(injection()));
   injection.registerLazySingleton(() => SearchMasterFilesUseCase(injection()));
 
   injection.registerFactory(() => I3MasterFileListCubit(
         appSharedData: injection(),
-        getAllUseCase: injection(),
+        getPaginatedUseCase: injection(),
         searchUseCase: injection(),
       ));
 

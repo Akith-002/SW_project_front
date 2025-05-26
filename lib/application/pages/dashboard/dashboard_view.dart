@@ -12,6 +12,7 @@ import 'package:land_asset_valuation/application/core/widgets/table/table_scaffo
 import 'package:land_asset_valuation/application/pages/dashboard/cubit/dashboard_cubit.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
 
 class DashboardView extends BasePage {
   const DashboardView({super.key});
@@ -22,6 +23,13 @@ class DashboardView extends BasePage {
 
 class _DashboardViewState extends BasePageState<DashboardView> {
   final _cubit = injection<DashboardCubit>();
+  late final LandAcquisitionRepository _repository;
+
+  @override
+  void initState() {
+    super.initState();
+    _repository = injection<LandAcquisitionRepository>();
+  }
 
   @override
   Widget buildView(BuildContext context) {
@@ -106,8 +114,7 @@ class _DashboardViewState extends BasePageState<DashboardView> {
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             SizedBox(height: 20), // Spacing
-                          LineChartSample2(),
-                            
+                            LineChartSample2(),
                           ],
                         ),
                       ),
@@ -135,40 +142,45 @@ class _DashboardViewState extends BasePageState<DashboardView> {
                             width: 256,
                             height: 45,
                             decoration: BoxDecoration(
-                              color:colors(context).colorGrey1,
+                              color: colors(context).colorGrey1,
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                   color: colors(context).colorGrey5!, width: 1),
                             ),
                             child: TextField(
-                            style: TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontFamily: 'Roboto',
-                                color: colors(context).colorGrey3?? Colors.grey,
-                            ),
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.fromLTRB(
-                                10,
-                                9,
-                                0,
-                                9,
+                                color:
+                                    colors(context).colorGrey3 ?? Colors.grey,
                               ),
-                              hintText: 'Search',
-                              iconColor: colors(context).colorGrey3?? Colors.grey,
-                              hintStyle: TextStyle(
-                                  fontSize: 14, fontFamily: 'Roboto'),
-                              suffixIcon: Icon(
-                                  PhosphorIconsThin.magnifyingGlass,color: colors(context).colorGrey3,
-                                  size: 24),
-                              border: InputBorder.none,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.fromLTRB(
+                                  10,
+                                  9,
+                                  0,
+                                  9,
+                                ),
+                                hintText: 'Search',
+                                iconColor:
+                                    colors(context).colorGrey3 ?? Colors.grey,
+                                hintStyle: TextStyle(
+                                    fontSize: 14, fontFamily: 'Roboto'),
+                                suffixIcon: Icon(
+                                    PhosphorIconsThin.magnifyingGlass,
+                                    color: colors(context).colorGrey3,
+                                    size: 24),
+                                border: InputBorder.none,
+                              ),
                             ),
-                          ),),
+                          ),
                           SizedBox(width: 8),
                           // Advanced Search Button
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: colors(context).colorWhite, // Background color
+                              backgroundColor: colors(context)
+                                  .colorWhite, // Background color
                               minimumSize:
                                   Size(170, 45), // Set width and height
                               shape: RoundedRectangleBorder(
@@ -200,12 +212,11 @@ class _DashboardViewState extends BasePageState<DashboardView> {
 
                   /// Table Section
                   SizedBox(
-                    width: double.infinity ,
+                    width: double.infinity,
                     height: 420, // Adjust as needed
                     child: TableScaffold(
-                      pageSource: 'dashboard',
-                      initialPageSize: 6,
-                      pageSizeOptions: [6, 12, 18, 24, 30, 36, 42, 48, 54, 60],
+                      pageSource: 'landAcquisition',
+                      repository: _repository,
                     ),
                   ),
                 ],
