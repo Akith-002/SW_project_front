@@ -57,6 +57,11 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         owner: 'Owner $i',
         status: i % 3 == 0 ? AssetStatus.completed : AssetStatus.pending,
         isRatingCard: i % 3 != 0, // Some assets have rating cards, some don't
+        area: (i * 1000.0) +
+            (i *
+                250.5), // Area in square meters, ranging from 1250.5 to 10004.0
+        location:
+            'Lat: ${10.0 + (i * 0.01)}, Lng: ${76.0 + (i * 0.01)}', // Sample coordinates
       ));
     }
 

@@ -18,13 +18,18 @@ import 'package:land_asset_valuation/application/pages/settingsScreen/cubit/sett
 import 'package:land_asset_valuation/application/pages/signIn/cubit/signin_cubit.dart';
 import 'package:land_asset_valuation/application/pages/splash/cubit/splash_cubit.dart';
 import 'package:land_asset_valuation/application/pages/conditionReport/cubit/condition_report_cubit.dart';
-import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
+import 'package:land_asset_valuation/data/datasources/shared_preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
-import 'package:land_asset_valuation/data/datasource/remote/condition_report_remote_data_source.dart';
+import 'package:land_asset_valuation/data/datasources/remote/api/dio_client.dart';
+import 'package:land_asset_valuation/data/datasources/remote/condition_report_remote_data_source.dart';
 import 'package:land_asset_valuation/data/repositories/condition_report_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart';
+import 'package:land_asset_valuation/data/datasources/remote/asset_division_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/asset_division_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/asset_division_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/asset_division_usecases.dart';
+import 'package:land_asset_valuation/application/pages/asset_division/cubit/asset_division_cubit.dart';
 
 final injection = GetIt.I;
 
@@ -52,6 +57,28 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => SendConditionReportUseCase(injection()),
   );
+
+  // Asset Division Feature
+  injection.registerLazySingleton<AssetDivisionRemoteDataSource>(
+    () => AssetDivisionRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<AssetDivisionRepository>(
+    () => AssetDivisionRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => DivideAssetUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => ValidateAssetDivisionUseCase(injection()),
+  );
+
+  injection.registerFactory(() => AssetDivisionCubit(
+        divideAssetUseCase: injection(),
+        validateAssetDivisionUseCase: injection(),
+      ));
 
   /// Cubits
   injection.registerFactory(() => SplashCubit(appSharedData: injection()));

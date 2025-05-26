@@ -7,6 +7,8 @@ class Asset {
   final String owner;
   final AssetStatus status;
   final bool isRatingCard;
+  final double? area;
+  final String? location;
 
   Asset({
     required this.id,
@@ -17,6 +19,8 @@ class Asset {
     required this.owner,
     required this.status,
     this.isRatingCard = false,
+    this.area,
+    this.location,
   });
   factory Asset.fromJson(Map<String, dynamic> json) {
     return Asset(
@@ -28,6 +32,8 @@ class Asset {
       owner: json['owner'] ?? '',
       status: AssetStatusExtension.fromString(json['status'] ?? 'pending'),
       isRatingCard: json['isRatingCard'] ?? false,
+      area: json['area']?.toDouble(),
+      location: json['location'],
     );
   }
 
@@ -41,8 +47,13 @@ class Asset {
       'owner': owner,
       'status': status.name,
       'isRatingCard': isRatingCard,
+      if (area != null) 'area': area,
+      if (location != null) 'location': location,
     };
   }
+
+  // Convenience getters for backward compatibility
+  String get assetNumber => assetNo;
 }
 
 enum AssetStatus { pending, completed, active, inactive }
