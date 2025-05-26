@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:land_asset_valuation/data/models/condition_report_model.dart';
 
 class ConditionReportFormData {
@@ -166,20 +165,25 @@ class ConditionReportFormService {
     if (assessmentNumber != null) formData.assessmentNumber = assessmentNumber;
     if (roadName != null) formData.roadName = roadName;
     if (accessCategory != null) formData.accessCategory = accessCategory;
-    if (accessCategoryDescription != null)
+    if (accessCategoryDescription != null) {
       formData.accessCategoryDescription = accessCategoryDescription;
-    if (descriptionOfLand != null)
+    }
+    if (descriptionOfLand != null) {
       formData.descriptionOfLand = descriptionOfLand;
-    if (landUseDescription != null)
+    }
+    if (landUseDescription != null) {
       formData.landUseDescription = landUseDescription;
+    }
     if (landUseType != null) formData.landUseType = landUseType;
     if (frontage != null) formData.frontage = frontage;
     if (depthOfLand != null) formData.depthOfLand = depthOfLand;
     if (levelWithAccess != null) formData.levelWithAccess = levelWithAccess;
-    if (plantationDetails != null)
+    if (plantationDetails != null) {
       formData.plantationDetails = plantationDetails;
-    if (detailsOfBusiness != null)
+    }
+    if (detailsOfBusiness != null) {
       formData.detailsOfBusiness = detailsOfBusiness;
+    }
     if (acquisitionName != null) formData.acquisitionName = acquisitionName;
     if (datePrepared != null) formData.datePrepared = datePrepared;
     if (dateOfSection3BA != null) formData.dateOfSection3BA = dateOfSection3BA;
@@ -203,8 +207,9 @@ class ConditionReportFormService {
     String? buildingDescription,
     String? buildingInfo,
   }) {
-    if (buildingDescription != null)
+    if (buildingDescription != null) {
       formData.buildingDescription = buildingDescription;
+    }
     if (buildingInfo != null) formData.buildingInfo = buildingInfo;
   }
 
@@ -212,10 +217,12 @@ class ConditionReportFormService {
     String? otherConstructionsDescription,
     String? otherConstructionsInfo,
   }) {
-    if (otherConstructionsDescription != null)
+    if (otherConstructionsDescription != null) {
       formData.otherConstructionsDescription = otherConstructionsDescription;
-    if (otherConstructionsInfo != null)
+    }
+    if (otherConstructionsInfo != null) {
       formData.otherConstructionsInfo = otherConstructionsInfo;
+    }
   }
 
   void updateSignatures({
@@ -223,13 +230,16 @@ class ConditionReportFormService {
     String? gramasewakaSignature,
     String? chiefValuerRepresentativeSignature,
   }) {
-    if (acquiringOfficerSignature != null)
+    if (acquiringOfficerSignature != null) {
       formData.acquiringOfficerSignature = acquiringOfficerSignature;
-    if (gramasewakaSignature != null)
+    }
+    if (gramasewakaSignature != null) {
       formData.gramasewakaSignature = gramasewakaSignature;
-    if (chiefValuerRepresentativeSignature != null)
+    }
+    if (chiefValuerRepresentativeSignature != null) {
       formData.chiefValuerRepresentativeSignature =
           chiefValuerRepresentativeSignature;
+    }
   }
 
   // Clear all form data

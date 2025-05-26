@@ -7,6 +7,7 @@ import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
 import 'package:land_asset_valuation/application/core/widgets/labeled_text_field.dart';
+import 'package:land_asset_valuation/application/core/widgets/password_text_field.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/datasources/shared_preference.dart';
@@ -22,7 +23,6 @@ class FormSection extends StatefulWidget {
 class _FormSectionState extends State<FormSection> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
 
   Future<void> _login(BuildContext context) async {
     final appSharedData = injection<AppSharedData>();
@@ -37,7 +37,7 @@ class _FormSectionState extends State<FormSection> {
       context.go(Pages.routeDashboard.toPath());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Invalid username or password")),
+        const SnackBar(content: Text("Invalid username or password")),
       );
     }
   }
@@ -72,67 +72,46 @@ class _FormSectionState extends State<FormSection> {
             ),
           ),
           const SizedBox(height: 64),
-          SizedBox(
+
+          /// Username
+          LabeledTextField(
+            controller: _usernameController,
+            placeholder: AppString.username.localize(context)!,
+            icon: PhosphorIconsRegular.user,
             width: 440,
-            height: 224,
-            child: Column(
-              children: [
-                LabeledTextField(
-                  controller: _usernameController,
-                  placeholder: AppString.username.localize(context)!,
-                  icon: PhosphorIconsRegular.user,
-                  width: 440,
-                  height: 48,
-                ),
-                const SizedBox(height: 16),
-                Stack(
-                  alignment: Alignment.centerRight,
-                  children: [
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: AppString.password.localize(context)!,
-                        prefixIcon: const Icon(Icons.lock),
-                        border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    AppString.forgotPassword.localize(context)!,
-                    style: AppStyling.mediumTextSize16.copyWith(
-                      color: colors(context).colorPrimary5,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                CustomButton(
-                  text: AppString.login.localize(context)!,
-                  onPressed: () => _login(context),
-                  backgroundColor:
-                      colors(context).colorPrimary5 ?? Colors.blue,
-                  height: 56,
-                  width: 440,
-                ),
-              ],
+            height: 48,
+          ),
+
+          const SizedBox(height: 16),
+
+          /// Password
+          PasswordTextField(
+            controller: _passwordController,
+            placeholder: AppString.password.localize(context)!,
+            width: 440,
+            height: 48,
+          ),
+
+          const SizedBox(height: 16),
+
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              AppString.forgotPassword.localize(context)!,
+              style: AppStyling.mediumTextSize16.copyWith(
+                color: colors(context).colorPrimary5,
+              ),
             ),
+          ),
+          const SizedBox(height: 16),
+
+          /// Login Button
+          CustomButton(
+            text: AppString.login.localize(context)!,
+            onPressed: () => _login(context),
+            backgroundColor: colors(context).colorPrimary5 ?? Colors.blue,
+            height: 56,
+            width: 440,
           ),
         ],
       ),

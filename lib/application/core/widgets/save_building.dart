@@ -133,7 +133,7 @@ class _SaveBuildingState extends State<SaveBuilding> {
                 onChanged: (value) {
                   // No need for null check if onChanged guarantees non-null
                   setState(() {
-                    _selectedConstructionType = value;
+                    _selectedConstructionType = value!;
                   });
                 },
               ),
