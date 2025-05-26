@@ -15,6 +15,7 @@ import 'package:land_asset_valuation/application/core/widgets/tableForRO/table_s
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
+import 'package:land_asset_valuation/application/pages/mr_requests/cubit/mr_requests_cubit.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -32,7 +33,8 @@ class I3MasterFileList extends StatefulWidget {
 
 class _I3MasterFileListState extends State<I3MasterFileList> {
   final searchController = TextEditingController();
-  final GlobalKey<TableScaffoldState> _tableKey = GlobalKey<TableScaffoldState>();
+  final GlobalKey<TableScaffoldState> _tableKey =
+      GlobalKey<TableScaffoldState>();
 
   int _masterFileCount = 0;
 
@@ -44,7 +46,8 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
 
   void _loadMasterFileCount() async {
     try {
-      final response = await http.get(Uri.parse("http://10.0.2.2:5221/api/LAMasterfile"));
+      final response =
+          await http.get(Uri.parse("http://10.0.2.2:5221/api/LAMasterfile"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final List<dynamic> list = data['masterFiles'];
@@ -61,7 +64,8 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
   Widget build(BuildContext context) {
     return BlocProvider<I3MasterFileListCubit>(
       create: (_) => injection<I3MasterFileListCubit>(),
-      child: Builder( // ✅ fixes the context issue
+      child: Builder(
+        // ✅ fixes the context issue
         builder: (context) => _buildContentForIndex(widget.number),
       ),
     );
@@ -119,7 +123,10 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
               AppString.massRating.localize(context)!,
             ],
             totalCount: 0,
-            table: TableScaffoldMr(pageSource: currentPageSource),
+            table: BlocProvider<MrRequestsCubit>(
+              create: (context) => injection<MrRequestsCubit>(),
+              child: TableScaffoldMr(pageSource: currentPageSource),
+            ),
           ),
         );
 
@@ -190,7 +197,8 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
         );
 
       default:
-        return const Center(child: Text("Content not available for this index."));
+        return const Center(
+            child: Text("Content not available for this index."));
     }
   }
 }

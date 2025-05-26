@@ -36,12 +36,19 @@ import 'package:land_asset_valuation/domain/repositories/land_acquisition_reposi
 import 'package:land_asset_valuation/domain/usecases/get_all_master_files_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/search_master_files_usecase.dart';
 
+// MR Requests Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/mr_request_remote_datasource.dart';
+import 'package:land_asset_valuation/data/repositories/mr_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/mr_request_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/mr_requests_usecases.dart';
+
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/LA_Building_Rates/cubit/la_building_rates_cubit.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/cubit/la_sales_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_cubit.dart';
+import 'package:land_asset_valuation/application/pages/mr_requests/cubit/mr_requests_cubit.dart';
 import 'package:land_asset_valuation/application/pages/RA_Assets_list/cubit/ra_assets_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/RB_Assets_list/cubit/rb_assets_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/RO_Assets_list/cubit/ro_assets_list_cubit.dart';
@@ -120,9 +127,31 @@ Future<void> init() async {
   injection.registerLazySingleton<LandAcquisitionRepository>(
     () => LandAcquisitionRepositoryImpl(injection()),
   );
-
   injection.registerLazySingleton(() => GetAllMasterFilesUseCase(injection()));
   injection.registerLazySingleton(() => SearchMasterFilesUseCase(injection()));
+
+  // ------------------------------
+  // MR Requests Feature (Clean Architecture)
+  // ------------------------------
+  injection.registerLazySingleton<MRRequestRemoteDataSource>(
+    () => MRRequestRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<MrRequestRepository>(
+    () => MrRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton<MrRepositoryImpl>(
+    () => MrRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetMrRequestsUseCase(injection<MrRequestRepository>()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetMrRequestsPaginatedUseCase(injection<MrRepositoryImpl>()),
+  );
 
   // ------------------------------
   // Cubits (UI Layer)
@@ -152,11 +181,15 @@ Future<void> init() async {
   
   injection.registerFactory(() => PastValuationCubit(appSharedData: injection()));
   injection.registerFactory(() => InspectionReportCubit(appSharedData: injection()));
-  
-  injection.registerFactory(() => I3MasterFileListCubit(
+    injection.registerFactory(() => I3MasterFileListCubit(
         appSharedData: injection(),
         getAllUseCase: injection(),
         searchUseCase: injection(),
+      ));
+
+  injection.registerFactory(() => MrRequestsCubit(
+        appSharedData: injection(),
+        getMrRequestsPaginatedUseCase: injection(),
       ));
 
   injection.registerFactory(() => AssetDivisionCubit(
