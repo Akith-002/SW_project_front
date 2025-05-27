@@ -38,11 +38,11 @@ class _SignaturesFormState extends State<SignaturesForm> {
   void _validateAndSubmitForm() {
     setState(() {
       acquiringOfficerError = SignatureFormValidator.validateSignature(
-        acquiringOfficerSignature, "Acquiring Officer");
+          acquiringOfficerSignature, "Acquiring Officer");
       gramaSevekaError = SignatureFormValidator.validateSignature(
-        gramaSevekaSignature, "Gramasewa Niladhari");
+          gramaSevekaSignature, "Gramasewa Niladhari");
       chiefValuersRepError = SignatureFormValidator.validateSignature(
-        chiefValuersRepSignature, "Chief Valuer’s Representative");
+          chiefValuersRepSignature, "Chief Valuer’s Representative");
     });
 
     if (acquiringOfficerError == null &&
@@ -74,6 +74,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
             ),
           );
           widget.onSubmitSuccess?.call();
+          context.go(Pages.routeMapScreen.toPath());
         } else if (state is ConditionReportSubmitFailure) {
           setState(() {
             _isSubmitting = false;
@@ -99,7 +100,6 @@ class _SignaturesFormState extends State<SignaturesForm> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-
                 SignatureBox(
                   title: AppString.acquiringOfficer.localize(context)!,
                   onSignatureChanged: (Uint8List? signature) {
@@ -111,7 +111,6 @@ class _SignaturesFormState extends State<SignaturesForm> {
                   errorMessage: acquiringOfficerError,
                 ),
                 const SizedBox(height: 16),
-
                 SignatureBox(
                   title: AppString.gramaSeveka.localize(context)!,
                   onSignatureChanged: (Uint8List? signature) {
@@ -123,9 +122,9 @@ class _SignaturesFormState extends State<SignaturesForm> {
                   errorMessage: gramaSevekaError,
                 ),
                 const SizedBox(height: 16),
-
                 SignatureBox(
-                  title: AppString.chiefValuersRepresentative.localize(context)!,
+                  title:
+                      AppString.chiefValuersRepresentative.localize(context)!,
                   onSignatureChanged: (Uint8List? signature) {
                     setState(() {
                       chiefValuersRepSignature = signature;
@@ -134,16 +133,13 @@ class _SignaturesFormState extends State<SignaturesForm> {
                   },
                   errorMessage: chiefValuersRepError,
                 ),
-
                 const SizedBox(height: 24),
-
                 Container(
                   width: formWidth,
                   height: 1.5,
                   color: colors(context).colorGrey5,
                 ),
                 const SizedBox(height: 16),
-
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: Row(
@@ -152,7 +148,8 @@ class _SignaturesFormState extends State<SignaturesForm> {
                       CustomButton(
                         text: AppString.cancel.localize(context)!,
                         backgroundColor: colors(context).colorGrey1!,
-                        onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                        onPressed:
+                            _isSubmitting ? null : () => Navigator.pop(context),
                         width: 120,
                         height: 48,
                       ),
@@ -180,16 +177,20 @@ class _SignaturesFormState extends State<SignaturesForm> {
     final formService = ConditionReportFormService();
 
     formService.updateSignatures(
-      acquiringOfficerSignature: acquiringOfficerSignature != null ? 'Signature present' : '',
-      gramasewakaSignature: gramaSevekaSignature != null ? 'Signature present' : '',
-      chiefValuerRepresentativeSignature: chiefValuersRepSignature != null ? 'Signature present' : '',
+      acquiringOfficerSignature:
+          acquiringOfficerSignature != null ? 'Signature present' : '',
+      gramasewakaSignature:
+          gramaSevekaSignature != null ? 'Signature present' : '',
+      chiefValuerRepresentativeSignature:
+          chiefValuersRepSignature != null ? 'Signature present' : '',
     );
 
     print('======= SENDING CONDITION REPORT DATA =======');
     print('Master File ID: 56249');
     print('Form Data Summary:');
     print(formService.formData.generateDetailedNotes());
-    print('Signatures collected: ${acquiringOfficerSignature != null ? "Yes" : "No"} (Acquiring Officer), '
+    print(
+        'Signatures collected: ${acquiringOfficerSignature != null ? "Yes" : "No"} (Acquiring Officer), '
         '${gramaSevekaSignature != null ? "Yes" : "No"} (Grama Seveka), '
         '${chiefValuersRepSignature != null ? "Yes" : "No"} (Chief Valuer\'s Rep)');
     print('===========================================');
