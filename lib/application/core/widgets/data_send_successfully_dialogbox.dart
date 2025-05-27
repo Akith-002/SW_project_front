@@ -31,21 +31,21 @@ class SuccessMessageCard extends StatelessWidget {
           children: [
             Icon(
               PhosphorIcons.checkCircle(PhosphorIconsStyle.regular),
-              size: 64,
+              size: 48,
               color: colors(context).colorPositive1,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               'Data Send successfully',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
               ).copyWith(color: colors(context).colorPositive1),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             SizedBox(
               width: 87,
-              height: 40,
+              height: 36,
               child: OutlinedButton(
                 onPressed: onClose,
                 style: OutlinedButton.styleFrom(

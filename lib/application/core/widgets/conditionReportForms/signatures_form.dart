@@ -12,6 +12,7 @@ import 'package:land_asset_valuation/app/cubit/base_state.dart';
 import 'package:land_asset_valuation/application/core/services/condition_report_form_service.dart';
 import 'package:land_asset_valuation/application/core/validators/signature_form_validator.dart';
 import 'dart:typed_data';
+import 'package:land_asset_valuation/application/core/widgets/data_send_successfully_dialogbox.dart';
 
 class SignaturesForm extends StatefulWidget {
   final Function? onSubmitSuccess;
@@ -67,14 +68,18 @@ class _SignaturesFormState extends State<SignaturesForm> {
           setState(() {
             _isSubmitting = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Condition report submitted successfully!'),
-              backgroundColor: Colors.green,
-            ),
+          showDialog(
+            context: context,
+            builder: (BuildContext dialogContext) {
+              return SuccessMessageCard(
+                onClose: () {
+                  Navigator.of(dialogContext).pop(); // Close the dialog
+                  widget.onSubmitSuccess?.call();
+                  context.go(Pages.routeMapScreen.toPath());
+                },
+              );
+            },
           );
-          widget.onSubmitSuccess?.call();
-          context.go(Pages.routeMapScreen.toPath());
         } else if (state is ConditionReportSubmitFailure) {
           setState(() {
             _isSubmitting = false;
