@@ -103,8 +103,7 @@ class _AssetListTableState extends State<AssetListTable> {
         return '4';
       case 'RO':
         return '5';
-  
-    
+
       default:
         return '2'; // Default to Mass Rating
     }
@@ -157,8 +156,8 @@ class _AssetListTableState extends State<AssetListTable> {
                         Asset selectedAsset = selectedAssets.first;
                         if (selectedAsset.isRatingCard) {
                           // Show edit rating card dialog for existing rating card
-                          EditRatingCardDialog.showEditRatingCardDialog(
-                              context);
+                          EditRatingCardDialog.showEditRatingCardDialog(context,
+                              asset: selectedAsset);
                         } else {
                           // Show create rating card dialog for new rating card
                           EditRatingCardDialog.showAddRatingCardDialog(context,
@@ -359,8 +358,8 @@ class _AssetListTableState extends State<AssetListTable> {
                   // Determine the selectedIndex based on assetType
                   String selectedIndex =
                       _getSelectedIndexForAssetType(widget.assetType);
-                     debugPrint('Selected Index: $selectedIndex');
-                     debugPrint('Asset Type: ${widget.assetType}');
+                  debugPrint('Selected Index: $selectedIndex');
+                  debugPrint('Asset Type: ${widget.assetType}');
                   context.go(
                       '${Pages.routeAssetMapScreen.toPath()}?selectedIndex=$selectedIndex&source=${widget.assetType ?? 'massRating'}');
                 },
