@@ -24,6 +24,7 @@ import 'package:land_asset_valuation/application/pages/splash/splash_view.dart';
 import 'package:land_asset_valuation/application/pages/RatingCard/rating_card_view.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/AssetMapScreen/asset_map_screen.dart';
+import 'package:land_asset_valuation/application/pages/test.dart';
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
@@ -343,6 +344,16 @@ class AppRouter {
               return NoTransitionPage(
                 key: state.pageKey,
                 child: SpecialRatingCard(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeTest.toPath(),
+            name: Pages.routeTest.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const Test(), // Replace with your test page
               );
             },
           ),

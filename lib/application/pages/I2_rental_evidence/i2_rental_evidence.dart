@@ -397,14 +397,14 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            '(Optional)',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontStyle: FontStyle.italic,
-                              fontSize: 12,
-                            ),
-                          ),
+                          // Text(
+                          //   '(Optional)',
+                          //   style: TextStyle(
+                          //     color: Colors.grey,
+                          //     fontStyle: FontStyle.italic,
+                          //     fontSize: 12,
+                          //   ),
+                          // ),
                         ],
                       ),
                       const SizedBox(height: 16),
