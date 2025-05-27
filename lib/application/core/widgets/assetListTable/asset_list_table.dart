@@ -17,6 +17,7 @@ class AssetListTable extends StatefulWidget {
   final String? assetType;
   final Function(Asset)? onAssetSelected;
   final Function(List<Asset>)? onAssetsSelected;
+  final VoidCallback? onRefresh;
 
   const AssetListTable({
     super.key,
@@ -24,6 +25,7 @@ class AssetListTable extends StatefulWidget {
     this.assetType,
     this.onAssetSelected,
     this.onAssetsSelected,
+    this.onRefresh,
   });
 
   @override
@@ -191,6 +193,26 @@ class _AssetListTableState extends State<AssetListTable> {
                   SizedBox(
                     width: 12,
                   ),
+                ],
+                // Add refresh button
+                if (widget.onRefresh != null) ...[
+                  IconButton(
+                    onPressed: widget.onRefresh,
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Refresh',
+                    style: IconButton.styleFrom(
+                      backgroundColor: colors(context).colorPrimary8,
+                      foregroundColor: colors(context).colorPrimary6,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(
+                          color: colors(context).colorPrimary6!,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
                 ],
                 SizedBox(
                   width: 290,
