@@ -3,16 +3,16 @@ class DomesticRatingCardModel {
   final String newNumber;
   final String owner;
   final String description;
-  final int selectWalls;
-  final int floor;
-  final int conveniences;
-  final int condition;
+  final String selectWalls;
+  final String floor;
+  final String conveniences;
+  final String condition;
   final int age;
-  final int access;
+  final String access;
   final String tsBop;
   final String parkingSpace;
-  final int propertySubCategory;
-  final int propertyType;
+  final String propertySubCategory;
+  final String propertyType;
   final String plantations;
   final String wardNumber;
   final String roadName;
@@ -81,16 +81,16 @@ class DomesticRatingCardModel {
       newNumber: json['newNumber'] ?? '',
       owner: json['owner'] ?? '',
       description: json['description'] ?? '',
-      selectWalls: json['selectWalls'] ?? 0,
-      floor: json['floor'] ?? 0,
-      conveniences: json['conveniences'] ?? 0,
-      condition: json['condition'] ?? 0,
+      selectWalls: json['selectWalls'] ?? '',
+      floor: json['floor'] ?? '',
+      conveniences: json['conveniences'] ?? '',
+      condition: json['condition'] ?? '',
       age: json['age'] ?? 0,
-      access: json['access'] ?? 0,
+      access: json['access'] ?? '',
       tsBop: json['tsBop'] ?? '',
       parkingSpace: json['parkingSpace'] ?? '',
-      propertySubCategory: json['propertySubCategory'] ?? 0,
-      propertyType: json['propertyType'] ?? 0,
+      propertySubCategory: json['propertySubCategory'] ?? '',
+      propertyType: json['propertyType'] ?? '',
       plantations: json['plantations'] ?? '',
       wardNumber: json['wardNumber'] ?? '',
       roadName: json['roadName'] ?? '',

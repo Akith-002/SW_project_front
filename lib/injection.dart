@@ -17,11 +17,11 @@ import 'package:land_asset_valuation/data/repositories/condition_report_reposito
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart';
 
-// Asset Division Feature (ADD THESE MISSING IMPORTS)
+// Asset Division Feature
 import 'package:land_asset_valuation/data/datasource/remote/asset_division_remote_data_source.dart';
 import 'package:land_asset_valuation/data/repositories/asset_division_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/asset_division_repository.dart';
-
+import 'package:land_asset_valuation/domain/usecases/asset_division_usecases.dart';
 import 'package:land_asset_valuation/application/pages/asset_division/cubit/asset_division_cubit.dart';
 
 // Rental Evidence Feature
@@ -104,7 +104,6 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => SendConditionReportUseCase(injection()),
   );
-
   // ------------------------------
   // Asset Division Feature
   // ------------------------------
@@ -114,6 +113,14 @@ Future<void> init() async {
 
   injection.registerLazySingleton<AssetDivisionRepository>(
     () => AssetDivisionRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => DivideAssetUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => ValidateAssetDivisionUseCase(injection()),
   );
 
   // ------------------------------

@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/labeled_text_field.dart';
+import 'package:land_asset_valuation/application/core/widgets/labeled_date_field.dart';
+import 'package:land_asset_valuation/application/core/widgets/labeled_numeric_field.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_dropdown_field.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
+import 'package:land_asset_valuation/application/core/widgets/saved_succesfully_dialogbox.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/pages/RatingCardForms/domestic/cubit/domestic_rating_card_cubit.dart';
+import 'package:land_asset_valuation/application/core/validators/domestic_rating_card_validator.dart';
 import 'package:land_asset_valuation/data/models/domestic_rating_card_model.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:land_asset_valuation/application/core/router/pages.dart';
 
 class DomesticRatingCard extends StatefulWidget {
   final int assetId;
@@ -89,38 +95,162 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
   }
 
   void _saveForm() {
-    if (_formKey.currentState?.validate() ?? false) {
-      final ratingCard = DomesticRatingCardModel(
-        assetId: widget.assetId,
-        newNumber: _newNumberController.text,
-        owner: _ownerController.text,
-        description: _descriptionController.text,
-        selectWalls: int.tryParse(_selectedWalls ?? '0') ?? 0,
-        floor: int.tryParse(_selectedFloor ?? '0') ?? 0,
-        conveniences: int.tryParse(_selectedConveniences ?? '0') ?? 0,
-        condition: int.tryParse(_selectedCondition ?? '0') ?? 0,
-        age: int.tryParse(_ageController.text) ?? 0,
-        access: int.tryParse(_selectedAccess ?? '0') ?? 0,
-        tsBop: _tsBopController.text,
-        parkingSpace: _parkingSpaceController.text,
-        propertySubCategory:
-            int.tryParse(_selectedPropertySubCategory ?? '0') ?? 0,
-        propertyType: int.tryParse(_selectedPropertyType ?? '0') ?? 0,
-        plantations: _plantationsController.text,
-        wardNumber: _wardNumberController.text,
-        roadName: _roadNameController.text,
-        date: _dateController.text.isNotEmpty
-            ? DateTime.tryParse(_dateController.text) ?? DateTime.now()
-            : DateTime.now(),
-        occupier: _occupierController.text,
-        rentPM: double.tryParse(_rentPMController.text) ?? 0.0,
-        terms: _termsController.text,
-        suggestedRate: double.tryParse(_suggestedRateController.text) ?? 0.0,
-        notes: _notesController.text,
-      );
-
-      _cubit.saveRatingCard(ratingCard);
+    // Collect all validation errors
+    List<String> validationErrors = []; // Validate dropdown fields
+    if (_selectedWalls == null || _selectedWalls == "Select Wall Type") {
+      validationErrors.add('Wall Type is required');
     }
+    if (_selectedFloor == null || _selectedFloor == "Select Floor Type") {
+      validationErrors.add('Floor Type is required');
+    }
+    if (_selectedConveniences == null ||
+        _selectedConveniences == "Select Conveniences") {
+      validationErrors.add('Conveniences is required');
+    }
+    if (_selectedCondition == null ||
+        _selectedCondition == "Select Condition") {
+      validationErrors.add('Condition is required');
+    }
+    if (_selectedAccess == null || _selectedAccess == "Select Access Type") {
+      validationErrors.add('Access Type is required');
+    }
+    if (_selectedPropertySubCategory == null ||
+        _selectedPropertySubCategory == "Select Property Sub Category") {
+      validationErrors.add('Property Sub Category is required');
+    }
+    if (_selectedPropertyType == null ||
+        _selectedPropertyType == "Select Property Type") {
+      validationErrors.add('Property Type is required');
+    } // Validate text fields using the validator
+    final ageValidation =
+        DomesticRatingCardValidator.validateAge(_ageController.text, 'Age');
+    if (ageValidation != null) validationErrors.add(ageValidation);
+
+    final roadNameValidation =
+        DomesticRatingCardValidator.validateRequiredTextWithLength(
+            _roadNameController.text, 100, 'Road Name');
+    if (roadNameValidation != null) validationErrors.add(roadNameValidation);
+
+    final dateValidation =
+        DomesticRatingCardValidator.validateDate(_dateController.text, 'Date');
+    if (dateValidation != null) validationErrors.add(dateValidation);
+
+    final rentValidation = DomesticRatingCardValidator.validatePositiveDecimal(
+        _rentPMController.text, 'Rent Per Month');
+    if (rentValidation != null) validationErrors.add(rentValidation);
+
+    final suggestedRateValidation =
+        DomesticRatingCardValidator.validatePositiveDecimal(
+            _suggestedRateController.text, 'Suggested Rate');
+    if (suggestedRateValidation != null)
+      validationErrors.add(suggestedRateValidation);
+
+    // Check if form validation passes and no manual validation errors
+    final isFormValid = _formKey.currentState?.validate() ?? false;
+
+    if (!isFormValid || validationErrors.isNotEmpty) {
+      // Show validation error snack bar
+      _showValidationErrorSnackBar(validationErrors);
+      return;
+    }
+
+    // Parse the date from the controller text
+    DateTime parseDate() {
+      if (_dateController.text.isNotEmpty) {
+        try {
+          return DateTime.parse(_dateController.text);
+        } catch (e) {
+          return DateTime.now();
+        }
+      }
+      return DateTime.now();
+    }
+
+    final ratingCard = DomesticRatingCardModel(
+      assetId: widget.assetId,
+      newNumber: _newNumberController.text.trim(),
+      owner: _ownerController.text.trim(),
+      description: _descriptionController.text.trim(),
+      selectWalls: _selectedWalls ?? '',
+      floor: _selectedFloor ?? '',
+      conveniences: _selectedConveniences ?? '',
+      condition: _selectedCondition ?? '',
+      age: int.tryParse(_ageController.text) ?? 0,
+      access: _selectedAccess ?? '',
+      tsBop: _tsBopController.text.trim(),
+      parkingSpace: _parkingSpaceController.text.trim(),
+      propertySubCategory: _selectedPropertySubCategory ?? '',
+      propertyType: _selectedPropertyType ?? '',
+      plantations: _plantationsController.text.trim(),
+      wardNumber: _wardNumberController.text.trim(),
+      roadName: _roadNameController.text.trim(),
+      date: parseDate(),
+      occupier: _occupierController.text.trim(),
+      rentPM: double.tryParse(_rentPMController.text) ?? 0.0,
+      terms: _termsController.text.trim(),
+      suggestedRate: double.tryParse(_suggestedRateController.text) ?? 0.0,
+      notes: _notesController.text.trim(),
+    );
+
+    _cubit.saveRatingCard(ratingCard);
+  }
+
+  void _showValidationErrorSnackBar(List<String> errors) {
+    if (errors.isEmpty) return;
+
+    final errorMessage = errors.length == 1
+        ? errors.first
+        : 'Please fix the following errors:\n• ${errors.join('\n• ')}';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Container(
+          constraints: const BoxConstraints(maxHeight: 200),
+          child: SingleChildScrollView(
+            child: Text(
+              errorMessage,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+        backgroundColor: Colors.red.shade600,
+        duration: const Duration(seconds: 5),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        action: SnackBarAction(
+          label: 'DISMISS',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: SavedMessageCard(
+            onClose: () {
+              Navigator.of(context).pop(); // Close dialog
+              // Navigate back to the MR assets list using go_router
+              context.go(Pages.routeMrAssetsList.toPath());
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -132,10 +262,7 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
           if (state is DomesticRatingCardAutofillLoaded) {
             _fillAutofillData(state.autofillData);
           } else if (state is DomesticRatingCardSaved) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Rating card saved successfully!')),
-            );
-            Navigator.pop(context);
+            _showSuccessDialog();
           } else if (state is DomesticRatingCardError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error: ${state.message}')),
@@ -179,89 +306,147 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                           ),
                         ),
                         _buildRow([
-                          LabeledTextField(
+                          _buildReadOnlyField(
                             label: AppString.newNumber.localize(context)!,
-                            placeholder: AppString.newNumber.localize(context)!,
                             controller: _newNumberController,
                           ),
-                          LabeledTextField(
+                          _buildReadOnlyField(
                             label: AppString.owner.localize(context)!,
-                            placeholder: AppString.owner.localize(context)!,
                             controller: _ownerController,
                           ),
                         ]),
                         _buildRow([
-                          LabeledTextField(
+                          _buildReadOnlyField(
                             label: AppString.description.localize(context)!,
-                            placeholder:
-                                AppString.description.localize(context)!,
                             controller: _descriptionController,
                           ),
                           CustomDropdownField(
                             label: AppString.selectWalls.localize(context)!,
-                            items: ["1", "2", "3", "4"],
-                            initialValue: _selectedWalls ?? "1",
+                            items: [
+                              "Select Wall Type",
+                              "Brick",
+                              "Concrete",
+                              "Glass Front",
+                              "Steel Frame"
+                            ],
+                            initialValue: _selectedWalls ?? "Select Wall Type",
                             onChanged: (value) {
                               setState(() {
-                                _selectedWalls = value;
+                                _selectedWalls =
+                                    value == "Select Wall Type" ? null : value;
                               });
                             },
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateDropdown(
+                                    value, 'Wall Type'),
                           ),
                         ]),
                         _buildRow([
                           CustomDropdownField(
                             label: AppString.floor.localize(context)!,
-                            items: ["1", "2", "3", "4"],
-                            initialValue: _selectedFloor ?? "1",
+                            items: [
+                              "Select Floor Type",
+                              "Tile",
+                              "Marble",
+                              "Concrete",
+                              "Wood"
+                            ],
+                            initialValue: _selectedFloor ?? "Select Floor Type",
                             onChanged: (value) {
                               setState(() {
-                                _selectedFloor = value;
+                                _selectedFloor =
+                                    value == "Select Floor Type" ? null : value;
                               });
                             },
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateDropdown(
+                                    value, 'Floor Type'),
                           ),
                           CustomDropdownField(
                             label: AppString.conveniences.localize(context)!,
-                            items: ["1", "2", "3", "4"],
-                            initialValue: _selectedConveniences ?? "1",
+                            items: [
+                              "Select Conveniences",
+                              "AC",
+                              "Parking",
+                              "Security",
+                              "Pool"
+                            ],
+                            initialValue:
+                                _selectedConveniences ?? "Select Conveniences",
                             onChanged: (value) {
                               setState(() {
-                                _selectedConveniences = value;
+                                _selectedConveniences =
+                                    value == "Select Conveniences"
+                                        ? null
+                                        : value;
                               });
                             },
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateDropdown(
+                                    value, 'Conveniences'),
                           ),
                         ]),
                         _buildRow([
                           CustomDropdownField(
                             label: AppString.condition.localize(context)!,
-                            items: ["1", "2", "3", "4"],
-                            initialValue: _selectedCondition ?? "1",
+                            items: [
+                              "Select Condition",
+                              "Excellent",
+                              "Good",
+                              "Fair",
+                              "Poor"
+                            ],
+                            initialValue:
+                                _selectedCondition ?? "Select Condition",
                             onChanged: (value) {
                               setState(() {
-                                _selectedCondition = value;
+                                _selectedCondition =
+                                    value == "Select Condition" ? null : value;
                               });
                             },
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateDropdown(
+                                    value, 'Condition'),
                           ),
-                          LabeledTextField(
+                          LabeledNumericField(
                             label: AppString.age.localize(context)!,
-                            placeholder: AppString.age.localize(context)!,
+                            placeholder: "Enter age in years",
                             controller: _ageController,
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateAge(
+                                    value, 'Age'),
                           ),
                         ]),
                         _buildRow([
                           CustomDropdownField(
                             label: AppString.access.localize(context)!,
-                            items: ["1", "2", "3", "4"],
-                            initialValue: _selectedAccess ?? "1",
+                            items: [
+                              "Select Access Type",
+                              "Main Road",
+                              "Side Road",
+                              "Lane",
+                              "Private Road"
+                            ],
+                            initialValue:
+                                _selectedAccess ?? "Select Access Type",
                             onChanged: (value) {
                               setState(() {
-                                _selectedAccess = value;
+                                _selectedAccess = value == "Select Access Type"
+                                    ? null
+                                    : value;
                               });
                             },
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateDropdown(
+                                    value, 'Access Type'),
                           ),
                           LabeledTextField(
                             label: AppString.tsBop.localize(context)!,
                             placeholder: AppString.tsBop.localize(context)!,
                             controller: _tsBopController,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validateOptionalTextWithLength(
+                                    value, 100, 'TS/BOP'),
                           ),
                         ]),
                         _buildRow([
@@ -270,34 +455,66 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                             placeholder:
                                 AppString.parkingSpace.localize(context)!,
                             controller: _parkingSpaceController,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validateOptionalTextWithLength(
+                                    value, 100, 'Parking Space'),
                           ),
                           CustomDropdownField(
                             label: AppString.propertySubCategory
                                 .localize(context)!,
-                            items: ["1", "2", "3", "4"],
-                            initialValue: _selectedPropertySubCategory ?? "1",
+                            items: [
+                              "Select Property Sub Category",
+                              "Villa",
+                              "Apartment",
+                              "Townhouse",
+                              "Bungalow"
+                            ],
+                            initialValue: _selectedPropertySubCategory ??
+                                "Select Property Sub Category",
                             onChanged: (value) {
                               setState(() {
-                                _selectedPropertySubCategory = value;
+                                _selectedPropertySubCategory =
+                                    value == "Select Property Sub Category"
+                                        ? null
+                                        : value;
                               });
                             },
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateDropdown(
+                                    value, 'Property Sub Category'),
                           ),
                         ]),
                         _buildRow([
                           CustomDropdownField(
                             label: AppString.propertyType.localize(context)!,
-                            items: ["1", "2", "3", "4"],
-                            initialValue: _selectedPropertyType ?? "1",
+                            items: [
+                              "Select Property Type",
+                              "Luxury",
+                              "Standard",
+                              "Commercial",
+                              "Budget"
+                            ],
+                            initialValue:
+                                _selectedPropertyType ?? "Select Property Type",
                             onChanged: (value) {
                               setState(() {
-                                _selectedPropertyType = value;
+                                _selectedPropertyType =
+                                    value == "Select Property Type"
+                                        ? null
+                                        : value;
                               });
                             },
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateDropdown(
+                                    value, 'Property Type'),
                           ),
                           LabeledTextField(
                             label: "Plantations",
                             placeholder: "Enter plantations",
                             controller: _plantationsController,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validateOptionalTextWithLength(
+                                    value, 200, 'Plantations'),
                           ),
                         ]),
                         _buildRow([
@@ -306,44 +523,66 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                             placeholder:
                                 AppString.wardNumber.localize(context)!,
                             controller: _wardNumberController,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validateOptionalTextWithLength(
+                                    value, 50, 'Ward Number'),
                           ),
                           LabeledTextField(
                             label: AppString.roadName.localize(context)!,
                             placeholder: AppString.roadName.localize(context)!,
                             controller: _roadNameController,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validateRequiredTextWithLength(
+                                    value, 100, 'Road Name'),
                           ),
                         ]),
                         _buildRow([
-                          LabeledTextField(
+                          LabeledDateField(
                             label: AppString.date.localize(context)!,
-                            placeholder: AppString.date.localize(context)!,
+                            placeholder: "Select date",
                             controller: _dateController,
+                            validator: (value) =>
+                                DomesticRatingCardValidator.validateDate(
+                                    value, 'Date'),
                           ),
                           LabeledTextField(
                             label: AppString.occupier.localize(context)!,
                             placeholder: AppString.occupier.localize(context)!,
                             controller: _occupierController,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validateOptionalTextWithLength(
+                                    value, 100, 'Occupier'),
                           ),
                         ]),
                         _buildRow([
-                          LabeledTextField(
+                          LabeledNumericField(
                             label: AppString.rentPM.localize(context)!,
-                            placeholder: AppString.rentPM.localize(context)!,
+                            placeholder: "Enter rent per month",
                             controller: _rentPMController,
+                            allowDecimals: true,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validatePositiveDecimal(
+                                    value, 'Rent Per Month'),
                           ),
                           LabeledTextField(
                             label: AppString.terms.localize(context)!,
                             placeholder: AppString.terms.localize(context)!,
                             controller: _termsController,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validateOptionalTextWithLength(
+                                    value, 200, 'Terms'),
                           ),
                         ]),
                         SizedBox(height: 16),
                         _buildRow([
-                          LabeledTextField(
+                          LabeledNumericField(
                             label: AppString.suggestedRate.localize(context)!,
-                            placeholder:
-                                AppString.suggestedRate.localize(context)!,
+                            placeholder: "Enter suggested rate",
                             controller: _suggestedRateController,
+                            allowDecimals: true,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validatePositiveDecimal(
+                                    value, 'Suggested Rate'),
                           ),
                         ]),
                         _buildRow([
@@ -351,6 +590,9 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                             label: AppString.notes.localize(context)!,
                             placeholder: AppString.notes.localize(context)!,
                             controller: _notesController,
+                            validator: (value) => DomesticRatingCardValidator
+                                .validateOptionalTextWithLength(
+                                    value, 500, 'Notes'),
                           ),
                         ]), // Save & Cancel Buttons
                         Padding(
@@ -448,6 +690,65 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
           ],
         ],
       ),
+    );
+  }
+
+  // Helper method to create read-only fields for autofilled data
+  Widget _buildReadOnlyField({
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            '$label (Auto-filled)',
+            style: TextStyle(
+              color: colors(context).labelTextColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        Container(
+          width: 484,
+          height: 48,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: colors(context).colorGrey5!,
+              width: 1.5,
+            ),
+            color: colors(context).colorGrey1,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller,
+                  enabled: false,
+                  style: TextStyle(
+                    color: colors(context).colorGrey6,
+                    fontSize: 14,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.lock,
+                color: colors(context).colorGrey5,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
