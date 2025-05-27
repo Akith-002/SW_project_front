@@ -9,8 +9,13 @@ import 'package:land_asset_valuation/application/core/validators/construction_fo
 
 class ConstructionForm extends StatefulWidget {
   final int tabIndex; // 1 for Building Info, 2 for Other Constructions
+  final TabController tabController; // Add TabController
 
-  const ConstructionForm({super.key, required this.tabIndex});
+  const ConstructionForm({
+    super.key,
+    required this.tabIndex,
+    required this.tabController, // Add required TabController
+  });
 
   @override
   State<ConstructionForm> createState() => _ConstructionFormState();
@@ -20,6 +25,7 @@ class _ConstructionFormState extends State<ConstructionForm> {
   final _formService = ConditionReportFormService();
   final _formKey = GlobalKey<FormState>();
   final _buildingDescriptionController = TextEditingController();
+  bool _autoValidate = false;
 
   final List<Map<String, String>> constructions = [
     const {"label": AppString.constructionName, "value": "Construction One"},
@@ -49,11 +55,29 @@ class _ConstructionFormState extends State<ConstructionForm> {
   }
 
   void _saveFormData() {
+    setState(() {
+      _autoValidate = true;
+    });
+
+    // Check if form is valid
     if (!(_formKey.currentState?.validate() ?? false)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please fix the errors in the form'),
+          content: Text('Please fill all required fields correctly'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Check if description is empty
+    if (_buildingDescriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a description'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
         ),
       );
       return;
@@ -75,11 +99,16 @@ class _ConstructionFormState extends State<ConstructionForm> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Information saved'),
+        content: Text('Information saved successfully'),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
       ),
     );
+
+    // Move to next tab after successful save
+    if (widget.tabController.index < widget.tabController.length - 1) {
+      widget.tabController.animateTo(widget.tabController.index + 1);
+    }
   }
 
   @override
@@ -97,6 +126,9 @@ class _ConstructionFormState extends State<ConstructionForm> {
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
+            autovalidateMode: _autoValidate
+                ? AutovalidateMode.onUserInteraction
+                : AutovalidateMode.disabled,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

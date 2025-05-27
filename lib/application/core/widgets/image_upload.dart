@@ -153,15 +153,14 @@ class ImageUpload extends StatelessWidget {
     }
 
     // Determine the image provider based on available imageFile or imagePath.
-    ImageProvider imageProvider;
+    ImageProvider? imageProvider; // Made nullable
     if (imageFile != null) {
       imageProvider = FileImage(imageFile!);
     } else if (imagePath != null) {
       imageProvider = AssetImage(imagePath!);
-    } else {
-      // Default image if no image is provided.
-      imageProvider = const AssetImage('images/pngs/img_upload.png');
     }
+    // If imageFile and imagePath are both null, imageProvider will now be null,
+    // and no default image will be shown.
 
     return Stack(
       children: [
@@ -172,7 +171,7 @@ class ImageUpload extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             image: DecorationImage(
-              image: imageProvider,
+              image: imageProvider!,
               fit: BoxFit.cover,
             ),
           ),

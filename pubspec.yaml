@@ -72,10 +72,19 @@ dependencies:
   dartz: ^0.10.1
   json_serializable: ^6.9.5
   json_annotation: ^4.9.0
+  flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mockito: ^5.4.4 # Explicitly use the latest stable version
+  build_runner: ^2.4.9 # Keep recent stable build_runner
+  bloc_test: ^9.1.7 # Add bloc_test dependency
+
+dependency_overrides:
+  analyzer: ^6.4.1 # Override analyzer to a version compatible with mockito 5.4.4
+
+  build_runner: ^2.4.15
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.

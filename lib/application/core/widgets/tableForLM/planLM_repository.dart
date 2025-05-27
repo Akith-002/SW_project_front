@@ -1,78 +1,63 @@
-import 'dart:math';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:land_asset_valuation/application/core/widgets/tableForLM/planLM.dart';
 
 class PlanlmRepository {
   static Future<PaginatedResponseLM<Planlm>> getPlans({
     required int pageSize,
-    required String? pageToken,
-    String? sortBy,
+    // pageToken is now pageNumber for API consistency
+    required int pageNumber,
+    String?
+        sortBy, // sortBy and sortDescending are not used by the API endpoint
     bool sortDescending = false,
-    String? searchQuery,
+    String? searchQuery, // searchQuery is not used by this specific endpoint
   }) async {
-    await Future.delayed(
-        const Duration(milliseconds: 500)); // Simulating network delay
+    final uri = Uri.parse(
+        'http://10.0.2.2:5221/api/LandMiscellaneous/paginated?pageNumber=$pageNumber&pageSize=$pageSize');
 
-    // Generate mock data
-    List<Planlm> plans = List.generate(100, (index) {
-      return Planlm(
-        masterFileNo: index,
-        planType: "Type ${String.fromCharCode(65 + (index % 5))}${index % 10}",
-        planNo: Random().nextInt(1000),
-        authorityReferenceNo: "00${index % 10}",
-        status: index % 2 == 0 ? PlanStatusLM.success : PlanStatusLM.pending,
-      );
-    });
+    try {
+      final response = await http.get(uri);
 
-    // Apply search filter
-    if (searchQuery != null && searchQuery.isNotEmpty) {
-      plans =
-          plans.where((plan) => plan.planType.contains(searchQuery)).toList();
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> records = data['records'];
+        final List<Planlm> plans = records
+            .map((e) => Planlm.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+        return PaginatedResponseLM(
+          items: plans,
+          totalCount: data['totalCount'],
+          pageNumber: data['pageNumber'],
+          pageSize: data['pageSize'],
+          totalPages: data['totalPages'],
+        );
+      } else {
+        // It's good practice to throw a more specific error or handle different status codes
+        throw Exception(
+            'Failed to load plans: ${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      // Catching network errors or json parsing errors
+      throw Exception('Failed to load plans: $e');
     }
-
-    // Apply sorting
-    if (sortBy != null) {
-      plans.sort((a, b) {
-        int comparison;
-        switch (sortBy) {
-          case "masterFileNo":
-            comparison = a.masterFileNo.compareTo(b.masterFileNo);
-            break;
-          case "planType":
-            comparison = a.planType.compareTo(b.planType);
-            break;
-          case "planNo":
-            comparison = a.planNo.compareTo(b.planNo);
-            break;
-          case "requestingAuthorityRefNo":
-            comparison =
-                a.authorityReferenceNo.compareTo(b.authorityReferenceNo);
-            break;
-          case "status":
-            comparison = a.status.compareTo(b.status);
-            break;
-          default:
-            comparison = 0;
-        }
-        return sortDescending ? -comparison : comparison;
-      });
-    }
-
-    // Paginate
-    int startIndex = pageToken == null ? 0 : int.tryParse(pageToken) ?? 0;
-    int endIndex = (startIndex + pageSize).clamp(0, plans.length);
-    List<Planlm> paginatedPlans = plans.sublist(startIndex, endIndex);
-    String? nextPageToken =
-        endIndex < plans.length ? endIndex.toString() : null;
-
-    return PaginatedResponseLM(
-        items: paginatedPlans, nextPageToken: nextPageToken);
   }
 }
 
 class PaginatedResponseLM<T> {
   final List<T> items;
-  final String? nextPageToken;
+  // final String? nextPageToken; // Replaced with pagination details from API
+  final int totalCount;
+  final int pageNumber;
+  final int pageSize;
+  final int totalPages;
 
-  PaginatedResponseLM({required this.items, this.nextPageToken});
+  PaginatedResponseLM({
+    required this.items,
+    required this.totalCount,
+    required this.pageNumber,
+    required this.pageSize,
+    required this.totalPages,
+    // this.nextPageToken
+  });
 }

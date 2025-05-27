@@ -1,7 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/cubit/lm_masterfile_list_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:logger/logger.dart';
+
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 // App setup
 import 'package:land_asset_valuation/application/core/router/routes.dart';
@@ -49,6 +53,14 @@ import 'package:land_asset_valuation/data/repositories/asset_repository_impl.dar
 import 'package:land_asset_valuation/domain/repositories/asset_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/asset_usecases.dart';
 
+// Land Miscellaneous Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/land_miscellaneous_remote_datasource.dart';
+import 'package:land_asset_valuation/data/repositories/land_miscellaneous_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/get_all_lm_master_files_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_paginated_lm_master_files_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/search_lm_master_files_usecase.dart';
+
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
@@ -67,6 +79,9 @@ import 'package:land_asset_valuation/application/pages/settingsScreen/cubit/sett
 import 'package:land_asset_valuation/application/pages/signIn/cubit/signin_cubit.dart';
 import 'package:land_asset_valuation/application/pages/splash/cubit/splash_cubit.dart';
 import 'package:land_asset_valuation/application/pages/conditionReport/cubit/condition_report_cubit.dart';
+import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
+import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
+import 'package:land_asset_valuation/data/services/sign_in_service.dart';
 
 // Domestic Rating Card Feature
 import 'package:land_asset_valuation/data/datasource/remote/domestic_rating_card_remote_data_source.dart';
@@ -86,7 +101,11 @@ Future<void> init() async {
   injection.registerSingleton(RouterServices(appSharedData: injection()));
   injection.registerSingleton(AppRouter(routerServices: injection()));
   // Register Dio and DioClient
-  injection.registerLazySingleton(() => Dio());
+  injection.registerLazySingleton(() {
+    final dio = Dio();
+    dio.options.baseUrl = AppConfig.apiBaseUrl;
+    return dio;
+  });
   injection.registerLazySingleton(() => DioClient(injection()));
   injection.registerLazySingleton(() => Logger());
 
@@ -159,7 +178,6 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => SendRentalEvidenceUseCase(injection()),
   );
-
   // ------------------------------
   // Land Acquisition Feature (Clean Architecture)
   // ------------------------------
@@ -172,6 +190,23 @@ Future<void> init() async {
   injection
       .registerLazySingleton(() => GetPaginatedMasterFilesUseCase(injection()));
   injection.registerLazySingleton(() => SearchMasterFilesUseCase(injection()));
+
+  // ------------------------------
+  // Land Miscellaneous Feature (Clean Architecture)
+  // ------------------------------
+  injection.registerLazySingleton<LandMiscellaneousRemoteDatasource>(
+    () => LandMiscellaneousRemoteDatasource(injection()),
+  );
+
+  injection.registerLazySingleton<LandMiscellaneousRepository>(
+    () => LandMiscellaneousRepositoryImpl(injection()),
+  );
+  injection
+      .registerLazySingleton(() => GetAllLmMasterFilesUseCase(injection()));
+  injection.registerLazySingleton(
+      () => GetPaginatedLMMasterFilesUseCase(injection()));
+  injection
+      .registerLazySingleton(() => SearchLmMasterFilesUseCase(injection()));
 
   // ------------------------------
   // MR Requests Feature (Clean Architecture)
@@ -207,7 +242,10 @@ Future<void> init() async {
   // ------------------------------
   injection.registerFactory(() => SplashCubit(appSharedData: injection()));
   injection.registerFactory(() => DashboardCubit(appSharedData: injection()));
-  injection.registerFactory(() => SigninCubit(appSharedData: injection()));
+  injection.registerFactory(() => SigninCubit(
+        appSharedData: injection(),
+        authRepository: injection(),
+      ));
   injection
       .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
   injection.registerFactory(() => MrAssetsListCubit(
@@ -249,6 +287,17 @@ Future<void> init() async {
       .registerFactory(() => PastValuationCubit(appSharedData: injection()));
   injection
       .registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+
+  // ------------------------------
+  // Auth Dependencies
+  // ------------------------------
+  injection.registerLazySingleton(() => SecureStorage());
+  injection.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(injection(), injection()),
+  );
+  injection.registerLazySingleton(
+    () => SignInService(authRepository: injection()),
+  );
   injection.registerFactory(() => I3MasterFileListCubit(
         appSharedData: injection(),
         getPaginatedUseCase: injection(),
@@ -263,5 +312,11 @@ Future<void> init() async {
   injection.registerFactory(() => AssetDivisionCubit(
         divideAssetUseCase: injection(),
         validateAssetDivisionUseCase: injection(),
+      ));
+  injection.registerFactory(() => LmMasterfileListCubit(
+        appSharedData: injection(),
+        getAllUseCase: injection(),
+        getPaginatedUseCase: injection(),
+        searchUseCase: injection(),
       ));
 }
