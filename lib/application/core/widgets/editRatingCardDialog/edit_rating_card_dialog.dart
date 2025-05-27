@@ -8,6 +8,7 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
 import 'package:land_asset_valuation/application/core/widgets/due_to_difficulties_modal.dart';
 import 'package:land_asset_valuation/application/core/widgets/enter_new_no_modal.dart';
+import 'package:land_asset_valuation/application/core/widgets/asset_change_modal.dart';
 import 'package:land_asset_valuation/application/core/widgets/invalid_owners_dialogbox.dart';
 import 'package:land_asset_valuation/application/core/widgets/saved_succesfully_dialogbox.dart';
 import 'package:land_asset_valuation/application/core/widgets/street_name_modal.dart';
@@ -174,7 +175,17 @@ class EditRatingCardDialog {
                                 break;
                               case 3:
                                 // Change number option
-                                _handleChangeNumber(context);
+                                if (asset != null) {
+                                  _handleChangeNumber(context, asset);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Asset information not available for changing number'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                                 break;
                               case 4:
                                 // Due to difficulties option
@@ -715,25 +726,26 @@ class EditRatingCardDialog {
       ),
     );
   }
-
-  // TODO: Implement change number functionality for single asset
-  static void _handleChangeNumber(BuildContext context) {
-    debugPrint("Change number option selected");
-    final TextEditingController newNoController = TextEditingController();
+  // Implement change number functionality for single asset
+  static void _handleChangeNumber(BuildContext context, Asset asset) {
+    debugPrint("Change number option selected for asset: ${asset.assetNo}");
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.transparent,
         contentPadding: EdgeInsets.zero,
-        content: EnterNewNoWidget(
-          controller: newNoController,
+        content: AssetChangeModal(
+          asset: asset,
           onSave: () {
-            String newNumber = newNoController.text.trim();
-            if (newNumber.isNotEmpty) {
-              debugPrint("New consolidation number: $newNumber");
-            }
             Navigator.pop(context);
+            // Show success dialog
+            showDialog(
+              context: context,
+              builder: (context) => SavedMessageCard(
+                onClose: () => Navigator.pop(context),
+              ),
+            );
           },
         ),
       ),

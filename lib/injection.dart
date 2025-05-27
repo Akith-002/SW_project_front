@@ -58,6 +58,12 @@ import 'package:land_asset_valuation/domain/usecases/get_all_lm_master_files_use
 import 'package:land_asset_valuation/domain/usecases/get_paginated_lm_master_files_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/search_lm_master_files_usecase.dart';
 
+// Asset Change Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/asset_change_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/asset_change_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/asset_change_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/change_asset_number_usecase.dart';
+
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
@@ -80,7 +86,6 @@ import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
 import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
 import 'package:land_asset_valuation/data/services/sign_in_service.dart';
 import 'package:land_asset_valuation/data/datasource/remote/rental_assessment_remote_datasource.dart';
-import 'package:land_asset_valuation/data/models/rental_assesment_model.dart';
 import 'package:land_asset_valuation/data/repositories/rental_assessment_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/rental_assessment_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/get_rental_assessments_usecase.dart';
@@ -133,34 +138,49 @@ Future<void> init() async {
   );
 
   // ------------------------------
-// Rental Assessment Feature
-// ------------------------------
-if (!injection.isRegistered<RentalAssessmentRemoteDataSource>()) {
-  injection.registerLazySingleton<RentalAssessmentRemoteDataSource>(
-    () => RentalAssessmentRemoteDataSourceImpl(dioClient: injection()),
+  // Asset Change Feature
+  // ------------------------------
+  injection.registerLazySingleton<AssetChangeRemoteDataSource>(
+    () => AssetChangeRemoteDataSourceImpl(dioClient: injection()),
   );
-}
 
-if (!injection.isRegistered<RentalAssessmentRepository>()) {
-  injection.registerLazySingleton<RentalAssessmentRepository>(
-    () => RentalAssessmentRepositoryImpl(
-      remoteDataSource: injection(),
+  injection.registerLazySingleton<AssetChangeRepository>(
+    () => AssetChangeRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => ChangeAssetNumberUseCase(injection()),
+  );
+
+  // ------------------------------
+  // Rental Assessment Feature
+  // ------------------------------
+  if (!injection.isRegistered<RentalAssessmentRemoteDataSource>()) {
+    injection.registerLazySingleton<RentalAssessmentRemoteDataSource>(
+      () => RentalAssessmentRemoteDataSourceImpl(dioClient: injection()),
+    );
+  }
+
+  if (!injection.isRegistered<RentalAssessmentRepository>()) {
+    injection.registerLazySingleton<RentalAssessmentRepository>(
+      () => RentalAssessmentRepositoryImpl(
+        remoteDataSource: injection(),
+      ),
+    );
+  }
+
+  if (!injection.isRegistered<GetRentalAssessmentsUseCase>()) {
+    injection.registerLazySingleton(
+      () => GetRentalAssessmentsUseCase(injection()),
+    );
+  }
+
+  // Factory registrations don't need isRegistered check as they create new instances
+  injection.registerFactory(
+    () => RentalAssessmentCubit(
+      getRentalAssessmentsUseCase: injection(),
     ),
   );
-}
-
-if (!injection.isRegistered<GetRentalAssessmentsUseCase>()) {
-  injection.registerLazySingleton(
-    () => GetRentalAssessmentsUseCase(injection()),
-  );
-}
-
-// Factory registrations don't need isRegistered check as they create new instances
-injection.registerFactory(
-  () => RentalAssessmentCubit(
-    getRentalAssessmentsUseCase: injection(),
-  ),
-);
 
   // ------------------------------
   // Rental Evidence Feature
@@ -177,7 +197,6 @@ injection.registerFactory(
     () => SendRentalEvidenceUseCase(injection()),
   );
 
-  
   // ------------------------------
   // Land Acquisition Feature (Clean Architecture)
   // ------------------------------
