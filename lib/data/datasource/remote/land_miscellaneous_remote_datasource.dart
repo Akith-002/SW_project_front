@@ -16,12 +16,19 @@ class LandMiscellaneousRemoteDatasource {
       getPaginatedMasterFiles({
     required int page,
     required int pageSize,
+    String? sortBy,
   }) async {
-    final response =
-        await dioClient.get('/LandMiscellaneous/paginated', queryParameters: {
+    final Map<String, dynamic> queryParams = {
       'pageNumber': page,
       'pageSize': pageSize,
-    });
+    };
+
+    if (sortBy != null) {
+      queryParams['sortBy'] = sortBy;
+    }
+
+    final response = await dioClient.get('/LandMiscellaneous/paginated',
+        queryParameters: queryParams);
 
     return PaginatedResponse.fromJson(
       response.data,
@@ -33,13 +40,20 @@ class LandMiscellaneousRemoteDatasource {
     required String query,
     required int page,
     required int pageSize,
+    String? sortBy,
   }) async {
-    final response =
-        await dioClient.get('/LandMiscellaneous/search', queryParameters: {
+    final Map<String, dynamic> queryParams = {
       'searchTerm': query,
       'pageNumber': page,
       'pageSize': pageSize,
-    });
+    };
+
+    if (sortBy != null) {
+      queryParams['sortBy'] = sortBy;
+    }
+
+    final response = await dioClient.get('/LandMiscellaneous/search',
+        queryParameters: queryParams);
 
     return PaginatedResponse.fromJson(
       response.data,

@@ -1,7 +1,3 @@
-// Import necessary packages and modules.
-// These include state management (Cubit), UI (Material),
-// base view and cubit classes, custom widgets from the sign in page,
-// dependency injection, and others.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:land_asset_valuation/app/base_view.dart';

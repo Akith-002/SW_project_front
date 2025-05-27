@@ -15,8 +15,8 @@ import 'package:land_asset_valuation/application/core/widgets/custom_button.dart
 import 'package:land_asset_valuation/application/core/widgets/custom_dropdown_field.dart';
 import 'package:land_asset_valuation/application/pages/settingsScreen/cubit/settings_screen_cubit.dart';
 import 'package:land_asset_valuation/injection.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+/// Settings screen for managing app preferences including theme, language, and font size
 class SettingsScreen extends BasePage {
   const SettingsScreen({super.key});
 
@@ -30,6 +30,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
   late AppThemeMode _themeMode;
   late TextScaleFactorModel _textScaleFactorModel;
 
+  /// Available languages with their display names and locale codes
   final Map<String, String> _languages = {
     "English": "en",
     "Sinhala": "si",
@@ -47,8 +48,8 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
     return Consumer(builder: (context, ref, child) {
       _themeMode = ref.watch(appThemeProvider);
 
+      // Get current language and find display name
       final currentLocale = ref.watch(languageProvider);
-
       final currentLanguage = _languages.entries
           .firstWhere(
             (element) => element.value == currentLocale.languageCode,
@@ -59,8 +60,8 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
       return Scaffold(
         appBar: CustomAppBar(
           title: AppString.settings.localize(context)!,
-           style: AppStyling.semiBoldTextSize14
-                        .copyWith(color: colors(context).colorGrey6), // Provide the required style argument
+          style: AppStyling.semiBoldTextSize14
+              .copyWith(color: colors(context).colorGrey6),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -68,44 +69,43 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Settings header section
               Text(
                 AppString.generalSettings.localize(context)!,
                 style: AppStyling.semiBoldTextSize16
                     .copyWith(color: colors(context).colorBlack),
               ),
-              SizedBox(
-                height: 4,
-              ),
+              SizedBox(height: 4),
               Text(
                 AppString.changeTheSettingsOfTheMobileApp.localize(context)!,
                 style: AppStyling.normalTextSize12
                     .copyWith(color: colors(context).colorGrey8),
               ),
-              SizedBox(
-                height: 16,
-              ),
-              // grey horizontal line
+              SizedBox(height: 16),
+
+              // Divider line
               Container(
                 height: 2,
                 color: colors(context).colorGrey9,
               ),
-              SizedBox(
-                height: 16,
-              ),
+              SizedBox(height: 16),
+
+              // Settings content
               Padding(
                 padding: const EdgeInsets.only(left: 4.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // App Appearance Section
                     Text(
                       AppString.appAppearance.localize(context)!,
                       style: AppStyling.semiBoldTextSize14
                           .copyWith(color: colors(context).colorBlack),
                     ),
-                    SizedBox(
-                      height: 16,
-                    ),
+                    SizedBox(height: 16),
+
+                    // Theme selection radio buttons
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: SizedBox(
@@ -113,6 +113,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
+                            // Light mode option
                             Expanded(
                               child: Row(
                                 children: [
@@ -132,6 +133,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                 ],
                               ),
                             ),
+                            // Dark mode option
                             Expanded(
                               child: Row(
                                 children: [
@@ -151,6 +153,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                 ],
                               ),
                             ),
+                            // System preference option
                             Expanded(
                               child: Row(
                                 children: [
@@ -175,17 +178,8 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 16,
-                    ),
-                    Text(
-                      AppString.language.localize(context)!,
-                      style: AppStyling.semiBoldTextSize14
-                          .copyWith(color: colors(context).colorBlack),
-                    ),
-                    SizedBox(
-                      height: 16,
-                    ),
+                    SizedBox(height: 16),
+
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: CustomDropdownField(
@@ -198,20 +192,13 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                 .changeLanguage(_languages[value]!);
                           });
                         },
-                        width: 322, label: '',
+                        width: 322,
+                        label: AppString.language.localize(context)!,
+                        required: false,
                       ),
                     ),
-                    SizedBox(
-                      height: 16,
-                    ),
-                    Text(
-                      AppString.fontSize.localize(context)!,
-                      style: AppStyling.semiBoldTextSize14
-                          .copyWith(color: colors(context).colorBlack),
-                    ),
-                    SizedBox(
-                      height: 16,
-                    ),
+                    SizedBox(height: 16),
+
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: CustomDropdownField(
@@ -222,6 +209,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                         ],
                         initialValue: AppString.large.localize(context)!,
                         onChanged: (value) {
+                          // Map font size selection to scale factor
                           double scaleFactor;
                           switch (value) {
                             case "Small":
@@ -238,15 +226,17 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                           }
                           _textScaleFactorModel.setTextScaleFactor(scaleFactor);
                         },
-                        width: 322, label: '',
+                        width: 322,
+                        label: AppString.fontSize.localize(context)!,
+                        required: false,
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(
-                height: 16,
-              ),
+              SizedBox(height: 16),
+
+              // Save button (currently no-op)
               CustomButton(
                 text: AppString.save.localize(context)!,
                 onPressed: () {},

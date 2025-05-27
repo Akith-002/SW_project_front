@@ -37,10 +37,11 @@ class LandMiscellaneousRepositoryImpl implements LandMiscellaneousRepository {
       getPaginatedMasterFiles({
     required int page,
     required int limit,
+    String? sortBy,
   }) async {
     try {
       final result = await remoteDatasource.getPaginatedMasterFiles(
-          page: page, pageSize: limit);
+          page: page, pageSize: limit, sortBy: sortBy);
       return Right(result);
     } catch (e) {
       return Left(ServerFailure(
@@ -54,12 +55,14 @@ class LandMiscellaneousRepositoryImpl implements LandMiscellaneousRepository {
     required String query,
     required int page,
     required int pageSize,
+    String? sortBy,
   }) async {
     try {
       final result = await remoteDatasource.searchMasterFiles(
         query: query,
         page: page,
         pageSize: pageSize,
+        sortBy: sortBy,
       );
       return Right(result);
     } catch (e) {
