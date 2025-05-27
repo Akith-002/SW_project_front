@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/cubit/lm_masterfile_list_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:logger/logger.dart';
+
 import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 // App setup
@@ -18,11 +21,11 @@ import 'package:land_asset_valuation/data/repositories/condition_report_reposito
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart';
 
-// Asset Division Feature (ADD THESE MISSING IMPORTS)
+// Asset Division Feature
 import 'package:land_asset_valuation/data/datasource/remote/asset_division_remote_data_source.dart';
 import 'package:land_asset_valuation/data/repositories/asset_division_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/asset_division_repository.dart';
-
+import 'package:land_asset_valuation/domain/usecases/asset_division_usecases.dart';
 import 'package:land_asset_valuation/application/pages/asset_division/cubit/asset_division_cubit.dart';
 
 // Rental Evidence Feature
@@ -80,6 +83,14 @@ import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
 import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
 import 'package:land_asset_valuation/data/services/sign_in_service.dart';
 
+// Domestic Rating Card Feature
+import 'package:land_asset_valuation/data/datasource/remote/domestic_rating_card_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/domestic_rating_card_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/domestic_rating_card_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/save_domestic_rating_card.dart';
+import 'package:land_asset_valuation/domain/usecases/get_domestic_rating_card_autofill.dart';
+import 'package:land_asset_valuation/application/pages/RatingCardForms/domestic/cubit/domestic_rating_card_cubit.dart';
+
 final injection = GetIt.I;
 
 Future<void> init() async {
@@ -89,7 +100,6 @@ Future<void> init() async {
   injection.registerSingleton(AppSharedData(injection()));
   injection.registerSingleton(RouterServices(appSharedData: injection()));
   injection.registerSingleton(AppRouter(routerServices: injection()));
-
   // Register Dio and DioClient
   injection.registerLazySingleton(() {
     final dio = Dio();
@@ -97,6 +107,7 @@ Future<void> init() async {
     return dio;
   });
   injection.registerLazySingleton(() => DioClient(injection()));
+  injection.registerLazySingleton(() => Logger());
 
   // ------------------------------
   // Condition Report Feature
@@ -112,7 +123,6 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => SendConditionReportUseCase(injection()),
   );
-
   // ------------------------------
   // Asset Division Feature
   // ------------------------------
@@ -122,6 +132,36 @@ Future<void> init() async {
 
   injection.registerLazySingleton<AssetDivisionRepository>(
     () => AssetDivisionRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => DivideAssetUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => ValidateAssetDivisionUseCase(injection()),
+  );
+
+  // ------------------------------
+  // Domestic Rating Card Feature
+  // ------------------------------
+  injection.registerLazySingleton<DomesticRatingCardRemoteDataSource>(
+    () => DomesticRatingCardRemoteDataSourceImpl(
+      client: injection(),
+      logger: injection(),
+    ),
+  );
+
+  injection.registerLazySingleton<DomesticRatingCardRepository>(
+    () => DomesticRatingCardRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SaveDomesticRatingCard(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetDomesticRatingCardAutofill(injection()),
   );
 
   // ------------------------------
@@ -236,6 +276,11 @@ Future<void> init() async {
   injection.registerFactory(() => ConditionReportCubit(
         appSharedData: injection(),
         sendConditionReportUseCase: injection(),
+      ));
+
+  injection.registerFactory(() => DomesticRatingCardCubit(
+        saveDomesticRatingCard: injection(),
+        getDomesticRatingCardAutofill: injection(),
       ));
 
   injection
