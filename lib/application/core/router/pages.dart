@@ -20,6 +20,7 @@ class Pages {
   static const routePastValuation = "past-valuation";
   static const routeInspectionReport = "inspection-report";
   static const routeSketchTool = "sketch-tool";
+  static const routeLmMasterfileList = "lm-masterfile-list";
 
   // Rating Card Forms
   static const routeDomesticRatingCard = "domestic-rating-card";

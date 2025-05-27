@@ -13,13 +13,15 @@ import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repo
 class TableScaffoldLM extends StatefulWidget {
   final int initialPageSize;
   final List<int> pageSizeOptions;
-  final String pageSource;
+  final String? pageSource;
   final LandMiscellaneousRepository repository;
+  final ValueChanged<int>? onTotalCountChanged;
 
   const TableScaffoldLM({
     super.key,
-    required this.pageSource,
+    this.pageSource,
     required this.repository,
+    this.onTotalCountChanged,
     this.initialPageSize = 9,
     this.pageSizeOptions = const [9, 15, 30, 60],
   });
@@ -37,6 +39,7 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
   late List<int> _pageSizeOptions;
   bool _isSearching = false;
   String? _currentSearchQuery;
+  String? _sortColumn;
 
   @override
   void initState() {
@@ -51,6 +54,7 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
       _futurePlans = widget.repository.getPaginatedMasterFiles(
         page: _currentPage,
         limit: _pageSize,
+        sortBy: _sortColumn,
       );
     });
   }
@@ -72,12 +76,12 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
         _isSearching = true;
         _currentSearchQuery = query;
       });
-
       try {
         final results = await widget.repository.searchMasterFiles(
           query: query,
           page: 1,
           pageSize: _pageSize,
+          sortBy: _sortColumn,
         );
         results.fold(
           (failure) {
@@ -112,12 +116,12 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
       setState(() {
         _isSearching = true;
       });
-
       try {
         final results = await widget.repository.searchMasterFiles(
           query: query,
           page: page,
           pageSize: _pageSize,
+          sortBy: _sortColumn,
         );
         results.fold(
           (failure) {
@@ -144,6 +148,19 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
           SnackBar(content: Text("Search failed: $e")),
         );
       }
+    }
+  }
+
+  void refreshWithSort(String sortBy) {
+    setState(() {
+      _sortColumn = sortBy;
+      _currentPage = 1;
+    });
+
+    if (_currentSearchQuery != null) {
+      _searchWithPagination(_currentSearchQuery!, 1);
+    } else {
+      _fetchPlans();
     }
   }
 
@@ -193,6 +210,11 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
         : 1;
     final int endRecord = startRecord + plans.length - 1;
     final int totalCount = paginationData?.totalCount ?? plans.length;
+    if (widget.onTotalCountChanged != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onTotalCountChanged!(totalCount);
+      });
+    }
 
     return Column(
       children: [
