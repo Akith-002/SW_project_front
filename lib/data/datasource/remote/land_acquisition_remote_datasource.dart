@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
 import 'package:land_asset_valuation/data/models/land_acquisition_master_file_model.dart';
 import 'package:land_asset_valuation/data/models/paginated_response.dart';
+import 'dart:math' as math;
 
 class LandAcquisitionRemoteDatasource {
   final DioClient dioClient;
@@ -12,30 +14,67 @@ class LandAcquisitionRemoteDatasource {
     required int page,
     required int pageSize,
   }) async {
-    final response = await dioClient.get(
-      '/LAMasterfile',
-      queryParameters: {
-        'page': page,
-        'pageSize': pageSize,
-      },
-    );
+    try {
+      if (kDebugMode) {
+        print('Fetching data - Page: $page, Size: $pageSize');
+      }
 
-    // If the API returns zeros for pagination values, use the actual data length
-    final data = response.data;
-    if (data['totalCount'] == 0) {
-      final List<dynamic> masterFiles = data['masterFiles'];
-      data['totalCount'] = masterFiles.length;
-      data['currentPage'] = page;
-      data['pageSize'] = pageSize;
-      data['totalPages'] = (masterFiles.length / pageSize).ceil();
-      data['hasPrevious'] = page > 1;
-      data['hasNext'] = page * pageSize < masterFiles.length;
+      final response = await dioClient.get(
+        '/LAMasterfile',
+        queryParameters: {
+          'pageNumber': page - 1, // Convert to 0-based for API
+          'pageSize': pageSize,
+        },
+      );
+
+      if (kDebugMode) {
+        print('Raw API Response: ${response.data}');
+      }
+
+      final data = response.data;
+      final List<dynamic> masterFiles = data['masterFiles'] as List<dynamic>;
+
+      // Get pagination metadata from API response
+      final totalCount = data['totalCount'] as int;
+      final currentPage = data['currentPage'] as int;
+      final totalPages = data['totalPages'] as int;
+      final hasPrevious = data['hasPrevious'] as bool;
+      final hasNext = data['hasNext'] as bool;
+
+      if (kDebugMode) {
+        print('Processing API response:');
+        print('Records received: ${masterFiles.length}');
+        print('Total Count: $totalCount');
+        print('Current Page: $currentPage');
+        print('Page Size: $pageSize');
+        print('Total Pages: $totalPages');
+        print('Has Previous: $hasPrevious');
+        print('Has Next: $hasNext');
+      }
+
+      // Convert records to model objects
+      final items = masterFiles
+          .map((e) =>
+              LandAcquisitionMasterFile.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      return PaginatedResponse(
+        items: items,
+        totalCount: totalCount,
+        currentPage: currentPage,
+        pageSize: pageSize,
+        totalPages: totalPages,
+        hasPrevious: hasPrevious,
+        hasNext: hasNext,
+      );
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('Error fetching paginated master files:');
+        print('Error: $e');
+        print('Stack trace: $stackTrace');
+      }
+      rethrow;
     }
-
-    return PaginatedResponse.fromJson(
-      data,
-      (json) => LandAcquisitionMasterFile.fromJson(json),
-    );
   }
 
   Future<List<LandAcquisitionMasterFile>> searchMasterFiles(
@@ -44,7 +83,7 @@ class LandAcquisitionRemoteDatasource {
       final response = await dioClient.post('/LAMasterfile/search', data: {
         'query': query,
       });
-      final List<dynamic> data = response.data['masterFiles'];
+      final List<dynamic> data = response.data['masterFiles'] ?? [];
       return data.map((e) => LandAcquisitionMasterFile.fromJson(e)).toList();
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
