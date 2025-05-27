@@ -38,15 +38,16 @@ class _FormSectionState extends State<FormSection> {
               duration: const Duration(seconds: 3),
             ),
           );
-        } else if (state is ForgotPasswordEmailSent) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Password reset email has been sent'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
-            ),
-          );
         }
+        // } else if (state is ForgotPasswordEmailSent) {
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     const SnackBar(
+        //       content: Text('Password reset email has been sent'),
+        //       backgroundColor: Colors.green,
+        //       duration: Duration(seconds: 3),
+        //     ),
+        //   );
+        // }
       },
       builder: (context, state) {
         return SizedBox(
