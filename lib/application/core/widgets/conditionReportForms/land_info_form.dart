@@ -107,17 +107,64 @@ class _LandInfoFormState extends State<LandInfoForm> {
   }
 
   void _saveFormData() {
-    if (!_formKey.currentState!.validate()) {
+    setState(() {
+      _autoValidate = true;
+    });
+
+    if (_formKey.currentState == null || !_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill all required fields correctly'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
         ),
       );
       return;
     }
 
-    // Update form service with current values
+    // Validate all text controllers have values
+    final controllers = [
+      _nameOfLandController,
+      _atPlanNumberController,
+      _atLotNumberController,
+      _ppCadNumberController,
+      _ppCadLotNumberController,
+      _acquiredExtentController,
+      _assessmentNumberController,
+      _roadNameController,
+      _accessCategoryDescController,
+      _descriptionOfLandController,
+      _landUseDescriptionController,
+      _frontageFeetController,
+      _depthOfLandFeetController,
+      _levelWithAccessController,
+      _plantationDetailsController,
+      _detailsOfBusinessController,
+      _acquisitionNameController,
+      _dateOfPreparedController,
+      _dateOfSection3BAController,
+      _northController,
+      _eastController,
+      _westController,
+      _southController,
+      _bottomController,
+    ];
+
+    // Check if any controller has empty value
+    for (final controller in controllers) {
+      if (controller.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please fill all required fields'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+    }
+
+    // All validations passed, proceed with saving
     _formService.updateLandInfo(
       nameOfTheVillage: _selectedVillage,
       nameOfTheLand: _nameOfLandController.text,
@@ -155,7 +202,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
     // Show save confirmation
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Land information saved'),
+        content: Text('Land information saved successfully'),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
       ),
@@ -198,8 +245,9 @@ class _LandInfoFormState extends State<LandInfoForm> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      autovalidateMode:
-          _autoValidate ? AutovalidateMode.always : AutovalidateMode.disabled,
+      autovalidateMode: _autoValidate
+          ? AutovalidateMode.onUserInteraction
+          : AutovalidateMode.disabled,
       child: LayoutBuilder(
         builder: (context, constraints) {
           double formWidth =
@@ -246,6 +294,8 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     label: AppString.atLotNumber.localize(context)!,
                     placeholder: "AT Lot 01",
                     controller: _atLotNumberController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'AT Lot Number'),
                   ),
                 ]),
                 _buildRow([
@@ -253,11 +303,15 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     label: AppString.ppCadNumber.localize(context)!,
                     placeholder: "123456789",
                     controller: _ppCadNumberController,
+                    validator: (value) => LandInfoValidator.validateNumeric(
+                        value, 'PP Cad Number'),
                   ),
                   LabeledTextField(
                     label: AppString.ppCadLotNumber.localize(context)!,
                     placeholder: "SLA 01",
                     controller: _ppCadLotNumberController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'PP Cad Lot Number'),
                   ),
                 ]),
                 _buildRow([
@@ -309,11 +363,15 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     placeholder:
                         AppString.accessCategoryDescription.localize(context)!,
                     controller: _accessCategoryDescController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'Access Category Description'),
                   ),
                   LabeledTextField(
                     label: AppString.descriptionOfLand.localize(context)!,
                     placeholder: AppString.descriptionOfLand.localize(context)!,
                     controller: _descriptionOfLandController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'Description of Land'),
                   ),
                 ]),
 
@@ -342,6 +400,8 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     placeholder:
                         AppString.landUseDescription.localize(context)!,
                     controller: _landUseDescriptionController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'Land Use Description'),
                   ),
                 ]),
                 _buildRow([
@@ -381,6 +441,8 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     label: AppString.levelWithAccess.localize(context)!,
                     placeholder: AppString.levelWithAccess.localize(context)!,
                     controller: _levelWithAccessController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'Level with Access'),
                   ),
                 ]),
                 _buildRow([
@@ -388,11 +450,15 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     label: AppString.plantationDetails.localize(context)!,
                     placeholder: AppString.plantationDetails.localize(context)!,
                     controller: _plantationDetailsController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'Plantation Details'),
                   ),
                   LabeledTextField(
                     label: AppString.detailsOfBusiness.localize(context)!,
                     placeholder: AppString.detailsOfBusiness.localize(context)!,
                     controller: _detailsOfBusinessController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'Details of Business'),
                   ),
                 ]),
                 _buildRow([
@@ -400,6 +466,8 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     label: AppString.acquisitionName.localize(context)!,
                     placeholder: AppString.acquisitionName.localize(context)!,
                     controller: _acquisitionNameController,
+                    validator: (value) => LandInfoValidator.validateRequired(
+                        value, 'Acquisition Name'),
                   ),
                   LabeledDateField(
                     label: AppString.dateOfPrepared.localize(context)!,
@@ -509,6 +577,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
         label: label,
         placeholder: label,
         controller: controller,
+        validator: (value) => LandInfoValidator.validateRequired(value, label),
       ),
     );
   }
