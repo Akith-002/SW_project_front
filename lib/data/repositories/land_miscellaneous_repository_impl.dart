@@ -10,13 +10,22 @@ class LandMiscellaneousRepositoryImpl implements LandMiscellaneousRepository {
   final LandMiscellaneousRemoteDatasource remoteDatasource;
 
   LandMiscellaneousRepositoryImpl(this.remoteDatasource);
-
   @override
-  Future<Either<Failure, List<LandMiscellaneousMasterFile>>>
+  Future<Either<Failure, PaginatedResponse<LandMiscellaneousMasterFile>>>
       getAllMasterFiles() async {
     try {
       final result = await remoteDatasource.getAllMasterFiles();
-      return Right(result);
+      // Convert List to PaginatedResponse for consistency
+      final paginatedResponse = PaginatedResponse<LandMiscellaneousMasterFile>(
+        items: result,
+        totalCount: result.length,
+        currentPage: 1,
+        pageSize: result.length,
+        totalPages: 1,
+        hasNext: false,
+        hasPrevious: false,
+      );
+      return Right(paginatedResponse);
     } catch (e) {
       return Left(
           ServerFailure('Failed to fetch all master files: ${e.toString()}'));
@@ -40,10 +49,18 @@ class LandMiscellaneousRepositoryImpl implements LandMiscellaneousRepository {
   }
 
   @override
-  Future<Either<Failure, List<LandMiscellaneousMasterFile>>> searchMasterFiles(
-      String query) async {
+  Future<Either<Failure, PaginatedResponse<LandMiscellaneousMasterFile>>>
+      searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+  }) async {
     try {
-      final result = await remoteDatasource.searchMasterFiles(query);
+      final result = await remoteDatasource.searchMasterFiles(
+        query: query,
+        page: page,
+        pageSize: pageSize,
+      );
       return Right(result);
     } catch (e) {
       return Left(

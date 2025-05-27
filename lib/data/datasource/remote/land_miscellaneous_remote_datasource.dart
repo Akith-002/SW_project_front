@@ -29,12 +29,21 @@ class LandMiscellaneousRemoteDatasource {
     );
   }
 
-  Future<List<LandMiscellaneousMasterFile>> searchMasterFiles(
-      String query) async {
-    final response = await dioClient.post('/LandMiscellaneous/search', data: {
-      'query': query,
+  Future<PaginatedResponse<LandMiscellaneousMasterFile>> searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+  }) async {
+    final response =
+        await dioClient.get('/LandMiscellaneous/search', queryParameters: {
+      'searchTerm': query,
+      'pageNumber': page,
+      'pageSize': pageSize,
     });
-    final List<dynamic> data = response.data['masterFiles'];
-    return data.map((e) => LandMiscellaneousMasterFile.fromJson(e)).toList();
+
+    return PaginatedResponse.fromJson(
+      response.data,
+      (json) => LandMiscellaneousMasterFile.fromJson(json),
+    );
   }
 }

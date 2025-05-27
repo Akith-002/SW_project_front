@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/cubit/lm_masterfile_list_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 // App setup
 import 'package:land_asset_valuation/application/core/router/routes.dart';
@@ -75,6 +76,17 @@ import 'package:land_asset_valuation/application/pages/settingsScreen/cubit/sett
 import 'package:land_asset_valuation/application/pages/signIn/cubit/signin_cubit.dart';
 import 'package:land_asset_valuation/application/pages/splash/cubit/splash_cubit.dart';
 import 'package:land_asset_valuation/application/pages/conditionReport/cubit/condition_report_cubit.dart';
+import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
+import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
+import 'package:land_asset_valuation/data/services/sign_in_service.dart';
+import 'package:land_asset_valuation/data/datasource/remote/rental_assessment_remote_datasource.dart';
+import 'package:land_asset_valuation/data/models/rental_assesment_model.dart';
+import 'package:land_asset_valuation/data/repositories/rental_assessment_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/rental_assessment_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/get_rental_assessments_usecase.dart';
+import 'package:land_asset_valuation/application/pages/rental_assessment/cubit/rental_assessment_cubit.dart';
+
+// Add repository import if you create one
 
 final injection = GetIt.I;
 
@@ -87,7 +99,11 @@ Future<void> init() async {
   injection.registerSingleton(AppRouter(routerServices: injection()));
 
   // Register Dio and DioClient
-  injection.registerLazySingleton(() => Dio());
+  injection.registerLazySingleton(() {
+    final dio = Dio();
+    dio.options.baseUrl = AppConfig.apiBaseUrl;
+    return dio;
+  });
   injection.registerLazySingleton(() => DioClient(injection()));
 
   // ------------------------------
@@ -117,6 +133,36 @@ Future<void> init() async {
   );
 
   // ------------------------------
+// Rental Assessment Feature
+// ------------------------------
+if (!injection.isRegistered<RentalAssessmentRemoteDataSource>()) {
+  injection.registerLazySingleton<RentalAssessmentRemoteDataSource>(
+    () => RentalAssessmentRemoteDataSourceImpl(dioClient: injection()),
+  );
+}
+
+if (!injection.isRegistered<RentalAssessmentRepository>()) {
+  injection.registerLazySingleton<RentalAssessmentRepository>(
+    () => RentalAssessmentRepositoryImpl(
+      remoteDataSource: injection(),
+    ),
+  );
+}
+
+if (!injection.isRegistered<GetRentalAssessmentsUseCase>()) {
+  injection.registerLazySingleton(
+    () => GetRentalAssessmentsUseCase(injection()),
+  );
+}
+
+// Factory registrations don't need isRegistered check as they create new instances
+injection.registerFactory(
+  () => RentalAssessmentCubit(
+    getRentalAssessmentsUseCase: injection(),
+  ),
+);
+
+  // ------------------------------
   // Rental Evidence Feature
   // ------------------------------
   injection.registerLazySingleton<RentalEvidenceRemoteDataSource>(
@@ -130,6 +176,8 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => SendRentalEvidenceUseCase(injection()),
   );
+
+  
   // ------------------------------
   // Land Acquisition Feature (Clean Architecture)
   // ------------------------------
@@ -194,7 +242,10 @@ Future<void> init() async {
   // ------------------------------
   injection.registerFactory(() => SplashCubit(appSharedData: injection()));
   injection.registerFactory(() => DashboardCubit(appSharedData: injection()));
-  injection.registerFactory(() => SigninCubit(appSharedData: injection()));
+  injection.registerFactory(() => SigninCubit(
+        appSharedData: injection(),
+        authRepository: injection(),
+      ));
   injection
       .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
   injection.registerFactory(() => MrAssetsListCubit(
@@ -231,6 +282,17 @@ Future<void> init() async {
       .registerFactory(() => PastValuationCubit(appSharedData: injection()));
   injection
       .registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+
+  // ------------------------------
+  // Auth Dependencies
+  // ------------------------------
+  injection.registerLazySingleton(() => SecureStorage());
+  injection.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(injection(), injection()),
+  );
+  injection.registerLazySingleton(
+    () => SignInService(authRepository: injection()),
+  );
   injection.registerFactory(() => I3MasterFileListCubit(
         appSharedData: injection(),
         getPaginatedUseCase: injection(),
