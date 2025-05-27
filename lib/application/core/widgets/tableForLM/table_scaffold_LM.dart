@@ -39,6 +39,7 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
   late List<int> _pageSizeOptions;
   bool _isSearching = false;
   String? _currentSearchQuery;
+  String? _sortColumn;
 
   @override
   void initState() {
@@ -53,6 +54,7 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
       _futurePlans = widget.repository.getPaginatedMasterFiles(
         page: _currentPage,
         limit: _pageSize,
+        sortBy: _sortColumn,
       );
     });
   }
@@ -74,12 +76,12 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
         _isSearching = true;
         _currentSearchQuery = query;
       });
-
       try {
         final results = await widget.repository.searchMasterFiles(
           query: query,
           page: 1,
           pageSize: _pageSize,
+          sortBy: _sortColumn,
         );
         results.fold(
           (failure) {
@@ -114,12 +116,12 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
       setState(() {
         _isSearching = true;
       });
-
       try {
         final results = await widget.repository.searchMasterFiles(
           query: query,
           page: page,
           pageSize: _pageSize,
+          sortBy: _sortColumn,
         );
         results.fold(
           (failure) {
@@ -146,6 +148,19 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
           SnackBar(content: Text("Search failed: $e")),
         );
       }
+    }
+  }
+
+  void refreshWithSort(String sortBy) {
+    setState(() {
+      _sortColumn = sortBy;
+      _currentPage = 1;
+    });
+
+    if (_currentSearchQuery != null) {
+      _searchWithPagination(_currentSearchQuery!, 1);
+    } else {
+      _fetchPlans();
     }
   }
 
