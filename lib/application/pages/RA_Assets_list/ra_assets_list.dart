@@ -59,6 +59,23 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
     // Handle multiple asset selection
   }
 
+  void _refreshAssets() {
+    debugPrint('Refreshing RA assets...');
+
+    // Show a brief loading indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Refreshing assets...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    // In a real app, this would reload data from the cubit
+    setState(() {
+      // This will trigger a rebuild and regenerate the sample data
+    });
+  }
+
   @override
   Widget buildView(BuildContext context) {
     // Generate dynamic assets based on source
@@ -103,7 +120,6 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
         ];
         break;
     }
-
     return Scaffold(
         appBar: CustomAppBar(title: title),
         body: SingleChildScrollView(
@@ -117,6 +133,7 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
                 assetType: 'RA',
                 onAssetSelected: _onAssetSelected,
                 onAssetsSelected: _onAssetsSelected,
+                onRefresh: _refreshAssets,
               ),
             ],
           ),

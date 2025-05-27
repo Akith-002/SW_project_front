@@ -293,16 +293,19 @@ class AppRouter {
                   key: state.pageKey,
                   child: SettingsScreen(),
                 );
-              }),
-
-          // Rating Card Forms routes
+              }), // Rating Card Forms routes
           GoRoute(
             path: Pages.routeDomesticRatingCard.toPath(),
             name: Pages.routeDomesticRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+
               return NoTransitionPage(
                 key: state.pageKey,
-                child: DomesticRatingCard(),
+                child: DomesticRatingCard(assetId: assetId),
               );
             },
           ),

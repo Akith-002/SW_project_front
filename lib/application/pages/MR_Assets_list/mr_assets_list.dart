@@ -84,6 +84,20 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
     // Handle multiple asset selection
   }
 
+  void _refreshAssets() {
+    debugPrint('Refreshing assets...');
+
+    // Show a brief loading indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Refreshing assets...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    _loadAssets();
+  }
+
   @override
   Widget buildView(BuildContext context) {
     // Determine title and breadcrumb based on source
@@ -125,7 +139,6 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         ];
         break;
     }
-
     return Scaffold(
       appBar: CustomAppBar(title: title),
       body: SingleChildScrollView(
@@ -134,6 +147,12 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
             Breadcrumb(items: [
               for (var item in breadcrumbItems) BreadcrumbItem(label: item),
             ]),
+            // Refresh button section
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            
+            ),
             BlocBuilder<MrAssetsListCubit, BaseState<MrAssetsListState>>(
               bloc: _cubit,
               builder: (context, state) {
@@ -176,6 +195,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
                     assetType: widget.source,
                     onAssetSelected: _onAssetSelected,
                     onAssetsSelected: _onAssetsSelected,
+                    onRefresh: _refreshAssets,
                   );
                 } else if (state is MrAssetsListSearchLoaded) {
                   return AssetListTable(
@@ -183,6 +203,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
                     assetType: widget.source,
                     onAssetSelected: _onAssetSelected,
                     onAssetsSelected: _onAssetsSelected,
+                    onRefresh: _refreshAssets,
                   );
                 } else {
                   // Initial state - show empty state or loading
