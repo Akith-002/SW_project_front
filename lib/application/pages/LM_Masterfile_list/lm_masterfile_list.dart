@@ -16,14 +16,15 @@ import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class LmMasterfileList extends BasePage {
-  final String currentPageSource;
-  const LmMasterfileList({super.key, required this.currentPageSource});
+  final String? currentPageSource;
+  const LmMasterfileList({super.key, this.currentPageSource});
 
   @override
   State<LmMasterfileList> createState() => _LmMasterfileListState();
 }
 
 class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
+  int _totalFiles = 0;
   final _cubit = injection<LmMasterfileListCubit>();
   final _repository = injection<LandMiscellaneousRepository>();
   final GlobalKey<TableScaffoldLMState> _tableKey =
@@ -48,7 +49,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
 
   void _onSearchChanged() {
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+    _debounceTimer = Timer(const Duration(milliseconds: 1000), () {
       final query = searchController.text.trim();
       _tableKey.currentState?.search(query);
     });
@@ -74,7 +75,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "${AppString.all_files.localize(context)!}0",
+                  "${AppString.all_files.localize(context)!}$_totalFiles",
                   style: AppStyling.semiBoldTextSize16
                       .copyWith(color: colors(context).colorBlack),
                 ),
@@ -135,6 +136,8 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
               key: _tableKey,
               pageSource: widget.currentPageSource,
               repository: _repository,
+              onTotalCountChanged: (count) =>
+                  setState(() => _totalFiles = count),
             ),
           ),
         ],

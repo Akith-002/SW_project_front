@@ -13,13 +13,15 @@ import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repo
 class TableScaffoldLM extends StatefulWidget {
   final int initialPageSize;
   final List<int> pageSizeOptions;
-  final String pageSource;
+  final String? pageSource;
   final LandMiscellaneousRepository repository;
+  final ValueChanged<int>? onTotalCountChanged;
 
   const TableScaffoldLM({
     super.key,
-    required this.pageSource,
+    this.pageSource,
     required this.repository,
+    this.onTotalCountChanged,
     this.initialPageSize = 9,
     this.pageSizeOptions = const [9, 15, 30, 60],
   });
@@ -193,6 +195,11 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
         : 1;
     final int endRecord = startRecord + plans.length - 1;
     final int totalCount = paginationData?.totalCount ?? plans.length;
+    if (widget.onTotalCountChanged != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onTotalCountChanged!(totalCount);
+      });
+    }
 
     return Column(
       children: [
