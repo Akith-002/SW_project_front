@@ -10,11 +10,14 @@ import 'package:land_asset_valuation/application/core/widgets/editRatingCardDial
 import 'package:land_asset_valuation/data/models/asset.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+// Global stream controller for sidebar state communication
 final sidebarExtendedController = StreamController<bool>.broadcast();
 
+/// A table widget that displays a list of assets with selection capabilities
+/// and action buttons for rating card management
 class AssetListTable extends StatefulWidget {
   final List<Asset> assets;
-  final String? assetType;
+  final String? assetType; // Used for routing and context determination
   final Function(Asset)? onAssetSelected;
   final Function(List<Asset>)? onAssetsSelected;
 
@@ -31,13 +34,16 @@ class AssetListTable extends StatefulWidget {
 }
 
 class _AssetListTableState extends State<AssetListTable> {
-  late List<bool> isChecked;
+  late List<bool> isChecked; // Tracks checkbox state for each asset
   bool isSidebarExtended = true;
 
   @override
   void initState() {
     super.initState();
+    // Initialize checkbox states for all assets
     isChecked = List.generate(widget.assets.length, (index) => false);
+
+    // Listen to sidebar state changes for responsive layout
     sidebarExtendedController.stream.listen((extended) {
       setState(() {
         isSidebarExtended = extended;
@@ -48,6 +54,7 @@ class _AssetListTableState extends State<AssetListTable> {
   @override
   void didUpdateWidget(AssetListTable oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Reset checkbox states when asset list changes
     if (oldWidget.assets.length != widget.assets.length) {
       isChecked = List.generate(widget.assets.length, (index) => false);
     }
@@ -72,8 +79,9 @@ class _AssetListTableState extends State<AssetListTable> {
     // Check if all selected assets have rating cards
     return selectedIndices.every((index) =>
         index < widget.assets.length && widget.assets[index].isRatingCard);
-  } // Helper method to get button text based on selection state
+  }
 
+  /// Determines the appropriate button text based on selection state
   String _getButtonText(BuildContext context) {
     // Get selected assets count
     int selectedCount = isChecked.where((checked) => checked).length;
@@ -92,7 +100,7 @@ class _AssetListTableState extends State<AssetListTable> {
     return AppString.decisions.localize(context)!;
   }
 
-  // Helper method to determine selectedIndex for sidebar navigation based on assetType
+  /// Maps asset types to their corresponding sidebar navigation indices
   String _getSelectedIndexForAssetType(String? assetType) {
     switch (assetType) {
       case 'massRating':
@@ -103,7 +111,6 @@ class _AssetListTableState extends State<AssetListTable> {
         return '4';
       case 'RO':
         return '5';
-
       default:
         return '2'; // Default to Mass Rating
     }
@@ -111,20 +118,20 @@ class _AssetListTableState extends State<AssetListTable> {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate available width based on sidebar state
+    // Calculate responsive table width based on sidebar state
     double sidebarWidth = isSidebarExtended ? 256.0 : 49.0;
     double screenWidth = MediaQuery.of(context).size.width;
     double tableWidth = screenWidth - sidebarWidth - 32.0;
 
-    // Define column widths with fixed checkbox column
+    // Define responsive column widths
     Map<int, TableColumnWidth> columnWidths = {
-      0: const FixedColumnWidth(64.0), // Checkbox column
+      0: const FixedColumnWidth(64.0), // Checkbox column (fixed)
       1: FlexColumnWidth(), // Asset No
       2: FlexColumnWidth(), // Ward
       3: FlexColumnWidth(), // Rd/St
-      4: FlexColumnWidth(), // Description (slightly wider)
+      4: FlexColumnWidth(), // Description
       5: FlexColumnWidth(), // Owner
-      6: FlexColumnWidth(), // Action
+      6: FlexColumnWidth(), // Action buttons
     };
 
     return SingleChildScrollView(
@@ -132,6 +139,7 @@ class _AssetListTableState extends State<AssetListTable> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Header row with title, controls, and search
             Row(
               children: [
                 Text(
@@ -140,31 +148,33 @@ class _AssetListTableState extends State<AssetListTable> {
                     color: colors(context).colorBlack,
                   ),
                 ),
-                Spacer(), // Only show Decisions button when assets are selected
+                Spacer(),
+                // Show decision button only when assets are selected
                 if (hasSelectedAssets) ...[
                   OutlinedButton(
                     onPressed: () {
-                      // Get selected assets
+                      // Collect selected assets
                       List<Asset> selectedAssets = [];
                       for (int i = 0; i < isChecked.length; i++) {
                         if (isChecked[i]) {
                           selectedAssets.add(widget.assets[i]);
                         }
-                      } // Check number of selected assets
+                      }
+
+                      // Handle single vs multiple asset selection
                       if (selectedAssets.length == 1) {
-                        // Single asset selected
                         Asset selectedAsset = selectedAssets.first;
                         if (selectedAsset.isRatingCard) {
-                          // Show edit rating card dialog for existing rating card
+                          // Edit existing rating card
                           EditRatingCardDialog.showEditRatingCardDialog(context,
                               asset: selectedAsset);
                         } else {
-                          // Show create rating card dialog for new rating card
+                          // Create new rating card
                           EditRatingCardDialog.showAddRatingCardDialog(context,
                               sourceContext: widget.assetType);
                         }
                       } else {
-                        // Multiple assets selected - show multi-select decision dialog
+                        // Handle multiple asset selection
                         EditRatingCardDialog
                             .showMultiSelectEditRatingCardDialog(
                                 context, selectedAssets);
@@ -187,10 +197,9 @@ class _AssetListTableState extends State<AssetListTable> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 12,
-                  ),
+                  SizedBox(width: 12),
                 ],
+                // Search field
                 SizedBox(
                   width: 290,
                   height: 37,
@@ -215,12 +224,14 @@ class _AssetListTableState extends State<AssetListTable> {
                   ),
                 ),
                 SizedBox(width: 12),
+                // Filter button
                 iconButtonWidget(
                   iconName: PhosphorIconsRegular.funnelSimple,
                   color: colors(context).colorBlack!,
                   onPressed: () {},
                 ),
                 SizedBox(width: 12),
+                // Advanced button
                 OutlinedButton(
                   onPressed: () {},
                   style: OutlinedButton.styleFrom(
@@ -242,6 +253,7 @@ class _AssetListTableState extends State<AssetListTable> {
               ],
             ),
             SizedBox(height: 16),
+            // Main data table
             Container(
               width: tableWidth,
               decoration: BoxDecoration(
@@ -269,6 +281,7 @@ class _AssetListTableState extends State<AssetListTable> {
                       ),
                     ),
                     children: [
+                      // Table header row
                       TableRow(
                         decoration: BoxDecoration(
                           color: colors(context).colorGrey9,
@@ -282,7 +295,8 @@ class _AssetListTableState extends State<AssetListTable> {
                           _buildHeaderCell('Owner', context),
                           _buildHeaderCell('Action', context),
                         ],
-                      ), // Dynamic data rows
+                      ),
+                      // Generate data rows for each asset
                       ...List.generate(
                         widget.assets.length,
                         (index) => _buildDataRow(index, context),
@@ -298,6 +312,7 @@ class _AssetListTableState extends State<AssetListTable> {
     );
   }
 
+  /// Builds a styled header cell for the table
   Widget _buildHeaderCell(String text, BuildContext context) {
     return Container(
       height: 38,
@@ -311,11 +326,13 @@ class _AssetListTableState extends State<AssetListTable> {
     );
   }
 
+  /// Builds a data row for the table with asset information and action buttons
   TableRow _buildDataRow(int index, BuildContext context) {
     final Asset asset = widget.assets[index];
 
     return TableRow(
       children: [
+        // Checkbox for asset selection
         SizedBox(
           height: 52,
           child: Checkbox(
@@ -324,13 +341,12 @@ class _AssetListTableState extends State<AssetListTable> {
               setState(() {
                 isChecked[index] = value ?? false;
 
-                // Handle callbacks
+                // Trigger single asset selection callback
                 if (value == true) {
-                  // Asset selected
                   widget.onAssetSelected?.call(asset);
                 }
 
-                // Get all selected assets
+                // Collect and trigger multi-asset selection callback
                 List<Asset> selectedAssets = [];
                 for (int i = 0; i < isChecked.length; i++) {
                   if (isChecked[i]) {
@@ -342,20 +358,23 @@ class _AssetListTableState extends State<AssetListTable> {
             },
           ),
         ),
+        // Asset data cells
         _buildDataCell(asset.assetNo),
         _buildDataCell(asset.ward),
         _buildDataCell(asset.rdSt),
         _buildDataCell(asset.description),
         _buildDataCell(asset.owner),
+        // Action buttons column
         SizedBox(
           height: 52,
           child: Row(
             children: [
+              // Map location button
               iconButtonWidget(
                 color: colors(context).colorGrey8!,
                 iconName: PhosphorIconsRegular.mapPin,
                 onPressed: () {
-                  // Determine the selectedIndex based on assetType
+                  // Navigate to map screen with appropriate context
                   String selectedIndex =
                       _getSelectedIndexForAssetType(widget.assetType);
                   debugPrint('Selected Index: $selectedIndex');
@@ -365,15 +384,13 @@ class _AssetListTableState extends State<AssetListTable> {
                 },
               ),
               SizedBox(width: 8),
+              // Edit/Add rating card button (icon changes based on asset state)
               iconButtonWidget(
                 color: colors(context).colorPrimary6!,
                 iconName: asset.isRatingCard
-                    ? PhosphorIconsRegular
-                        .pencilSimpleLine // Edit existing rating card
-                    : PhosphorIconsRegular
-                        .folderSimplePlus, // Add new rating card
+                    ? PhosphorIconsRegular.pencilSimpleLine // Edit existing
+                    : PhosphorIconsRegular.folderSimplePlus, // Add new
                 onPressed: () {
-                  // Handle edit action for this specific asset
                   widget.onAssetSelected?.call(asset);
                 },
               ),
@@ -384,6 +401,7 @@ class _AssetListTableState extends State<AssetListTable> {
     );
   }
 
+  /// Builds a styled data cell with text content
   Widget _buildDataCell(String text) {
     return Container(
       height: 52,

@@ -9,6 +9,7 @@ abstract class LandMiscellaneousRepository {
       getPaginatedMasterFiles({
     required int page,
     required int limit,
+    String? sortBy,
   });
   Future<Either<Failure, PaginatedResponse<LandMiscellaneousMasterFile>>>
       getAllMasterFiles();
@@ -17,5 +18,6 @@ abstract class LandMiscellaneousRepository {
     required String query,
     required int page,
     required int pageSize,
+    String? sortBy,
   });
 }
