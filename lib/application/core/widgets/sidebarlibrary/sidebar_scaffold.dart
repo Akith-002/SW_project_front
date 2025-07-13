@@ -90,20 +90,20 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                         // Dashboard
                         _buildMenuItem(
                           index: 0,
-                          title: 'Dashboard',
+                          title: AppString.dashboard.l10n(context)!,
                           icon: PhosphorIconsBold.squaresFour,
                         ),
 
                         // Land Acquisition
                         _buildMenuItem(
                           index: 1,
-                          title: 'Land Acquisition',
+                          title: AppString.landAcquisition.l10n(context)!,
                           icon: PhosphorIconsBold.mapTrifold,
                         ),
 
                         // Mass Rating with subcategories
                         _buildExpandableSection(
-                          title: 'Mass Rating',
+                          title: AppString.massRating.l10n(context)!,
                           icon: PhosphorIconsBold.pencilRuler,
                           isExpanded: _isMassRatingExpanded,
                           onTap: () {
@@ -118,23 +118,23 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                           children: [
                             _buildSubMenuItem(
                               index: 2,
-                              title: 'Mass Rating',
+                              title: AppString.massRating.l10n(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 3,
-                              title: 'Rating Assessment',
+                              title: AppString.ratingAssessment.l10n(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 4,
-                              title: 'Rating Building',
+                              title: AppString.ratingBuilding.l10n(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 5,
-                              title: 'Rating Object',
+                              title: AppString.ratingObject.l10n(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 6,
-                              title: 'MR Rental Evidence',
+                              title: AppString.mrRentalEvidence.l10n(context)!,
                             ),
                           ],
                         ),
@@ -142,7 +142,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                         // Land Miscellaneous
                         _buildMenuItem(
                           index: 7,
-                          title: 'Land Miscellaneous',
+                          title: AppString.landMiscellaneous.l10n(context)!,
                           icon: PhosphorIconsBold.ticket,
                         ),
                       ],
@@ -194,7 +194,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  AppString.valuationDepartment.localize(context)!,
+                  AppString.valuationDepartment.l10n(context)!,
                   style: TextStyle(
                     fontFamily: 'Roboto',
                     color: colors(context).colorBlack!,
@@ -325,7 +325,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
 
             // If we're expanding and it's the Mass Rating section,
             // automatically select the first item (index 2)
-            if (!isExpanded && title == 'Mass Rating') {
+            if (!isExpanded && title == AppString.massRating.l10n(context)!) {
               widget.onIndexChanged(2);
             }
           },

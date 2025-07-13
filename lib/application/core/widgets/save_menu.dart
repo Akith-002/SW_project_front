@@ -89,14 +89,14 @@ class _SaveMenuState extends State<SaveMenu> {
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             onTap: widget.onNewFile ?? () {},
-            child: Text(AppString.openNew.localize(context)!),
+            child: Text(AppString.openNew.l10n(context)!),
           ),
           // Default menu item: Open.
           PopupMenuItem<String>(
             value: 'open',
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(AppString.open.localize(context)!),
+            child: Text(AppString.open.l10n(context)!),
           ),
           // Default menu item: Save.
           PopupMenuItem<String>(
@@ -104,14 +104,14 @@ class _SaveMenuState extends State<SaveMenu> {
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             onTap: widget.onSave ?? () {},
-            child: Text(AppString.save.localize(context)!),
+            child: Text(AppString.save.l10n(context)!),
           ),
           // Default menu item: Save As.
           PopupMenuItem<String>(
             value: 'saveAs',
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(AppString.saveAs.localize(context)!),
+            child: Text(AppString.saveAs.l10n(context)!),
           ),
           // Divider between groups of menu items.
           const PopupMenuDivider(height: 1),
@@ -120,7 +120,7 @@ class _SaveMenuState extends State<SaveMenu> {
             value: 'sendData',
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(AppString.sendData.localize(context)!),
+            child: Text(AppString.sendData.l10n(context)!),
           ),
         ],
       ],
@@ -143,7 +143,7 @@ class _SaveMenuState extends State<SaveMenu> {
               ),
               child: Center(
                 child: Text(
-                  AppString.save.localize(context)!,
+                  AppString.save.l10n(context)!,
                   style: AppStyling.mediumTextSize16.copyWith(
                     color: colors(context).colorPrimary5,
                   ),

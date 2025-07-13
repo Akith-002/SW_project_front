@@ -259,7 +259,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
               children: [
                 _buildRow([
                   CustomDropdownField(
-                    label: AppString.nameOfVillage.localize(context)!,
+                    label: AppString.nameOfVillage.l10n(context)!,
                     items: ["Village A", "Village B", "Village C"],
                     initialValue: _selectedVillage,
                     onChanged: (value) {
@@ -275,8 +275,8 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     ),
                   ),
                   LabeledTextField(
-                    label: AppString.nameOfLand.localize(context)!,
-                    placeholder: AppString.nameOfLand.localize(context)!,
+                    label: AppString.nameOfLand.l10n(context)!,
+                    placeholder: AppString.nameOfLand.l10n(context)!,
                     controller: _nameOfLandController,
                     validator: (value) => LandInfoValidator.validateRequired(
                         value, 'Name of Land'),
@@ -284,14 +284,14 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 ]),
                 _buildRow([
                   LabeledTextField(
-                    label: AppString.atPlanNumber.localize(context)!,
+                    label: AppString.atPlanNumber.l10n(context)!,
                     placeholder: "123456789",
                     controller: _atPlanNumberController,
                     validator: (value) => LandInfoValidator.validateNumeric(
                         value, 'AT Plan Number'),
                   ),
                   LabeledTextField(
-                    label: AppString.atLotNumber.localize(context)!,
+                    label: AppString.atLotNumber.l10n(context)!,
                     placeholder: "AT Lot 01",
                     controller: _atLotNumberController,
                     validator: (value) => LandInfoValidator.validateRequired(
@@ -300,14 +300,14 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 ]),
                 _buildRow([
                   LabeledTextField(
-                    label: AppString.ppCadNumber.localize(context)!,
+                    label: AppString.ppCadNumber.l10n(context)!,
                     placeholder: "123456789",
                     controller: _ppCadNumberController,
                     validator: (value) => LandInfoValidator.validateNumeric(
                         value, 'PP Cad Number'),
                   ),
                   LabeledTextField(
-                    label: AppString.ppCadLotNumber.localize(context)!,
+                    label: AppString.ppCadLotNumber.l10n(context)!,
                     placeholder: "SLA 01",
                     controller: _ppCadLotNumberController,
                     validator: (value) => LandInfoValidator.validateRequired(
@@ -316,15 +316,15 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 ]),
                 _buildRow([
                   LabeledTextField(
-                    label: AppString.acquiredExtent.localize(context)!,
-                    placeholder: AppString.acquiredExtent.localize(context)!,
+                    label: AppString.acquiredExtent.l10n(context)!,
+                    placeholder: AppString.acquiredExtent.l10n(context)!,
                     controller: _acquiredExtentController,
                     validator: (value) => LandInfoValidator.validateNumeric(
                         value, 'Acquired Extent'),
                   ),
                   LabeledTextField(
-                    label: AppString.assessmentNumber.localize(context)!,
-                    placeholder: AppString.assessmentNumber.localize(context)!,
+                    label: AppString.assessmentNumber.l10n(context)!,
+                    placeholder: AppString.assessmentNumber.l10n(context)!,
                     controller: _assessmentNumberController,
                     validator: (value) => LandInfoValidator.validateNumeric(
                         value, 'Assessment Number'),
@@ -332,15 +332,15 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 ]),
                 _buildRow([
                   LabeledTextField(
-                    label: AppString.roadName.localize(context)!,
-                    placeholder: AppString.roadName.localize(context)!,
+                    label: AppString.roadName.l10n(context)!,
+                    placeholder: AppString.roadName.l10n(context)!,
                     controller: _roadNameController,
                     validator: (value) =>
                         LandInfoValidator.validateAlphaNumeric(
                             value, 'Road Name'),
                   ),
                   CustomDropdownField(
-                    label: AppString.accessCategory.localize(context)!,
+                    label: AppString.accessCategory.l10n(context)!,
                     items: ["Category 1", "Category 2", "Category 3"],
                     initialValue: _selectedAccessCategory,
                     onChanged: (value) {
@@ -359,16 +359,16 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 _buildRow([
                   LabeledTextField(
                     label:
-                        AppString.accessCategoryDescription.localize(context)!,
+                        AppString.accessCategoryDescription.l10n(context)!,
                     placeholder:
-                        AppString.accessCategoryDescription.localize(context)!,
+                        AppString.accessCategoryDescription.l10n(context)!,
                     controller: _accessCategoryDescController,
                     validator: (value) => LandInfoValidator.validateRequired(
                         value, 'Access Category Description'),
                   ),
                   LabeledTextField(
-                    label: AppString.descriptionOfLand.localize(context)!,
-                    placeholder: AppString.descriptionOfLand.localize(context)!,
+                    label: AppString.descriptionOfLand.l10n(context)!,
+                    placeholder: AppString.descriptionOfLand.l10n(context)!,
                     controller: _descriptionOfLandController,
                     validator: (value) => LandInfoValidator.validateRequired(
                         value, 'Description of Land'),
@@ -381,13 +381,13 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppString.situation.localize(context)!,
+                        AppString.situation.l10n(context)!,
                         style: AppStyling.mediumTextSize14
                             .copyWith(color: colors(context).labelTextColor),
                       ),
                       const SizedBox(height: 8),
                       CustomButton(
-                        text: AppString.addPr.localize(context)!,
+                        text: AppString.addPr.l10n(context)!,
                         backgroundColor: colors(context).colorPrimary1!,
                         onPressed: () {},
                         width: 484,
@@ -396,9 +396,9 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     ],
                   ),
                   LabeledTextField(
-                    label: AppString.landUseDescription.localize(context)!,
+                    label: AppString.landUseDescription.l10n(context)!,
                     placeholder:
-                        AppString.landUseDescription.localize(context)!,
+                        AppString.landUseDescription.l10n(context)!,
                     controller: _landUseDescriptionController,
                     validator: (value) => LandInfoValidator.validateRequired(
                         value, 'Land Use Description'),
@@ -406,7 +406,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 ]),
                 _buildRow([
                   CustomDropdownField(
-                    label: AppString.landUseType.localize(context)!,
+                    label: AppString.landUseType.l10n(context)!,
                     items: ["Residential", "Commercial", "Agricultural"],
                     initialValue: _selectedLandUseType,
                     onChanged: (value) {
@@ -422,8 +422,8 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     ),
                   ),
                   LabeledTextField(
-                    label: AppString.frontageFeet.localize(context)!,
-                    placeholder: AppString.frontageFeet.localize(context)!,
+                    label: AppString.frontageFeet.l10n(context)!,
+                    placeholder: AppString.frontageFeet.l10n(context)!,
                     controller: _frontageFeetController,
                     validator: (value) =>
                         LandInfoValidator.validateNumeric(value, 'Frontage'),
@@ -431,15 +431,15 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 ]),
                 _buildRow([
                   LabeledTextField(
-                    label: AppString.depthOfLandFeet.localize(context)!,
-                    placeholder: AppString.depthOfLandFeet.localize(context)!,
+                    label: AppString.depthOfLandFeet.l10n(context)!,
+                    placeholder: AppString.depthOfLandFeet.l10n(context)!,
                     controller: _depthOfLandFeetController,
                     validator: (value) => LandInfoValidator.validateNumeric(
                         value, 'Depth of Land'),
                   ),
                   LabeledTextField(
-                    label: AppString.levelWithAccess.localize(context)!,
-                    placeholder: AppString.levelWithAccess.localize(context)!,
+                    label: AppString.levelWithAccess.l10n(context)!,
+                    placeholder: AppString.levelWithAccess.l10n(context)!,
                     controller: _levelWithAccessController,
                     validator: (value) => LandInfoValidator.validateRequired(
                         value, 'Level with Access'),
@@ -447,15 +447,15 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 ]),
                 _buildRow([
                   LabeledTextField(
-                    label: AppString.plantationDetails.localize(context)!,
-                    placeholder: AppString.plantationDetails.localize(context)!,
+                    label: AppString.plantationDetails.l10n(context)!,
+                    placeholder: AppString.plantationDetails.l10n(context)!,
                     controller: _plantationDetailsController,
                     validator: (value) => LandInfoValidator.validateRequired(
                         value, 'Plantation Details'),
                   ),
                   LabeledTextField(
-                    label: AppString.detailsOfBusiness.localize(context)!,
-                    placeholder: AppString.detailsOfBusiness.localize(context)!,
+                    label: AppString.detailsOfBusiness.l10n(context)!,
+                    placeholder: AppString.detailsOfBusiness.l10n(context)!,
                     controller: _detailsOfBusinessController,
                     validator: (value) => LandInfoValidator.validateRequired(
                         value, 'Details of Business'),
@@ -463,14 +463,14 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 ]),
                 _buildRow([
                   LabeledTextField(
-                    label: AppString.acquisitionName.localize(context)!,
-                    placeholder: AppString.acquisitionName.localize(context)!,
+                    label: AppString.acquisitionName.l10n(context)!,
+                    placeholder: AppString.acquisitionName.l10n(context)!,
                     controller: _acquisitionNameController,
                     validator: (value) => LandInfoValidator.validateRequired(
                         value, 'Acquisition Name'),
                   ),
                   LabeledDateField(
-                    label: AppString.dateOfPrepared.localize(context)!,
+                    label: AppString.dateOfPrepared.l10n(context)!,
                     placeholder: "YYYY-MM-DD",
                     controller: _dateOfPreparedController,
                     validator: (value) => LandInfoValidator.validateDate(
@@ -480,7 +480,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 // Fixed: Put both date fields in the same row with an empty spacer
                 _buildRow([
                   LabeledDateField(
-                    label: AppString.dateOfSection3BA.localize(context)!,
+                    label: AppString.dateOfSection3BA.l10n(context)!,
                     placeholder: "YYYY-MM-DD",
                     controller: _dateOfSection3BAController,
                     validator: (value) => LandInfoValidator.validateDate(
@@ -492,7 +492,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 // Boundaries Section
                 const SizedBox(height: 16),
                 Text(
-                  AppString.boundaries.localize(context)!,
+                  AppString.boundaries.l10n(context)!,
                   style: AppStyling.mediumTextSize14
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -501,15 +501,15 @@ class _LandInfoFormState extends State<LandInfoForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildSmallInput(
-                        AppString.north.localize(context)!, _northController),
+                        AppString.north.l10n(context)!, _northController),
                     _buildSmallInput(
-                        AppString.east.localize(context)!, _eastController),
+                        AppString.east.l10n(context)!, _eastController),
                     _buildSmallInput(
-                        AppString.west.localize(context)!, _westController),
+                        AppString.west.l10n(context)!, _westController),
                     _buildSmallInput(
-                        AppString.south.localize(context)!, _southController),
+                        AppString.south.l10n(context)!, _southController),
                     _buildSmallInput(
-                        AppString.bottom.localize(context)!, _bottomController),
+                        AppString.bottom.l10n(context)!, _bottomController),
                   ],
                 ),
 
@@ -533,7 +533,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomButton(
-                        text: AppString.cancel.localize(context)!,
+                        text: AppString.cancel.l10n(context)!,
                         backgroundColor: colors(context).colorGrey1!,
                         onPressed: () {
                           Navigator.pop(context);
@@ -542,7 +542,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
                         height: 48,
                       ),
                       CustomButton(
-                        text: AppString.save.localize(context)!,
+                        text: AppString.save.l10n(context)!,
                         backgroundColor: colors(context).colorPrimary5!,
                         onPressed: _saveFormData,
                         width: 120,

@@ -290,13 +290,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             Row(
               children: [
                 CustomButton(
-                  text: AppString.cancel.localize(context) ?? 'Cancel',
+                  text: AppString.cancel.l10n(context) ?? 'Cancel',
                   onPressed: () => Navigator.pop(context),
                   backgroundColor: colors(context).colorGrey1!,
                 ),
                 const Spacer(),
                 CustomButton(
-                  text: AppString.save.localize(context) ?? 'Save',
+                  text: AppString.save.l10n(context) ?? 'Save',
                   onPressed: () {
                     if (_landInfoFormKey.currentState?.validate() ?? false) {
                       // Handle save logic here
@@ -407,14 +407,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               LabeledTextField(
                 label:
-                    "${AppString.buildingId.localize(context) ?? 'Building ID'} ($_selectedBuildingName)",
+                    "${AppString.buildingId.l10n(context) ?? 'Building ID'} ($_selectedBuildingName)",
                 placeholder: "Enter Building ID",
                 controller: _buildingIdController,
                 validator: (value) =>
                     InspectionValidator.required(value, "Building ID"),
               ),
               LabeledTextField(
-                label: AppString.buildingName.localize(context) ?? '',
+                label: AppString.buildingName.l10n(context) ?? '',
                 placeholder: "Enter Building Name",
                 controller: _buildingNameController,
                 validator: (value) =>
@@ -424,7 +424,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.buildingCategory.localize(context) ?? '',
+                label: AppString.buildingCategory.l10n(context) ?? '',
                 items: [
                   "Select Building Category",
                   "Residential",
@@ -437,7 +437,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     value, "Building Category"),
               ),
               CustomDropdownField(
-                label: AppString.buildingClass.localize(context) ?? '',
+                label: AppString.buildingClass.l10n(context) ?? '',
                 items: [
                   "Select Building Class",
                   "Class A",
@@ -453,14 +453,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               LabeledTextField(
-                label: AppString.detailOfBuilding.localize(context) ?? '',
+                label: AppString.detailOfBuilding.l10n(context) ?? '',
                 placeholder: "Enter Details",
                 controller: _buildingDetailsController,
                 validator: (value) => InspectionValidator.optionalAlphaNum(
                     value, 200, "Building Details"),
               ),
               LabeledTextField(
-                label: AppString.noOfFloorsGPlus.localize(context) ?? '',
+                label: AppString.noOfFloorsGPlus.l10n(context) ?? '',
                 placeholder: "Enter Number of Floors",
                 controller: _noOfFloorsGPlusController,
                 validator: (value) => InspectionValidator.required(
@@ -470,14 +470,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               LabeledTextField(
-                label: AppString.noOfFloorsGMinus.localize(context) ?? '',
+                label: AppString.noOfFloorsGMinus.l10n(context) ?? '',
                 placeholder: "Enter Number of Floors",
                 controller: _noOfFloorsGMinusController,
                 validator: (value) => InspectionValidator.required(
                     value, "Number of Floors (G-)"),
               ),
               LabeledTextField(
-                label: AppString.age.localize(context) ?? '',
+                label: AppString.age.l10n(context) ?? '',
                 placeholder: "Enter Age",
                 controller: _ageController,
                 validator: (value) =>
@@ -487,14 +487,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               LabeledTextField(
-                label: AppString.expectedLifePeriod.localize(context) ?? '',
+                label: AppString.expectedLifePeriod.l10n(context) ?? '',
                 placeholder: "Enter Expected Life Period",
                 controller: _expectedLifePeriodController,
                 validator: (value) =>
                     InspectionValidator.required(value, "Expected Life Period"),
               ),
               LabeledTextField(
-                label: AppString.parkingSpace.localize(context) ?? '',
+                label: AppString.parkingSpace.l10n(context) ?? '',
                 placeholder: "Enter Parking Space",
                 controller: _parkingSpaceController,
                 validator: (value) => InspectionValidator.optionalAlphaNum(
@@ -504,14 +504,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               LabeledTextField(
-                label: AppString.design.localize(context) ?? '',
+                label: AppString.design.l10n(context) ?? '',
                 placeholder: "Design",
                 controller: _designController,
                 validator: (value) =>
                     InspectionValidator.optionalAlphaNum(value, 100, "Design"),
               ),
               LabeledTextField(
-                label: AppString.conveniences.localize(context) ?? '',
+                label: AppString.conveniences.l10n(context) ?? '',
                 placeholder: "Conveniences",
                 controller: _conveniencesController,
                 validator: (value) => InspectionValidator.optionalAlphaNum(
@@ -521,14 +521,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               LabeledTextField(
-                label: AppString.structure.localize(context) ?? '',
+                label: AppString.structure.l10n(context) ?? '',
                 placeholder: "Structure",
                 controller: _structureController,
                 validator: (value) =>
                     InspectionValidator.required(value, "Structure"),
               ),
               LabeledTextField(
-                label: AppString.buildingConditions.localize(context) ?? '',
+                label: AppString.buildingConditions.l10n(context) ?? '',
                 placeholder: "Building Conditions",
                 controller: _buildingConditionsController,
                 validator: (value) =>
@@ -538,7 +538,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.natureOfConstruction.localize(context) ?? '',
+                label: AppString.natureOfConstruction.l10n(context) ?? '',
                 items: [
                   "Select Nature of Building",
                   "New",
@@ -552,7 +552,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     value, "Nature of Building"),
               ),
               CustomDropdownField(
-                label: AppString.condition.localize(context) ?? '',
+                label: AppString.condition.l10n(context) ?? '',
                 items: [
                   "Select Building Condition",
                   "New",
@@ -569,7 +569,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             const SizedBox(height: 16),
             Text(
-              AppString.roofDetails.localize(context) ?? '',
+              AppString.roofDetails.l10n(context) ?? '',
               style: AppStyling.mediumTextSize14
                   .copyWith(fontWeight: FontWeight.bold),
             ),
@@ -577,7 +577,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.roofMaterial.localize(context) ?? '',
+                label: AppString.roofMaterial.l10n(context) ?? '',
                 items: ["Select Roof Material", "Concrete", "Metal", "Tiles"],
                 initialValue: "Select Roof Material",
                 onChanged: (value) {},
@@ -585,7 +585,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     value, "Roof Material"),
               ),
               CustomDropdownField(
-                label: AppString.roofFrame.localize(context) ?? '',
+                label: AppString.roofFrame.l10n(context) ?? '',
                 items: ["Select Roof Frame", "Steel", "Wood", "Concrete"],
                 initialValue: "Select Roof Frame",
                 onChanged: (value) {},
@@ -596,7 +596,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.roofFinisher.localize(context) ?? '',
+                label: AppString.roofFinisher.l10n(context) ?? '',
                 items: [
                   "Select Roof Finisher",
                   "Painted",
@@ -609,7 +609,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     value, "Roof Finisher"),
               ),
               CustomDropdownField(
-                label: AppString.ceiling.localize(context) ?? '',
+                label: AppString.ceiling.l10n(context) ?? '',
                 items: ["Select Ceiling", "Plasterboard", "Wood", "PVC"],
                 initialValue: "Select Ceiling",
                 onChanged: (value) {},
@@ -620,7 +620,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             const SizedBox(height: 16),
             Text(
-              AppString.structureDetails.localize(context) ?? '',
+              AppString.structureDetails.l10n(context) ?? '',
               style: AppStyling.mediumTextSize14
                   .copyWith(fontWeight: FontWeight.bold),
             ),
@@ -628,7 +628,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.foundationStructure.localize(context) ?? '',
+                label: AppString.foundationStructure.l10n(context) ?? '',
                 items: ["Select Foundation Structure", "Pile", "Raft", "Pad"],
                 initialValue: "Select Foundation Structure",
                 onChanged: (value) {},
@@ -636,7 +636,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     value, "Foundation Structure"),
               ),
               CustomDropdownField(
-                label: AppString.wallStructure.localize(context) ?? '',
+                label: AppString.wallStructure.l10n(context) ?? '',
                 items: ["Select Wall Structure", "Brick", "Concrete", "Wood"],
                 initialValue: "Select Wall Structure",
                 onChanged: (value) {},
@@ -647,7 +647,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.floorStructure.localize(context) ?? '',
+                label: AppString.floorStructure.l10n(context) ?? '',
                 items: ["Select Floor Structure", "Concrete", "Wood", "Tile"],
                 initialValue: "Select Floor Structure",
                 onChanged: (value) {},
@@ -657,7 +657,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             ]),
 
             Text(
-              AppString.fixedAndFittingDetails.localize(context) ?? '',
+              AppString.fixedAndFittingDetails.l10n(context) ?? '',
               style: AppStyling.mediumTextSize14
                   .copyWith(fontWeight: FontWeight.bold),
             ),
@@ -665,7 +665,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.door.localize(context) ?? '',
+                label: AppString.door.l10n(context) ?? '',
                 items: ["Select Door", "Wooden", "Glass", "Metal"],
                 initialValue: "Select Door",
                 onChanged: (value) {},
@@ -673,7 +673,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     InspectionValidator.validateDropdown(value, "Door"),
               ),
               CustomDropdownField(
-                label: AppString.window.localize(context) ?? '',
+                label: AppString.window.l10n(context) ?? '',
                 items: ["Select Window", "Sliding", "Casement", "Fixed"],
                 initialValue: "Select Window",
                 onChanged: (value) {},
@@ -684,7 +684,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.windowProtection.localize(context) ?? '',
+                label: AppString.windowProtection.l10n(context) ?? '',
                 items: [
                   "Select Window Protection",
                   "Grills",
@@ -698,7 +698,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
               ),
               CustomDropdownField(
                 label:
-                    AppString.doorsBathroomToiletFittings.localize(context) ??
+                    AppString.doorsBathroomToiletFittings.l10n(context) ??
                         '',
                 items: [
                   "Select Doors Bathroom and Toilet Fittings",
@@ -715,7 +715,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.doorsHandRail.localize(context) ?? '',
+                label: AppString.doorsHandRail.l10n(context) ?? '',
                 items: ["Select Doors Hand Rail", "Steel", "Wood", "Glass"],
                 initialValue: "Select Doors Hand Rail",
                 onChanged: (value) {},
@@ -723,7 +723,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     value, "Doors Hand Rail"),
               ),
               CustomDropdownField(
-                label: AppString.doorsPantryCupboard.localize(context) ?? '',
+                label: AppString.doorsPantryCupboard.l10n(context) ?? '',
                 items: [
                   "Select Doors Pantry Cupboard",
                   "Laminated",
@@ -739,7 +739,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.doorsOther.localize(context) ?? '',
+                label: AppString.doorsOther.l10n(context) ?? '',
                 items: [
                   "Select Doors Other",
                   "Double Door",
@@ -755,7 +755,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             const SizedBox(height: 16),
             Text(
-              AppString.finishersServiceDetails.localize(context) ?? '',
+              AppString.finishersServiceDetails.l10n(context) ?? '',
               style: AppStyling.mediumTextSize14
                   .copyWith(fontWeight: FontWeight.bold),
             ),
@@ -763,7 +763,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.wallFinisher.localize(context) ?? '',
+                label: AppString.wallFinisher.l10n(context) ?? '',
                 items: ["Select Wall Finisher", "Paint", "Tiles", "Wallpaper"],
                 initialValue: "Select Wall Finisher",
                 onChanged: (value) {},
@@ -771,7 +771,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     value, "Wall Finisher"),
               ),
               CustomDropdownField(
-                label: AppString.floorFinisher.localize(context) ?? '',
+                label: AppString.floorFinisher.l10n(context) ?? '',
                 items: ["Select Floor Finisher", "Tile", "Carpet", "Wood"],
                 initialValue: "Select Floor Finisher",
                 onChanged: (value) {},
@@ -782,7 +782,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             _buildRow([
               CustomDropdownField(
-                label: AppString.bathroomToilet.localize(context) ?? '',
+                label: AppString.bathroomToilet.l10n(context) ?? '',
                 items: [
                   "Select Bathroom and Toilet",
                   "Tiled",
@@ -795,7 +795,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     value, "Bathroom and Toilet"),
               ),
               CustomDropdownField(
-                label: AppString.services.localize(context) ?? '',
+                label: AppString.services.l10n(context) ?? '',
                 items: ["Select Services", "Electricity", "Plumbing", "HVAC"],
                 initialValue: "Select Services",
                 onChanged: (value) {},
@@ -806,14 +806,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             const SizedBox(height: 16),
             Text(
-              AppString.finishersServiceDetails.localize(context) ?? '',
+              AppString.finishersServiceDetails.l10n(context) ?? '',
               style: AppStyling.mediumTextSize14
                   .copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
 
             CustomButton(
-              text: AppString.addOwner.localize(context) ?? '',
+              text: AppString.addOwner.l10n(context) ?? '',
               onPressed: () {},
               backgroundColor: colors(context).colorGrey1!,
               width: 150,
@@ -822,7 +822,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
             const SizedBox(height: 16),
             Text(
-              AppString.imageCapturingUpload.localize(context) ?? '',
+              AppString.imageCapturingUpload.l10n(context) ?? '',
               style: AppStyling.mediumTextSize14
                   .copyWith(fontWeight: FontWeight.bold),
             ),
@@ -864,13 +864,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             Row(
               children: [
                 CustomButton(
-                  text: AppString.cancel.localize(context) ?? '',
+                  text: AppString.cancel.l10n(context) ?? '',
                   onPressed: () => Navigator.pop(context),
                   backgroundColor: colors(context).colorGrey1!,
                 ),
                 const Spacer(),
                 CustomButton(
-                  text: AppString.save.localize(context) ?? '',
+                  text: AppString.save.l10n(context) ?? '',
                   onPressed: () {
                     if (_buildingInfoFormKey.currentState?.validate() ??
                         false) {
@@ -940,13 +940,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             Row(
               children: [
                 CustomButton(
-                  text: AppString.cancel.localize(context) ?? 'Cancel',
+                  text: AppString.cancel.l10n(context) ?? 'Cancel',
                   onPressed: () => Navigator.pop(context),
                   backgroundColor: colors(context).colorGrey1!,
                 ),
                 const Spacer(),
                 CustomButton(
-                  text: AppString.save.localize(context) ?? 'Save',
+                  text: AppString.save.l10n(context) ?? 'Save',
                   onPressed: () {
                     if (_otherConstructionsFormKey.currentState?.validate() ??
                         false) {

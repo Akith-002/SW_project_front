@@ -144,13 +144,13 @@ class EditRatingCardDialog {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CustomButton(
-                          text: AppString.cancel.localize(context)!,
+                          text: AppString.cancel.l10n(context)!,
                           onPressed: () => Navigator.pop(context),
                           backgroundColor: colors(context).colorGrey1!,
                         ),
                         SizedBox(width: 20),
                         CustomButton(
-                          text: AppString.submit.localize(context)!,
+                          text: AppString.submit.l10n(context)!,
                           onPressed: () {
                             Navigator.pop(
                                 context); // Handle the selected option
@@ -334,13 +334,13 @@ class EditRatingCardDialog {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CustomButton(
-                          text: AppString.cancel.localize(context)!,
+                          text: AppString.cancel.l10n(context)!,
                           onPressed: () => Navigator.pop(context),
                           backgroundColor: colors(context).colorGrey1!,
                         ),
                         SizedBox(width: 20),
                         CustomButton(
-                          text: AppString.submit.localize(context)!,
+                          text: AppString.submit.l10n(context)!,
                           onPressed: () {
                             if (!hasSameOwner) {
                               // Show invalid owners dialog
@@ -533,13 +533,13 @@ class EditRatingCardDialog {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CustomButton(
-                          text: AppString.cancel.localize(context)!,
+                          text: AppString.cancel.l10n(context)!,
                           onPressed: () => Navigator.pop(context),
                           backgroundColor: colors(context).colorGrey1!,
                         ),
                         SizedBox(width: 20),
                         CustomButton(
-                          text: AppString.submit.localize(context)!,
+                          text: AppString.submit.l10n(context)!,
                           onPressed: () {
                             Navigator.pop(context);
 

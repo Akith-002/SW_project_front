@@ -140,10 +140,10 @@ class _ConstructionFormState extends State<ConstructionForm> {
                     children: [
                       LabeledTextField(
                         label: widget.tabIndex == 1
-                            ? AppString.buildingDescription.localize(context)!
+                            ? AppString.buildingDescription.l10n(context)!
                             : "Other Constructions Description",
                         placeholder: widget.tabIndex == 1
-                            ? AppString.buildingDescription.localize(context)!
+                            ? AppString.buildingDescription.l10n(context)!
                             : "Enter other constructions description",
                         controller: _buildingDescriptionController,
                         validator: (value) =>
@@ -160,7 +160,7 @@ class _ConstructionFormState extends State<ConstructionForm> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: ReadOnlyLabeledField(
-                              label: construction["label"]!.localize(context)!,
+                              label: construction["label"]!.l10n(context)!,
                               value: construction["value"]!,
                             ),
                           );
@@ -182,7 +182,7 @@ class _ConstructionFormState extends State<ConstructionForm> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomButton(
-                        text: AppString.cancel.localize(context)!,
+                        text: AppString.cancel.l10n(context)!,
                         backgroundColor: colors(context).colorGrey1!,
                         onPressed: () {
                           Navigator.pop(context);
@@ -191,7 +191,7 @@ class _ConstructionFormState extends State<ConstructionForm> {
                         height: 48,
                       ),
                       CustomButton(
-                        text: AppString.save.localize(context)!,
+                        text: AppString.save.l10n(context)!,
                         backgroundColor: colors(context).colorPrimary5!,
                         onPressed: _saveFormData,
                         width: 120,

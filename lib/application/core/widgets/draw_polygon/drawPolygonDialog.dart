@@ -98,7 +98,7 @@ class _DrawPolygonDialogState extends State<DrawPolygonDialog> {
     return AlertDialog(
       backgroundColor: Colors.white,
       title: Text(
-        AppString.drawPolygon.localize(context)!,
+        AppString.drawPolygon.l10n(context)!,
         style: AppStyling.semiBoldTextSize18,
       ),
       contentPadding: const EdgeInsets.all(24),
@@ -139,8 +139,8 @@ class _DrawPolygonDialogState extends State<DrawPolygonDialog> {
                         children: [
                           Expanded(
                             child: LabeledTextField(
-                              label: AppString.feet.localize(context)!,
-                              placeholder: AppString.feet.localize(context)!,
+                              label: AppString.feet.l10n(context)!,
+                              placeholder: AppString.feet.l10n(context)!,
                               controller: feetController,
                               width: 149,
                             ),
@@ -148,8 +148,8 @@ class _DrawPolygonDialogState extends State<DrawPolygonDialog> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: LabeledTextField(
-                              placeholder: AppString.inches.localize(context)!,
-                              label: AppString.inches.localize(context)!,
+                              placeholder: AppString.inches.l10n(context)!,
+                              label: AppString.inches.l10n(context)!,
                               controller: inchesController,
                               width: 149,
                             ),
@@ -189,13 +189,13 @@ class _DrawPolygonDialogState extends State<DrawPolygonDialog> {
           children: [
             // Cancel button - closes dialog without saving
             CustomButton(
-              text: AppString.cancel.localize(context)!,
+              text: AppString.cancel.l10n(context)!,
               onPressed: () => Navigator.pop(context, null),
               backgroundColor: colors(context).colorGrey1!,
             ),
             // Save button - validates and returns measurements
             CustomButton(
-                text: AppString.save.localize(context)!,
+                text: AppString.save.l10n(context)!,
                 onPressed: () {
                   debugPrint("Save button pressed");
                   _saveSideValues(); // Save current input first

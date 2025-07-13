@@ -14,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: AppString.profile.localize(context)!,
+        title: AppString.profile.l10n(context)!,
         style: AppStyling.semiBoldTextSize16
             .copyWith(color: colors(context).colorGrey6),
         leftIcon: (style) => PhosphorIcons.userCircle(style),
@@ -31,7 +31,7 @@ class ProfileScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 16.0, top: 16.0),
               child: Text(
-                AppString.overview.localize(context)!,
+                AppString.overview.l10n(context)!,
                 style: AppStyling.semiBoldTextSize14
                     .copyWith(color: colors(context).colorGrey6),
               ),
@@ -56,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 16.0),
               child: Text(
-                AppString.myActivities.localize(context)!,
+                AppString.myActivities.l10n(context)!,
                 style: AppStyling.semiBoldTextSize14
                     .copyWith(color: colors(context).colorGrey6),
               ),
@@ -73,14 +73,14 @@ class ProfileScreen extends StatelessWidget {
                   child: Row(
                     children: [
                       CustomActivityCard(
-                        title: AppString.totalActivities.localize(context)!,
+                        title: AppString.totalActivities.l10n(context)!,
                         completed: 120,
                         pending: 27,
                         icon: PhosphorIcons.pulse(PhosphorIconsStyle.regular),
                       ),
                       const SizedBox(width: 12),
                       CustomActivityCard(
-                        title: AppString.landAcquisition.localize(context)!,
+                        title: AppString.landAcquisition.l10n(context)!,
                         completed: 120,
                         pending: 27,
                         icon: PhosphorIcons.mapTrifold(
@@ -88,7 +88,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       CustomActivityCard(
-                        title: AppString.massRating.localize(context)!,
+                        title: AppString.massRating.l10n(context)!,
                         completed: 120,
                         pending: 27,
                         icon: PhosphorIcons.pencilRuler(
@@ -96,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       CustomActivityCard(
-                        title: AppString.landMiscellaneous.localize(context)!,
+                        title: AppString.landMiscellaneous.l10n(context)!,
                         completed: 120,
                         pending: 27,
                         icon: PhosphorIcons.ticket(PhosphorIconsStyle.regular),
@@ -139,11 +139,11 @@ class ProfileCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppString.johnDoe.localize(context)!,
+                      Text(AppString.johnDoe.l10n(context)!,
                           style: AppStyling.semiBoldTextSize18.copyWith(
                             color: colors(context).colorGrey2,
                           )),
-                      Text(AppString.email.localize(context)!,
+                      Text(AppString.email.l10n(context)!,
                           style: AppStyling.regularTextSize14.copyWith(
                             color: colors(context).colorGrey8,
                           )),
@@ -153,11 +153,11 @@ class ProfileCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppString.employeeId.localize(context)!,
+                      Text(AppString.employeeId.l10n(context)!,
                           style: AppStyling.regularTextSize12.copyWith(
                             color: colors(context).colorGrey8,
                           )),
-                      Text(AppString.id.localize(context)!,
+                      Text(AppString.id.l10n(context)!,
                           style: AppStyling.semiBoldTextSize16.copyWith(
                             color: colors(context).colorGrey2,
                           )),
@@ -167,11 +167,11 @@ class ProfileCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppString.position.localize(context)!,
+                      Text(AppString.position.l10n(context)!,
                           style: AppStyling.regularTextSize12.copyWith(
                             color: colors(context).colorGrey8,
                           )),
-                      Text(AppString.adv.localize(context)!,
+                      Text(AppString.adv.l10n(context)!,
                           style: AppStyling.semiBoldTextSize16.copyWith(
                             color: colors(context).colorGrey2,
                           )),
@@ -181,11 +181,11 @@ class ProfileCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppString.assignedDivision.localize(context)!,
+                      Text(AppString.assignedDivision.l10n(context)!,
                           style: AppStyling.regularTextSize12.copyWith(
                             color: colors(context).colorGrey8,
                           )),
-                      Text(AppString.kollupitiya.localize(context)!,
+                      Text(AppString.kollupitiya.l10n(context)!,
                           style: AppStyling.semiBoldTextSize16.copyWith(
                             color: colors(context).colorGrey2,
                           )),
@@ -256,7 +256,7 @@ class CustomActivityCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    AppString.completed.localize(context)!,
+                    AppString.completed.l10n(context)!,
                     style: AppStyling.semiBoldTextSize14.copyWith(
                       color: colors(context).colorPositive1,
                     ),
@@ -274,7 +274,7 @@ class CustomActivityCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    AppString.pending.localize(context)!,
+                    AppString.pending.l10n(context)!,
                     style: AppStyling.semiBoldTextSize14.copyWith(
                       color: colors(context).colorNotice7,
                     ),

@@ -156,7 +156,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHoverMenuItem(
-                          Icons.person, AppString.profile.localize(context)!,
+                          Icons.person, AppString.profile.l10n(context)!,
                           () {
                         _overlayEntry?.remove();
                         _overlayEntry = null;
@@ -164,7 +164,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                       }),
                       SizedBox(height: 16),
                       _buildHoverMenuItem(
-                          Icons.settings, AppString.settings.localize(context)!,
+                          Icons.settings, AppString.settings.l10n(context)!,
                           () {
                         _overlayEntry?.remove();
                         _overlayEntry = null;
@@ -173,7 +173,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                       SizedBox(height: 16),
                       _buildHoverMenuItem(
                           Icons.logout,
-                          AppString.logOut.localize(context)!,
+                          AppString.logOut.l10n(context)!,
                           () => _handleLogout(context)),
                     ],
                   ),

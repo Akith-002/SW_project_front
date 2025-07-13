@@ -62,83 +62,83 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                   ]),
                   _buildRow([
                     LabeledTextField(
-                      label: AppString.masterFilerefno.localize(context)!,
+                      label: AppString.masterFilerefno.l10n(context)!,
                       placeholder: "Metro/2/LM/123",
                     ),
                     LabeledTextField(
-                      label: AppString.fileNoGnDivision.localize(context)!,
-                      placeholder: AppString.fileNoGnDivision.localize(context)!,
+                      label: AppString.fileNoGnDivision.l10n(context)!,
+                      placeholder: AppString.fileNoGnDivision.l10n(context)!,
                       validator: (value) =>
                           PastValuationValidator.optionalAlphaNum(value, 255, "Assessment No"),
                     ),
                   ]),
                   _buildRow([
                     LabeledTextField(
-                      label: AppString.situation.localize(context)!,
-                      placeholder: AppString.situation.localize(context)!,
+                      label: AppString.situation.l10n(context)!,
+                      placeholder: AppString.situation.l10n(context)!,
                       validator: (value) =>
                           PastValuationValidator.optionalAlphaNum(value, 255, "Situation"),
                     ),
                     LabeledTextField(
-                      label: AppString.dateOfValuation.localize(context)!,
+                      label: AppString.dateOfValuation.l10n(context)!,
                       placeholder: "AT Lot 01",
                     ),
                   ]),
                   _buildRow([
                     LabeledTextField(
-                      label: AppString.purposeOfValuation.localize(context)!,
-                      placeholder: AppString.purposeOfValuation.localize(context)!,
+                      label: AppString.purposeOfValuation.l10n(context)!,
+                      placeholder: AppString.purposeOfValuation.l10n(context)!,
                       validator: (value) => PastValuationValidator.optionalAlphaNum(value, 255, "Purpose of Valuation"),
                     ),
                     LabeledTextField(
-                      label: AppString.planOfParticulars.localize(context)!,
-                      placeholder: AppString.planOfParticulars.localize(context)!,
+                      label: AppString.planOfParticulars.l10n(context)!,
+                      placeholder: AppString.planOfParticulars.l10n(context)!,
                       validator: (value) => PastValuationValidator.optionalAlphaNum(value, 255, "Plan Particulars"),
                     ),
                   ]),
                   _buildRow([
                     LabeledTextField(
-                      label: AppString.extent.localize(context)!,
-                      placeholder: AppString.extent.localize(context)!,
+                      label: AppString.extent.l10n(context)!,
+                      placeholder: AppString.extent.l10n(context)!,
                       validator: (value) => PastValuationValidator.optionalNumeric(value, 255, "Extent"),
                     ),
                     LabeledTextField(
-                      label: AppString.rate.localize(context)!,
-                      placeholder: AppString.rate.localize(context)!,
+                      label: AppString.rate.l10n(context)!,
+                      placeholder: AppString.rate.l10n(context)!,
                       validator: (value) => PastValuationValidator.optionalNumeric(value, 255, "Rate per unit"),
                     ),
                   ]),
                   _buildRow([
                     CustomDropdownField(
-                      label: AppString.rateType.localize(context)!,
+                      label: AppString.rateType.l10n(context)!,
                       items: ["Market Value", "Government Valuation"],
                       initialValue: "Market Value",
                       onChanged: (value) {},
                       width: 484,
                     ),
                     LabeledTextField(
-                      label: AppString.remarks.localize(context)!,
-                      placeholder: AppString.remarks.localize(context)!,
+                      label: AppString.remarks.l10n(context)!,
+                      placeholder: AppString.remarks.l10n(context)!,
                       validator: (value) =>
                           PastValuationValidator.optionalAlphaNum(value, 255, "Remarks"),
                     ),
                   ]),
                   _buildRow([
                     LabeledTextField(
-                      label: AppString.locationLongitude.localize(context)!,
+                      label: AppString.locationLongitude.l10n(context)!,
                       placeholder: "6.123456789",
                       validator: (value) =>
                           PastValuationValidator.optionalNumeric(value, 255, "Longitude"),
                     ),
                     LabeledTextField(
-                      label: AppString.locationLatitude.localize(context)!,
+                      label: AppString.locationLatitude.l10n(context)!,
                       placeholder: "6.123456789",
                       validator: (value) =>
                           PastValuationValidator.optionalNumeric(value, 255, "Latitude"),
                     ),
                   ]),
                   const SizedBox(height: 24),
-                  Text(AppString.uploadImgs.localize(context)!, style: AppStyling.mediumTextSize14),
+                  Text(AppString.uploadImgs.l10n(context)!, style: AppStyling.mediumTextSize14),
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 16,
@@ -170,14 +170,14 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomButton(
-                        text: AppString.cancel.localize(context)!,
+                        text: AppString.cancel.l10n(context)!,
                         onPressed: () {},
                         backgroundColor: colors(context).colorGrey1!,
                       ),
                       Row(
                         children: [
                           CustomButton(
-                            text: AppString.save.localize(context)!,
+                            text: AppString.save.l10n(context)!,
                             onPressed: () {
                               if (_formKey.currentState?.validate() ?? false) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -193,7 +193,7 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                           ),
                           const SizedBox(width: 40),
                           CustomButton(
-                            text: AppString.sendData.localize(context)!,
+                            text: AppString.sendData.l10n(context)!,
                             onPressed: () {},
                             backgroundColor: colors(context).colorPrimary1!,
                           ),

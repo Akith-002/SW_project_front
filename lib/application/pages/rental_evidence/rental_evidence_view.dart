@@ -276,7 +276,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
       child: Scaffold(
         // Custom app bar with a localized title.
         appBar: CustomAppBar(
-          title: AppString.rentalEvidence.localize(context) ?? '',
+          title: AppString.rentalEvidence.l10n(context) ?? '',
         ),
         // Allows the entire view to be scrollable.
         body: SingleChildScrollView(
@@ -286,11 +286,11 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
               // Breadcrumb navigation.
               Breadcrumb(items: [
                 BreadcrumbItem(
-                    label: AppString.landAcquisition.localize(context) ?? ''),
-                BreadcrumbItem(label: AppString.masterFile.localize(context)!),
+                    label: AppString.landAcquisition.l10n(context) ?? ''),
+                BreadcrumbItem(label: AppString.masterFile.l10n(context)!),
                 BreadcrumbItem(
                     label:
-                        AppString.rentalEvidenceForm.localize(context) ?? ''),
+                        AppString.rentalEvidenceForm.l10n(context) ?? ''),
               ]),
               // LayoutBuilder used to determine the width constraints for form fields.
               LayoutBuilder(
@@ -314,9 +314,9 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                               // Each LabeledTextField represents a form field with a label and placeholder.
                               LabeledTextField(
                                 placeholder: AppString.assesmentNoPlaceholder
-                                    .localize(context)!,
+                                    .l10n(context)!,
                                 label:
-                                    AppString.assesmentNo.localize(context) ??
+                                    AppString.assesmentNo.l10n(context) ??
                                         '',
                                 width: fieldWidth,
                                 controller: _assessmentNoController,
@@ -325,15 +325,15 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         value,
                                         50,
                                         AppString.assesmentNo
-                                                .localize(context) ??
+                                                .l10n(context) ??
                                             'Assessment No'),
                               ),
                               LabeledTextField(
                                 placeholder: AppString
                                     .masterFileRefNoPlaceholder
-                                    .localize(context)!,
+                                    .l10n(context)!,
                                 label: AppString.masterFileRefNo
-                                        .localize(context) ??
+                                        .l10n(context) ??
                                     '',
                                 width: fieldWidth,
                                 controller: _masterFileRefNoController,
@@ -342,41 +342,41 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         value,
                                         50,
                                         AppString.masterFileRefNo
-                                                .localize(context) ??
+                                                .l10n(context) ??
                                             'Master File Ref No'),
                               ),
                               LabeledTextField(
                                 placeholder:
-                                    AppString.owner.localize(context) ?? '',
-                                label: AppString.owner.localize(context)!,
+                                    AppString.owner.l10n(context) ?? '',
+                                label: AppString.owner.l10n(context)!,
                                 width: fieldWidth,
                                 controller: _ownerController,
                                 validator: (value) =>
                                     RentalEvidenceValidator.requiredAlphaNum(
                                         value,
                                         100,
-                                        AppString.owner.localize(context) ??
+                                        AppString.owner.l10n(context) ??
                                             'Owner'),
                               ),
                               LabeledTextField(
                                 placeholder:
-                                    AppString.occupier.localize(context) ?? '',
-                                label: AppString.occupier.localize(context)!,
+                                    AppString.occupier.l10n(context) ?? '',
+                                label: AppString.occupier.l10n(context)!,
                                 width: fieldWidth,
                                 controller: _occupierController,
                                 validator: (value) =>
                                     RentalEvidenceValidator.requiredAlphaNum(
                                         value,
                                         100,
-                                        AppString.occupier.localize(context) ??
+                                        AppString.occupier.l10n(context) ??
                                             'Occupier'),
                               ),
                               LabeledTextField(
                                 placeholder:
-                                    AppString.description.localize(context) ??
+                                    AppString.description.l10n(context) ??
                                         '',
                                 label:
-                                    AppString.description.localize(context) ??
+                                    AppString.description.l10n(context) ??
                                         '',
                                 width: fieldWidth,
                                 controller: _descriptionController,
@@ -385,29 +385,29 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         value,
                                         255,
                                         AppString.description
-                                                .localize(context) ??
+                                                .l10n(context) ??
                                             'Description'),
                               ),
                               LabeledTextField(
                                 placeholder: AppString.floorRatePlaceholder
-                                    .localize(context)!,
+                                    .l10n(context)!,
                                 label:
-                                    AppString.floorRate.localize(context) ?? '',
+                                    AppString.floorRate.l10n(context) ?? '',
                                 width: fieldWidth,
                                 controller: _floorRateController,
                                 validator: (value) =>
                                     RentalEvidenceValidator.requiredInteger(
                                         value,
                                         20,
-                                        AppString.floorRate.localize(context) ??
+                                        AppString.floorRate.l10n(context) ??
                                             'Floor Rate'),
                               ),
                               LabeledTextField(
                                 placeholder:
-                                    AppString.ratePerSqft.localize(context) ??
+                                    AppString.ratePerSqft.l10n(context) ??
                                         '',
                                 label:
-                                    AppString.ratePerSqft.localize(context) ??
+                                    AppString.ratePerSqft.l10n(context) ??
                                         '',
                                 width: fieldWidth,
                                 controller: _ratePerSqftController,
@@ -416,15 +416,15 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         value,
                                         20,
                                         AppString.ratePerSqft
-                                                .localize(context) ??
+                                                .l10n(context) ??
                                             'Rate Per Sqft'),
                               ),
                               LabeledTextField(
                                 placeholder:
-                                    AppString.ratePerMonth.localize(context) ??
+                                    AppString.ratePerMonth.l10n(context) ??
                                         '',
                                 label:
-                                    AppString.ratePerMonth.localize(context) ??
+                                    AppString.ratePerMonth.l10n(context) ??
                                         '',
                                 width: fieldWidth,
                                 controller: _ratePerMonthController,
@@ -433,15 +433,15 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         value,
                                         20,
                                         AppString.ratePerMonth
-                                                .localize(context) ??
+                                                .l10n(context) ??
                                             'Rate Per Month'),
                               ),
                               LabeledTextField(
                                 placeholder: AppString
                                     .locationLongitudePlaceholder
-                                    .localize(context)!,
+                                    .l10n(context)!,
                                 label: AppString.locationLongitude
-                                        .localize(context) ??
+                                        .l10n(context) ??
                                     '',
                                 width: fieldWidth,
                                 controller: _longitudeController,
@@ -449,15 +449,15 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                     RentalEvidenceValidator.requiredCoordinate(
                                         value,
                                         AppString.locationLongitude
-                                                .localize(context) ??
+                                                .l10n(context) ??
                                             'Longitude'),
                               ),
                               LabeledTextField(
                                 placeholder: AppString
                                     .locationLatitudePlaceholder
-                                    .localize(context)!,
+                                    .l10n(context)!,
                                 label: AppString.locationLatitude
-                                        .localize(context) ??
+                                        .l10n(context) ??
                                     '',
                                 width: fieldWidth,
                                 controller: _latitudeController,
@@ -465,15 +465,15 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                     RentalEvidenceValidator.requiredCoordinate(
                                         value,
                                         AppString.locationLatitude
-                                                .localize(context) ??
+                                                .l10n(context) ??
                                             'Latitude'),
                               ),
                               LabeledTextField(
                                 placeholder:
-                                    AppString.headOfTerms.localize(context) ??
+                                    AppString.headOfTerms.l10n(context) ??
                                         '',
                                 label:
-                                    AppString.headOfTerms.localize(context) ??
+                                    AppString.headOfTerms.l10n(context) ??
                                         '',
                                 width: fieldWidth,
                                 controller: _headOfTermsController,
@@ -482,36 +482,36 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         value,
                                         255,
                                         AppString.headOfTerms
-                                                .localize(context) ??
+                                                .l10n(context) ??
                                             'Head of Terms'),
                               ),
                               LabeledTextField(
                                 placeholder:
-                                    AppString.situation.localize(context) ?? '',
+                                    AppString.situation.l10n(context) ?? '',
                                 label:
-                                    AppString.situation.localize(context) ?? '',
+                                    AppString.situation.l10n(context) ?? '',
                                 width: fieldWidth,
                                 controller: _situationController,
                                 validator: (value) =>
                                     RentalEvidenceValidator.requiredAlphaNum(
                                         value,
                                         255,
-                                        AppString.situation.localize(context) ??
+                                        AppString.situation.l10n(context) ??
                                             'Situation'),
                               ),
                               // Full width text field for remarks.
                               LabeledTextField(
                                 placeholder:
-                                    AppString.remarks.localize(context) ?? '',
+                                    AppString.remarks.l10n(context) ?? '',
                                 label:
-                                    AppString.remarks.localize(context) ?? '',
+                                    AppString.remarks.l10n(context) ?? '',
                                 width: fullWidth,
                                 controller: _remarksController,
                                 validator: (value) =>
                                     RentalEvidenceValidator.requiredAlphaNum(
                                         value,
                                         500,
-                                        AppString.remarks.localize(context) ??
+                                        AppString.remarks.l10n(context) ??
                                             'Remarks'),
                               ),
                             ],
@@ -521,7 +521,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                           Row(
                             children: [
                               Text(
-                                AppString.uploadImgs.localize(context) ?? '',
+                                AppString.uploadImgs.l10n(context) ?? '',
                                 style: AppStyling.mediumTextSize14,
                               ),
                               const SizedBox(width: 8),
@@ -570,7 +570,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                             children: [
                               // Cancel button.
                               CustomButton(
-                                text: AppString.cancel.localize(context) ?? '',
+                                text: AppString.cancel.l10n(context) ?? '',
                                 onPressed: _isSubmitting ? null : () {},
                                 backgroundColor: colors(context).colorGrey1 ??
                                     LightColorList.lightGrey50,
@@ -582,7 +582,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         // Save button.
                                         CustomButton(
                                           text: AppString.save
-                                                  .localize(context) ??
+                                                  .l10n(context) ??
                                               '',
                                           onPressed: _validateAndSubmit,
                                           backgroundColor: colors(context)
@@ -593,7 +593,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                         // Send data button.
                                         CustomButton(
                                           text: AppString.sendData
-                                                  .localize(context) ??
+                                                  .l10n(context) ??
                                               '',
                                           onPressed: _validateAndSubmit,
                                           backgroundColor: colors(context)

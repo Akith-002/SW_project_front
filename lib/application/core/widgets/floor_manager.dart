@@ -107,7 +107,7 @@ class _FloorManagerState extends State<FloorManager> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  AppString.floor.localize(context)!,
+                  AppString.floor.l10n(context)!,
                   style: AppStyling.semiBoldTextSize18,
                 ),
                 IconButton(
@@ -227,7 +227,7 @@ class _AddFloorDialogState extends State<AddFloorDialog> {
     return AlertDialog(
       backgroundColor: colors(context).colorWhite,
       title: Text(
-        AppString.addFloor.localize(context)!,
+        AppString.addFloor.l10n(context)!,
         style: AppStyling.regularTextSize16,
       ),
       content: Column(
@@ -236,12 +236,12 @@ class _AddFloorDialogState extends State<AddFloorDialog> {
           TextField(
             controller: _nameController,
             decoration: InputDecoration(
-                labelText: AppString.floorName.localize(context)!),
+                labelText: AppString.floorName.l10n(context)!),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Text(AppString.position.localize(context)!),
+              Text(AppString.position.l10n(context)!),
               const SizedBox(width: 10),
               DropdownButton<String>(
                 value: _selectedPosition,
@@ -249,10 +249,10 @@ class _AddFloorDialogState extends State<AddFloorDialog> {
                 items: [
                   DropdownMenuItem(
                       value: 'above',
-                      child: Text(AppString.above.localize(context)!)),
+                      child: Text(AppString.above.l10n(context)!)),
                   DropdownMenuItem(
                       value: 'below',
-                      child: Text(AppString.below.localize(context)!)),
+                      child: Text(AppString.below.l10n(context)!)),
                 ],
                 onChanged: (val) {
                   if (val != null) {
@@ -274,7 +274,7 @@ class _AddFloorDialogState extends State<AddFloorDialog> {
             ),
             onPressed: () => Navigator.pop(context),
             child: Text(
-              AppString.cancel.localize(context)!,
+              AppString.cancel.l10n(context)!,
               style: AppStyling.semiBoldTextSize14
                   .copyWith(color: colors(context).colorBlack),
             )),
@@ -294,7 +294,7 @@ class _AddFloorDialogState extends State<AddFloorDialog> {
             }
           },
           child: Text(
-            AppString.add.localize(context)!,
+            AppString.add.l10n(context)!,
             style: AppStyling.semiBoldTextSize14
                 .copyWith(color: colors(context).colorWhite),
           ),

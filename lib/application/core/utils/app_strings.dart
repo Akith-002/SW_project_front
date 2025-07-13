@@ -1,11 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:land_asset_valuation/application/core/utils/app_localizations.dart';
 
-extension LocalizeString on String? {
-  String? localize(BuildContext context) {
-    return AppLocalizations.of(context)!.translate(this);
-  }
-}
+// Export the localization extension so it's available wherever AppString is imported
+export 'package:land_asset_valuation/application/core/utils/app_localizations.dart' show LocalizeString;
 
 class AppString {
   /// **General**
@@ -70,6 +67,7 @@ class AppString {
   static const String ratingBuilding = "ratingBuilding";
   static const String ratingObjectRO = "ratingObjectRO";
   static const String ratingObject = "ratingObject";
+  static const String mrRentalEvidence = "mrRentalEvidence";
 
   /// **Land Info Form**
   static const String landInfo = "land_info";

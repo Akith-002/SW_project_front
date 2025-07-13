@@ -48,7 +48,7 @@ class _SplashViewState extends BasePageState<SplashView> {
             ),
             // Department name
             Text(
-              AppString.valuationDepartment.localize(context)!,
+              AppString.valuationDepartment.l10n(context)!,
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,

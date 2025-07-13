@@ -82,38 +82,38 @@ class _SketchToolsMenuState extends State<SketchToolsMenu> {
       return [
         {
           'id': 'line',
-          'label': AppString.line.localize(context)!,
+          'label': AppString.line.l10n(context)!,
           'icon': PhosphorIcons.lineSegment(
               PhosphorIconsStyle.regular), // Use lineSegment for clarity
         },
         {
           'id': 'circle',
-          'label': AppString.circle.localize(context)!,
+          'label': AppString.circle.l10n(context)!,
           'icon': PhosphorIcons.circle(PhosphorIconsStyle.regular),
         },
         {
           'id': 'text',
-          'label': AppString.text.localize(context)!,
+          'label': AppString.text.l10n(context)!,
           'icon': PhosphorIcons.textT(PhosphorIconsStyle.regular),
         },
         {
           'id': 'partition',
-          'label': AppString.partition.localize(context)!,
+          'label': AppString.partition.l10n(context)!,
           'icon': PhosphorIcons.house(PhosphorIconsStyle.regular),
         },
         {
           'id': 'graph',
-          'label': AppString.graph.localize(context)!,
+          'label': AppString.graph.l10n(context)!,
           'icon': PhosphorIcons.chartLine(PhosphorIconsStyle.regular),
         },
         {
           'id': 'report',
-          'label': AppString.report.localize(context)!,
+          'label': AppString.report.l10n(context)!,
           'icon': PhosphorIcons.notebook(PhosphorIconsStyle.regular),
         },
         {
           'id': 'image',
-          'label': AppString.image.localize(context)!,
+          'label': AppString.image.l10n(context)!,
           'icon': PhosphorIconsRegular.imageSquare, // Correct icon name
         },
       ];
@@ -122,29 +122,29 @@ class _SketchToolsMenuState extends State<SketchToolsMenu> {
       return [
         {
           'id': 'polygon',
-          'label': AppString.polygon.localize(context)!,
+          'label': AppString.polygon.l10n(context)!,
           'icon': PhosphorIcons.pentagon(PhosphorIconsStyle.regular),
         },
         {
           'id': 'line',
-          'label': AppString.line.localize(context)!,
+          'label': AppString.line.l10n(context)!,
           'icon': PhosphorIcons.lineSegment(
               PhosphorIconsStyle.regular), // Use lineSegment for clarity
         },
         {
           'id': 'circle',
-          'label': AppString.circle.localize(context)!,
+          'label': AppString.circle.l10n(context)!,
           'icon': PhosphorIcons.circle(PhosphorIconsStyle.regular),
         },
         {
           'id': 'text',
-          'label': AppString.text.localize(context)!,
+          'label': AppString.text.l10n(context)!,
           'icon': PhosphorIcons.textT(PhosphorIconsStyle.regular),
         },
         // Keep 'image' if it's implemented, otherwise remove
         {
           'id': 'image',
-          'label': AppString.image.localize(context)!,
+          'label': AppString.image.l10n(context)!,
           'icon': PhosphorIconsRegular.imageSquare, // Correct icon name
         },
       ];
@@ -226,7 +226,7 @@ class _SketchToolsMenuState extends State<SketchToolsMenu> {
                     child: _isExpanded
                         ? Text(
                             // Show title when expanded
-                            AppString.sketchTool.localize(context)!,
+                            AppString.sketchTool.l10n(context)!,
                             style: AppStyling.normalTextSize15.copyWith(
                                 fontWeight:
                                     FontWeight.w600 // Slightly bolder title
@@ -261,7 +261,7 @@ class _SketchToolsMenuState extends State<SketchToolsMenu> {
                               )
                             : Text(
                                 // Fallback when collapsed and no tool selected
-                                AppString.selectTool.localize(context)!,
+                                AppString.selectTool.l10n(context)!,
                                 style: AppStyling.normalTextSize15.copyWith(
                                   color: colors(context).colorGrey7 ??
                                       Colors.grey[700],

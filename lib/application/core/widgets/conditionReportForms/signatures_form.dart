@@ -106,7 +106,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
               children: [
                 const SizedBox(height: 24),
                 SignatureBox(
-                  title: AppString.acquiringOfficer.localize(context)!,
+                  title: AppString.acquiringOfficer.l10n(context)!,
                   onSignatureChanged: (Uint8List? signature) {
                     setState(() {
                       acquiringOfficerSignature = signature;
@@ -117,7 +117,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
                 ),
                 const SizedBox(height: 16),
                 SignatureBox(
-                  title: AppString.gramaSeveka.localize(context)!,
+                  title: AppString.gramaSeveka.l10n(context)!,
                   onSignatureChanged: (Uint8List? signature) {
                     setState(() {
                       gramaSevekaSignature = signature;
@@ -129,7 +129,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
                 const SizedBox(height: 16),
                 SignatureBox(
                   title:
-                      AppString.chiefValuersRepresentative.localize(context)!,
+                      AppString.chiefValuersRepresentative.l10n(context)!,
                   onSignatureChanged: (Uint8List? signature) {
                     setState(() {
                       chiefValuersRepSignature = signature;
@@ -151,7 +151,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomButton(
-                        text: AppString.cancel.localize(context)!,
+                        text: AppString.cancel.l10n(context)!,
                         backgroundColor: colors(context).colorGrey1!,
                         onPressed:
                             _isSubmitting ? null : () => Navigator.pop(context),
@@ -161,7 +161,7 @@ class _SignaturesFormState extends State<SignaturesForm> {
                       _isSubmitting
                           ? const CircularProgressIndicator()
                           : CustomButton(
-                              text: AppString.save.localize(context)!,
+                              text: AppString.save.l10n(context)!,
                               backgroundColor: colors(context).colorPrimary5!,
                               onPressed: _validateAndSubmitForm,
                               width: 120,

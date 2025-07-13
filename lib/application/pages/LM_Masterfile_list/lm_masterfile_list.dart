@@ -78,7 +78,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
       },
       child: Scaffold(
         appBar: CustomAppBar(
-          title: AppString.landMiscellaneous.localize(context)!,
+          title: AppString.landMiscellaneous.l10n(context)!,
           leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
         ),
         body: Stack(
@@ -88,7 +88,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
               children: [
                 Breadcrumb(items: [
                   BreadcrumbItem(
-                      label: AppString.landMiscellaneous.localize(context)!)
+                      label: AppString.landMiscellaneous.l10n(context)!)
                 ]),
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -96,7 +96,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "${AppString.all_files.localize(context)!}$_totalFiles",
+                        "${AppString.all_files.l10n(context)!}$_totalFiles",
                         style: AppStyling.semiBoldTextSize16
                             .copyWith(color: colors(context).colorBlack),
                       ),
@@ -107,7 +107,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
                         child: TextField(
                           controller: searchController,
                           decoration: InputDecoration(
-                            hintText: AppString.search.localize(context),
+                            hintText: AppString.search.l10n(context),
                             hintStyle: AppStyling.regularTextSize14,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),

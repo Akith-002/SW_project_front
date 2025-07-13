@@ -55,9 +55,9 @@ class Dialogbox extends StatelessWidget {
 
     // Set default values or use provided ones
     final secondaryText =
-        secondaryButtonText ?? AppString.cancel.localize(context)!;
+        secondaryButtonText ?? AppString.cancel.l10n(context)!;
     final primaryText =
-        primaryButtonText ?? AppString.approved.localize(context)!;
+        primaryButtonText ?? AppString.approved.l10n(context)!;
     final buttonColor = color ?? colors(context).colorPrimary5;
     final mainTextColor =
         mainTextColors[dialogType] ?? colors(context).colorBlack;

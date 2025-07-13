@@ -80,7 +80,7 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
   Widget buildView(BuildContext context) {
     return Scaffold(
       appBar:
-          CustomAppBar(title: AppString.buildingRatesForm.localize(context)!),
+          CustomAppBar(title: AppString.buildingRatesForm.l10n(context)!),
       body: LayoutBuilder(
         builder: (context, constraints) {
           // Calculate responsive field width (47% of screen width)
@@ -95,11 +95,11 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                   Breadcrumb(
                     items: [
                       BreadcrumbItem(
-                          label: AppString.landAcquisition.localize(context)!),
+                          label: AppString.landAcquisition.l10n(context)!),
                       BreadcrumbItem(
-                          label: AppString.masterFile.localize(context)!),
+                          label: AppString.masterFile.l10n(context)!),
                       BreadcrumbItem(
-                          label: AppString.buildingRates.localize(context)!),
+                          label: AppString.buildingRates.l10n(context)!),
                     ],
                   ),
                   Padding(
@@ -115,9 +115,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                           children: [
                             LabeledTextField(
                               label:
-                                  AppString.assessmentNumber.localize(context)!,
+                                  AppString.assessmentNumber.l10n(context)!,
                               placeholder:
-                                  AppString.assessmentNumber.localize(context)!,
+                                  AppString.assessmentNumber.l10n(context)!,
                               width: fieldWidth,
                               controller: _assessmentNumberController,
                               validator: (value) => LaBuildingRatesValidator
@@ -125,9 +125,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                                       value, 50, "Assessment Number"),
                             ),
                             LabeledTextField(
-                              label: AppString.owner.localize(context)!,
+                              label: AppString.owner.l10n(context)!,
                               placeholder:
-                                  AppString.nameOfTheOwner.localize(context)!,
+                                  AppString.nameOfTheOwner.l10n(context)!,
                               width: fieldWidth,
                               controller: _ownerController,
                               validator: (value) =>
@@ -135,9 +135,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                                       value, 100, "Owner"),
                             ),
                             LabeledTextField(
-                              label: AppString.constructedBy.localize(context)!,
+                              label: AppString.constructedBy.l10n(context)!,
                               placeholder:
-                                  AppString.constructedBy.localize(context)!,
+                                  AppString.constructedBy.l10n(context)!,
                               width: fieldWidth,
                               controller: _constructedByController,
                               validator: (value) =>
@@ -146,9 +146,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                             ),
                             LabeledTextField(
                               label: AppString.yearofConstruction
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               placeholder: AppString.yearofConstruction
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               width: fieldWidth,
                               controller: _yearOfConstructionController,
                               validator: (value) =>
@@ -157,9 +157,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                             ),
                             LabeledTextField(
                               label: AppString.descriptionofProperty
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               placeholder: AppString.propertyDescription
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               width: fieldWidth,
                               controller: _descriptionOfPropertyController,
                               validator: (value) =>
@@ -167,9 +167,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                                       value, 500, "Property Description"),
                             ),
                             LabeledTextField(
-                              label: AppString.floorAreaSQFT.localize(context)!,
+                              label: AppString.floorAreaSQFT.l10n(context)!,
                               placeholder:
-                                  AppString.floorAreaSQFT.localize(context)!,
+                                  AppString.floorAreaSQFT.l10n(context)!,
                               width: fieldWidth,
                               controller: _floorAreaSQFTController,
                               validator: (value) =>
@@ -177,9 +177,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                                       value, "Floor Area (SQFT)"),
                             ),
                             LabeledTextField(
-                              label: AppString.ratePerSQFT.localize(context)!,
+                              label: AppString.ratePerSQFT.l10n(context)!,
                               placeholder:
-                                  AppString.ratePerSQFT.localize(context)!,
+                                  AppString.ratePerSQFT.l10n(context)!,
                               width: fieldWidth,
                               controller: _ratePerSQFTController,
                               validator: (value) =>
@@ -187,8 +187,8 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                                       value, "Rate Per SQFT"),
                             ),
                             LabeledTextField(
-                              label: AppString.cost.localize(context)!,
-                              placeholder: AppString.cost.localize(context)!,
+                              label: AppString.cost.l10n(context)!,
+                              placeholder: AppString.cost.l10n(context)!,
                               width: fieldWidth,
                               controller: _costController,
                               validator: (value) =>
@@ -196,8 +196,8 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                                       value, "Cost"),
                             ),
                             LabeledTextField(
-                              label: AppString.remarks.localize(context)!,
-                              placeholder: AppString.remarks.localize(context)!,
+                              label: AppString.remarks.l10n(context)!,
+                              placeholder: AppString.remarks.l10n(context)!,
                               width: fieldWidth,
                               controller: _remarksController,
                               validator: (value) =>
@@ -206,9 +206,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                             ),
                             LabeledTextField(
                               label:
-                                  AppString.locationLatitude.localize(context)!,
+                                  AppString.locationLatitude.l10n(context)!,
                               placeholder:
-                                  AppString.locationLatitude.localize(context)!,
+                                  AppString.locationLatitude.l10n(context)!,
                               width: fieldWidth,
                               controller: _locationLatitudeController,
                               validator: (value) =>
@@ -217,9 +217,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                             ),
                             LabeledTextField(
                               label: AppString.locationLongitude
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               placeholder: AppString.locationLongitude
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               width: fieldWidth,
                               controller: _locationLongitudeController,
                               validator: (value) =>
@@ -231,7 +231,7 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                         const SizedBox(height: 24),
                         // Image upload section
                         Text(
-                          AppString.imageCapturing.localize(context)!,
+                          AppString.imageCapturing.l10n(context)!,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 16),
@@ -273,19 +273,19 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
                         Row(
                           children: [
                             CustomButton(
-                              text: AppString.cancel.localize(context)!,
+                              text: AppString.cancel.l10n(context)!,
                               onPressed: () {},
                               backgroundColor: colors(context).colorGrey1!,
                             ),
                             Spacer(),
                             CustomButton(
-                              text: AppString.save.localize(context)!,
+                              text: AppString.save.l10n(context)!,
                               onPressed: _validateAndSave,
                               backgroundColor: colors(context).colorPrimary1!,
                             ),
                             SizedBox(width: 40),
                             CustomButton(
-                              text: AppString.sendData.localize(context)!,
+                              text: AppString.sendData.l10n(context)!,
                               onPressed: _validateAndSubmit,
                               backgroundColor: colors(context).colorPrimary5!,
                             ),

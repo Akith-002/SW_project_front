@@ -24,13 +24,25 @@ class LanguageNotifier extends StateNotifier<Locale> {
       final languageCode = prefs.getString(_languageKey) ?? _defaultLanguage;
 
       if (_AppLocalizationsDelegate.supportedLanguages.contains(languageCode)) {
-        state = Locale(languageCode);
+        // Set locale with appropriate country code
+        switch (languageCode) {
+          case 'si':
+            state = const Locale('si', 'LK');
+            break;
+          case 'ta':
+            state = const Locale('ta', 'LK');
+            break;
+          case 'en':
+          default:
+            state = const Locale('en', 'US');
+            break;
+        }
       } else {
-        state = const Locale(_defaultLanguage);
+        state = const Locale(_defaultLanguage, 'US');
       }
     } catch (e) {
       // Fallback to default language if loading fails
-      state = const Locale(_defaultLanguage);
+      state = const Locale(_defaultLanguage, 'US');
     }
   }
 
@@ -38,7 +50,20 @@ class LanguageNotifier extends StateNotifier<Locale> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_languageKey, languageCode);
-      state = Locale(languageCode);
+      
+      // Set locale with appropriate country code
+      switch (languageCode) {
+        case 'si':
+          state = const Locale('si', 'LK');
+          break;
+        case 'ta':
+          state = const Locale('ta', 'LK');
+          break;
+        case 'en':
+        default:
+          state = const Locale('en', 'US');
+          break;
+      }
     } catch (e) {
       // Optional: Add logging or error handling
       debugPrint('Failed to change language: $e');
@@ -68,6 +93,7 @@ class AppLocalizations {
     // Check if localization is already cached
     if (_cachedLocalizations.containsKey(locale.languageCode)) {
       _localizedStrings = _cachedLocalizations[locale.languageCode]!;
+      debugPrint("Loaded ${_localizedStrings.length} translations from cache for ${locale.languageCode}");
       return true;
     }
 
@@ -82,9 +108,17 @@ class AppLocalizations {
       _localizedStrings =
           jsonMap.map((key, value) => MapEntry(key, value.toString()));
       _cachedLocalizations[locale.languageCode] = _localizedStrings;
+      
+      debugPrint("Successfully loaded ${_localizedStrings.length} translations for ${locale.languageCode}");
 
       return true;
     } catch (e) {
+      // Log the error for debugging
+      debugPrint("Failed to load localization for ${locale.languageCode}: $e");
+      
+      // Initialize with empty map to prevent null errors
+      _localizedStrings = {};
+      
       // Fallback to default language if loading fails
       return false;
     }
@@ -127,6 +161,10 @@ class _AppLocalizationsDelegate
 
 extension LocalizeString on String {
   String? localize(BuildContext context) {
+    return AppLocalizations.of(context)?.translate(this);
+  }
+
+  String? l10n(BuildContext context) {
     return AppLocalizations.of(context)?.translate(this);
   }
 }

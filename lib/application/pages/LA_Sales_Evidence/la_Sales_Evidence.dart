@@ -101,7 +101,7 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
   Widget buildView(BuildContext context) {
     return Scaffold(
       appBar:
-          CustomAppBar(title: AppString.salesEvidencesForm.localize(context)!),
+          CustomAppBar(title: AppString.salesEvidencesForm.l10n(context)!),
       body: LayoutBuilder(
         builder: (context, constraints) {
           // Calculate the width for form fields based on available screen width
@@ -117,11 +117,11 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                   Breadcrumb(
                     items: [
                       BreadcrumbItem(
-                          label: AppString.landAcquisition.localize(context)!),
+                          label: AppString.landAcquisition.l10n(context)!),
                       BreadcrumbItem(
-                          label: AppString.masterFile.localize(context)!),
+                          label: AppString.masterFile.l10n(context)!),
                       BreadcrumbItem(
-                          label: AppString.salesEvidences.localize(context)!),
+                          label: AppString.salesEvidences.l10n(context)!),
                     ],
                   ),
                   Padding(
@@ -137,9 +137,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                           children: [
                             // Property identification fields
                             LabeledTextField(
-                              label: AppString.assetNumber.localize(context)!,
+                              label: AppString.assetNumber.l10n(context)!,
                               placeholder:
-                                  AppString.assetNumber.localize(context)!,
+                                  AppString.assetNumber.l10n(context)!,
                               width: fieldWidth,
                               controller: _assetNumberController,
                               validator: (value) =>
@@ -148,9 +148,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                             ),
                             LabeledTextField(
                               label:
-                                  AppString.masterFilerefno.localize(context)!,
+                                  AppString.masterFilerefno.l10n(context)!,
                               placeholder:
-                                  AppString.masterFilerefno.localize(context)!,
+                                  AppString.masterFilerefno.l10n(context)!,
                               width: fieldWidth,
                               controller: _masterFileRefController,
                               validator: (value) =>
@@ -160,8 +160,8 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
                             // Location information fields
                             LabeledTextField(
-                              label: AppString.roadName.localize(context)!,
-                              placeholder: AppString.owner.localize(context)!,
+                              label: AppString.roadName.l10n(context)!,
+                              placeholder: AppString.owner.l10n(context)!,
                               width: fieldWidth,
                               controller: _roadNameController,
                               validator: (value) =>
@@ -169,9 +169,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 100, "Road Name"),
                             ),
                             LabeledTextField(
-                              label: AppString.village.localize(context)!,
+                              label: AppString.village.l10n(context)!,
                               placeholder:
-                                  AppString.occupier.localize(context)!,
+                                  AppString.occupier.l10n(context)!,
                               width: fieldWidth,
                               controller: _villageController,
                               validator: (value) =>
@@ -181,9 +181,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
                             // Transaction information fields
                             LabeledTextField(
-                              label: AppString.vendor.localize(context)!,
+                              label: AppString.vendor.l10n(context)!,
                               placeholder:
-                                  AppString.situation.localize(context)!,
+                                  AppString.situation.l10n(context)!,
                               width: fieldWidth,
                               controller: _vendorController,
                               validator: (value) =>
@@ -191,9 +191,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 100, "Vendor"),
                             ),
                             LabeledTextField(
-                              label: AppString.deedNumber.localize(context)!,
+                              label: AppString.deedNumber.l10n(context)!,
                               placeholder:
-                                  AppString.floorRate.localize(context)!,
+                                  AppString.floorRate.l10n(context)!,
                               width: fieldWidth,
                               controller: _deedNumberController,
                               validator: (value) =>
@@ -202,9 +202,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                             ),
                             LabeledTextField(
                               label: AppString.deedAttestedNumber
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               placeholder: AppString.deedAttestedNumber
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               width: fieldWidth,
                               controller: _deedAttestedNumberController,
                               validator: (value) =>
@@ -212,9 +212,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 50, "Deed Attested Number"),
                             ),
                             LabeledTextField(
-                              label: AppString.notaryName.localize(context)!,
+                              label: AppString.notaryName.l10n(context)!,
                               placeholder:
-                                  AppString.notaryName.localize(context)!,
+                                  AppString.notaryName.l10n(context)!,
                               width: fieldWidth,
                               controller: _notaryNameController,
                               validator: (value) =>
@@ -224,9 +224,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
                             // Land specification fields
                             LabeledTextField(
-                              label: AppString.lotNumber.localize(context)!,
+                              label: AppString.lotNumber.l10n(context)!,
                               placeholder: AppString.noofLotNumbergiven
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               width: fieldWidth,
                               controller: _lotNumberController,
                               validator: (value) =>
@@ -234,9 +234,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 50, "Lot Number"),
                             ),
                             LabeledTextField(
-                              label: AppString.planNumber.localize(context)!,
+                              label: AppString.planNumber.l10n(context)!,
                               placeholder:
-                                  AppString.planNumber.localize(context)!,
+                                  AppString.planNumber.l10n(context)!,
                               width: fieldWidth,
                               controller: _planNumberController,
                               validator: (value) =>
@@ -244,9 +244,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 50, "Plan Number"),
                             ),
                             LabeledTextField(
-                              label: AppString.planDate.localize(context)!,
+                              label: AppString.planDate.l10n(context)!,
                               placeholder:
-                                  AppString.planDate.localize(context)!,
+                                  AppString.planDate.l10n(context)!,
                               width: fieldWidth,
                               controller: _planDateController,
                               validator: (value) =>
@@ -254,8 +254,8 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, "Plan Date"),
                             ),
                             LabeledTextField(
-                              label: AppString.extent.localize(context)!,
-                              placeholder: AppString.extent.localize(context)!,
+                              label: AppString.extent.l10n(context)!,
+                              placeholder: AppString.extent.l10n(context)!,
                               width: fieldWidth,
                               controller: _extentController,
                               validator: (value) =>
@@ -265,9 +265,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
                             // Financial and valuation fields
                             LabeledTextField(
-                              label: AppString.consideration.localize(context)!,
+                              label: AppString.consideration.l10n(context)!,
                               placeholder:
-                                  AppString.consideration.localize(context)!,
+                                  AppString.consideration.l10n(context)!,
                               width: fieldWidth,
                               controller: _considerationController,
                               validator: (value) =>
@@ -275,8 +275,8 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 20, "Consideration"),
                             ),
                             LabeledTextField(
-                              label: AppString.remarks.localize(context)!,
-                              placeholder: AppString.remarks.localize(context)!,
+                              label: AppString.remarks.l10n(context)!,
+                              placeholder: AppString.remarks.l10n(context)!,
                               width: fieldWidth,
                               controller: _remarksController,
                               validator: (value) =>
@@ -284,8 +284,8 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 500, "Remarks"),
                             ),
                             LabeledTextField(
-                              label: AppString.rate.localize(context)!,
-                              placeholder: AppString.rate.localize(context)!,
+                              label: AppString.rate.l10n(context)!,
+                              placeholder: AppString.rate.l10n(context)!,
                               width: fieldWidth,
                               controller: _rateController,
                               validator: (value) =>
@@ -293,9 +293,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 20, "Rate"),
                             ),
                             LabeledTextField(
-                              label: AppString.rateType.localize(context)!,
+                              label: AppString.rateType.l10n(context)!,
                               placeholder:
-                                  AppString.rateType.localize(context)!,
+                                  AppString.rateType.l10n(context)!,
                               width: fieldWidth,
                               controller: _rateTypeController,
                               validator: (value) =>
@@ -306,9 +306,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                             // Geolocation fields
                             LabeledTextField(
                               label: AppString.locationLongitude
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               placeholder: AppString.locationLongitude
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               width: fieldWidth,
                               controller: _locationLongitudeController,
                               validator: (value) =>
@@ -317,9 +317,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                             ),
                             LabeledTextField(
                               label:
-                                  AppString.locationLatitude.localize(context)!,
+                                  AppString.locationLatitude.l10n(context)!,
                               placeholder:
-                                  AppString.locationLatitude.localize(context)!,
+                                  AppString.locationLatitude.l10n(context)!,
                               width: fieldWidth,
                               controller: _locationLatitudeController,
                               validator: (value) =>
@@ -330,9 +330,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                             // Additional reference and description fields
                             LabeledTextField(
                               label: AppString.landRegistryReferences
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               placeholder: AppString.landRegistryReferences
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               width: fieldWidth,
                               controller: _landRegistryReferencesController,
                               validator: (value) =>
@@ -340,9 +340,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                       value, 200, "Land Registry References"),
                             ),
                             LabeledTextField(
-                              label: AppString.situation.localize(context)!,
+                              label: AppString.situation.l10n(context)!,
                               placeholder:
-                                  AppString.situation.localize(context)!,
+                                  AppString.situation.l10n(context)!,
                               width: fieldWidth,
                               controller: _situationController,
                               validator: (value) =>
@@ -351,9 +351,9 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                             ),
                             LabeledTextField(
                               label: AppString.descriptionOfLand
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               placeholder: AppString.descriptionOfLand
-                                  .localize(context)!,
+                                  .l10n(context)!,
                               width: fieldWidth,
                               controller: _descriptionOfLandController,
                               validator: (value) =>
@@ -366,7 +366,7 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                         // Image upload section
                         const SizedBox(height: 24),
                         Text(
-                          AppString.imageCapturing.localize(context)!,
+                          AppString.imageCapturing.l10n(context)!,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 16),
@@ -409,19 +409,19 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                         Row(
                           children: [
                             CustomButton(
-                              text: AppString.cancel.localize(context)!,
+                              text: AppString.cancel.l10n(context)!,
                               onPressed: () {},
                               backgroundColor: colors(context).colorGrey1!,
                             ),
                             const Spacer(),
                             CustomButton(
-                              text: AppString.save.localize(context)!,
+                              text: AppString.save.l10n(context)!,
                               onPressed: _validateAndSave,
                               backgroundColor: colors(context).colorPrimary1!,
                             ),
                             const SizedBox(width: 40),
                             CustomButton(
-                              text: AppString.sendData.localize(context)!,
+                              text: AppString.sendData.l10n(context)!,
                               onPressed: _validateAndSubmit,
                               backgroundColor: colors(context).colorPrimary5!,
                             ),

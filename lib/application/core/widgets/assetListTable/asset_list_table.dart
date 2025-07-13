@@ -97,7 +97,7 @@ class _AssetListTableState extends State<AssetListTable> {
     }
 
     // Multiple assets selected
-    return AppString.decisions.localize(context)!;
+    return AppString.decisions.l10n(context)!;
   }
 
   /// Maps asset types to their corresponding sidebar navigation indices
@@ -143,7 +143,7 @@ class _AssetListTableState extends State<AssetListTable> {
             Row(
               children: [
                 Text(
-                  "${AppString.allAssets.localize(context)!}${widget.assets.length}",
+                  "${AppString.allAssets.l10n(context)!}${widget.assets.length}",
                   style: AppStyling.semiBoldTextSize16.copyWith(
                     color: colors(context).colorBlack,
                   ),
@@ -205,7 +205,7 @@ class _AssetListTableState extends State<AssetListTable> {
                   height: 37,
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: AppString.search.localize(context),
+                      hintText: AppString.search.l10n(context),
                       hintStyle: AppStyling.regularTextSize14,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -244,7 +244,7 @@ class _AssetListTableState extends State<AssetListTable> {
                     ),
                   ),
                   child: Text(
-                    AppString.advanced.localize(context)!,
+                    AppString.advanced.l10n(context)!,
                     style: AppStyling.semiBoldTextSize12.copyWith(
                       color: colors(context).colorBlack,
                     ),

@@ -59,7 +59,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
 
       return Scaffold(
         appBar: CustomAppBar(
-          title: AppString.settings.localize(context)!,
+          title: AppString.settings.l10n(context)!,
           style: AppStyling.semiBoldTextSize14
               .copyWith(color: colors(context).colorGrey6),
         ),
@@ -71,13 +71,13 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
             children: [
               // Settings header section
               Text(
-                AppString.generalSettings.localize(context)!,
+                AppString.generalSettings.l10n(context)!,
                 style: AppStyling.semiBoldTextSize16
                     .copyWith(color: colors(context).colorBlack),
               ),
               SizedBox(height: 4),
               Text(
-                AppString.changeTheSettingsOfTheMobileApp.localize(context)!,
+                AppString.changeTheSettingsOfTheMobileApp.l10n(context)!,
                 style: AppStyling.normalTextSize12
                     .copyWith(color: colors(context).colorGrey8),
               ),
@@ -99,7 +99,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                   children: [
                     // App Appearance Section
                     Text(
-                      AppString.appAppearance.localize(context)!,
+                      AppString.appAppearance.l10n(context)!,
                       style: AppStyling.semiBoldTextSize14
                           .copyWith(color: colors(context).colorBlack),
                     ),
@@ -129,7 +129,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                       });
                                     },
                                   ),
-                                  Text(AppString.lightMode.localize(context)!),
+                                  Text(AppString.lightMode.l10n(context)!),
                                 ],
                               ),
                             ),
@@ -149,7 +149,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                       });
                                     },
                                   ),
-                                  Text(AppString.darkMode.localize(context)!),
+                                  Text(AppString.darkMode.l10n(context)!),
                                 ],
                               ),
                             ),
@@ -170,7 +170,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                     },
                                   ),
                                   Text(AppString.systemPreferences
-                                      .localize(context)!),
+                                      .l10n(context)!),
                                 ],
                               ),
                             ),
@@ -193,7 +193,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                           });
                         },
                         width: 322,
-                        label: AppString.language.localize(context)!,
+                        label: AppString.language.l10n(context)!,
                         required: false,
                       ),
                     ),
@@ -203,31 +203,28 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: CustomDropdownField(
                         items: [
-                          AppString.small.localize(context)!,
-                          AppString.medium.localize(context)!,
-                          AppString.large.localize(context)!,
+                          AppString.small.l10n(context)!,
+                          AppString.medium.l10n(context)!,
+                          AppString.large.l10n(context)!,
                         ],
-                        initialValue: AppString.large.localize(context)!,
+                        initialValue: AppString.large.l10n(context)!,
                         onChanged: (value) {
                           // Map font size selection to scale factor
                           double scaleFactor;
-                          switch (value) {
-                            case "Small":
-                              scaleFactor = 0.7;
-                              break;
-                            case "Medium":
-                              scaleFactor = 0.9;
-                              break;
-                            case "Large":
-                              scaleFactor = 1.0;
-                              break;
-                            default:
-                              scaleFactor = 1.0;
+                          // Check against the localized values
+                          if (value == AppString.small.l10n(context)!) {
+                            scaleFactor = 0.7;
+                          } else if (value == AppString.medium.l10n(context)!) {
+                            scaleFactor = 0.9;
+                          } else if (value == AppString.large.l10n(context)!) {
+                            scaleFactor = 1.0;
+                          } else {
+                            scaleFactor = 1.0;
                           }
                           _textScaleFactorModel.setTextScaleFactor(scaleFactor);
                         },
                         width: 322,
-                        label: AppString.fontSize.localize(context)!,
+                        label: AppString.fontSize.l10n(context)!,
                         required: false,
                       ),
                     ),
@@ -238,7 +235,7 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
 
               // Save button (currently no-op)
               CustomButton(
-                text: AppString.save.localize(context)!,
+                text: AppString.save.l10n(context)!,
                 onPressed: () {},
                 backgroundColor: colors(context).colorPrimary5!,
               )

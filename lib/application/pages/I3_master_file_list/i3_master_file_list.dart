@@ -88,11 +88,11 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
       case 1: // Land Acquisition
         return Scaffold(
           appBar: CustomAppBar(
-            title: AppString.landAcquisition.localize(context)!,
+            title: AppString.landAcquisition.l10n(context)!,
           ),
           body: FileList(
             breadcrumbItems: [
-              AppString.landAcquisition.localize(context)!,
+              AppString.landAcquisition.l10n(context)!,
             ],
             totalCount: _totalCount,
             onSearch: (query) {
@@ -110,13 +110,13 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
       case 2: // Mass Rating MR
         return Scaffold(
           appBar: CustomAppBar(
-            title: AppString.massRatingMR.localize(context)!,
+            title: AppString.massRatingMR.l10n(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
           body: FileList(
             breadcrumbItems: [
-              AppString.massRating.localize(context)!,
-              AppString.massRating.localize(context)!,
+              AppString.massRating.l10n(context)!,
+              AppString.massRating.l10n(context)!,
             ],
             totalCount: 0,
             table: BlocProvider<MrRequestsCubit>(
@@ -129,13 +129,13 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
       case 3: // Rating Assessment RA
         return Scaffold(
           appBar: CustomAppBar(
-            title: AppString.ratingAssessmentRA.localize(context)!,
+            title: AppString.ratingAssessmentRA.l10n(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
           body: FileList(
             breadcrumbItems: [
-              AppString.massRating.localize(context)!,
-              AppString.ratingAssessment.localize(context)!,
+              AppString.massRating.l10n(context)!,
+              AppString.ratingAssessment.l10n(context)!,
             ],
             totalCount: 0,
             table: TableScaffoldRA(pageSource: currentPageSource),
@@ -145,13 +145,13 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
       case 4: // Rating Building RB
         return Scaffold(
           appBar: CustomAppBar(
-            title: AppString.ratingBuildingRB.localize(context)!,
+            title: AppString.ratingBuildingRB.l10n(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
           body: FileList(
             breadcrumbItems: [
-              AppString.massRating.localize(context)!,
-              AppString.ratingBuilding.localize(context)!,
+              AppString.massRating.l10n(context)!,
+              AppString.ratingBuilding.l10n(context)!,
             ],
             totalCount: 0,
             table: TableScaffoldRB(pageSource: currentPageSource),
@@ -161,13 +161,13 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
       case 5: // Rating Object RO
         return Scaffold(
           appBar: CustomAppBar(
-            title: AppString.ratingObjectRO.localize(context)!,
+            title: AppString.ratingObjectRO.l10n(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
           body: FileList(
             breadcrumbItems: [
-              AppString.massRating.localize(context)!,
-              AppString.ratingObject.localize(context)!,
+              AppString.massRating.l10n(context)!,
+              AppString.ratingObject.l10n(context)!,
             ],
             totalCount: 0,
             table: TableScaffoldRO(pageSource: currentPageSource),

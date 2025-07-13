@@ -191,7 +191,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     return Scaffold(
       // Customized AppBar with title and customized styling.
       appBar: CustomAppBar(
-        title: AppString.rentalEvidence.localize(context)!,
+        title: AppString.rentalEvidence.l10n(context)!,
       ),
       // Main body wrapped in a SingleChildScrollView to allow vertical scrolling.
       body: SingleChildScrollView(
@@ -201,9 +201,9 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
           children: [
             // Breadcrumb navigation for a clear page hierarchy.
             Breadcrumb(items: [
-              BreadcrumbItem(label: AppString.massRating.localize(context)!),
+              BreadcrumbItem(label: AppString.massRating.l10n(context)!),
               BreadcrumbItem(
-                  label: AppString.rentalEvidence.localize(context)!),
+                  label: AppString.rentalEvidence.l10n(context)!),
             ]),
             // LayoutBuilder to determine available width and adjust field sizes accordingly.
             LayoutBuilder(builder: (context, constraints) {
@@ -223,14 +223,14 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                         children: [
                           // Dropdown field for selecting a building.
                           CustomDropdownField(
-                            label: AppString.selectBuilding.localize(context)!,
+                            label: AppString.selectBuilding.l10n(context)!,
                             items: [
-                              AppString.selectBuilding.localize(context)!,
-                              AppString.building1.localize(context)!,
-                              AppString.building2.localize(context)!
+                              AppString.selectBuilding.l10n(context)!,
+                              AppString.building1.l10n(context)!,
+                              AppString.building2.l10n(context)!
                             ],
                             initialValue:
-                                AppString.selectBuilding.localize(context)!,
+                                AppString.selectBuilding.l10n(context)!,
                             onChanged: (value) {
                               setState(() {
                                 _selectedBuilding = value;
@@ -241,20 +241,20 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                 I2RentalEvidenceValidator.requiredDropdown(
                                     value,
                                     AppString.selectBuilding
-                                        .localize(context)!),
+                                        .l10n(context)!),
                           ),
                           // Dropdown field for selecting a property category.
                           CustomDropdownField(
                             label:
-                                AppString.propertyCategory.localize(context)!,
+                                AppString.propertyCategory.l10n(context)!,
                             items: [
                               AppString.selectPropertyCategory
-                                  .localize(context)!,
-                              AppString.category1.localize(context)!,
-                              AppString.category2.localize(context)!
+                                  .l10n(context)!,
+                              AppString.category1.l10n(context)!,
+                              AppString.category2.l10n(context)!
                             ],
                             initialValue: AppString.selectPropertyCategory
-                                .localize(context)!,
+                                .l10n(context)!,
                             onChanged: (value) {
                               setState(() {
                                 _selectedPropertyCategory = value;
@@ -265,20 +265,20 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                 I2RentalEvidenceValidator.requiredDropdown(
                                     value,
                                     AppString.propertyCategory
-                                        .localize(context)!),
+                                        .l10n(context)!),
                           ),
                           // Dropdown field for selecting a property subcategory.
                           CustomDropdownField(
                             label: AppString.propertySubcategory
-                                .localize(context)!,
+                                .l10n(context)!,
                             items: [
                               AppString.selectPropertySubcategory
-                                  .localize(context)!,
-                              AppString.subcategory1.localize(context)!,
-                              AppString.subcategory2.localize(context)!
+                                  .l10n(context)!,
+                              AppString.subcategory1.l10n(context)!,
+                              AppString.subcategory2.l10n(context)!
                             ],
                             initialValue: AppString.selectPropertySubcategory
-                                .localize(context)!,
+                                .l10n(context)!,
                             onChanged: (value) {
                               setState(() {
                                 _selectedPropertySubcategory = value;
@@ -289,18 +289,18 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                 I2RentalEvidenceValidator.requiredDropdown(
                                     value,
                                     AppString.propertySubcategory
-                                        .localize(context)!),
+                                        .l10n(context)!),
                           ),
                           // Dropdown field for selecting a property type.
                           CustomDropdownField(
-                            label: AppString.propertyType.localize(context)!,
+                            label: AppString.propertyType.l10n(context)!,
                             items: [
-                              AppString.selectPropertyType.localize(context)!,
-                              AppString.type1.localize(context)!,
-                              AppString.type2.localize(context)!
+                              AppString.selectPropertyType.l10n(context)!,
+                              AppString.type1.l10n(context)!,
+                              AppString.type2.l10n(context)!
                             ],
                             initialValue:
-                                AppString.selectPropertyType.localize(context)!,
+                                AppString.selectPropertyType.l10n(context)!,
                             onChanged: (value) {
                               setState(() {
                                 _selectedPropertyType1 = value;
@@ -310,43 +310,43 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                             validator: (value) =>
                                 I2RentalEvidenceValidator.requiredDropdown(
                                     value,
-                                    AppString.propertyType.localize(context)!),
+                                    AppString.propertyType.l10n(context)!),
                           ),
                           // Text field for inputting assessment number.
                           LabeledTextField(
-                            label: AppString.assesmentNo.localize(context)!,
+                            label: AppString.assesmentNo.l10n(context)!,
                             placeholder:
-                                AppString.assesmentNo.localize(context)!,
+                                AppString.assesmentNo.l10n(context)!,
                             width: fieldWidth,
                             controller: _assessmentNoController,
                             validator: (value) =>
                                 I2RentalEvidenceValidator.requiredAlphaNum(
                                     value,
                                     50,
-                                    AppString.assesmentNo.localize(context)!),
+                                    AppString.assesmentNo.l10n(context)!),
                           ),
                           // Text field for inputting owner name.
                           LabeledTextField(
-                            label: AppString.ownerName.localize(context)!,
-                            placeholder: AppString.ownerName.localize(context)!,
+                            label: AppString.ownerName.l10n(context)!,
+                            placeholder: AppString.ownerName.l10n(context)!,
                             width: fieldWidth,
                             controller: _ownerNameController,
                             validator: (value) =>
                                 I2RentalEvidenceValidator.requiredAlphaNum(
                                     value,
                                     100,
-                                    AppString.ownerName.localize(context)!),
+                                    AppString.ownerName.l10n(context)!),
                           ),
                           // Dropdown field for selecting property type.
                           CustomDropdownField(
-                            label: AppString.propertyType.localize(context)!,
+                            label: AppString.propertyType.l10n(context)!,
                             items: [
-                              AppString.propertyType.localize(context)!,
-                              AppString.typeA.localize(context)!,
-                              AppString.typeB.localize(context)!
+                              AppString.propertyType.l10n(context)!,
+                              AppString.typeA.l10n(context)!,
+                              AppString.typeB.l10n(context)!
                             ],
                             initialValue:
-                                AppString.propertyType.localize(context)!,
+                                AppString.propertyType.l10n(context)!,
                             onChanged: (value) {
                               setState(() {
                                 _selectedPropertyType2 = value;
@@ -356,27 +356,27 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                             validator: (value) =>
                                 I2RentalEvidenceValidator.requiredDropdown(
                                     value,
-                                    AppString.propertyType.localize(context)!),
+                                    AppString.propertyType.l10n(context)!),
                           ),
                           // Text field for inputting occupier name.
                           LabeledTextField(
-                            label: AppString.occupierName.localize(context)!,
+                            label: AppString.occupierName.l10n(context)!,
                             placeholder:
-                                AppString.occupierName.localize(context)!,
+                                AppString.occupierName.l10n(context)!,
                             width: fieldWidth,
                             controller: _occupierNameController,
                             validator: (value) =>
                                 I2RentalEvidenceValidator.requiredAlphaNum(
                                     value,
                                     100,
-                                    AppString.occupierName.localize(context)!),
+                                    AppString.occupierName.l10n(context)!),
                           ),
                           // Text field for describing the property.
                           LabeledTextField(
                             label: AppString.descriptionOfProperty
-                                .localize(context)!,
+                                .l10n(context)!,
                             placeholder: AppString.descriptionOfProperty
-                                .localize(context)!,
+                                .l10n(context)!,
                             width: fieldWidth,
                             controller: _descriptionController,
                             validator: (value) =>
@@ -384,7 +384,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                     value,
                                     255,
                                     AppString.descriptionOfProperty
-                                        .localize(context)!),
+                                        .l10n(context)!),
                           ),
                         ],
                       ),
@@ -393,7 +393,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                       Row(
                         children: [
                           Text(
-                            AppString.imageCapturing.localize(context)!,
+                            AppString.imageCapturing.l10n(context)!,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(width: 8),
@@ -444,7 +444,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                           Row(
                             children: [
                               CustomButton(
-                                text: AppString.save.localize(context)!,
+                                text: AppString.save.l10n(context)!,
                                 onPressed: _validateAndSubmit,
                                 backgroundColor: colors(context).colorPrimary5!,
                               ),
@@ -458,7 +458,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                           ),
                           // Button for sending data.
                           CustomButton(
-                            text: AppString.sendData.localize(context)!,
+                            text: AppString.sendData.l10n(context)!,
                             onPressed: _validateAndSubmit,
                             backgroundColor: colors(context).colorPrimary5!,
                           ),

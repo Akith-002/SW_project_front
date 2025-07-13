@@ -67,7 +67,7 @@ class _FormSectionState extends State<FormSection> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        AppString.welcome.localize(context)!,
+                        AppString.welcome.l10n(context)!,
                         style: AppStyling.boldTextSize24.copyWith(
                           color: colors(context).colorGrey2,
                         ),
@@ -82,7 +82,7 @@ class _FormSectionState extends State<FormSection> {
               /// Username
               LabeledTextField(
                 controller: _usernameController,
-                placeholder: AppString.username.localize(context)!,
+                placeholder: AppString.username.l10n(context)!,
                 icon: PhosphorIconsRegular.user,
                 width: 440,
                 height: 48,
@@ -93,7 +93,7 @@ class _FormSectionState extends State<FormSection> {
               /// Password
               PasswordTextField(
                 controller: _passwordController,
-                placeholder: AppString.password.localize(context)!,
+                placeholder: AppString.password.l10n(context)!,
                 width: 440,
                 height: 48,
               ),
@@ -117,7 +117,7 @@ class _FormSectionState extends State<FormSection> {
                     }
                   },
                   child: Text(
-                    AppString.forgotPassword.localize(context)!,
+                    AppString.forgotPassword.l10n(context)!,
                     style: AppStyling.mediumTextSize16.copyWith(
                       color: colors(context).colorPrimary5,
                     ),
@@ -128,7 +128,7 @@ class _FormSectionState extends State<FormSection> {
 
               /// Login Button
               CustomButton(
-                text: AppString.login.localize(context)!,
+                text: AppString.login.l10n(context)!,
                 onPressed: state is SigninLoading
                     ? null
                     : () {

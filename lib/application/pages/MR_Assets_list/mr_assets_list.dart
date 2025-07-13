@@ -117,39 +117,39 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
     List<String> breadcrumbItems;
 
     // Use request reference number if available, otherwise use 'Request'
-    final String requestLabel = _requestReferenceNo ?? AppString.request.localize(context)!;
+    final String requestLabel = _requestReferenceNo ?? AppString.request.l10n(context)!;
 
     switch (widget.source) {
       case 'ratingAssessment':
-        title = AppString.ratingAssessmentRA.localize(context)!;
+        title = AppString.ratingAssessmentRA.l10n(context)!;
         breadcrumbItems = [
-          AppString.massRating.localize(context)!,
-          AppString.ratingAssessment.localize(context)!,
+          AppString.massRating.l10n(context)!,
+          AppString.ratingAssessment.l10n(context)!,
           requestLabel,
         ];
         break;
       case 'ratingBuilding':
-        title = AppString.ratingBuildingRB.localize(context)!;
+        title = AppString.ratingBuildingRB.l10n(context)!;
         breadcrumbItems = [
-          AppString.massRating.localize(context)!,
-          AppString.ratingBuilding.localize(context)!,
+          AppString.massRating.l10n(context)!,
+          AppString.ratingBuilding.l10n(context)!,
           requestLabel,
         ];
         break;
       case 'ratingObject':
-        title = AppString.ratingObjectRO.localize(context)!;
+        title = AppString.ratingObjectRO.l10n(context)!;
         breadcrumbItems = [
-          AppString.massRating.localize(context)!,
-          AppString.ratingObject.localize(context)!,
+          AppString.massRating.l10n(context)!,
+          AppString.ratingObject.l10n(context)!,
           requestLabel,
         ];
         break;
       case 'massRating':
       default:
-        title = AppString.massRatingMR.localize(context)!;
+        title = AppString.massRatingMR.l10n(context)!;
         breadcrumbItems = [
-          AppString.massRating.localize(context)!,
-          AppString.massRating.localize(context)!,
+          AppString.massRating.l10n(context)!,
+          AppString.massRating.l10n(context)!,
           requestLabel,
         ];
         break;
