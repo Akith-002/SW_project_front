@@ -12,10 +12,12 @@ import 'package:land_asset_valuation/injection.dart';
 
 class RaAssetsList extends BasePage {
   final String? source;
+  final int? requestId;
 
   const RaAssetsList({
     super.key,
     this.source,
+    this.requestId,
   });
 
   @override

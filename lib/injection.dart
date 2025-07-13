@@ -43,6 +43,7 @@ import 'package:land_asset_valuation/data/datasource/remote/mr_request_remote_da
 import 'package:land_asset_valuation/data/repositories/mr_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/mr_request_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/mr_requests_usecases.dart';
+import 'package:land_asset_valuation/domain/usecases/get_request_by_id_usecase.dart';
 
 // Asset Feature (Clean Architecture)
 import 'package:land_asset_valuation/data/datasource/remote/asset_remote_data_source.dart';
@@ -240,6 +241,7 @@ Future<void> init() async {
   injection.registerLazySingleton(() => GetMrRequestsUseCase(injection()));
   injection
       .registerLazySingleton(() => GetMrRequestsPaginatedUseCase(injection()));
+  injection.registerLazySingleton(() => GetRequestByIdUseCase(repository: injection()));
 
   // ------------------------------
   // Asset Feature (Clean Architecture)
