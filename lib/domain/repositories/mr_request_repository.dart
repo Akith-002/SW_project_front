@@ -12,4 +12,6 @@ abstract class MrRequestRepository {
     required int pageSize,
     String? pageToken,
   });
+
+  Future<MrRequest> getRequestById(int requestId);
 }
