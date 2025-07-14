@@ -52,7 +52,9 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               Text(
                 '${widget.label!}${widget.required ? ' *' : ''}',
                 style: AppStyling.mediumTextSize14.copyWith(
-                  color: colors(context).labelTextColor,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Color(0xFFF6F6F6)
+                      : colors(context).labelTextColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
@@ -64,19 +66,30 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
           width: fieldWidth,
           height: 48,
           decoration: BoxDecoration(
-            color: colors(context).colorWhite,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Color(0xFF03346E)
+                : colors(context).colorWhite,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: borderColor,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? (_errorMessage != null ? Colors.red : Color(0xFF6EACDA))
+                  : borderColor,
               width: 1.5,
             ),
           ),
           child: DropdownButtonFormField<String>(
             value: _selectedValue!.isNotEmpty ? _selectedValue : null,
-            icon: Icon(Icons.keyboard_arrow_down, color: borderColor),
+            icon: Icon(Icons.keyboard_arrow_down, 
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Color(0xFF6EACDA)
+                    : borderColor),
             style: AppStyling.normalTextSize14
-                .copyWith(color: colors(context).labelTextColor),
-            dropdownColor: colors(context).colorWhite,
+                .copyWith(color: Theme.of(context).brightness == Brightness.dark
+                    ? Color(0xFFF6F6F6)
+                    : colors(context).labelTextColor),
+            dropdownColor: Theme.of(context).brightness == Brightness.dark
+                ? Color(0xFF03346E)
+                : colors(context).colorWhite,
             isExpanded: true,
             decoration: InputDecoration(
               border: InputBorder.none,
@@ -112,7 +125,9 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
                   style: TextStyle(
                     color: item == _selectedValue && _errorMessage != null
                         ? Colors.red
-                        : colors(context).labelTextColor,
+                        : Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xFFF6F6F6)
+                            : colors(context).labelTextColor,
                   ),
                 ),
               );

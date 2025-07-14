@@ -47,6 +47,10 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
   Widget buildView(BuildContext context) {
     return Consumer(builder: (context, ref, child) {
       _themeMode = ref.watch(appThemeProvider);
+      
+      // Debug print to check theme
+      print('Current theme mode: $_themeMode');
+      print('Current brightness: ${Theme.of(context).brightness}');
 
       // Get current language and find display name
       final currentLocale = ref.watch(languageProvider);
@@ -63,6 +67,9 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
           style: AppStyling.semiBoldTextSize14
               .copyWith(color: colors(context).colorGrey6),
         ),
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? Color(0xFF021526)
+            : colors(context).colorWhite,
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -86,7 +93,9 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
               // Divider line
               Container(
                 height: 2,
-                color: colors(context).colorGrey9,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Color(0xFF03346E)
+                    : colors(context).colorGrey9,
               ),
               SizedBox(height: 16),
 
@@ -120,7 +129,19 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                   Radio<AppThemeMode>(
                                     value: AppThemeMode.light,
                                     groupValue: _themeMode,
-                                    activeColor: colors(context).colorPrimary1,
+                                    activeColor: Theme.of(context).brightness == Brightness.dark
+                                        ? Color(0xFF6EACDA)
+                                        : colors(context).colorPrimary1,
+                                    fillColor: MaterialStateProperty.resolveWith((states) {
+                                      if (states.contains(MaterialState.selected)) {
+                                        return Theme.of(context).brightness == Brightness.dark
+                                            ? Color(0xFF6EACDA)
+                                            : colors(context).colorPrimary1;
+                                      }
+                                      return Theme.of(context).brightness == Brightness.dark
+                                          ? Color(0xFF9CADBF)
+                                          : colors(context).colorGrey4;
+                                    }),
                                     onChanged: (value) {
                                       setState(() {
                                         ref
@@ -129,7 +150,11 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                       });
                                     },
                                   ),
-                                  Text(AppString.lightMode.l10n(context)!),
+                                  Text(
+                                    AppString.lightMode.l10n(context)!,
+                                    style: AppStyling.normalTextSize14
+                                        .copyWith(color: colors(context).colorBlack),
+                                  ),
                                 ],
                               ),
                             ),
@@ -140,7 +165,19 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                   Radio<AppThemeMode>(
                                     value: AppThemeMode.dark,
                                     groupValue: _themeMode,
-                                    activeColor: colors(context).colorPrimary1,
+                                    activeColor: Theme.of(context).brightness == Brightness.dark
+                                        ? Color(0xFF6EACDA)
+                                        : colors(context).colorPrimary1,
+                                    fillColor: MaterialStateProperty.resolveWith((states) {
+                                      if (states.contains(MaterialState.selected)) {
+                                        return Theme.of(context).brightness == Brightness.dark
+                                            ? Color(0xFF6EACDA)
+                                            : colors(context).colorPrimary1;
+                                      }
+                                      return Theme.of(context).brightness == Brightness.dark
+                                          ? Color(0xFF9CADBF)
+                                          : colors(context).colorGrey4;
+                                    }),
                                     onChanged: (value) {
                                       setState(() {
                                         ref
@@ -149,7 +186,11 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                       });
                                     },
                                   ),
-                                  Text(AppString.darkMode.l10n(context)!),
+                                  Text(
+                                    AppString.darkMode.l10n(context)!,
+                                    style: AppStyling.normalTextSize14
+                                        .copyWith(color: colors(context).colorBlack),
+                                  ),
                                 ],
                               ),
                             ),
@@ -160,7 +201,19 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                   Radio<AppThemeMode>(
                                     value: AppThemeMode.system,
                                     groupValue: _themeMode,
-                                    activeColor: colors(context).colorPrimary1,
+                                    activeColor: Theme.of(context).brightness == Brightness.dark
+                                        ? Color(0xFF6EACDA)
+                                        : colors(context).colorPrimary1,
+                                    fillColor: MaterialStateProperty.resolveWith((states) {
+                                      if (states.contains(MaterialState.selected)) {
+                                        return Theme.of(context).brightness == Brightness.dark
+                                            ? Color(0xFF6EACDA)
+                                            : colors(context).colorPrimary1;
+                                      }
+                                      return Theme.of(context).brightness == Brightness.dark
+                                          ? Color(0xFF9CADBF)
+                                          : colors(context).colorGrey4;
+                                    }),
                                     onChanged: (value) {
                                       setState(() {
                                         ref
@@ -169,8 +222,12 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                                       });
                                     },
                                   ),
-                                  Text(AppString.systemPreferences
-                                      .l10n(context)!),
+                                  Text(
+                                    AppString.systemPreferences
+                                        .l10n(context)!,
+                                    style: AppStyling.normalTextSize14
+                                        .copyWith(color: colors(context).colorBlack),
+                                  ),
                                 ],
                               ),
                             ),
@@ -237,7 +294,9 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
               CustomButton(
                 text: AppString.save.l10n(context)!,
                 onPressed: () {},
-                backgroundColor: colors(context).colorPrimary5!,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? Color(0xFF6EACDA)
+                    : colors(context).colorPrimary5!,
               )
             ],
           ),

@@ -142,7 +142,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   width: 200,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Color(0xFF03346E)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
@@ -202,13 +204,17 @@ class _CustomAppBarState extends State<CustomAppBar> {
         height: 40,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? appColors.colorPrimary1 : appColors.colorGrey9,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? (isSelected ? Color(0xFF6EACDA) : Color(0xFF03346E))
+              : (isSelected ? appColors.colorPrimary1 : appColors.colorGrey9),
           borderRadius: BorderRadius.circular(24),
         ),
         child: Icon(
           icon(PhosphorIconsStyle.regular),
           size: 24.0,
-          color: isSelected ? appColors.colorWhite : appColors.colorBlack,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? (isSelected ? Color(0xFF021526) : Color(0xFFF6F6F6))
+              : (isSelected ? appColors.colorWhite : appColors.colorBlack),
         ),
       ),
     );
@@ -223,7 +229,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
       height: 64,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: appColors.colorWhite,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Color(0xFF021526)
+            : appColors.colorWhite,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -34,9 +34,14 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Set text/icon color based on background color.
-    final textColor = backgroundColor == colors(context).colorGrey1
-        ? colors(context).colorGrey2 ?? Colors.grey
-        : colors(context).colorWhite ?? Colors.white;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode
+        ? (backgroundColor == Color(0xFF6EACDA) 
+            ? Color(0xFF021526)  // Dark text on light blue button
+            : Color(0xFFF6F6F6)) // Light text on other buttons
+        : (backgroundColor == colors(context).colorGrey1
+            ? colors(context).colorGrey2 ?? Colors.grey
+            : colors(context).colorWhite ?? Colors.white);
 
     return SizedBox(
       width: width,
