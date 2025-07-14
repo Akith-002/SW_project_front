@@ -28,4 +28,11 @@ class InspectionValidator {
   static String? requiredField(String? value, String fieldName) {
     return required(value, fieldName);
   }
+
+  static String? validateDropdown(String? value, String fieldName) {
+    if (value == null || value.isEmpty || value.startsWith('Select')) {
+      return 'Please select a $fieldName';
+    }
+    return null;
+  }
 }

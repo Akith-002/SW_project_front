@@ -63,7 +63,7 @@ class _MapDrawMenuState extends State<MapDrawMenu> {
                             _toggleMenu();
                           },
                           menuText:
-                              AppString.draw_selection_layer.localize(context)!,
+                              AppString.draw_selection_layer.l10n(context)!,
                         ),
                         SizedBox(height: 14),
                         DrawMenuItem(
@@ -73,7 +73,7 @@ class _MapDrawMenuState extends State<MapDrawMenu> {
                             _toggleMenu();
                           },
                           menuText: AppString.draw_measured_selection_layer
-                              .localize(context)!,
+                              .l10n(context)!,
                         ),
                         SizedBox(height: 14),
                         DrawMenuItem(
@@ -83,7 +83,7 @@ class _MapDrawMenuState extends State<MapDrawMenu> {
                             _toggleMenu();
                           },
                           menuText: AppString.clear_selection_layer
-                              .localize(context)!,
+                              .l10n(context)!,
                         ),
                         SizedBox(height: 14),
                       ],
@@ -95,7 +95,7 @@ class _MapDrawMenuState extends State<MapDrawMenu> {
                           widget.onAddMarker();
                           _toggleMenu();
                         },
-                        menuText: AppString.add_marker.localize(context)!,
+                        menuText: AppString.add_marker.l10n(context)!,
                       ),
                       SizedBox(height: 14),
                     ],

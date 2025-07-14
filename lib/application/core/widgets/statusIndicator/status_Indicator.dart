@@ -27,8 +27,8 @@ class StatusIndicator extends StatelessWidget {
       ),
       child: Text(
         isSuccessful
-            ? AppString.success.localize(context)!
-            : AppString.pending.localize(context)!,
+            ? AppString.success.l10n(context)!
+            : AppString.pending.l10n(context)!,
         style: TextStyle(
           color: isSuccessful
               ? colors(context).colorPositive7

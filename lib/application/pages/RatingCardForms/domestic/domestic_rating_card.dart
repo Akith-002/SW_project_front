@@ -25,7 +25,6 @@ class DomesticRatingCard extends StatelessWidget {
         onRightIcon2Pressed: () {},
       ),
       body: LayoutBuilder(builder: (context, constraints) {
-        double formWidth = constraints.maxWidth - 32;
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -43,118 +42,84 @@ class DomesticRatingCard extends StatelessWidget {
                   ],
                 ),
               ),
+
               _buildRow([
+                LabeledTextField(
+                  label: AppString.newNumber.l10n(context)!,
+                  placeholder: AppString.newNumber.l10n(context)!,
+                ),
+                LabeledTextField(
+                  label: AppString.owner.l10n(context)!,
+                  placeholder: AppString.owner.l10n(context)!,
+                ),
+              ]),
+              _buildRow([
+                LabeledTextField(
+                  label: AppString.description.l10n(context)!,
+                  placeholder: AppString.description.l10n(context)!,
+                ),
                 CustomDropdownField(
-                  label: AppString.selectBuilding.localize(context)!,
-                  items: [
-                    "Select Building",
-                    "Building A",
-                    "Building B",
-                    "Building C"
-                  ],
-                  initialValue: "Select Building",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
-                ),
-                LabeledTextField(
-                  label: AppString.localAuthority.localize(context)!,
-                  placeholder: AppString.localAuthority.localize(context)!,
-                ),
-              ]),
-              _buildRow([
-                LabeledTextField(
-                  label: AppString.localAuthorityCode.localize(context)!,
-                  placeholder: "123456789",
-                ),
-                LabeledTextField(
-                  label: AppString.assessmentNumber.localize(context)!,
-                  placeholder: AppString.assessmentNumber.localize(context)!,
-                ),
-              ]),
-              _buildRow([
-                LabeledTextField(
-                  label: AppString.newNumber.localize(context)!,
-                  placeholder: AppString.newNumber.localize(context)!,
-                ),
-                LabeledTextField(
-                  label: AppString.obsoleteNumber.localize(context)!,
-                  placeholder: AppString.obsoleteNumber.localize(context)!,
-                ),
-              ]),
-              _buildRow([
-                LabeledTextField(
-                  label: AppString.owner.localize(context)!,
-                  placeholder: AppString.owner.localize(context)!,
-                ),
-                LabeledTextField(
-                  label: AppString.description.localize(context)!,
-                  placeholder: AppString.description.localize(context)!,
-                ),
-              ]),
-              _buildRow([
-                CustomDropdownField(
-                  label: AppString.selectWalls.localize(context)!,
+                  label: AppString.selectWalls.l10n(context)!,
                   items: ["Select Walls", "Brick", "Concrete", "Wood"],
                   initialValue: "Select Walls",
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
+              ]),
+              _buildRow([
                 CustomDropdownField(
-                  label: AppString.floor.localize(context)!,
+                  label: AppString.floor.l10n(context)!,
                   items: ["Floor", "Tile", "Concrete", "Wood"],
                   initialValue: "Floor",
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
-              ]),
-              _buildRow([
                 CustomDropdownField(
-                  label: AppString.conveniences.localize(context)!,
+                  label: AppString.conveniences.l10n(context)!,
                   items: ["Select Conveniences", "Basic", "Modern", "Luxury"],
                   initialValue: "Select Conveniences",
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
+              ]),
+              _buildRow([
                 CustomDropdownField(
-                  label: AppString.condition.localize(context)!,
+                  label: AppString.condition.l10n(context)!,
                   items: ["Select Condition", "Good", "Fair", "Poor"],
                   initialValue: "Select Condition",
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
+                LabeledTextField(
+                  label: AppString.age.l10n(context)!,
+                  placeholder: AppString.age.l10n(context)!,
+                ),
               ]),
               _buildRow([
-                LabeledTextField(
-                  label: AppString.age.localize(context)!,
-                  placeholder: AppString.age.localize(context)!,
-                ),
                 CustomDropdownField(
-                  label: AppString.access.localize(context)!,
+                  label: AppString.access.l10n(context)!,
                   items: ["Select Access", "Road", "Lane", "Path"],
                   initialValue: "Select Access",
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
-              ]),
-              _buildRow([
                 LabeledTextField(
-                  label: AppString.tsBop.localize(context)!,
-                  placeholder: AppString.tsBop.localize(context)!,
-                ),
-                LabeledTextField(
-                  label: AppString.parkingSpace.localize(context)!,
-                  placeholder: AppString.parkingSpace.localize(context)!,
+                  label: AppString.tsBop.l10n(context)!,
+                  placeholder: AppString.tsBop.l10n(context)!,
                 ),
               ]),
               _buildRow([
+                LabeledTextField(
+                  label: AppString.parkingSpace.l10n(context)!,
+                  placeholder: AppString.parkingSpace.l10n(context)!,
+                ),
                 CustomDropdownField(
-                  label: AppString.propertySubCategory.localize(context)!,
+                  label: AppString.propertySubCategory.l10n(context)!,
                   items: [
                     "Select Property Sub Category",
                     "Single Family",
@@ -166,107 +131,63 @@ class DomesticRatingCard extends StatelessWidget {
                     debugPrint(value);
                   },
                 ),
+              ]),
+              _buildRow([
                 CustomDropdownField(
-                  label: AppString.propertyType.localize(context)!,
+                  label: AppString.propertyType.l10n(context)!,
                   items: ["Select Property Type", "Residential", "Mixed Use"],
                   initialValue: "Select Property Type",
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
-              ]),
-              _buildRow([
                 LabeledTextField(
-                  label: AppString.wardNumber.localize(context)!,
-                  placeholder: AppString.wardNumber.localize(context)!,
-                ),
-                LabeledTextField(
-                  label: AppString.roadName.localize(context)!,
-                  placeholder: AppString.roadName.localize(context)!,
+                  label: "Plantations",
+                  placeholder: "Enter plantations",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.date.localize(context)!,
-                  placeholder: AppString.date.localize(context)!,
+                  label: AppString.wardNumber.l10n(context)!,
+                  placeholder: AppString.wardNumber.l10n(context)!,
                 ),
                 LabeledTextField(
-                  label: AppString.occupier.localize(context)!,
-                  placeholder: AppString.occupier.localize(context)!,
+                  label: AppString.roadName.l10n(context)!,
+                  placeholder: AppString.roadName.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.rentPM.localize(context)!,
-                  placeholder: AppString.rentPM.localize(context)!,
+                  label: AppString.date.l10n(context)!,
+                  placeholder: AppString.date.l10n(context)!,
                 ),
                 LabeledTextField(
-                  label: AppString.terms.localize(context)!,
-                  placeholder: AppString.terms.localize(context)!,
-                ),
-              ]),
-              _buildRow([
-                Text(
-                  'Floor wise Area',
-                  style: AppStyling.mediumTextSize14.copyWith(
-                      color: colors(context).colorBlack,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14),
-                ),
-              ]),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Flexible(
-                        child: LabeledTextField(
-                          label: AppString.building.localize(context)!,
-                          placeholder: "Enter building name",
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          backgroundColor: colors(context).colorPrimary1,
-                          foregroundColor: colors(context).colorWhite,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 25, vertical: 13),
-                        ),
-                        child: Text("Set", textAlign: TextAlign.center),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              _buildRow([
-                LabeledTextField(
-                  label: AppString.totalArea.localize(context)!,
-                  placeholder: AppString.totalArea.localize(context)!,
+                  label: AppString.occupier.l10n(context)!,
+                  placeholder: AppString.occupier.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.totalFloorArea.localize(context)!,
-                  placeholder: AppString.totalFloorArea.localize(context)!,
+                  label: AppString.rentPM.l10n(context)!,
+                  placeholder: AppString.rentPM.l10n(context)!,
+                ),
+                LabeledTextField(
+                  label: AppString.terms.l10n(context)!,
+                  placeholder: AppString.terms.l10n(context)!,
+                ),
+              ]),
+              SizedBox(height: 16),
+          
+              _buildRow([
+                LabeledTextField(
+                  label: AppString.suggestedRate.l10n(context)!,
+                  placeholder: AppString.suggestedRate.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.suggestedRate.localize(context)!,
-                  placeholder: AppString.suggestedRate.localize(context)!,
-                ),
-              ]),
-              _buildRow([
-                LabeledTextField(
-                  label: AppString.notes.localize(context)!,
-                  placeholder: AppString.notes.localize(context)!,
+                  label: AppString.notes.l10n(context)!,
+                  placeholder: AppString.notes.l10n(context)!,
                 ),
               ]),
               // Save & Cancel Buttons
@@ -278,7 +199,7 @@ class DomesticRatingCard extends StatelessWidget {
                     SizedBox(
                       width: 120,
                       child: CustomButton(
-                        text: AppString.cancel.localize(context)!,
+                        text: AppString.cancel.l10n(context)!,
                         backgroundColor: colors(context).colorGrey1!,
                         onPressed: () {
                           Navigator.pop(context);
@@ -292,7 +213,7 @@ class DomesticRatingCard extends StatelessWidget {
                         SizedBox(
                           width: 120,
                           child: CustomButton(
-                            text: AppString.save.localize(context)!,
+                            text: AppString.save.l10n(context)!,
                             backgroundColor: colors(context).colorPrimary1!,
                             onPressed: () {
                               // TODO: Implement save functionality
@@ -352,8 +273,13 @@ Widget _buildRow(List<Widget> children) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 8.0),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: children.map((widget) => Expanded(child: widget)).toList(),
+      children: [
+        Expanded(child: children[0]),
+        if (children.length > 1) ...[
+          SizedBox(width: 16),
+          Expanded(child: children[1]),
+        ],
+      ],
     ),
   );
 }

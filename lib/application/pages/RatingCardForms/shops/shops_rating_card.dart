@@ -44,7 +44,7 @@ class ShopsRatingCard extends StatelessWidget {
               ),
               _buildRow([
                 CustomDropdownField(
-                  label: AppString.selectBuilding.localize(context)!,
+                  label: AppString.selectBuilding.l10n(context)!,
                   items: [
                     "Select Building",
                     "Building A",
@@ -57,47 +57,47 @@ class ShopsRatingCard extends StatelessWidget {
                   },
                 ),
                 LabeledTextField(
-                  label: AppString.localAuthority.localize(context)!,
-                  placeholder: AppString.localAuthority.localize(context)!,
+                  label: AppString.localAuthority.l10n(context)!,
+                  placeholder: AppString.localAuthority.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.localAuthorityCode.localize(context)!,
+                  label: AppString.localAuthorityCode.l10n(context)!,
                   placeholder: "123456789",
                 ),
                 LabeledTextField(
-                  label: AppString.assessmentNumber.localize(context)!,
-                  placeholder: AppString.assessmentNumber.localize(context)!,
+                  label: AppString.assessmentNumber.l10n(context)!,
+                  placeholder: AppString.assessmentNumber.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.newNumber.localize(context)!,
+                  label: AppString.newNumber.l10n(context)!,
                   placeholder: "500",
                 ),
                 LabeledTextField(
-                  label: AppString.obsoleteNumber.localize(context)!,
-                  placeholder: AppString.obsoleteNumber.localize(context)!,
+                  label: AppString.obsoleteNumber.l10n(context)!,
+                  placeholder: AppString.obsoleteNumber.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.owner.localize(context)!,
+                  label: AppString.owner.l10n(context)!,
                   placeholder: "John Doe",
                 ),
                 LabeledTextField(
-                  label: AppString.description.localize(context)!,
+                  label: AppString.description.l10n(context)!,
                   placeholder: "Two-story residential house",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.tsBop.localize(context)!,
+                  label: AppString.tsBop.l10n(context)!,
                   placeholder: "Available",
                 ),
                 CustomDropdownField(
-                  label: AppString.propertySubCategory.localize(context)!,
+                  label: AppString.propertySubCategory.l10n(context)!,
                   items: [
                     "Select Property Sub Category",
                     "Villa",
@@ -113,7 +113,7 @@ class ShopsRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 CustomDropdownField(
-                  label: AppString.propertyType.localize(context)!,
+                  label: AppString.propertyType.l10n(context)!,
                   items: [
                     "Select Property Type",
                     "Luxury",
@@ -133,17 +133,17 @@ class ShopsRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.occupier.localize(context)!,
+                  label: AppString.occupier.l10n(context)!,
                   placeholder: "John Doe",
                 ),
                 LabeledTextField(
-                  label: AppString.rentPM.localize(context)!,
+                  label: AppString.rentPM.l10n(context)!,
                   placeholder: "50000",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.terms.localize(context)!,
+                  label: AppString.terms.l10n(context)!,
                   placeholder: "Yearly Renewal",
                 ),
                 LabeledTextField(
@@ -153,7 +153,7 @@ class ShopsRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.totalFloorArea.localize(context)!,
+                  label: AppString.totalFloorArea.l10n(context)!,
                   placeholder: "200 sqm",
                 ),
                 LabeledTextField(
@@ -167,19 +167,19 @@ class ShopsRatingCard extends StatelessWidget {
                   placeholder: "150",
                 ),
                 LabeledTextField(
-                  label: AppString.suggestedRate.localize(context)!,
+                  label: AppString.suggestedRate.l10n(context)!,
                   placeholder: "135",
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.notes.localize(context)!,
+                  label: AppString.notes.l10n(context)!,
                   placeholder: "Additional notes or observations",
                 ),
               ]),
               _buildRow([
                 CustomDropdownField(
-                  label: AppString.selectWalls.localize(context)!,
+                  label: AppString.selectWalls.l10n(context)!,
                   items: ["Select Walls", "Brick", "Concrete", "Glass Front"],
                   initialValue: "Select Walls",
                   onChanged: (value) {
@@ -187,7 +187,7 @@ class ShopsRatingCard extends StatelessWidget {
                   },
                 ),
                 CustomDropdownField(
-                  label: AppString.floor.localize(context)!,
+                  label: AppString.floor.l10n(context)!,
                   items: ["Select Floor", "Tile", "Marble", "Concrete", "Wood"],
                   initialValue: "Select Floor",
                   onChanged: (value) {
@@ -197,7 +197,7 @@ class ShopsRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 CustomDropdownField(
-                  label: AppString.conveniences.localize(context)!,
+                  label: AppString.conveniences.l10n(context)!,
                   items: [
                     "Select Conveniences",
                     "AC",
@@ -211,7 +211,7 @@ class ShopsRatingCard extends StatelessWidget {
                   },
                 ),
                 CustomDropdownField(
-                  label: AppString.condition.localize(context)!,
+                  label: AppString.condition.l10n(context)!,
                   items: [
                     "Select Condition",
                     "Excellent",
@@ -227,11 +227,11 @@ class ShopsRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.age.localize(context)!,
+                  label: AppString.age.l10n(context)!,
                   placeholder: "Building age",
                 ),
                 CustomDropdownField(
-                  label: AppString.access.localize(context)!,
+                  label: AppString.access.l10n(context)!,
                   items: ["Select Access", "Main Road", "Side Road", "Lane"],
                   initialValue: "Select Access",
                   onChanged: (value) {
@@ -241,22 +241,22 @@ class ShopsRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.parkingSpace.localize(context)!,
+                  label: AppString.parkingSpace.l10n(context)!,
                   placeholder: "Available parking spaces",
                 ),
                 LabeledTextField(
-                  label: AppString.wardNumber.localize(context)!,
-                  placeholder: AppString.wardNumber.localize(context)!,
+                  label: AppString.wardNumber.l10n(context)!,
+                  placeholder: AppString.wardNumber.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.roadName.localize(context)!,
-                  placeholder: AppString.roadName.localize(context)!,
+                  label: AppString.roadName.l10n(context)!,
+                  placeholder: AppString.roadName.l10n(context)!,
                 ),
                 LabeledTextField(
-                  label: AppString.date.localize(context)!,
-                  placeholder: AppString.date.localize(context)!,
+                  label: AppString.date.l10n(context)!,
+                  placeholder: AppString.date.l10n(context)!,
                 ),
               ]),
               _buildRow([
@@ -319,7 +319,7 @@ class ShopsRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.notes.localize(context)!,
+                  label: AppString.notes.l10n(context)!,
                   placeholder: "Shop-specific notes and features",
                 ),
               ]),
@@ -332,7 +332,7 @@ class ShopsRatingCard extends StatelessWidget {
                     SizedBox(
                       width: 120,
                       child: CustomButton(
-                        text: AppString.cancel.localize(context)!,
+                        text: AppString.cancel.l10n(context)!,
                         backgroundColor: colors(context).colorGrey1!,
                         onPressed: () {
                           Navigator.pop(context);
@@ -346,7 +346,7 @@ class ShopsRatingCard extends StatelessWidget {
                         SizedBox(
                           width: 120,
                           child: CustomButton(
-                            text: AppString.save.localize(context)!,
+                            text: AppString.save.l10n(context)!,
                             backgroundColor: colors(context).colorPrimary1!,
                             onPressed: () {
                               // TODO: Implement save functionality

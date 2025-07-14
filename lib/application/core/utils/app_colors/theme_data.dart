@@ -1,4 +1,5 @@
 import 'package:land_asset_valuation/application/core/utils/app_colors/light_color_list.dart';
+import 'package:land_asset_valuation/application/core/utils/app_colors/dark_color_list.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -8,261 +9,262 @@ AppColors colors(BuildContext context) {
 
 ThemeData getAppTheme(BuildContext context, bool isDarkTheme) {
   return ThemeData(
+    brightness: isDarkTheme ? Brightness.dark : Brightness.light,
     extensions: <ThemeExtension<AppColors>>[
       AppColors(
         colorPrimary1: !isDarkTheme
             ? LightColorList.lightPrimary500
-            : LightColorList.lightPrimary500,
+            : DarkColorsList.primary500,
         colorPrimary2: !isDarkTheme
             ? LightColorList.lightPrimary900
-            : LightColorList.lightPrimary900,
+            : DarkColorsList.primary500,
         colorPrimary3: !isDarkTheme
             ? LightColorList.lightPrimary900
-            : LightColorList.lightPrimary900,
+            : DarkColorsList.primary500,
         colorPrimary4: !isDarkTheme
             ? LightColorList.lightPrimary800
-            : LightColorList.lightPrimary800,
+            : DarkColorsList.primary400,
         colorPrimary5: !isDarkTheme
             ? LightColorList.lightPrimary700
-            : LightColorList.lightPrimary700,
+            : DarkColorsList.primary300,
         colorPrimary6: !isDarkTheme
             ? LightColorList.lightPrimary600
-            : LightColorList.lightPrimary600,
+            : DarkColorsList.primary200,
         colorPrimary7: !isDarkTheme
             ? LightColorList.lightPrimary50
-            : LightColorList.lightPrimary50,
+            : DarkColorsList.primary50,
         colorPrimary8: !isDarkTheme
             ? LightColorList.lightPrimary200
-            : LightColorList.lightPrimary200,
+            : DarkColorsList.primary100,
         colorPrimary9: !isDarkTheme
             ? LightColorList.lightPrimary100
-            : LightColorList.lightPrimary100,
+            : DarkColorsList.primary100,
             
         colorGrey1: !isDarkTheme
             ? LightColorList.lightGrey50
-            : LightColorList.lightGrey50,
+            : DarkColorsList.darkGreyColor,
         colorGrey2: !isDarkTheme
             ? LightColorList.lightGrey700
-            : LightColorList.lightGrey700,
+            : DarkColorsList.darkGreyColor,
         colorGrey3: !isDarkTheme
             ? LightColorList.lightGrey400
-            : LightColorList.lightGrey400,
+            : DarkColorsList.darkGrayColor,
         colorGrey4: !isDarkTheme
             ? LightColorList.lightGrey500
-            : LightColorList.lightGrey500,
+            : DarkColorsList.darkGrayColor,
         colorGrey5: !isDarkTheme
             ? LightColorList.lightGrey200
-            : LightColorList.lightGrey200,
+            : DarkColorsList.darkGrayColor,
         colorGrey6: !isDarkTheme
             ? LightColorList.lightGrey800
-            : LightColorList.lightGrey800,
+            : DarkColorsList.neutral200,
         colorGrey7: !isDarkTheme
             ? LightColorList.lightGrey900
-            : LightColorList.lightGrey900,
+            : DarkColorsList.neutral100,
         colorGrey8: !isDarkTheme
             ? LightColorList.lightGrey600
-            : LightColorList.lightGrey600,
+            : DarkColorsList.darkGrayColor,
         colorGrey9: !isDarkTheme
             ? LightColorList.lightGrey100
-            : LightColorList.lightGrey100,
+            : DarkColorsList.darkGrayColor,
         colorGrey10: !isDarkTheme
             ? LightColorList.lightGrey600
-            : LightColorList.lightGrey600,
+            : DarkColorsList.darkGrayColor,
         colorGrey11: !isDarkTheme
             ? LightColorList.lightGrey300
-            : LightColorList.lightGrey300,
-        colorNeutral5: isDarkTheme
+            : DarkColorsList.darkGrayColor,
+        colorNeutral5: !isDarkTheme
             ? LightColorList.lightNeutral700
-            : LightColorList.lightNeutral700,
-        colorNeutral6: isDarkTheme
+            : DarkColorsList.neutral500,
+        colorNeutral6: !isDarkTheme
             ? LightColorList.lightNeutral600
-            : LightColorList.lightNeutral600,
-        colorNeutral7: isDarkTheme
+            : DarkColorsList.neutral400,
+        colorNeutral7: !isDarkTheme
             ? LightColorList.lightNeutral150
-            : LightColorList.lightNeutral150,
-        colorNeutral8: isDarkTheme
+            : DarkColorsList.neutral200,
+        colorNeutral8: !isDarkTheme
             ? LightColorList.lightNeutral50
-            : LightColorList.lightNeutral50,
-        colorInformative1: isDarkTheme
+            : DarkColorsList.neutral100,
+        colorInformative1: !isDarkTheme
             ? LightColorList.lightInformative500
-            : LightColorList.lightInformative500,
+            : DarkColorsList.informative500,
         colorInformative2: !isDarkTheme
             ? LightColorList.lightInformative950
-            : LightColorList.lightInformative950,
+            : DarkColorsList.informative400,
         colorInformative3: !isDarkTheme
             ? LightColorList.lightInformative900
-            : LightColorList.lightInformative900,
+            : DarkColorsList.informative300,
         colorInformative4: !isDarkTheme
             ? LightColorList.lightInformative800
-            : LightColorList.lightInformative800,
+            : DarkColorsList.informative200,
         colorInformative5: !isDarkTheme
             ? LightColorList.lightInformative700
-            : LightColorList.lightInformative700,
-        colorInformative6: isDarkTheme
+            : DarkColorsList.informative100,
+        colorInformative6: !isDarkTheme
             ? LightColorList.lightInformative600
-            : LightColorList.lightInformative600,
+            : DarkColorsList.informative50,
         colorPositive1: !isDarkTheme
             ? LightColorList.positive600
-            : LightColorList.positive600,
+            : DarkColorsList.positive500,
         colorPositive2: !isDarkTheme
             ? LightColorList.positive50
-            : LightColorList.positive900,
+            : DarkColorsList.positive50,
         colorPositive3: !isDarkTheme
             ? LightColorList.positive100
-            : LightColorList.positive100,
+            : DarkColorsList.positive100,
         colorPositive4: !isDarkTheme
             ? LightColorList.positive200
-            : LightColorList.positive200,
+            : DarkColorsList.positive200,
         colorPositive5: !isDarkTheme
             ? LightColorList.positive300
-            : LightColorList.positive300,
-        colorPositive6: isDarkTheme
+            : DarkColorsList.positive300,
+        colorPositive6: !isDarkTheme
             ? LightColorList.positive400
-            : LightColorList.positive400,
-        colorPositive7: isDarkTheme
+            : DarkColorsList.positive400,
+        colorPositive7: !isDarkTheme
             ? LightColorList.positive700
-            : LightColorList.positive700,
+            : DarkColorsList.positive500,
         colorNotice1:
-            !isDarkTheme ? LightColorList.notice500 : LightColorList.notice500,
+            !isDarkTheme ? LightColorList.notice500 : DarkColorsList.notice500,
         colorNotice2:
-            !isDarkTheme ? LightColorList.notice50 : LightColorList.notice50,
+            !isDarkTheme ? LightColorList.notice50 : DarkColorsList.notice50,
         colorNotice3:
-            !isDarkTheme ? LightColorList.notice100 : LightColorList.notice100,
+            !isDarkTheme ? LightColorList.notice100 : DarkColorsList.notice100,
         colorNotice4:
-            !isDarkTheme ? LightColorList.notice200 : LightColorList.notice200,
+            !isDarkTheme ? LightColorList.notice200 : DarkColorsList.notice200,
         colorNotice5:
-            !isDarkTheme ? LightColorList.notice300 : LightColorList.notice300,
+            !isDarkTheme ? LightColorList.notice300 : DarkColorsList.notice300,
         colorNotice6:
-            !isDarkTheme ? LightColorList.notice400 : LightColorList.notice400,
+            !isDarkTheme ? LightColorList.notice400 : DarkColorsList.notice400,
         colorNotice7:
-            !isDarkTheme ? LightColorList.notice600 : LightColorList.notice600,
+            !isDarkTheme ? LightColorList.notice600 : DarkColorsList.notice500,
         colorNegative1: !isDarkTheme
             ? LightColorList.lightNegative500
-            : LightColorList.lightNegative500,
+            : DarkColorsList.negative500,
         colorNegative2: !isDarkTheme
             ? LightColorList.lightNegative900
-            : LightColorList.lightNegative900,
+            : DarkColorsList.negative400,
         colorNegative3: !isDarkTheme
             ? LightColorList.lightNegative900
-            : LightColorList.lightNegative900,
+            : DarkColorsList.negative300,
         colorNegative4: !isDarkTheme
             ? LightColorList.lightNegative800
-            : LightColorList.lightNegative800,
+            : DarkColorsList.negative200,
         colorNegative5: !isDarkTheme
             ? LightColorList.lightNegative700
-            : LightColorList.lightNegative700,
+            : DarkColorsList.negative100,
         colorNegative6: !isDarkTheme
             ? LightColorList.lightNegative600
-            : LightColorList.lightNegative600,
-        colorWhite: isDarkTheme
+            : DarkColorsList.negative50,
+        colorWhite: !isDarkTheme
             ? LightColorList.lightColorWhite
-            : LightColorList.lightColorWhite,
-        colorTextFieldBg: isDarkTheme
+            : DarkColorsList.darkColorWhite,
+        colorTextFieldBg: !isDarkTheme
             ? LightColorList.lightNeutral100
-            : LightColorList.lightNeutral100,
-        colorBlack: isDarkTheme
+            : DarkColorsList.neutral300,
+        colorBlack: !isDarkTheme
             ? LightColorList.lightColorBlack
-            : LightColorList.lightColorBlack,
+            : DarkColorsList.darkColorWhite,
         colorCarousel: !isDarkTheme
             ? LightColorList.lightNeutral600
-            : LightColorList.lightNeutral600,
+            : DarkColorsList.neutral400,
         colorBorderColor: !isDarkTheme
             ? LightColorList.lightNeutral400
-            : LightColorList.lightNeutral400,
+            : DarkColorsList.neutral300,
         containerBorderColor: !isDarkTheme
             ? LightColorList.lightNeutral200
-            : LightColorList.lightNeutral200,
+            : DarkColorsList.neutral300,
         containerBGColor: !isDarkTheme
             ? LightColorList.lightContainerBG
-            : LightColorList.lightContainerBG,
+            : DarkColorsList.neutral500,
         successGreenColor: !isDarkTheme
             ? LightColorList.lightSuccessGreenColor
-            : LightColorList.lightSuccessGreenColor,
+            : DarkColorsList.darkSuccessGreenColor,
         errorRedColor: !isDarkTheme
             ? LightColorList.lightErrorRedColor
-            : LightColorList.lightErrorRedColor,
+            : DarkColorsList.darkErrorRedColor,
         grayColor: !isDarkTheme
             ? LightColorList.lightGrayColor
-            : LightColorList.lightGrayColor,
+            : DarkColorsList.darkGrayColor,
         emptyViewSubtextColor: !isDarkTheme
             ? LightColorList.lightTextColor
-            : LightColorList.lightTextColor,
+            : DarkColorsList.darkTextColor,
         readMoreTextColor: !isDarkTheme
             ? LightColorList.lightBlueColor
-            : LightColorList.lightBlueColor,
+            : DarkColorsList.darkBlueColor,
         errorColor: !isDarkTheme
             ? LightColorList.lightErrorColor
-            : LightColorList.lightErrorColor,
+            : DarkColorsList.darkErrorColor,
         grayTextColor: !isDarkTheme
             ? LightColorList.lightGrey500
-            : LightColorList.lightGrey500,
+            : DarkColorsList.darkTextGrey,
         errorBoderColor: !isDarkTheme
             ? LightColorList.lightErrorBorderColor
-            : LightColorList.lightErrorBorderColor,
+            : DarkColorsList.darkErrorBorderColor,
         dropDownBorderColor: !isDarkTheme
             ? LightColorList.lightDropDownBorderColor
-            : LightColorList.lightDropDownBorderColor,
+            : DarkColorsList.darkDropDownBorderColor,
         dropDownBGColor: !isDarkTheme
             ? LightColorList.lightDropDownBGColor
-            : LightColorList.lightDropDownBGColor,
+            : DarkColorsList.darkDropDownBGColor,
         labelTextColor: !isDarkTheme
             ? LightColorList.lightLabelColor
-            : LightColorList.lightLabelColor,
+            : DarkColorsList.darkLabelColor,
         checkBoxColor: !isDarkTheme
             ? LightColorList.lightCheckBoxColor
-            : LightColorList.lightCheckBoxColor,
+            : DarkColorsList.darkCheckBoxColor,
         searchButtonColor: !isDarkTheme
             ? LightColorList.lightSearchButton
-            : LightColorList.lightSearchButton,
+            : DarkColorsList.darkSearchButton,
         bottomSheetTitleColor: !isDarkTheme
             ? LightColorList.lightBottomTitleColor
-            : LightColorList.lightBottomTitleColor,
+            : DarkColorsList.darkBottomTitleColor,
         greenTextColor: !isDarkTheme
             ? LightColorList.lightGreenColor
-            : LightColorList.lightGreenColor,
+            : DarkColorsList.darkGreenColor,
         tabColor: !isDarkTheme
             ? LightColorList.lightTabColor
-            : LightColorList.lightTabColor,
+            : DarkColorsList.darkTabColor,
         textGrey: !isDarkTheme
             ? LightColorList.lightTextGrey
-            : LightColorList.lightTextGrey,
+            : DarkColorsList.darkTextGrey,
         textPrimary: !isDarkTheme
             ? LightColorList.lightTextPrimary
-            : LightColorList.lightTextPrimary,
+            : DarkColorsList.darkColorWhite,
         splash1: !isDarkTheme
             ? LightColorList.lightSplashColor1
-            : LightColorList.lightSplashColor1,
+            : DarkColorsList.darkSplashColor1,
         splash2: !isDarkTheme
             ? LightColorList.lightSplashColor2
-            : LightColorList.lightSplashColor2,
+            : DarkColorsList.darkSplashColor2,
         brownTextColor: !isDarkTheme
             ? LightColorList.lightBrownTextColor
-            : LightColorList.lightBrownTextColor,
+            : DarkColorsList.darkBrownTextColor,
         errorBoxColor: !isDarkTheme
             ? LightColorList.lightErrorBoxColor
-            : LightColorList.lightErrorBoxColor,
+            : DarkColorsList.darkErrorBoxColor,
         claimMessageBlueColor: !isDarkTheme
             ? LightColorList.lightClimBlueColor
-            : LightColorList.lightClimBlueColor,
+            : DarkColorsList.darkClimBlueColor,
         claimMessageBlueBorderColor: !isDarkTheme
             ? LightColorList.lightClimBlueBorderColor
-            : LightColorList.lightClimBlueBorderColor,
+            : DarkColorsList.darkClimBlueBorderColor,
         profileBGColor: !isDarkTheme
             ? LightColorList.lightProfileBgColor
-            : LightColorList.lightProfileBgColor,
+            : DarkColorsList.darkProfileBgColor,
         colorIconBlack: !isDarkTheme
             ? LightColorList.lightIconBlack
-            : LightColorList.lightIconBlack,
+            : DarkColorsList.darkColorWhite,
         colorIconDefault: !isDarkTheme
             ? LightColorList.lightIconDefault
-            : LightColorList.lightIconDefault,
+            : DarkColorsList.darkColorWhite,
       ),
     ],
     fontFamily: "Roboto",
     textTheme: GoogleFonts.figtreeTextTheme(),
-    scaffoldBackgroundColor: isDarkTheme
+    scaffoldBackgroundColor: !isDarkTheme
         ? LightColorList.lightColorWhite
-        : LightColorList.lightColorWhite,
+        : DarkColorsList.darkColorBlack,
   );
 }
 

@@ -110,7 +110,7 @@ class _MapFilterMenuState extends State<MapFilterMenu> {
                         SizedBox(width: 16),
                         // Map toggle filters
                         ToggleItem(
-                          label: AppString.at_map.localize(context) ??
+                          label: AppString.at_map.l10n(context) ??
                               'default label',
                           function: (isToggled) => {
                             debugPrint("pressed at map"),
@@ -118,7 +118,7 @@ class _MapFilterMenuState extends State<MapFilterMenu> {
                         ),
                         const SizedBox(width: 16),
                         ToggleItem(
-                          label: AppString.pp_map.localize(context) ??
+                          label: AppString.pp_map.l10n(context) ??
                               'default label',
                           function: (isToggled) => {
                             debugPrint("pressed pp map"),
@@ -127,7 +127,7 @@ class _MapFilterMenuState extends State<MapFilterMenu> {
                         const SizedBox(width: 16),
                         // Zoning layer toggle with actual map layer visibility change
                         ToggleItem(
-                          label: AppString.zoning_layer.localize(context) ??
+                          label: AppString.zoning_layer.l10n(context) ??
                               'default label',
                           function: (isToggled) {
                             setState(() {
@@ -148,7 +148,7 @@ class _MapFilterMenuState extends State<MapFilterMenu> {
                         ),
                         const SizedBox(width: 16),
                         ToggleItem(
-                          label: AppString.data_layer.localize(context) ??
+                          label: AppString.data_layer.l10n(context) ??
                               'default label',
                           function: (isToggled) => {
                             debugPrint("pressed data layer"),

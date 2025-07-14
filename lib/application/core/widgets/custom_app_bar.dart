@@ -5,6 +5,9 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:get_it/get_it.dart';
+import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
+import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -40,6 +43,73 @@ class _CustomAppBarState extends State<CustomAppBar> {
   bool _isRightIcon1Selected = false;
   bool _isRightIcon2Selected = false;
 
+  Widget _buildHoverMenuItem(IconData icon, String text, VoidCallback onTap) {
+    return MouseRegion(
+      onEnter: (_) => setState(() {}),
+      onExit: (_) => setState(() {}),
+      child: InkWell(
+        onTap: onTap,
+        hoverColor: Colors.grey.shade200,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Row(
+            children: [
+              Icon(icon, size: 24, color: Colors.black87),
+              SizedBox(width: 16),
+              Text(text,
+                  style: AppStyling.regularTextSize20
+                      .copyWith(color: Colors.black87)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    try {
+      final secureStorage = GetIt.I<SecureStorage>();
+      final authRepository = GetIt.I<AuthRepository>();
+
+      // Get username from secure storage
+      final username = await secureStorage.read('username');
+
+      if (username != null) {
+        final result = await authRepository.logout(username);
+
+        result.fold(
+          (error) {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Logout failed: ${error.toString()}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          },
+          (success) {
+            // Clear overlay and navigate to sign in
+            _overlayEntry?.remove();
+            _overlayEntry = null;
+            context.go(Pages.routeSignIn.toPath());
+          },
+        );
+      } else {
+        // If no username found, just navigate to sign in
+        _overlayEntry?.remove();
+        _overlayEntry = null;
+        context.go(Pages.routeSignIn.toPath());
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Logout failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   void _toggleProfileMenu(BuildContext context) {
     if (_overlayEntry != null) {
       _overlayEntry!.remove();
@@ -72,7 +142,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   width: 200,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Color(0xFF03346E)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
@@ -86,7 +158,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHoverMenuItem(
-                          Icons.person, AppString.profile.localize(context)!,
+                          Icons.person, AppString.profile.l10n(context)!,
                           () {
                         _overlayEntry?.remove();
                         _overlayEntry = null;
@@ -94,7 +166,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                       }),
                       SizedBox(height: 16),
                       _buildHoverMenuItem(
-                          Icons.settings, AppString.settings.localize(context)!,
+                          Icons.settings, AppString.settings.l10n(context)!,
                           () {
                         _overlayEntry?.remove();
                         _overlayEntry = null;
@@ -102,12 +174,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
                       }),
                       SizedBox(height: 16),
                       _buildHoverMenuItem(
-                          Icons.logout, AppString.logOut.localize(context)!,
-                          () {
-                        _overlayEntry?.remove();
-                        _overlayEntry = null;
-                        context.push(Pages.routeSignIn.toPath());
-                      }),
+                          Icons.logout,
+                          AppString.logOut.l10n(context)!,
+                          () => _handleLogout(context)),
                     ],
                   ),
                 ),
@@ -119,29 +188,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
       overlay.insert(_overlayEntry!);
     }
-  }
-
-  Widget _buildHoverMenuItem(IconData icon, String text, VoidCallback onTap) {
-    return MouseRegion(
-      onEnter: (_) => setState(() {}),
-      onExit: (_) => setState(() {}),
-      child: InkWell(
-        onTap: onTap,
-        hoverColor: Colors.grey.shade200,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: Row(
-            children: [
-              Icon(icon, size: 24, color: Colors.black87),
-              SizedBox(width: 16),
-              Text(text,
-                  style: AppStyling.regularTextSize20
-                      .copyWith(color: Colors.black87)),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildSelectableIconButton(
@@ -158,13 +204,17 @@ class _CustomAppBarState extends State<CustomAppBar> {
         height: 40,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? appColors.colorPrimary1 : appColors.colorGrey9,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? (isSelected ? Color(0xFF6EACDA) : Color(0xFF03346E))
+              : (isSelected ? appColors.colorPrimary1 : appColors.colorGrey9),
           borderRadius: BorderRadius.circular(24),
         ),
         child: Icon(
           icon(PhosphorIconsStyle.regular),
           size: 24.0,
-          color: isSelected ? appColors.colorWhite : appColors.colorBlack,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? (isSelected ? Color(0xFF021526) : Color(0xFFF6F6F6))
+              : (isSelected ? appColors.colorWhite : appColors.colorBlack),
         ),
       ),
     );
@@ -179,7 +229,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
       height: 64,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: appColors.colorWhite,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Color(0xFF021526)
+            : appColors.colorWhite,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

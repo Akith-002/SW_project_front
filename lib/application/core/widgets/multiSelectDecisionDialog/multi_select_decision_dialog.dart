@@ -102,7 +102,7 @@ class _MultiSelectDecisionDialogState extends State<MultiSelectDecisionDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 CustomButton(
-                  text: AppString.cancel.localize(context)!,
+                  text: AppString.cancel.l10n(context)!,
                   onPressed: () {
                     Navigator.of(context).pop();
                     widget.onCancel?.call();
@@ -111,7 +111,7 @@ class _MultiSelectDecisionDialogState extends State<MultiSelectDecisionDialog> {
                 ),
                 const SizedBox(width: 12),
                 CustomButton(
-                  text: AppString.submit.localize(context)!,
+                  text: AppString.submit.l10n(context)!,
                   onPressed: selectedOption != null
                       ? () {
                           Navigator.of(context).pop();

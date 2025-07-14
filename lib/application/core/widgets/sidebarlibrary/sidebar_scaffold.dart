@@ -58,13 +58,17 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
             duration: const Duration(milliseconds: 200),
             width: _isExpanded ? 265 : 56,
             decoration: BoxDecoration(
-              color: _isExpanded
-                  ? colors(context).colorWhite!
-                  : colors(context).colorPrimary6!,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? (_isExpanded ? Color(0xFF021526) : Color(0xFF03346E))
+                  : (_isExpanded
+                      ? colors(context).colorWhite!
+                      : colors(context).colorPrimary6!),
               border: _isExpanded
                   ? Border(
                       right: BorderSide(
-                        color: colors(context).colorGrey9!,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xFF03346E)
+                            : colors(context).colorGrey9!,
                         width: 1.0,
                       ),
                     )
@@ -90,20 +94,20 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                         // Dashboard
                         _buildMenuItem(
                           index: 0,
-                          title: 'Dashboard',
+                          title: AppString.dashboard.l10n(context)!,
                           icon: PhosphorIconsBold.squaresFour,
                         ),
 
                         // Land Acquisition
                         _buildMenuItem(
                           index: 1,
-                          title: 'Land Acquisition',
+                          title: AppString.landAcquisition.l10n(context)!,
                           icon: PhosphorIconsBold.mapTrifold,
                         ),
 
                         // Mass Rating with subcategories
                         _buildExpandableSection(
-                          title: 'Mass Rating',
+                          title: AppString.massRating.l10n(context)!,
                           icon: PhosphorIconsBold.pencilRuler,
                           isExpanded: _isMassRatingExpanded,
                           onTap: () {
@@ -118,23 +122,23 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                           children: [
                             _buildSubMenuItem(
                               index: 2,
-                              title: 'Mass Rating',
+                              title: AppString.massRating.l10n(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 3,
-                              title: 'Rating Assessment',
+                              title: AppString.ratingAssessment.l10n(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 4,
-                              title: 'Rating Building',
+                              title: AppString.ratingBuilding.l10n(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 5,
-                              title: 'Rating Object',
+                              title: AppString.ratingObject.l10n(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 6,
-                              title: 'MR Rental Evidence',
+                              title: AppString.mrRentalEvidence.l10n(context)!,
                             ),
                           ],
                         ),
@@ -142,7 +146,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                         // Land Miscellaneous
                         _buildMenuItem(
                           index: 7,
-                          title: 'Land Miscellaneous',
+                          title: AppString.landMiscellaneous.l10n(context)!,
                           icon: PhosphorIconsBold.ticket,
                         ),
                       ],
@@ -194,10 +198,12 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  AppString.valuationDepartment.localize(context)!,
+                  AppString.valuationDepartment.l10n(context)!,
                   style: TextStyle(
                     fontFamily: 'Roboto',
-                    color: colors(context).colorBlack!,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Color(0xFFF6F6F6)
+                        : colors(context).colorBlack!,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     height: 0.9,
@@ -221,7 +227,9 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
               },
               icon: Icon(
                 PhosphorIcons.sidebar(),
-                color: colors(context).colorGrey4!,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Color(0xFF6EACDA)
+                    : colors(context).colorGrey4!,
               ),
               splashRadius: 20,
             )
@@ -243,17 +251,23 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
         height: 44,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: isSelected
-              ? _isExpanded
-                  ? colors(context).colorPrimary9
-                  : colors(context).colorPrimary4!
-              : Colors.transparent,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? (isSelected
+                  ? (_isExpanded ? Color(0xFF03346E) : Color(0xFF6EACDA).withOpacity(0.3))
+                  : Colors.transparent)
+              : (isSelected
+                  ? (_isExpanded
+                      ? colors(context).colorPrimary9
+                      : colors(context).colorPrimary4!)
+                  : Colors.transparent),
           border: isSelected
               ? Border(
                   right: BorderSide(
-                    color: _isExpanded
-                        ? colors(context).colorPrimary6!
-                        : colors(context).colorPrimary9!,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Color(0xFF6EACDA)
+                        : (_isExpanded
+                            ? colors(context).colorPrimary6!
+                            : colors(context).colorPrimary9!),
                     width: 4.0,
                   ),
                 )
@@ -271,13 +285,17 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                   : EdgeInsets.only(left: 4),
               child: Icon(
                 icon,
-                color: isSelected
-                    ? _isExpanded
-                        ? colors(context).colorPrimary5!
-                        : colors(context).colorPrimary7!
-                    : _isExpanded
-                        ? colors(context).colorGrey4!
-                        : colors(context).colorPrimary8!,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? (isSelected
+                        ? Color(0xFF6EACDA)
+                        : (_isExpanded ? Color(0xFF9CADBF) : Color(0xFF6EACDA)))
+                    : (isSelected
+                        ? (_isExpanded
+                            ? colors(context).colorPrimary5!
+                            : colors(context).colorPrimary7!)
+                        : (_isExpanded
+                            ? colors(context).colorGrey4!
+                            : colors(context).colorPrimary8!)),
                 size: 20,
               ),
             ),
@@ -288,9 +306,13 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: isSelected
-                        ? colors(context).colorPrimary5
-                        : colors(context).colorGrey2!,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? (isSelected
+                            ? Color(0xFF6EACDA)
+                            : Color(0xFFF6F6F6))
+                        : (isSelected
+                            ? colors(context).colorPrimary5
+                            : colors(context).colorGrey2!),
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -325,7 +347,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
 
             // If we're expanding and it's the Mass Rating section,
             // automatically select the first item (index 2)
-            if (!isExpanded && title == 'Mass Rating') {
+            if (!isExpanded && title == AppString.massRating.l10n(context)!) {
               widget.onIndexChanged(2);
             }
           },
@@ -354,13 +376,17 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                   height: 32,
                   child: Icon(
                     icon,
-                    color: hasSelectedChild
-                        ? _isExpanded
-                            ? colors(context).colorPrimary5!
-                            : colors(context).colorPrimary7!
-                        : _isExpanded
-                            ? colors(context).colorGrey4!
-                            : colors(context).colorPrimary8!,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? (hasSelectedChild
+                            ? Color(0xFF6EACDA)
+                            : (_isExpanded ? Color(0xFF9CADBF) : Color(0xFF6EACDA)))
+                        : (hasSelectedChild
+                            ? (_isExpanded
+                                ? colors(context).colorPrimary5!
+                                : colors(context).colorPrimary7!)
+                            : (_isExpanded
+                                ? colors(context).colorGrey4!
+                                : colors(context).colorPrimary8!)),
                     size: 20,
                   ),
                 ),
@@ -370,18 +396,26 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                     child: Text(
                       title,
                       style: TextStyle(
-                        color: hasSelectedChild
-                            ? colors(context).colorPrimary5!
-                            : colors(context).colorGrey2!,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? (hasSelectedChild
+                                ? Color(0xFF6EACDA)
+                                : Color(0xFFF6F6F6))
+                            : (hasSelectedChild
+                                ? colors(context).colorPrimary5!
+                                : colors(context).colorGrey2!),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: hasSelectedChild
-                        ? colors(context).colorPrimary5!
-                        : colors(context).colorGrey4!,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? (hasSelectedChild
+                            ? Color(0xFF6EACDA)
+                            : Color(0xFF9CADBF))
+                        : (hasSelectedChild
+                            ? colors(context).colorPrimary5!
+                            : colors(context).colorGrey4!),
                   ),
                 ],
               ],
@@ -412,14 +446,17 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
         height: 42,
         width: double.infinity,
         decoration: BoxDecoration(
-          color:
-              isSelected ? colors(context).colorPrimary9! : Colors.transparent,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? (isSelected ? Color(0xFF03346E) : Colors.transparent)
+              : (isSelected ? colors(context).colorPrimary9! : Colors.transparent),
           border: isSelected
               ? Border(
                   right: BorderSide(
-                    color: _isExpanded
-                        ? colors(context).colorPrimary6!
-                        : colors(context).colorPrimary9!,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Color(0xFF6EACDA)
+                        : (_isExpanded
+                            ? colors(context).colorPrimary6!
+                            : colors(context).colorPrimary9!),
                     width: 4.0,
                   ),
                 )
@@ -436,9 +473,11 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                 margin: const EdgeInsets.only(left: 4, right: 8),
                 child: Icon(
                   icon,
-                  color: isSelected
-                      ? colors(context).colorPrimary5!
-                      : colors(context).colorGrey4!,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? (isSelected ? Color(0xFF6EACDA) : Color(0xFF9CADBF))
+                      : (isSelected
+                          ? colors(context).colorPrimary5!
+                          : colors(context).colorGrey4!),
                   size: 18,
                 ),
               )
@@ -450,9 +489,11 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
               child: Text(
                 title,
                 style: TextStyle(
-                  color: isSelected
-                      ? colors(context).colorPrimary5!
-                      : colors(context).colorGrey2!,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? (isSelected ? Color(0xFF6EACDA) : Color(0xFFF6F6F6))
+                      : (isSelected
+                          ? colors(context).colorPrimary5!
+                          : colors(context).colorGrey2!),
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
@@ -471,9 +512,13 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
       return Colors.transparent;
     }
 
-    // If sidebar is collapsed, use primary4 color
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // If sidebar is collapsed
     if (!_isExpanded) {
-      return colors(context).colorPrimary4!;
+      return isDarkMode
+          ? Color(0xFF6EACDA).withOpacity(0.3)
+          : colors(context).colorPrimary4!;
     }
 
     // If mass rating section is expanded, use transparent
@@ -482,6 +527,8 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
     }
 
     // Otherwise (sidebar expanded, section collapsed, has selected child)
-    return colors(context).colorPrimary9!;
+    return isDarkMode
+        ? Color(0xFF03346E)
+        : colors(context).colorPrimary9!;
   }
 }

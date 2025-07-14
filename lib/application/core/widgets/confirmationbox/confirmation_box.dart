@@ -27,11 +27,11 @@ class ConfirmationBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Set icon and color based on confirmation type (success or error)
-    final iconName = confirmationType == AppString.success.localize(context)!
+    final iconName = confirmationType == AppString.success.l10n(context)!
         ? PhosphorIconsRegular.checkCircle
         : PhosphorIconsRegular.x;
     final mainTextColor =
-        confirmationType == AppString.success.localize(context)!
+        confirmationType == AppString.success.l10n(context)!
             ? colors(context).colorPositive6 // Green for success
             : colors(context).colorNegative6; // Red for error
 
@@ -84,7 +84,7 @@ class ConfirmationBox extends StatelessWidget {
                 ],
               ),
             CustomButton(
-              text: AppString.close.localize(context)!,
+              text: AppString.close.l10n(context)!,
               onPressed: () {},
               backgroundColor: colors(context).colorGrey1!,
             ),

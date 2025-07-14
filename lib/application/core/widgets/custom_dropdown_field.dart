@@ -28,6 +28,7 @@ class CustomDropdownField extends StatefulWidget {
 
 class _CustomDropdownFieldState extends State<CustomDropdownField> {
   late String? _selectedValue;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -37,8 +38,9 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
 
   @override
   Widget build(BuildContext context) {
-    final Color borderColor =
-        colors(context).dropDownBorderColor ?? Colors.grey;
+    final Color borderColor = _errorMessage != null
+        ? Colors.red
+        : colors(context).dropDownBorderColor ?? Colors.grey;
     final double fieldWidth = widget.width ?? 484; // Default width if null
 
     return Column(
@@ -50,7 +52,9 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               Text(
                 '${widget.label!}${widget.required ? ' *' : ''}',
                 style: AppStyling.mediumTextSize14.copyWith(
-                  color: colors(context).labelTextColor,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Color(0xFFF6F6F6)
+                      : colors(context).labelTextColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
@@ -62,35 +66,53 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
           width: fieldWidth,
           height: 48,
           decoration: BoxDecoration(
-            color: colors(context).colorWhite,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Color(0xFF03346E)
+                : colors(context).colorWhite,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: borderColor,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? (_errorMessage != null ? Colors.red : Color(0xFF6EACDA))
+                  : borderColor,
               width: 1.5,
             ),
           ),
           child: DropdownButtonFormField<String>(
             value: _selectedValue!.isNotEmpty ? _selectedValue : null,
-            icon: Icon(Icons.keyboard_arrow_down, color: borderColor),
+            icon: Icon(Icons.keyboard_arrow_down, 
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Color(0xFF6EACDA)
+                    : borderColor),
             style: AppStyling.normalTextSize14
-                .copyWith(color: colors(context).labelTextColor),
-            dropdownColor: colors(context).colorWhite,
+                .copyWith(color: Theme.of(context).brightness == Brightness.dark
+                    ? Color(0xFFF6F6F6)
+                    : colors(context).labelTextColor),
+            dropdownColor: Theme.of(context).brightness == Brightness.dark
+                ? Color(0xFF03346E)
+                : colors(context).colorWhite,
             isExpanded: true,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               border: InputBorder.none,
-              contentPadding:
+              contentPadding: const
                   EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              errorStyle: const TextStyle(height: 0, fontSize: 0),
+              errorText: null,
             ),
-            validator: widget.validator ??
-                (widget.required
-                    ? (value) => value == null || value.isEmpty
-                        ? 'This field is required'
-                        : null
-                    : null),
+            validator: (value) {
+              final error = widget.validator?.call(value) ??
+                  (widget.required && (value == null || value.isEmpty)
+                      ? 'This field is required'
+                      : null);
+              setState(() {
+                _errorMessage = error;
+              });
+              return error;
+            },
             onChanged: (String? newValue) {
               if (newValue != null) {
                 setState(() {
                   _selectedValue = newValue;
+                _errorMessage = null;
                 });
                 widget.onChanged!(newValue);
               }
@@ -98,7 +120,16 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
             items: widget.items.map((String item) {
               return DropdownMenuItem<String>(
                 value: item,
-                child: Text(item),
+                child: Text(
+                  item,
+                  style: TextStyle(
+                    color: item == _selectedValue && _errorMessage != null
+                        ? Colors.red
+                        : Theme.of(context).brightness == Brightness.dark
+                            ? Color(0xFFF6F6F6)
+                            : colors(context).labelTextColor,
+                  ),
+                ),
               );
             }).toList(),
           ),

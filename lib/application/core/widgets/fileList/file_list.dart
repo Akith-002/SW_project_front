@@ -42,7 +42,7 @@ class _FileListState extends State<FileList> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                "${AppString.all_files.localize(context)!}${widget.totalCount}", // ✅ Dynamic count
+                "${AppString.all_files.l10n(context)!}${widget.totalCount}", // ✅ Dynamic count
                 style: AppStyling.semiBoldTextSize16
                     .copyWith(color: colors(context).colorBlack),
               ),
@@ -54,7 +54,7 @@ class _FileListState extends State<FileList> {
                   controller: searchController,
                   onSubmitted: widget.onSearch,
                   decoration: InputDecoration(
-                    hintText: AppString.search.localize(context),
+                    hintText: AppString.search.l10n(context),
                     hintStyle: AppStyling.regularTextSize14,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -90,7 +90,7 @@ class _FileListState extends State<FileList> {
                   ),
                 ),
                 child: Text(
-                  AppString.advanced.localize(context)!,
+                  AppString.advanced.l10n(context)!,
                   style: AppStyling.semiBoldTextSize12.copyWith(
                     color: colors(context).colorBlack,
                   ),

@@ -11,7 +11,7 @@ import 'dart:convert';
 class SignatureBox extends StatefulWidget {
   final String title;
   final Function(Uint8List?)? onSignatureChanged;
-  final String? errorMessage; // ✅ New parameter
+  final String? errorMessage; 
 
   const SignatureBox({
     super.key,

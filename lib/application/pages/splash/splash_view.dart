@@ -25,8 +25,7 @@ class _SplashViewState extends BasePageState<SplashView> {
     super.initState();
 
     Future.delayed(Duration(seconds: 3), () {
-      // context.go(Pages.routeI3MasterFileList.toPath());
-      context.go(Pages.routeSignIn.toPath());
+      context.go(Pages.routeDashboard.toPath());
     });
   }
 
@@ -49,7 +48,7 @@ class _SplashViewState extends BasePageState<SplashView> {
             ),
             // Department name
             Text(
-              AppString.valuationDepartment.localize(context)!,
+              AppString.valuationDepartment.l10n(context)!,
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,

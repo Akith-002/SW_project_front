@@ -59,37 +59,37 @@ class AgricultureRatingCard extends StatelessWidget {
                   },
                 ),
                 LabeledTextField(
-                  label: AppString.localAuthority.localize(context)!,
-                  placeholder: AppString.localAuthority.localize(context)!,
+                  label: AppString.localAuthority.l10n(context)!,
+                  placeholder: AppString.localAuthority.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.localAuthorityCode.localize(context)!,
+                  label: AppString.localAuthorityCode.l10n(context)!,
                   placeholder: "123456789",
                 ),
                 LabeledTextField(
-                  label: AppString.assessmentNumber.localize(context)!,
-                  placeholder: AppString.assessmentNumber.localize(context)!,
+                  label: AppString.assessmentNumber.l10n(context)!,
+                  placeholder: AppString.assessmentNumber.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.newNumber.localize(context)!,
-                  placeholder: AppString.newNumber.localize(context)!,
+                  label: AppString.newNumber.l10n(context)!,
+                  placeholder: AppString.newNumber.l10n(context)!,
                 ),
                 LabeledTextField(
-                  label: AppString.obsoleteNumber.localize(context)!,
-                  placeholder: AppString.obsoleteNumber.localize(context)!,
+                  label: AppString.obsoleteNumber.l10n(context)!,
+                  placeholder: AppString.obsoleteNumber.l10n(context)!,
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.owner.localize(context)!,
-                  placeholder: AppString.owner.localize(context)!,
+                  label: AppString.owner.l10n(context)!,
+                  placeholder: AppString.owner.l10n(context)!,
                 ),
                 LabeledTextField(
-                  label: AppString.description.localize(context)!,
+                  label: AppString.description.l10n(context)!,
                   placeholder: "Land use description",
                 ),
               ]),
@@ -160,7 +160,7 @@ class AgricultureRatingCard extends StatelessWidget {
                   placeholder: "Age of crops/plantation",
                 ),
                 CustomDropdownField(
-                  label: AppString.access.localize(context)!,
+                  label: AppString.access.l10n(context)!,
                   items: [
                     "Select Access",
                     "Paved Road",
@@ -185,7 +185,7 @@ class AgricultureRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 CustomDropdownField(
-                  label: AppString.propertySubCategory.localize(context)!,
+                  label: AppString.propertySubCategory.l10n(context)!,
                   items: [
                     "Select Property Sub Category",
                     "Agricultural Land",
@@ -198,7 +198,7 @@ class AgricultureRatingCard extends StatelessWidget {
                   },
                 ),
                 CustomDropdownField(
-                  label: AppString.propertyType.localize(context)!,
+                  label: AppString.propertyType.l10n(context)!,
                   items: [
                     "Select Property Type",
                     "Agricultural",
@@ -213,8 +213,8 @@ class AgricultureRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.wardNumber.localize(context)!,
-                  placeholder: AppString.wardNumber.localize(context)!,
+                  label: AppString.wardNumber.l10n(context)!,
+                  placeholder: AppString.wardNumber.l10n(context)!,
                 ),
                 LabeledTextField(
                   label: "Village/District",
@@ -223,8 +223,8 @@ class AgricultureRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.date.localize(context)!,
-                  placeholder: AppString.date.localize(context)!,
+                  label: AppString.date.l10n(context)!,
+                  placeholder: AppString.date.l10n(context)!,
                 ),
                 LabeledTextField(
                   label: "Cultivator",
@@ -301,7 +301,7 @@ class AgricultureRatingCard extends StatelessWidget {
               ]),
               _buildRow([
                 LabeledTextField(
-                  label: AppString.notes.localize(context)!,
+                  label: AppString.notes.l10n(context)!,
                   placeholder: "Agricultural land notes and features",
                 ),
               ]),
@@ -314,7 +314,7 @@ class AgricultureRatingCard extends StatelessWidget {
                     SizedBox(
                       width: 120,
                       child: CustomButton(
-                        text: AppString.cancel.localize(context)!,
+                        text: AppString.cancel.l10n(context)!,
                         backgroundColor: colors(context).colorGrey1!,
                         onPressed: () {
                           Navigator.pop(context);
@@ -328,7 +328,7 @@ class AgricultureRatingCard extends StatelessWidget {
                         SizedBox(
                           width: 120,
                           child: CustomButton(
-                            text: AppString.save.localize(context)!,
+                            text: AppString.save.l10n(context)!,
                             backgroundColor: colors(context).colorPrimary1!,
                             onPressed: () {
                               // TODO: Implement save functionality

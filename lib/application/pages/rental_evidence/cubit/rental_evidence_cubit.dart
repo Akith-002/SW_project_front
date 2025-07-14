@@ -3,8 +3,7 @@ import 'package:land_asset_valuation/app/cubit/base_state.dart';
 import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 import 'package:land_asset_valuation/domain/usecases/send_rental_evidence_usecase.dart';
 import 'package:land_asset_valuation/data/models/rental_evidence_model.dart';
-
-part 'rental_evidence_state.dart';
+import 'package:land_asset_valuation/application/pages/rental_evidence/cubit/rental_evidence_state.dart';
 
 class RentalEvidenceCubit extends BaseCubit<BaseState<RentalEvidenceState>> {
   final AppSharedData appSharedData;

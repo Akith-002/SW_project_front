@@ -23,14 +23,14 @@ class LoginFotter extends StatelessWidget {
               children: [
                 TextSpan(
                   text: AppString.loginFooter
-                      .localize(context)!
+                      .l10n(context)!
                       .substring(0, 40),
                   style: AppStyling.normalTextSize12.copyWith(
                       color: colors(context).colorGrey8),
                 ),
                 TextSpan(
                   text: AppString.loginFooter
-                      .localize(context)!
+                      .l10n(context)!
                       .substring(40),
                   style: AppStyling.normalTextSize12.copyWith(
                     color: colors(context).colorGrey8,

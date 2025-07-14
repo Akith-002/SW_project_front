@@ -12,10 +12,12 @@ import 'package:land_asset_valuation/injection.dart';
 
 class RoAssetsList extends BasePage {
   final String? source;
+  final int? requestId;
 
   const RoAssetsList({
     super.key,
     this.source,
+    this.requestId,
   });
 
   @override
@@ -24,7 +26,6 @@ class RoAssetsList extends BasePage {
 
 class _RoAssetsListState extends BasePageState<RoAssetsList> {
   final _cubit = injection<RoAssetsListCubit>();
-
   // Generate sample assets based on the asset type
   List<Asset> _generateSampleAssets() {
     List<Asset> assets = []; // Generate RO-specific sample data
@@ -40,6 +41,11 @@ class _RoAssetsListState extends BasePageState<RoAssetsList> {
         status: i % 5 == 0 ? AssetStatus.completed : AssetStatus.active,
         isRatingCard: i % 4 !=
             1, // Most assets have rating cards except every 4th starting from 1
+        area: (i * 900.0) +
+            (i *
+                125.75), // Area in square meters, ranging from 1025.75 to 8206.0
+        location:
+            'Lat: ${9.8 + (i * 0.03)}, Lng: ${76.8 + (i * 0.025)}', // Sample coordinates for object area
       ));
     }
 
@@ -66,36 +72,36 @@ class _RoAssetsListState extends BasePageState<RoAssetsList> {
 
     switch (widget.source) {
       case 'ratingAssessment':
-        title = AppString.ratingAssessmentRA.localize(context)!;
+        title = AppString.ratingAssessmentRA.l10n(context)!;
         breadcrumbItems = [
-          AppString.massRating.localize(context)!,
-          AppString.ratingAssessment.localize(context)!,
-          AppString.request.localize(context)!,
+          AppString.massRating.l10n(context)!,
+          AppString.ratingAssessment.l10n(context)!,
+          AppString.request.l10n(context)!,
         ];
         break;
       case 'ratingBuilding':
-        title = AppString.ratingBuildingRB.localize(context)!;
+        title = AppString.ratingBuildingRB.l10n(context)!;
         breadcrumbItems = [
-          AppString.massRating.localize(context)!,
-          AppString.ratingBuilding.localize(context)!,
-          AppString.request.localize(context)!,
+          AppString.massRating.l10n(context)!,
+          AppString.ratingBuilding.l10n(context)!,
+          AppString.request.l10n(context)!,
         ];
         break;
       case 'ratingObject':
-        title = AppString.ratingObjectRO.localize(context)!;
+        title = AppString.ratingObjectRO.l10n(context)!;
         breadcrumbItems = [
-          AppString.massRating.localize(context)!,
-          AppString.ratingObject.localize(context)!,
-          AppString.request.localize(context)!,
+          AppString.massRating.l10n(context)!,
+          AppString.ratingObject.l10n(context)!,
+          AppString.request.l10n(context)!,
         ];
         break;
       case 'massRating':
       default:
-        title = AppString.ratingObjectRO.localize(context)!;
+        title = AppString.ratingObjectRO.l10n(context)!;
         breadcrumbItems = [
-          AppString.massRating.localize(context)!,
-          AppString.ratingObject.localize(context)!,
-          AppString.request.localize(context)!,
+          AppString.massRating.l10n(context)!,
+          AppString.ratingObject.l10n(context)!,
+          AppString.request.l10n(context)!,
         ];
         break;
     }

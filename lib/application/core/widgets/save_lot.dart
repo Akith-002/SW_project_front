@@ -75,7 +75,7 @@ class _LotIdSearchDialogState extends State<_LotIdSearchDialog> {
     return AlertDialog(
       backgroundColor: Colors.white,
       // Dialog title prompting the user to select a lot ID.
-      title: Text(AppString.selectLotId.localize(context)!),
+      title: Text(AppString.selectLotId.l10n(context)!),
       contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       // Constrain the overall content area width
       content: SizedBox(
@@ -91,7 +91,7 @@ class _LotIdSearchDialogState extends State<_LotIdSearchDialog> {
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: AppString.searchEllipsis.localize(context)!,
+                  hintText: AppString.searchEllipsis.l10n(context)!,
                   prefixIcon: const Icon(Icons.search, size: 20),
                   isDense: true,
                   border: OutlineInputBorder(
@@ -140,7 +140,7 @@ class _LotIdSearchDialogState extends State<_LotIdSearchDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppString.cancel.localize(context)!),
+          child: Text(AppString.cancel.l10n(context)!),
         ),
       ],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -212,7 +212,7 @@ class _SaveLotState extends State<SaveLot> {
           children: [
             // Main title.
             Text(
-              AppString.saveLot.localize(context)!,
+              AppString.saveLot.l10n(context)!,
               style: AppStyling.semiBoldTextSize18.copyWith(
                 color: colors(context).textPrimary,
               ),
@@ -220,7 +220,7 @@ class _SaveLotState extends State<SaveLot> {
             const SizedBox(height: 24),
             // Label for lot id selection input.
             Text(
-              AppString.selectLotId.localize(context)!,
+              AppString.selectLotId.l10n(context)!,
               style: AppStyling.normalTextSize14.copyWith(
                 color: colors(context).textPrimary,
               ),
@@ -239,7 +239,7 @@ class _SaveLotState extends State<SaveLot> {
                       : colors(context).textGrey,
                 ),
                 decoration: InputDecoration(
-                  hintText: AppString.selectLotId.localize(context),
+                  hintText: AppString.selectLotId.l10n(context),
                   hintStyle: AppStyling.normalTextSize14.copyWith(
                     color: _selectedLotId != null
                         ? colors(context).textPrimary
@@ -289,7 +289,7 @@ class _SaveLotState extends State<SaveLot> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
                   ),
-                  child: Text(AppString.cancel.localize(context)!,
+                  child: Text(AppString.cancel.l10n(context)!,
                       style: AppStyling.semiBoldTextSize14.copyWith(
                         color: colors(context).textPrimary,
                       )),
@@ -314,7 +314,7 @@ class _SaveLotState extends State<SaveLot> {
                     disabledBackgroundColor: Colors.grey.shade300,
                     disabledForegroundColor: Colors.grey.shade500,
                   ),
-                  child: Text(AppString.save.localize(context)!,
+                  child: Text(AppString.save.l10n(context)!,
                       style: AppStyling.semiBoldTextSize14.copyWith(
                             color: colors(context).colorWhite,
                           )),
