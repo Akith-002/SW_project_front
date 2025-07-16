@@ -38,7 +38,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
   final GlobalKey<TableScaffoldState> _tableKey =
       GlobalKey<TableScaffoldState>();
   late final LandAcquisitionRepository _repository;
-  int _totalCount = 0;
+  int _totalCount = 8;
 
   @override
   void initState() {

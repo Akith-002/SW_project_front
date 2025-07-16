@@ -149,10 +149,15 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'massRating';
+              final String? requestIdStr = state.uri.queryParameters['requestId'];
+              final int? requestId = requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: MrAssetsList(source: source),
+                child: MrAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -162,10 +167,15 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingAssessment';
+              final String? requestIdStr = state.uri.queryParameters['requestId'];
+              final int? requestId = requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RaAssetsList(source: source),
+                child: RaAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -175,10 +185,15 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingBuilding';
+              final String? requestIdStr = state.uri.queryParameters['requestId'];
+              final int? requestId = requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RbAssetsList(source: source),
+                child: RbAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -188,10 +203,15 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingObject';
+              final String? requestIdStr = state.uri.queryParameters['requestId'];
+              final int? requestId = requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RoAssetsList(source: source),
+                child: RoAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -293,16 +313,19 @@ class AppRouter {
                   key: state.pageKey,
                   child: SettingsScreen(),
                 );
-              }),
-
-          // Rating Card Forms routes
+              }), // Rating Card Forms routes
           GoRoute(
             path: Pages.routeDomesticRatingCard.toPath(),
             name: Pages.routeDomesticRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+
               return NoTransitionPage(
                 key: state.pageKey,
-                child: DomesticRatingCard(),
+                child: DomesticRatingCard(assetId: assetId),
               );
             },
           ),

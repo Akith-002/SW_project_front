@@ -72,7 +72,9 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
             ),
           ),
           child: DropdownButtonFormField<String>(
-            value: _selectedValue!.isNotEmpty ? _selectedValue : null,
+            value: _selectedValue != null && _selectedValue!.isNotEmpty
+                ? _selectedValue
+                : null,
             icon: Icon(Icons.keyboard_arrow_down, color: borderColor),
             style: AppStyling.normalTextSize14
                 .copyWith(color: colors(context).labelTextColor),
@@ -80,8 +82,8 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
             isExpanded: true,
             decoration: InputDecoration(
               border: InputBorder.none,
-              contentPadding: const
-                  EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               errorStyle: const TextStyle(height: 0, fontSize: 0),
               errorText: null,
             ),
@@ -99,9 +101,9 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               if (newValue != null) {
                 setState(() {
                   _selectedValue = newValue;
-                _errorMessage = null;
+                  _errorMessage = null;
                 });
-                widget.onChanged!(newValue);
+                widget.onChanged?.call(newValue);
               }
             },
             items: widget.items.map((String item) {
