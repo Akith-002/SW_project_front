@@ -5,8 +5,13 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 
 class FloorManager extends StatefulWidget {
   final Function(String)? onFloorSelected;
+  final Function(String)? onFloorDeleted; // Add callback for deletion
 
-  const FloorManager({super.key, this.onFloorSelected});
+  const FloorManager({
+    Key? key,
+    this.onFloorSelected,
+    this.onFloorDeleted, // Add to constructor
+  }) : super(key: key);
 
   @override
   State<FloorManager> createState() => _FloorManagerState();
@@ -78,6 +83,37 @@ class _FloorManagerState extends State<FloorManager> {
     }
   }
 
+  void _deleteFloor(String floorName) {
+    // Prevent deleting the last floor (e.g., 'Ground') - Optional rule
+    if (floors.length <= 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Cannot delete the base floor.")),
+      );
+      return;
+    }
+
+    setState(() {
+      int deletedIndex = floors.indexOf(floorName);
+      floors.remove(floorName);
+
+      // If the deleted floor was selected, select another floor
+      if (_selectedFloor == floorName) {
+        // Select the floor below if possible, otherwise the new last floor
+        String newSelection =
+            (deletedIndex > 0 && deletedIndex <= floors.length)
+                ? floors[deletedIndex - 1]
+                : floors.last;
+        _selectFloor(
+            newSelection); // This already calls setState and onFloorSelected
+      }
+    });
+
+    // Notify parent to delete associated partitions
+    if (widget.onFloorDeleted != null) {
+      widget.onFloorDeleted!(floorName);
+    }
+  }
+
   void _selectFloor(String floorName) {
     if (_selectedFloor != floorName) {
       setState(() {
@@ -123,8 +159,10 @@ class _FloorManagerState extends State<FloorManager> {
                       floorName: floor,
                       isSelected: _selectedFloor == floor,
                       onTap: () => _selectFloor(floor),
+                      onDelete: () =>
+                          _deleteFloor(floor), // Pass delete handler
                     ))
-                ,
+                .toList(),
           ],
         ),
       ),
@@ -136,10 +174,12 @@ class FloorItem extends StatelessWidget {
   final String floorName;
   final bool isSelected;
   final VoidCallback onTap;
+  final VoidCallback onDelete; // Add callback for delete button
 
-  const FloorItem({super.key, 
+  const FloorItem({
     required this.floorName,
     required this.onTap,
+    required this.onDelete, // Require delete callback
     this.isSelected = false,
   });
 
@@ -197,7 +237,7 @@ class FloorItem extends StatelessWidget {
                     Icons.delete,
                     color: isSelected ? colors(context).colorPrimary6 : null,
                   ),
-                  onPressed: () {},
+                  onPressed: onDelete, // Use the onDelete callback
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                   iconSize: 20,
@@ -212,8 +252,6 @@ class FloorItem extends StatelessWidget {
 }
 
 class AddFloorDialog extends StatefulWidget {
-  const AddFloorDialog({super.key});
-
   @override
   State<AddFloorDialog> createState() => _AddFloorDialogState();
 }
@@ -248,11 +286,11 @@ class _AddFloorDialogState extends State<AddFloorDialog> {
                 dropdownColor: colors(context).colorWhite,
                 items: [
                   DropdownMenuItem(
-                      value: 'above',
-                      child: Text(AppString.above.localize(context)!)),
+                      child: Text(AppString.above.localize(context)!),
+                      value: 'above'),
                   DropdownMenuItem(
-                      value: 'below',
-                      child: Text(AppString.below.localize(context)!)),
+                      child: Text(AppString.below.localize(context)!),
+                      value: 'below'),
                 ],
                 onChanged: (val) {
                   if (val != null) {
