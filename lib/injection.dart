@@ -46,6 +46,7 @@ import 'package:land_asset_valuation/data/datasource/remote/mr_request_remote_da
 import 'package:land_asset_valuation/data/repositories/mr_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/mr_request_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/mr_requests_usecases.dart';
+import 'package:land_asset_valuation/domain/usecases/get_request_by_id_usecase.dart';
 
 // Asset Feature (Clean Architecture)
 import 'package:land_asset_valuation/data/datasource/remote/asset_remote_data_source.dart';
@@ -60,6 +61,12 @@ import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repo
 import 'package:land_asset_valuation/domain/usecases/get_all_lm_master_files_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/get_paginated_lm_master_files_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/search_lm_master_files_usecase.dart';
+
+// Asset Change Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/asset_change_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/asset_change_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/asset_change_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/change_asset_number_usecase.dart';
 
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
@@ -82,6 +89,13 @@ import 'package:land_asset_valuation/application/pages/conditionReport/cubit/con
 import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
 import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
 import 'package:land_asset_valuation/data/services/sign_in_service.dart';
+import 'package:land_asset_valuation/data/datasource/remote/rental_assessment_remote_datasource.dart';
+import 'package:land_asset_valuation/data/repositories/rental_assessment_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/rental_assessment_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/get_rental_assessments_usecase.dart';
+import 'package:land_asset_valuation/application/pages/rental_assessment/cubit/rental_assessment_cubit.dart';
+
+// Add repository import if you create one
 
 // Domestic Rating Card Feature
 import 'package:land_asset_valuation/data/datasource/remote/domestic_rating_card_remote_data_source.dart';
@@ -165,6 +179,51 @@ Future<void> init() async {
   );
 
   // ------------------------------
+  // Asset Change Feature
+  // ------------------------------
+  injection.registerLazySingleton<AssetChangeRemoteDataSource>(
+    () => AssetChangeRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<AssetChangeRepository>(
+    () => AssetChangeRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => ChangeAssetNumberUseCase(injection()),
+  );
+
+  // ------------------------------
+  // Rental Assessment Feature
+  // ------------------------------
+  if (!injection.isRegistered<RentalAssessmentRemoteDataSource>()) {
+    injection.registerLazySingleton<RentalAssessmentRemoteDataSource>(
+      () => RentalAssessmentRemoteDataSourceImpl(dioClient: injection()),
+    );
+  }
+
+  if (!injection.isRegistered<RentalAssessmentRepository>()) {
+    injection.registerLazySingleton<RentalAssessmentRepository>(
+      () => RentalAssessmentRepositoryImpl(
+        remoteDataSource: injection(),
+      ),
+    );
+  }
+
+  if (!injection.isRegistered<GetRentalAssessmentsUseCase>()) {
+    injection.registerLazySingleton(
+      () => GetRentalAssessmentsUseCase(injection()),
+    );
+  }
+
+  // Factory registrations don't need isRegistered check as they create new instances
+  injection.registerFactory(
+    () => RentalAssessmentCubit(
+      getRentalAssessmentsUseCase: injection(),
+    ),
+  );
+
+  // ------------------------------
   // Rental Evidence Feature
   // ------------------------------
   injection.registerLazySingleton<RentalEvidenceRemoteDataSource>(
@@ -178,6 +237,7 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => SendRentalEvidenceUseCase(injection()),
   );
+
   // ------------------------------
   // Land Acquisition Feature (Clean Architecture)
   // ------------------------------
@@ -221,6 +281,7 @@ Future<void> init() async {
   injection.registerLazySingleton(() => GetMrRequestsUseCase(injection()));
   injection
       .registerLazySingleton(() => GetMrRequestsPaginatedUseCase(injection()));
+  injection.registerLazySingleton(() => GetRequestByIdUseCase(repository: injection()));
 
   // ------------------------------
   // Asset Feature (Clean Architecture)
