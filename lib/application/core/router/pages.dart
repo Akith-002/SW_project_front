@@ -28,6 +28,7 @@ class Pages {
   static const routeAgricultureRatingCard = "agriculture-rating-card";
   static const routeShopsRatingCard = "shops-rating-card";
   static const routeSpecialRatingCard = "special-rating-card";
+  static const routeTest = "test";
 }
 
 extension PagesExtension on String {
