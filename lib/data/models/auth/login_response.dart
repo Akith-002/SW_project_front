@@ -4,6 +4,7 @@ class LoginResponse {
   final String empName;
   final String empEmail;
   final String empId;
+  final int id;
   final String position;
   final String division;
 
@@ -13,6 +14,7 @@ class LoginResponse {
     required this.empName,
     required this.empEmail,
     required this.empId,
+    required this.id,
     required this.position,
     required this.division,
   });
@@ -24,6 +26,7 @@ class LoginResponse {
       empName: json['empName'] as String,
       empEmail: json['empEmail'] as String,
       empId: json['empId'] as String,
+      id: json['id'] as int,
       position: json['position'] as String,
       division: json['division'] as String,
     );
@@ -36,6 +39,7 @@ class LoginResponse {
       'empName': empName,
       'empEmail': empEmail,
       'empId': empId,
+      'id': id,
       'position': position,
       'division': division,
     };
