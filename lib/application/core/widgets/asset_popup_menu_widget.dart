@@ -41,7 +41,7 @@ class AssetPopupMenuWidget extends StatelessWidget {
                       "Rental Evidences",
                       Color(0xFF45A249),
                       () => context.pushNamed(
-                        Pages.routeRentalEvidence.toPathName(),
+                        Pages.routeI2RentalEvidence.toPathName(),
                         queryParameters: {'selectedIndex': '6'},
                       ),
                     ),

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
@@ -13,10 +12,14 @@ import 'package:land_asset_valuation/application/core/widgets/tableForRA/table_s
 import 'package:land_asset_valuation/application/core/widgets/tableForRB/table_scaffold_RB.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRO/table_scaffold_RO.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
+import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/LM_Masterfile_list.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
+import 'package:land_asset_valuation/application/pages/mr_requests/cubit/mr_requests_cubit.dart';
+import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class I3MasterFileList extends StatefulWidget {
   final int number;
@@ -32,28 +35,22 @@ class I3MasterFileList extends StatefulWidget {
 
 class _I3MasterFileListState extends State<I3MasterFileList> {
   final searchController = TextEditingController();
-  final GlobalKey<TableScaffoldState> _tableKey = GlobalKey<TableScaffoldState>();
-
-  int _masterFileCount = 0;
+  final GlobalKey<TableScaffoldState> _tableKey =
+      GlobalKey<TableScaffoldState>();
+  late final LandAcquisitionRepository _repository;
+  int _totalCount = 8;
 
   @override
   void initState() {
     super.initState();
-    _loadMasterFileCount();
+    _repository = injection<LandAcquisitionRepository>();
   }
 
-  void _loadMasterFileCount() async {
-    try {
-      final response = await http.get(Uri.parse("http://10.0.2.2:5221/api/LAMasterfile"));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> list = data['masterFiles'];
-        setState(() {
-          _masterFileCount = list.length;
-        });
-      }
-    } catch (e) {
-      print("Failed to load master file count: $e");
+  void _updateTotalCount(int count) {
+    if (mounted && _totalCount != count) {
+      setState(() {
+        _totalCount = count;
+      });
     }
   }
 
@@ -61,7 +58,8 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
   Widget build(BuildContext context) {
     return BlocProvider<I3MasterFileListCubit>(
       create: (_) => injection<I3MasterFileListCubit>(),
-      child: Builder( // ✅ fixes the context issue
+      child: Builder(
+        // ✅ fixes the context issue
         builder: (context) => _buildContentForIndex(widget.number),
       ),
     );
@@ -96,13 +94,15 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             breadcrumbItems: [
               AppString.landAcquisition.localize(context)!,
             ],
-            totalCount: _masterFileCount,
+            totalCount: _totalCount,
             onSearch: (query) {
               _tableKey.currentState?.search(query);
             },
             table: TableScaffold(
               key: _tableKey,
               pageSource: currentPageSource,
+              repository: _repository,
+              onTotalCountChanged: _updateTotalCount,
             ),
           ),
         );
@@ -119,7 +119,10 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
               AppString.massRating.localize(context)!,
             ],
             totalCount: 0,
-            table: TableScaffoldMr(pageSource: currentPageSource),
+            table: BlocProvider<MrRequestsCubit>(
+              create: (context) => injection<MrRequestsCubit>(),
+              child: TableScaffoldMr(pageSource: currentPageSource),
+            ),
           ),
         );
 
@@ -175,22 +178,13 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
         return MapScreen();
 
       case 7:
-        return Scaffold(
-          appBar: CustomAppBar(
-            title: AppString.landMiscellaneous.localize(context)!,
-            leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
-          ),
-          body: FileList(
-            breadcrumbItems: [
-              AppString.landMiscellaneous.localize(context)!,
-            ],
-            totalCount: 0,
-            table: TableScaffoldLM(pageSource: currentPageSource),
-          ),
+        return LmMasterfileList(
+          currentPageSource: currentPageSource,
         );
 
       default:
-        return const Center(child: Text("Content not available for this index."));
+        return const Center(
+            child: Text("Content not available for this index."));
     }
   }
 }

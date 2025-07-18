@@ -12,10 +12,12 @@ import 'package:land_asset_valuation/injection.dart';
 
 class RaAssetsList extends BasePage {
   final String? source;
+  final int? requestId;
 
   const RaAssetsList({
     super.key,
     this.source,
+    this.requestId,
   });
 
   @override
@@ -24,7 +26,6 @@ class RaAssetsList extends BasePage {
 
 class _RaAssetsListState extends BasePageState<RaAssetsList> {
   final _cubit = injection<RaAssetsListCubit>();
-
   // Generate sample assets based on the asset type
   List<Asset> _generateSampleAssets() {
     List<Asset> assets = []; // Generate RA-specific sample data
@@ -40,23 +41,13 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
         owner: 'Assessment Owner $i',
         status: i % 4 == 0 ? AssetStatus.completed : AssetStatus.active,
         isRatingCard: i % 2 == 0, // Alternating pattern for rating cards
+        area: (i * 800.0) +
+            (i *
+                150.25), // Area in square meters, ranging from 950.25 to 5701.5
+        location:
+            'Lat: ${9.5 + (i * 0.02)}, Lng: ${76.5 + (i * 0.015)}', // Sample coordinates for assessment area
       ));
     }
-        for (int i = 1; i <= 6; i++) {
-      assets.add(Asset(
-        id: i,
-        assetNo: 'RA${i.toString().padLeft(3, '0')}',
-        ward: 'Ward ${(i % 3) + 1}',
-        rdSt: 'Assessment Road ${String.fromCharCode(65 + (i % 8))}',
-        description: i % 2 == 0
-            ? 'Assessment Property Type A'
-            : 'Assessment Property Type B',
-        owner: 'Assessment Owner $i',
-        status: i % 4 == 0 ? AssetStatus.completed : AssetStatus.active,
-        isRatingCard: i % 2 == 0, // Alternating pattern for rating cards
-      ));
-    }
-
     return assets;
   }
 
@@ -68,6 +59,23 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
   void _onAssetsSelected(List<Asset> assets) {
     debugPrint('Selected ${assets.length} RA assets');
     // Handle multiple asset selection
+  }
+
+  void _refreshAssets() {
+    debugPrint('Refreshing RA assets...');
+
+    // Show a brief loading indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Refreshing assets...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    // In a real app, this would reload data from the cubit
+    setState(() {
+      // This will trigger a rebuild and regenerate the sample data
+    });
   }
 
   @override
@@ -114,7 +122,6 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
         ];
         break;
     }
-
     return Scaffold(
         appBar: CustomAppBar(title: title),
         body: SingleChildScrollView(
@@ -128,6 +135,7 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
                 assetType: 'RA',
                 onAssetSelected: _onAssetSelected,
                 onAssetsSelected: _onAssetsSelected,
+                onRefresh: _refreshAssets,
               ),
             ],
           ),

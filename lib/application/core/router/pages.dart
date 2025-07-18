@@ -20,6 +20,7 @@ class Pages {
   static const routePastValuation = "past-valuation";
   static const routeInspectionReport = "inspection-report";
   static const routeSketchTool = "sketch-tool";
+  static const routeLmMasterfileList = "lm-masterfile-list";
 
   // Rating Card Forms
   static const routeDomesticRatingCard = "domestic-rating-card";
@@ -27,6 +28,7 @@ class Pages {
   static const routeAgricultureRatingCard = "agriculture-rating-card";
   static const routeShopsRatingCard = "shops-rating-card";
   static const routeSpecialRatingCard = "special-rating-card";
+  static const routeTest = "test";
 }
 
 extension PagesExtension on String {
