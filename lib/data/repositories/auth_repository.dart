@@ -46,6 +46,7 @@ class AuthRepositoryImpl implements AuthRepository {
         await _secureStorage.write('empName', loginResponse.empName);
         await _secureStorage.write('empEmail', loginResponse.empEmail);
         await _secureStorage.write('empId', loginResponse.empId);
+        await _secureStorage.write('id', loginResponse.id.toString());
         await _secureStorage.write('position', loginResponse.position);
         await _secureStorage.write('division', loginResponse.division);
 

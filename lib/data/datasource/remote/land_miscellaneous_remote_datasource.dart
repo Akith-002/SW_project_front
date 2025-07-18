@@ -16,11 +16,13 @@ class LandMiscellaneousRemoteDatasource {
       getPaginatedMasterFiles({
     required int page,
     required int pageSize,
+    required int assignedToUserId,
     String? sortBy,
   }) async {
     final Map<String, dynamic> queryParams = {
       'pageNumber': page,
       'pageSize': pageSize,
+      'assignedToUserId': assignedToUserId,
     };
 
     if (sortBy != null) {
@@ -40,12 +42,14 @@ class LandMiscellaneousRemoteDatasource {
     required String query,
     required int page,
     required int pageSize,
+    required int assignedToUserId,
     String? sortBy,
   }) async {
     final Map<String, dynamic> queryParams = {
       'searchTerm': query,
       'pageNumber': page,
       'pageSize': pageSize,
+      'assignedToUserId': assignedToUserId,
     };
 
     if (sortBy != null) {
