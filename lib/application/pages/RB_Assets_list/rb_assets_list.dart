@@ -12,10 +12,12 @@ import 'package:land_asset_valuation/injection.dart';
 
 class RbAssetsList extends BasePage {
   final String? source;
+  final int? requestId;
 
   const RbAssetsList({
     super.key,
     this.source,
+    this.requestId,
   });
 
   @override
@@ -55,6 +57,23 @@ class _RbAssetsListState extends BasePageState<RbAssetsList> {
   void _onAssetsSelected(List<Asset> assets) {
     debugPrint('Selected ${assets.length} RB assets');
     // Handle multiple asset selection
+  }
+
+  void _refreshAssets() {
+    debugPrint('Refreshing RB assets...');
+
+    // Show a brief loading indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Refreshing assets...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    // In a real app, this would reload data from the cubit
+    setState(() {
+      // This will trigger a rebuild and regenerate the sample data
+    });
   }
 
   @override
@@ -114,6 +133,7 @@ class _RbAssetsListState extends BasePageState<RbAssetsList> {
                 assetType: 'RB',
                 onAssetSelected: _onAssetSelected,
                 onAssetsSelected: _onAssetsSelected,
+                onRefresh: _refreshAssets,
               ),
             ],
           ),

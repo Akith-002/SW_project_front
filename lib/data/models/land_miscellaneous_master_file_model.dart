@@ -5,6 +5,7 @@ class LandMiscellaneousMasterFile {
   final String planNo;
   final String requestingAuthorityReferenceNo;
   final String status;
+  final int lots;
 
   LandMiscellaneousMasterFile({
     required this.id,
@@ -13,6 +14,7 @@ class LandMiscellaneousMasterFile {
     required this.planNo,
     required this.requestingAuthorityReferenceNo,
     required this.status,
+    required this.lots,
   });
 
   factory LandMiscellaneousMasterFile.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class LandMiscellaneousMasterFile {
       planNo: json['planNo'],
       requestingAuthorityReferenceNo: json['requestingAuthorityReferenceNo'],
       status: json['status'],
+      lots: json['lots'],
     );
   }
 
@@ -34,6 +37,7 @@ class LandMiscellaneousMasterFile {
       'planNo': planNo,
       'requestingAuthorityReferenceNo': requestingAuthorityReferenceNo,
       'status': status,
+      'lots': lots,
     };
   }
 }

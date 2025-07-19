@@ -26,7 +26,8 @@ class LmMasterfileListCubit
       final result = await getAllUseCase();
       result.fold(
         (failure) => emit(LM_MasterfileListError(failure.message)),
-        (files) => emit(LM_MasterfileListSuccess(files)),
+        (paginatedFiles) =>
+            emit(LM_MasterfileListPaginatedSuccess(paginatedFiles)),
       );
     } catch (e) {
       emit(LM_MasterfileListError('Failed to fetch master files'));
@@ -48,13 +49,22 @@ class LmMasterfileListCubit
     }
   }
 
-  Future<void> searchMasterFiles(String query) async {
+  Future<void> searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+  }) async {
     emit(LM_MasterfileListLoading());
     try {
-      final result = await searchUseCase(query);
+      final result = await searchUseCase(
+        query: query,
+        page: page,
+        pageSize: pageSize,
+      );
       result.fold(
         (failure) => emit(LM_MasterfileListError(failure.message)),
-        (files) => emit(LM_MasterfileListSuccess(files)),
+        (paginatedFiles) =>
+            emit(LM_MasterfileListPaginatedSuccess(paginatedFiles)),
       );
     } catch (e) {
       emit(LM_MasterfileListError('Search failed'));

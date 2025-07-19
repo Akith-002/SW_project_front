@@ -16,12 +16,21 @@ class LandMiscellaneousRemoteDatasource {
       getPaginatedMasterFiles({
     required int page,
     required int pageSize,
+    required int assignedToUserId,
+    String? sortBy,
   }) async {
-    final response =
-        await dioClient.get('/LandMiscellaneous/paginated', queryParameters: {
+    final Map<String, dynamic> queryParams = {
       'pageNumber': page,
       'pageSize': pageSize,
-    });
+      'assignedToUserId': assignedToUserId,
+    };
+
+    if (sortBy != null) {
+      queryParams['sortBy'] = sortBy;
+    }
+
+    final response = await dioClient.get('/LandMiscellaneous/paginated',
+        queryParameters: queryParams);
 
     return PaginatedResponse.fromJson(
       response.data,
@@ -29,12 +38,30 @@ class LandMiscellaneousRemoteDatasource {
     );
   }
 
-  Future<List<LandMiscellaneousMasterFile>> searchMasterFiles(
-      String query) async {
-    final response = await dioClient.post('/LandMiscellaneous/search', data: {
-      'query': query,
-    });
-    final List<dynamic> data = response.data['masterFiles'];
-    return data.map((e) => LandMiscellaneousMasterFile.fromJson(e)).toList();
+  Future<PaginatedResponse<LandMiscellaneousMasterFile>> searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+    required int assignedToUserId,
+    String? sortBy,
+  }) async {
+    final Map<String, dynamic> queryParams = {
+      'searchTerm': query,
+      'pageNumber': page,
+      'pageSize': pageSize,
+      'assignedToUserId': assignedToUserId,
+    };
+
+    if (sortBy != null) {
+      queryParams['sortBy'] = sortBy;
+    }
+
+    final response = await dioClient.get('/LandMiscellaneous/search',
+        queryParameters: queryParams);
+
+    return PaginatedResponse.fromJson(
+      response.data,
+      (json) => LandMiscellaneousMasterFile.fromJson(json),
+    );
   }
 }

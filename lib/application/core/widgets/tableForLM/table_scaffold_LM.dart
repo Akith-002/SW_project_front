@@ -13,13 +13,15 @@ import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repo
 class TableScaffoldLM extends StatefulWidget {
   final int initialPageSize;
   final List<int> pageSizeOptions;
-  final String pageSource;
+  final String? pageSource;
   final LandMiscellaneousRepository repository;
+  final ValueChanged<int>? onTotalCountChanged;
 
   const TableScaffoldLM({
     super.key,
-    required this.pageSource,
+    this.pageSource,
     required this.repository,
+    this.onTotalCountChanged,
     this.initialPageSize = 9,
     this.pageSizeOptions = const [9, 15, 30, 60],
   });
@@ -31,10 +33,15 @@ class TableScaffoldLM extends StatefulWidget {
 class TableScaffoldLMState extends State<TableScaffoldLM> {
   late Future<Either<Failure, PaginatedResponse<LandMiscellaneousMasterFile>>>
       _futurePlans;
-  List<LandMiscellaneousMasterFile>? _searchResults;
+  PaginatedResponse<LandMiscellaneousMasterFile>? _searchResults;
   int _currentPage = 1;
   late int _pageSize;
   late List<int> _pageSizeOptions;
+  bool _isSearching = false;
+  String? _currentSearchQuery;
+  String? _sortColumn;
+  int?
+      _previousTotalCount; // Cache previous count to prevent unnecessary callbacks
 
   @override
   void initState() {
@@ -49,32 +56,125 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
       _futurePlans = widget.repository.getPaginatedMasterFiles(
         page: _currentPage,
         limit: _pageSize,
+        sortBy: _sortColumn,
       );
     });
   }
 
   void search(String query) async {
     if (widget.pageSource == 'landMiscellaneous') {
+      // If query is empty, clear search results and show original data
+      if (query.trim().isEmpty) {
+        setState(() {
+          _searchResults = null;
+          _isSearching = false;
+          _currentSearchQuery = null;
+        });
+        _fetchPlans(); // Reload original paginated data
+        return;
+      }
+
+      setState(() {
+        _isSearching = true;
+        _currentSearchQuery = query;
+      });
       try {
-        final results = await widget.repository.searchMasterFiles(query);
+        final results = await widget.repository.searchMasterFiles(
+          query: query,
+          page: 1,
+          pageSize: _pageSize,
+          sortBy: _sortColumn,
+        );
         results.fold(
           (failure) {
+            setState(() {
+              _isSearching = false;
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Search failed: ${failure.message}")),
             );
           },
-          (files) {
+          (paginatedResponse) {
             setState(() {
-              _searchResults = files;
+              _searchResults = paginatedResponse;
               _currentPage = 1;
+              _isSearching = false;
             });
           },
         );
       } catch (e) {
+        setState(() {
+          _isSearching = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Search failed: $e")),
         );
       }
+    }
+  }
+
+  void _searchWithPagination(String query, int page) async {
+    if (widget.pageSource == 'landMiscellaneous') {
+      setState(() {
+        _isSearching = true;
+      });
+      try {
+        final results = await widget.repository.searchMasterFiles(
+          query: query,
+          page: page,
+          pageSize: _pageSize,
+          sortBy: _sortColumn,
+        );
+        results.fold(
+          (failure) {
+            setState(() {
+              _isSearching = false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Search failed: ${failure.message}")),
+            );
+          },
+          (paginatedResponse) {
+            setState(() {
+              _searchResults = paginatedResponse;
+              _currentPage = page;
+              _isSearching = false;
+            });
+          },
+        );
+      } catch (e) {
+        setState(() {
+          _isSearching = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Search failed: $e")),
+        );
+      }
+    }
+  }
+
+  void refreshWithSort(String sortBy) {
+    setState(() {
+      _sortColumn = sortBy;
+      _currentPage = 1;
+    });
+
+    if (_currentSearchQuery != null) {
+      _searchWithPagination(_currentSearchQuery!, 1);
+    } else {
+      _fetchPlans();
+    }
+  }
+
+  void _updateTotalCount(int totalCount) {
+    // Only call callback if count has actually changed
+    if (_previousTotalCount != totalCount &&
+        widget.onTotalCountChanged != null) {
+      _previousTotalCount = totalCount;
+      // Defer the callback to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onTotalCountChanged!(totalCount);
+      });
     }
   }
 
@@ -85,8 +185,14 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
           Either<Failure, PaginatedResponse<LandMiscellaneousMasterFile>>>(
         future: _futurePlans,
         builder: (context, snapshot) {
+          // Show search results if available
           if (_searchResults != null) {
-            return _buildTable(_searchResults!, null);
+            return _buildTable(_searchResults!.items, _searchResults);
+          }
+
+          // Show loading indicator while searching
+          if (_isSearching) {
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -119,95 +225,196 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
     final int endRecord = startRecord + plans.length - 1;
     final int totalCount = paginationData?.totalCount ?? plans.length;
 
+    // Move callback outside of build method to prevent excessive calls
+    _updateTotalCount(totalCount);
+
     return Column(
       children: [
         // Table Section - Use Expanded to take available space
         Expanded(
+          // Use a more efficient table implementation
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Container(
-                    width: constraints.maxWidth,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: colors(context).colorGrey3 ??
-                            colors(context).colorGrey9!,
-                        width: 0.5,
-                      ),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: DataTable(
-                      headingRowColor: WidgetStateProperty.all(
-                        colors(context).colorGrey9!,
-                      ),
-                      columns: const [
-                        DataColumn(label: Text("Master File No")),
-                        DataColumn(label: Text("Plan Type")),
-                        DataColumn(label: Text("Plan No")),
-                        DataColumn(
-                            label: Text("Requesting Authority Reference No")),
-                        DataColumn(label: Center(child: Text("Status"))),
-                        DataColumn(label: Center(child: Text("Action"))),
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color:
+                      colors(context).colorGrey3 ?? colors(context).colorGrey9!,
+                  width: 0.5,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                children: [
+                  // Fixed header
+                  Container(
+                    color: colors(context).colorGrey9!,
+                    child: const Row(
+                      children: [
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Master File No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Plan Type",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Plan No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 3,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Authority Reference No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Center(
+                                  child: Text("Status",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold))),
+                            )),
+                        Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Center(
+                                  child: Text("Action",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold))),
+                            )),
                       ],
-                      rows: plans.map((plan) {
-                        return DataRow(cells: [
-                          DataCell(Text(plan.masterFileNo.toString())),
-                          DataCell(Text(plan.planType)),
-                          DataCell(Text(plan.planNo.toString())),
-                          DataCell(Text(plan.requestingAuthorityReferenceNo)),
-                          DataCell(Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color:
-                                  _getStatusColor(plan.status).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              plan.status,
-                              style: TextStyle(
-                                  color: _getStatusColor(plan.status),
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          )),
-                          DataCell(
-                            SizedBox(
-                              height: 52,
-                              child: Row(
-                                children: [
-                                  iconButtonWidget(
-                                    color: colors(context).colorGrey8!,
-                                    iconName: PhosphorIconsRegular.eye,
-                                    onPressed: () {
-                                      context.pushNamed(
-                                        Pages.routeMapScreen.toPathName(),
-                                        queryParameters: {
-                                          'source': 'landMiscellaneous'
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ],
+                    ),
+                  ),
+                  // Scrollable body
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: plans.length,
+                      itemBuilder: (context, index) {
+                        final plan = plans[index];
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: colors(context).colorGrey3 ??
+                                    colors(context).colorGrey9!,
+                                width: 0.5,
                               ),
                             ),
                           ),
-                        ]);
-                      }).toList(),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(plan.masterFileNo.toString()),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(plan.planType),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(plan.planNo.toString()),
+                                  )),
+                              Expanded(
+                                  flex: 3,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(
+                                        plan.requestingAuthorityReferenceNo),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: _getStatusColor(plan.status)
+                                              .withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          plan.status,
+                                          style: TextStyle(
+                                            color: _getStatusColor(plan.status),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )),
+                              Expanded(
+                                  flex: 1,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Center(
+                                      child: iconButtonWidget(
+                                        color: colors(context).colorGrey8!,
+                                        iconName: PhosphorIconsRegular.eye,
+                                        onPressed: () {
+                                          context.pushNamed(
+                                            Pages.routeMapScreen.toPathName(),
+                                            queryParameters: {
+                                              'source': 'landMiscellaneous',
+                                              'id': plan.id.toString(),
+                                              'masterFileNo':
+                                                  plan.masterFileNo.toString(),
+                                              'planType': plan.planType,
+                                              'planNo': plan.planNo,
+                                              'authorityRefNo': plan
+                                                  .requestingAuthorityReferenceNo,
+                                              'status': plan.status,
+                                              'lots': plan.lots.toString(),
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  )),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
-                );
-              },
+                ],
+              ),
             ),
           ),
         ),
 
         // Pagination Section - Fixed at bottom
         const SizedBox(height: 16),
-        Padding(
+        Container(
+          color: Theme.of(context).scaffoldBackgroundColor,
           padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,8 +435,12 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
                         setState(() {
                           _pageSize = newSize;
                           _currentPage = 1;
-                          _fetchPlans();
                         });
+                        if (_currentSearchQuery != null) {
+                          _searchWithPagination(_currentSearchQuery!, 1);
+                        } else {
+                          _fetchPlans();
+                        }
                       }
                     },
                   ),
@@ -245,8 +456,13 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
                         ? () {
                             setState(() {
                               _currentPage--;
-                              _fetchPlans();
                             });
+                            if (_currentSearchQuery != null) {
+                              _searchWithPagination(
+                                  _currentSearchQuery!, _currentPage);
+                            } else {
+                              _fetchPlans();
+                            }
                           }
                         : null,
                   ),
@@ -256,8 +472,13 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
                         ? () {
                             setState(() {
                               _currentPage++;
-                              _fetchPlans();
                             });
+                            if (_currentSearchQuery != null) {
+                              _searchWithPagination(
+                                  _currentSearchQuery!, _currentPage);
+                            } else {
+                              _fetchPlans();
+                            }
                           }
                         : null,
                   ),

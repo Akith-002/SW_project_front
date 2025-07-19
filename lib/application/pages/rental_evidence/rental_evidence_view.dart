@@ -525,13 +525,13 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
                                 style: AppStyling.mediumTextSize14,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                '(Optional)',
-                                style: AppStyling.regularTextSize12.copyWith(
-                                  color: Colors.grey,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
+                              // Text(
+                              //   '(Optional)',
+                              //   style: AppStyling.regularTextSize12.copyWith(
+                              //     color: Colors.grey,
+                              //     fontStyle: FontStyle.italic,
+                              //   ),
+                              // ),
                             ],
                           ),
                           const SizedBox(height: 16),

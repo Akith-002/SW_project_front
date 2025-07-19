@@ -4,12 +4,14 @@ import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
+import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/widgets/assetListTable/asset_list_table.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_state.dart';
 import 'package:land_asset_valuation/data/models/asset.dart';
+import 'package:land_asset_valuation/domain/usecases/get_request_by_id_usecase.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 class MrAssetsList extends BasePage {
@@ -28,12 +30,36 @@ class MrAssetsList extends BasePage {
 
 class _MrAssetsListState extends BasePageState<MrAssetsList> {
   final _cubit = injection<MrAssetsListCubit>();
+  String? _requestReferenceNo;
 
   @override
   void initState() {
     super.initState();
     // Load assets with requestType = 1 for MR assets
     _loadAssets();
+    _fetchRequestDetails();
+  }
+
+  Future<void> _fetchRequestDetails() async {
+    if (widget.requestId != null) {
+      try {
+        final getRequestById = injection<GetRequestByIdUseCase>();
+        final request = await getRequestById(widget.requestId!);
+        if (mounted) {
+          setState(() {
+            _requestReferenceNo = request.ratingReferenceNo;
+          });
+        }
+      } catch (e) {
+        debugPrint('Error fetching request details: $e');
+        // Fallback to a default format
+        if (mounted) {
+          setState(() {
+            _requestReferenceNo = 'Request ${widget.requestId}';
+          });
+        }
+      }
+    }
   }
 
   void _loadAssets() {
@@ -84,11 +110,28 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
     // Handle multiple asset selection
   }
 
+  void _refreshAssets() {
+    debugPrint('Refreshing assets...');
+
+    // Show a brief loading indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Refreshing assets...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    _loadAssets();
+  }
+
   @override
   Widget buildView(BuildContext context) {
     // Determine title and breadcrumb based on source
     String title;
     List<String> breadcrumbItems;
+
+    // Use request reference number if available, otherwise use 'Request'
+    final String requestLabel = _requestReferenceNo ?? AppString.request.localize(context)!;
 
     switch (widget.source) {
       case 'ratingAssessment':
@@ -96,7 +139,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
           AppString.ratingAssessment.localize(context)!,
-          AppString.request.localize(context)!,
+          requestLabel,
         ];
         break;
       case 'ratingBuilding':
@@ -104,7 +147,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
           AppString.ratingBuilding.localize(context)!,
-          AppString.request.localize(context)!,
+          requestLabel,
         ];
         break;
       case 'ratingObject':
@@ -112,7 +155,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
           AppString.ratingObject.localize(context)!,
-          AppString.request.localize(context)!,
+          requestLabel,
         ];
         break;
       case 'massRating':
@@ -121,11 +164,10 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
           AppString.massRating.localize(context)!,
-          AppString.request.localize(context)!,
+          requestLabel,
         ];
         break;
     }
-
     return Scaffold(
       appBar: CustomAppBar(title: title),
       body: SingleChildScrollView(
@@ -134,6 +176,12 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
             Breadcrumb(items: [
               for (var item in breadcrumbItems) BreadcrumbItem(label: item),
             ]),
+            // Refresh button section
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            
+            ),
             BlocBuilder<MrAssetsListCubit, BaseState<MrAssetsListState>>(
               bloc: _cubit,
               builder: (context, state) {
@@ -176,6 +224,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
                     assetType: widget.source,
                     onAssetSelected: _onAssetSelected,
                     onAssetsSelected: _onAssetsSelected,
+                    onRefresh: _refreshAssets,
                   );
                 } else if (state is MrAssetsListSearchLoaded) {
                   return AssetListTable(
@@ -183,6 +232,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
                     assetType: widget.source,
                     onAssetSelected: _onAssetSelected,
                     onAssetsSelected: _onAssetsSelected,
+                    onRefresh: _refreshAssets,
                   );
                 } else {
                   // Initial state - show empty state or loading

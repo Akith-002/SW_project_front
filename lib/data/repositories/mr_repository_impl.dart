@@ -52,4 +52,13 @@ class MrRepositoryImpl implements MrRequestRepository {
       throw Exception('Failed to fetch MR requests: $e');
     }
   }
+
+  @override
+  Future<MrRequest> getRequestById(int requestId) async {
+    try {
+      return await _remoteDataSource.getRequestById(requestId);
+    } catch (e) {
+      throw Exception('Failed to fetch request: $e');
+    }
+  }
 }

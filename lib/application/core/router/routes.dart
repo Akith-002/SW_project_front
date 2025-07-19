@@ -7,6 +7,7 @@ import 'package:land_asset_valuation/application/core/widgets/sidebarlibrary/sid
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/i3_master_file_list.dart';
 import 'package:land_asset_valuation/application/pages/LA_Building_Rates/la_building_rates.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/la_Sales_Evidence.dart';
+import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/lm_masterfile_list.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/mr_assets_list.dart';
 import 'package:land_asset_valuation/application/pages/RA_Assets_list/ra_assets_list.dart';
 import 'package:land_asset_valuation/application/pages/RB_Assets_list/rb_assets_list.dart';
@@ -23,6 +24,7 @@ import 'package:land_asset_valuation/application/pages/splash/splash_view.dart';
 import 'package:land_asset_valuation/application/pages/RatingCard/rating_card_view.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/AssetMapScreen/asset_map_screen.dart';
+import 'package:land_asset_valuation/application/pages/test.dart';
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
@@ -148,10 +150,15 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'massRating';
+              final String? requestIdStr = state.uri.queryParameters['requestId'];
+              final int? requestId = requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: MrAssetsList(source: source),
+                child: MrAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -161,10 +168,15 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingAssessment';
+              final String? requestIdStr = state.uri.queryParameters['requestId'];
+              final int? requestId = requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RaAssetsList(source: source),
+                child: RaAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -174,10 +186,15 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingBuilding';
+              final String? requestIdStr = state.uri.queryParameters['requestId'];
+              final int? requestId = requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RbAssetsList(source: source),
+                child: RbAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -187,10 +204,15 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingObject';
+              final String? requestIdStr = state.uri.queryParameters['requestId'];
+              final int? requestId = requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RoAssetsList(source: source),
+                child: RoAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -292,16 +314,19 @@ class AppRouter {
                   key: state.pageKey,
                   child: SettingsScreen(),
                 );
-              }),
-
-          // Rating Card Forms routes
+              }), // Rating Card Forms routes
           GoRoute(
             path: Pages.routeDomesticRatingCard.toPath(),
             name: Pages.routeDomesticRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+
               return NoTransitionPage(
                 key: state.pageKey,
-                child: DomesticRatingCard(),
+                child: DomesticRatingCard(assetId: assetId),
               );
             },
           ),
@@ -345,6 +370,26 @@ class AppRouter {
               );
             },
           ),
+          GoRoute(
+            path: Pages.routeTest.toPath(),
+            name: Pages.routeTest.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const Test(), // Replace with your test page
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeLmMasterfileList.toPath(),
+            name: Pages.routeLmMasterfileList.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const LmMasterfileList(),
+              );
+            },
+          ),
         ],
       ),
     ],
@@ -356,6 +401,15 @@ class AppRouter {
   // Helper method to determine sidebar index from current route
   int _getSelectedIndexFromRoute(GoRouterState state) {
     final String path = state.matchedLocation;
+    final String source = state.uri.queryParameters['source'] ?? '';
+
+    print("DEBUG: _getSelectedIndexFromRoute called");
+    print("DEBUG: Path: $path");
+    print("DEBUG: Source: $source");
+    print("DEBUG: MapScreen path should be: ${Pages.routeMapScreen.toPath()}");
+    print(
+        "DEBUG: Does path start with MapScreen? ${path.startsWith(Pages.routeMapScreen.toPath())}");
+    print("DEBUG: All query parameters: ${state.uri.queryParameters}");
 
     // Check for selectedIndex in query parameters first
     if (state.uri.queryParameters.containsKey('selectedIndex')) {
@@ -391,24 +445,30 @@ class AppRouter {
           return 2; // Default to Mass Rating if no source specified
       }
     }
-    if (path.startsWith(Pages.routeMapScreen.toPath())) {
-      String source = state.uri.queryParameters['source'] ?? '';
-      print("DEBUG: MapScreen route with source: '$source'");
+
+    // Check MapScreen routes BEFORE checking i3masterfilelist
+    if (path.startsWith(Pages.routeMapScreen.toPath()) ||
+        path.startsWith(Pages.routeI3MasterFileList.toPath())) {
+      print("DEBUG: MapScreen route detected with source: '$source'");
 
       if (source == 'MRrentalEvidence') {
-        return 6; // MR Rental Evidence tab
+        print("DEBUG: Returning index 6 for MRrentalEvidence");
+        return 6;
       }
       if (source == 'landAcquisition') {
-        return 1; // Land Acquisition tab
+        print("DEBUG: Returning index 1 for landAcquisition");
+        return 1;
       }
       if (source == 'landMiscellaneous') {
-        return 7; // Land Miscellaneous tab - add this case
+        print("DEBUG: Returning index 7 for landMiscellaneous");
+        return 7;
       }
       if (source == 'massRating') {
-        return 2; // Mass Rating tab
+        print("DEBUG: Returning index 2 for massRating");
+        return 2;
       }
 
-      // Default to MR Rental Evidence if no specific source
+      print("DEBUG: No matching source, defaulting to index 6");
       return 6;
     }
 
@@ -449,6 +509,8 @@ class AppRouter {
     } else if (path.startsWith(Pages.routeRentalEvidence.toPath()) ||
         path.startsWith(Pages.routeI2RentalEvidence.toPath())) {
       return 6; // MR Rental Evidence
+    } else if (path.startsWith(Pages.routeLmMasterfileList.toPath())) {
+      return 7; // Land Miscellaneous
     }
 
     // Default
