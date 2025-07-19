@@ -14,6 +14,7 @@ import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 
 // Dio client
 import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
+import 'package:land_asset_valuation/data/datasource/remote/api/auth_interceptor.dart';
 
 // Condition Report Feature
 import 'package:land_asset_valuation/data/datasource/remote/condition_report_remote_data_source.dart';
@@ -120,8 +121,12 @@ Future<void> init() async {
     dio.options.baseUrl = AppConfig.apiBaseUrl;
     return dio;
   });
-  injection.registerLazySingleton(() => DioClient(injection()));
+  injection.registerLazySingleton(() => DioClient(
+        injection(),
+        additionalInterceptors: [AuthInterceptor(injection())],
+      ));
   injection.registerLazySingleton(() => Logger());
+  injection.registerLazySingleton(() => SecureStorage());
 
   // ------------------------------
   // Condition Report Feature
@@ -281,7 +286,8 @@ Future<void> init() async {
   injection.registerLazySingleton(() => GetMrRequestsUseCase(injection()));
   injection
       .registerLazySingleton(() => GetMrRequestsPaginatedUseCase(injection()));
-  injection.registerLazySingleton(() => GetRequestByIdUseCase(repository: injection()));
+  injection.registerLazySingleton(
+      () => GetRequestByIdUseCase(repository: injection()));
 
   // ------------------------------
   // Asset Feature (Clean Architecture)
@@ -352,7 +358,6 @@ Future<void> init() async {
   // ------------------------------
   // Auth Dependencies
   // ------------------------------
-  injection.registerLazySingleton(() => SecureStorage());
   injection.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(injection(), injection()),
   );

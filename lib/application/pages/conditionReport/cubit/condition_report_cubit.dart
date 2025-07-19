@@ -41,7 +41,16 @@ class ConditionReportCubit extends BaseCubit<BaseState<ConditionReportState>> {
     print('===========================================');
 
     result.fold(
-      (failure) => emit(ConditionReportSubmitFailure(failure.message)),
+      (failure) {
+        // Handle specific authentication errors
+        if (failure.message.toLowerCase().contains('unauthorized') ||
+            failure.message.toLowerCase().contains('401')) {
+          emit(ConditionReportSubmitFailure(
+              'Authentication failed. Please login again and try.'));
+        } else {
+          emit(ConditionReportSubmitFailure(failure.message));
+        }
+      },
       (success) => emit(ConditionReportSubmitSuccess()),
     );
   }
