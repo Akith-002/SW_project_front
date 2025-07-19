@@ -142,8 +142,9 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
     final suggestedRateValidation =
         DomesticRatingCardValidator.validatePositiveDecimal(
             _suggestedRateController.text, 'Suggested Rate');
-    if (suggestedRateValidation != null)
+    if (suggestedRateValidation != null) {
       validationErrors.add(suggestedRateValidation);
+    }
 
     // Check if form validation passes and no manual validation errors
     final isFormValid = _formKey.currentState?.validate() ?? false;

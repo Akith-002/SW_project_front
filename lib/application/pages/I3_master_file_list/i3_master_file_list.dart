@@ -94,6 +94,10 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             onSearch: (query) {
               _tableKey.currentState?.search(query);
             },
+            onSort: (sortBy) {
+              _tableKey.currentState?.refreshWithSort(sortBy);
+            },
+            pageSource: currentPageSource,
             table: TableScaffold(
               key: _tableKey,
               pageSource: currentPageSource,
