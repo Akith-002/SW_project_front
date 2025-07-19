@@ -16,6 +16,7 @@ import 'package:land_asset_valuation/application/pages/inspectionReport/cubit/in
 import 'package:land_asset_valuation/application/core/validators/inspection_validator.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
+import 'package:http/http.dart' as http;
 
 class InspectionReportView extends BasePage {
   final MasterDataResponse masterData;
@@ -121,6 +122,132 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     setState(() {
       uploadedImages.removeAt(index);
     });
+  }
+
+  // Add this function to handle validation, submission, and image upload
+  void _validateAndSubmit() async {
+    if (_buildingInfoFormKey.currentState?.validate() ?? false) {
+      final reportId = await _submitFormData();
+      if (reportId != null) {
+        await _uploadImages(reportId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Inspection report submitted successfully!'),
+              backgroundColor: Colors.green),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Failed to submit inspection report.'),
+              backgroundColor: Colors.red),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please fix the validation errors in the form'),
+            backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<String?> _submitFormData() async {
+    try {
+      final uri = Uri.parse('http://10.0.2.2:5221/api/InspectionReport');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: _buildFormJson(),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.body;
+        final reportId =
+            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
+        print('DEBUG: InspectionReport reportId: $reportId');
+        return reportId;
+      } else {
+        print(
+            'DEBUG: InspectionReport submission failed: ${response.statusCode} ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('DEBUG: Exception during InspectionReport submission: $e');
+      return null;
+    }
+  }
+
+  String _buildFormJson() {
+    // Build JSON string for the form data (add more fields as needed)
+    return '''{
+      "masterFileRef": "", // Add actual value if needed
+      "inspectionDate": "", // Add actual value if needed
+      "dsDivision": "", // Add actual value if needed
+      "district": "", // Add actual value if needed
+      "province": "", // Add actual value if needed
+      "buildingId": "", // Add actual value if needed
+      "buildingName": "", // Add actual value if needed
+      "buildingDetails": "", // Add actual value if needed
+      "noOfFloorsGPlus": "", // Add actual value if needed
+      "noOfFloorsGMinus": "", // Add actual value if needed
+      "age": "", // Add actual value if needed
+      "expectedLifePeriod": "", // Add actual value if needed
+      "parkingSpace": "", // Add actual value if needed
+      "design": "", // Add actual value if needed
+      "conveniences": "", // Add actual value if needed
+      "structure": "", // Add actual value if needed
+      "buildingConditions": "", // Add actual value if needed
+      "otherInfo": "", // Add actual value if needed
+      "otherConstructionDetails": "", // Add actual value if needed
+      "assetDetails": "", // Add actual value if needed
+      "businessDetails": "", // Add actual value if needed
+      "remarks": "" // Add actual value if needed
+    }''';
+  }
+
+  Future<void> _uploadImages(String reportId) async {
+    print('DEBUG: _uploadImages called with reportId: $reportId');
+    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
+    if (uploadedImages.isEmpty) return;
+    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['reportId'] = reportId
+      ..fields['parent_id'] = reportId
+      ..fields['parent_type'] = 'InspectionReports';
+    for (var image in uploadedImages) {
+      if (image is File) {
+        print('DEBUG: Adding image file: ${image.path}');
+        request.files
+            .add(await http.MultipartFile.fromPath('files', image.path));
+      } else {
+        print('DEBUG: Skipping non-File image: $image');
+      }
+    }
+    try {
+      var response = await request.send();
+      print('DEBUG: Image upload response status: ${response.statusCode}');
+      final respStr = await response.stream.bytesToString();
+      print('DEBUG: Image upload response body: $respStr');
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Images uploaded successfully.'),
+              backgroundColor: Colors.green),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Failed to upload images.'),
+              backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      print('DEBUG: Exception during image upload: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error uploading images: $e'),
+            backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
@@ -855,14 +982,9 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                 ),
                 const Spacer(),
                 CustomButton(
-                  text: AppString.save.localize(context) ?? '',
-                  onPressed: () {
-                    if (_buildingInfoFormKey.currentState?.validate() ??
-                        false) {
-                      // Handle save logic here
-                    }
-                  },
-                  backgroundColor: colors(context).colorPrimary1!,
+                  text: AppString.sendData.localize(context) ?? '',
+                  onPressed: _validateAndSubmit,
+                  backgroundColor: colors(context).colorPrimary5!,
                 ),
               ],
             ),

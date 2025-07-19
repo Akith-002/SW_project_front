@@ -8,7 +8,7 @@ class SendRentalEvidenceUseCase {
 
   SendRentalEvidenceUseCase(this.repository);
 
-  Future<Either<Failure, bool>> call(RentalEvidenceModel report) async {
+  Future<Either<Failure, String>> call(RentalEvidenceModel report) async {
     return await repository.sendRentalEvidence(report);
   }
 }

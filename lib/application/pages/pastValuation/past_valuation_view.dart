@@ -16,6 +16,7 @@ import 'package:land_asset_valuation/application/core/widgets/image_upload.dart'
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/validators/past_valuation_validator.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
+import 'package:http/http.dart' as http;
 
 class PastValuationView extends BasePage {
   final MasterDataResponse masterData;
@@ -42,6 +43,122 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
     setState(() {
       uploadedImages.removeAt(index);
     });
+  }
+
+  // Add this function to handle validation, submission, and image upload
+  void _validateAndSubmit() async {
+    if (_formKey.currentState!.validate()) {
+      final reportId = await _submitFormData();
+      if (reportId != null) {
+        await _uploadImages(reportId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Past valuation submitted successfully!'),
+              backgroundColor: Colors.green),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Failed to submit past valuation.'),
+              backgroundColor: Colors.red),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please fix the validation errors in the form'),
+            backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<String?> _submitFormData() async {
+    try {
+      final uri = Uri.parse('http://10.0.2.2:5221/api/PastValuationsLA');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: _buildFormJson(),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.body;
+        final reportId =
+            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
+        print('DEBUG: PastValuationsLA reportId: $reportId');
+        return reportId;
+      } else {
+        print(
+            'DEBUG: PastValuationsLA submission failed: ${response.statusCode} ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('DEBUG: Exception during PastValuationsLA submission: $e');
+      return null;
+    }
+  }
+
+  String _buildFormJson() {
+    // Build JSON string for the form data (add more fields as needed)
+    return '''{
+      "masterFileRef": "", // Add actual value if needed
+      "fileNoGnDivision": "", // Add actual value if needed
+      "situation": "", // Add actual value if needed
+      "dateOfValuation": "", // Add actual value if needed
+      "purposeOfValuation": "", // Add actual value if needed
+      "planOfParticulars": "", // Add actual value if needed
+      "extent": "", // Add actual value if needed
+      "rate": "", // Add actual value if needed
+      "rateType": "", // Add actual value if needed
+      "remarks": "", // Add actual value if needed
+      "locationLongitude": "", // Add actual value if needed
+      "locationLatitude": "" // Add actual value if needed
+    }''';
+  }
+
+  Future<void> _uploadImages(String reportId) async {
+    print('DEBUG: _uploadImages called with reportId: $reportId');
+    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
+    if (uploadedImages.isEmpty) return;
+    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['reportId'] = reportId
+      ..fields['parent_id'] = reportId
+      ..fields['parent_type'] = 'PastValuationsLA';
+    for (var image in uploadedImages) {
+      if (image is File) {
+        print('DEBUG: Adding image file: ${image.path}');
+        request.files
+            .add(await http.MultipartFile.fromPath('files', image.path));
+      } else {
+        print('DEBUG: Skipping non-File image: $image');
+      }
+    }
+    try {
+      var response = await request.send();
+      print('DEBUG: Image upload response status: ${response.statusCode}');
+      final respStr = await response.stream.bytesToString();
+      print('DEBUG: Image upload response body: $respStr');
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Images uploaded successfully.'),
+              backgroundColor: Colors.green),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Failed to upload images.'),
+              backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      print('DEBUG: Exception during image upload: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error uploading images: $e'),
+            backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
@@ -219,7 +336,7 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                           const SizedBox(width: 40),
                           CustomButton(
                             text: AppString.sendData.localize(context)!,
-                            onPressed: () {},
+                            onPressed: _validateAndSubmit,
                             backgroundColor: colors(context).colorPrimary1!,
                           ),
                         ],

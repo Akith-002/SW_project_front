@@ -15,6 +15,7 @@ import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/
 import 'package:land_asset_valuation/application/core/validators/i2_rental_evidence_validator.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
+import 'package:http/http.dart' as http;
 
 /// Main page widget for displaying rental evidence.
 class I2RentalEvidence extends BasePage {
@@ -85,90 +86,87 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     );
   }
 
-  void _validateAndSubmit() {
+  // Add this function to handle validation, submission, and image upload
+  void _validateAndSubmit() async {
     if (_formKey.currentState!.validate()) {
-      // All form validation passed, now perform additional data type validation
-      try {
-        // Create a map to track all validation issues
-        Map<String, String> validationErrors = {};
-
-        // Validate dropdowns are selected properly
-        String? buildingError =
-            I2RentalEvidenceValidator.dropdown(_selectedBuilding, 'Building');
-        if (buildingError != null) {
-          validationErrors['Building'] = buildingError;
-        }
-
-        String? categoryError = I2RentalEvidenceValidator.dropdown(
-            _selectedPropertyCategory, 'Property Category');
-        if (categoryError != null) {
-          validationErrors['Property Category'] = categoryError;
-        }
-
-        String? subcategoryError = I2RentalEvidenceValidator.dropdown(
-            _selectedPropertySubcategory, 'Property Subcategory');
-        if (subcategoryError != null) {
-          validationErrors['Property Subcategory'] = subcategoryError;
-        }
-
-        String? type1Error = I2RentalEvidenceValidator.dropdown(
-            _selectedPropertyType1, 'Property Type');
-        if (type1Error != null) {
-          validationErrors['Property Type 1'] = type1Error;
-        }
-
-        String? type2Error = I2RentalEvidenceValidator.dropdown(
-            _selectedPropertyType2, 'Property Type');
-        if (type2Error != null) {
-          validationErrors['Property Type 2'] = type2Error;
-        }
-
-        // Validate text fields for proper content
-        String? assessmentError = I2RentalEvidenceValidator.alphanumeric(
-            _assessmentNoController.text, 'Assessment Number');
-        if (assessmentError != null) {
-          validationErrors['Assessment Number'] = assessmentError;
-        }
-
-        String? ownerError = I2RentalEvidenceValidator.alphanumeric(
-            _ownerNameController.text, 'Owner Name');
-        if (ownerError != null) {
-          validationErrors['Owner Name'] = ownerError;
-        }
-
-        String? occupierError = I2RentalEvidenceValidator.alphanumeric(
-            _occupierNameController.text, 'Occupier Name');
-        if (occupierError != null) {
-          validationErrors['Occupier Name'] = occupierError;
-        }
-
-        String? descriptionError = I2RentalEvidenceValidator.required(
-            _descriptionController.text, 'Description');
-        if (descriptionError != null) {
-          validationErrors['Description'] = descriptionError;
-        }
-
-        // If there are validation errors, show them and stop
-        if (validationErrors.isNotEmpty) {
-          String errorMessage = 'Validation errors:\n';
-          validationErrors.forEach((field, error) {
-            errorMessage += '• $field: $error\n';
-          });
-          _showErrorMessage(errorMessage);
-          return;
-        }
-
-        // Form is valid, proceed with submission
-        _showSuccessMessage(
-            'Form validated successfully. Ready to submit data!');
-
-        // Here you would normally send the data to your backend
-        // _cubit.sendRentalEvidence(...);
-      } catch (e) {
-        _showErrorMessage('Error validating form data: $e');
+      final reportId = await _submitFormData();
+      if (reportId != null) {
+        await _uploadImages(reportId);
+        _showSuccessMessage('Rental evidence submitted successfully!');
+      } else {
+        _showErrorMessage('Failed to submit rental evidence.');
       }
     } else {
-      _showErrorMessage('Please fix the errors in the form');
+      _showErrorMessage('Please fix the validation errors in the form');
+    }
+  }
+
+  Future<String?> _submitFormData() async {
+    try {
+      final uri = Uri.parse('http://10.0.2.2:5221/api/LMRentalEvidence');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: _buildFormJson(),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.body;
+        final reportId =
+            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
+        print('DEBUG: LMRentalEvidence reportId: $reportId');
+        return reportId;
+      } else {
+        print(
+            'DEBUG: LMRentalEvidence submission failed: ${response.statusCode} ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('DEBUG: Exception during LMRentalEvidence submission: $e');
+      return null;
+    }
+  }
+
+  String _buildFormJson() {
+    // Build JSON string for the form data (add more fields as needed)
+    return '''{
+      "assessmentNo": "${_assessmentNoController.text}",
+      "ownerName": "${_ownerNameController.text}",
+      "occupierName": "${_occupierNameController.text}",
+      "description": "${_descriptionController.text}"
+    }''';
+  }
+
+  Future<void> _uploadImages(String reportId) async {
+    print('DEBUG: _uploadImages called with reportId: $reportId');
+    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
+    if (uploadedImages.isEmpty) return;
+    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['reportId'] = reportId
+      ..fields['parent_id'] = reportId
+      ..fields['parent_type'] = 'LMRentalEvidences';
+    for (var image in uploadedImages) {
+      if (image is File) {
+        print('DEBUG: Adding image file: ${image.path}');
+        request.files
+            .add(await http.MultipartFile.fromPath('files', image.path));
+      } else {
+        print('DEBUG: Skipping non-File image: $image');
+      }
+    }
+    try {
+      var response = await request.send();
+      print('DEBUG: Image upload response status: ${response.statusCode}');
+      final respStr = await response.stream.bytesToString();
+      print('DEBUG: Image upload response body: $respStr');
+      if (response.statusCode == 200) {
+        _showSuccessMessage('Images uploaded successfully.');
+      } else {
+        _showErrorMessage('Failed to upload images.');
+      }
+    } catch (e) {
+      print('DEBUG: Exception during image upload: $e');
+      _showErrorMessage('Error uploading images: $e');
     }
   }
 
