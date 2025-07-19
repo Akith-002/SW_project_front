@@ -173,32 +173,32 @@ class TableScaffoldState extends State<TableScaffold> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: DataTable(
-                    headingRowColor: MaterialStateProperty.all(
+                    headingRowColor: WidgetStateProperty.all(
                       colors(context).colorGrey9!,
                     ),
                     columnSpacing: 16,
                     horizontalMargin: 16,
                     columns: [
                       DataColumn(
-                        label: Container(
+                        label: SizedBox(
                           width: 100,
                           child: Text("Master File No"),
                         ),
                       ),
                       DataColumn(
-                        label: Container(
+                        label: SizedBox(
                           width: 150,
                           child: Text("Plan Type"),
                         ),
                       ),
                       DataColumn(
-                        label: Container(
+                        label: SizedBox(
                           width: 100,
                           child: Text("Plan No"),
                         ),
                       ),
                       DataColumn(
-                        label: Container(
+                        label: SizedBox(
                           width: 200,
                           child: Text("Requesting Authority Reference No"),
                         ),
@@ -221,25 +221,25 @@ class TableScaffoldState extends State<TableScaffold> {
                     rows: plans.map((plan) {
                       return DataRow(cells: [
                         DataCell(
-                          Container(
+                          SizedBox(
                             width: 100,
                             child: Text(plan.masterFileNo.toString()),
                           ),
                         ),
                         DataCell(
-                          Container(
+                          SizedBox(
                             width: 150,
                             child: Text(plan.planType),
                           ),
                         ),
                         DataCell(
-                          Container(
+                          SizedBox(
                             width: 100,
                             child: Text(plan.planNo.toString()),
                           ),
                         ),
                         DataCell(
-                          Container(
+                          SizedBox(
                             width: 200,
                             child: Text(plan.requestingAuthorityReferenceNo),
                           ),

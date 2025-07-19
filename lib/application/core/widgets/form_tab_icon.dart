@@ -53,7 +53,7 @@ class _FormTabIconsState extends State<FormTabIcons>
             dividerColor: colors(context).colorBlack ?? Colors.transparent,
             labelColor: colors(context).colorWhite ?? Colors.white,
             unselectedLabelColor: colors(context).colorBlack ?? Colors.black87,
-            overlayColor: MaterialStateProperty.all(Colors.transparent),
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
             labelPadding: EdgeInsets.zero, // Remove extra padding
             tabs: tabTitles.map((title) {
               return Container(

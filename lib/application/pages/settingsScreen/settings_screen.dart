@@ -15,7 +15,6 @@ import 'package:land_asset_valuation/application/core/widgets/custom_button.dart
 import 'package:land_asset_valuation/application/core/widgets/custom_dropdown_field.dart';
 import 'package:land_asset_valuation/application/pages/settingsScreen/cubit/settings_screen_cubit.dart';
 import 'package:land_asset_valuation/injection.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SettingsScreen extends BasePage {
   const SettingsScreen({super.key});
