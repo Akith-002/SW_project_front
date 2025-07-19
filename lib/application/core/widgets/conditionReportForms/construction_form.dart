@@ -6,15 +6,18 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/services/condition_report_form_service.dart';
 import 'package:land_asset_valuation/application/core/validators/construction_form_validator.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
 class ConstructionForm extends StatefulWidget {
   final int tabIndex; // 1 for Building Info, 2 for Other Constructions
   final TabController tabController; // Add TabController
+  final MasterDataResponse masterData;
 
   const ConstructionForm({
     super.key,
     required this.tabIndex,
-    required this.tabController, // Add required TabController
+    required this.tabController,
+    required this.masterData,
   });
 
   @override

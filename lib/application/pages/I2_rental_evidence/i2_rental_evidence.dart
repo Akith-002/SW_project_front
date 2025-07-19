@@ -14,10 +14,12 @@ import 'package:land_asset_valuation/application/core/widgets/image_upload.dart'
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/core/validators/i2_rental_evidence_validator.dart';
 import 'package:land_asset_valuation/injection.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
 /// Main page widget for displaying rental evidence.
 class I2RentalEvidence extends BasePage {
-  const I2RentalEvidence({super.key});
+  final MasterDataResponse masterData;
+  const I2RentalEvidence({super.key, required this.masterData});
 
   @override
   State<I2RentalEvidence> createState() => _I2RentalEvidenceState();
@@ -221,7 +223,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                         spacing: 16,
                         runSpacing: 16,
                         children: [
-                          // Dropdown field for selecting a building.
+                          // Intentionally static: No backend mapping for building list
                           CustomDropdownField(
                             label: AppString.selectBuilding.localize(context)!,
                             items: [
@@ -243,7 +245,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                     AppString.selectBuilding
                                         .localize(context)!),
                           ),
-                          // Dropdown field for selecting a property category.
+                          // Intentionally static: No backend mapping for property category
                           CustomDropdownField(
                             label:
                                 AppString.propertyCategory.localize(context)!,
@@ -267,7 +269,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                     AppString.propertyCategory
                                         .localize(context)!),
                           ),
-                          // Dropdown field for selecting a property subcategory.
+                          // Intentionally static: No backend mapping for property subcategory
                           CustomDropdownField(
                             label: AppString.propertySubcategory
                                 .localize(context)!,
@@ -291,7 +293,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                                     AppString.propertySubcategory
                                         .localize(context)!),
                           ),
-                          // Dropdown field for selecting a property type.
+                          // Intentionally static: No backend mapping for property type
                           CustomDropdownField(
                             label: AppString.propertyType.localize(context)!,
                             items: [

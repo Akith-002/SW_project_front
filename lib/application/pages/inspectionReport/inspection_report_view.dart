@@ -15,9 +15,11 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/pages/inspectionReport/cubit/inspection_report_cubit.dart';
 import 'package:land_asset_valuation/application/core/validators/inspection_validator.dart';
 import 'package:land_asset_valuation/injection.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
 class InspectionReportView extends BasePage {
-  const InspectionReportView({super.key});
+  final MasterDataResponse masterData;
+  const InspectionReportView({super.key, required this.masterData});
 
   @override
   State<InspectionReportView> createState() => _InspectionReportViewState();
@@ -425,26 +427,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.buildingCategory.localize(context) ?? '',
-                items: [
-                  "Select Building Category",
-                  "Residential",
-                  "Commercial",
-                  "Industrial"
-                ],
-                initialValue: "Select Building Category",
+                items: widget.masterData.buildingCategory,
+                initialValue: widget.masterData.buildingCategory.isNotEmpty
+                    ? widget.masterData.buildingCategory.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Building Category"),
               ),
               CustomDropdownField(
                 label: AppString.buildingClass.localize(context) ?? '',
-                items: [
-                  "Select Building Class",
-                  "Class A",
-                  "Class B",
-                  "Class C"
-                ],
-                initialValue: "Select Building Class",
+                items: widget.masterData.buildingClass,
+                initialValue: widget.masterData.buildingClass.isNotEmpty
+                    ? widget.masterData.buildingClass.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Building Class"),
@@ -539,31 +535,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.natureOfConstruction.localize(context) ?? '',
-                items: [
-                  "Select Nature of Building",
-                  "New",
-                  "Good",
-                  "Needs Repair",
-                  "Poor"
-                ],
-                initialValue: "Select Nature of Building",
+                items: widget.masterData.natureOfConstruction,
+                initialValue: widget.masterData.natureOfConstruction.isNotEmpty
+                    ? widget.masterData.natureOfConstruction.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Nature of Building"),
-              ),
-              CustomDropdownField(
-                label: AppString.condition.localize(context) ?? '',
-                items: [
-                  "Select Building Condition",
-                  "New",
-                  "Good",
-                  "Needs Repair",
-                  "Poor"
-                ],
-                initialValue: "Select Building Condition",
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Building Condition"),
               ),
             ]),
 
@@ -578,16 +556,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.roofMaterial.localize(context) ?? '',
-                items: ["Select Roof Material", "Concrete", "Metal", "Tiles"],
-                initialValue: "Select Roof Material",
+                items: widget.masterData.roofMaterial,
+                initialValue: widget.masterData.roofMaterial.isNotEmpty
+                    ? widget.masterData.roofMaterial.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Roof Material"),
               ),
               CustomDropdownField(
                 label: AppString.roofFrame.localize(context) ?? '',
-                items: ["Select Roof Frame", "Steel", "Wood", "Concrete"],
-                initialValue: "Select Roof Frame",
+                items: widget.masterData.roofFrame,
+                initialValue: widget.masterData.roofFrame.isNotEmpty
+                    ? widget.masterData.roofFrame.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Roof Frame"),
@@ -597,21 +579,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.roofFinisher.localize(context) ?? '',
-                items: [
-                  "Select Roof Finisher",
-                  "Painted",
-                  "Varnished",
-                  "Other"
-                ],
-                initialValue: "Select Roof Finisher",
+                items: widget.masterData.roofFinisher,
+                initialValue: widget.masterData.roofFinisher.isNotEmpty
+                    ? widget.masterData.roofFinisher.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Roof Finisher"),
               ),
               CustomDropdownField(
                 label: AppString.ceiling.localize(context) ?? '',
-                items: ["Select Ceiling", "Plasterboard", "Wood", "PVC"],
-                initialValue: "Select Ceiling",
+                items: widget.masterData.celing,
+                initialValue: widget.masterData.celing.isNotEmpty
+                    ? widget.masterData.celing.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Ceiling"),
@@ -629,16 +610,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.foundationStructure.localize(context) ?? '',
-                items: ["Select Foundation Structure", "Pile", "Raft", "Pad"],
-                initialValue: "Select Foundation Structure",
+                items: widget.masterData.foundationStructure,
+                initialValue: widget.masterData.foundationStructure.isNotEmpty
+                    ? widget.masterData.foundationStructure.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Foundation Structure"),
               ),
               CustomDropdownField(
                 label: AppString.wallStructure.localize(context) ?? '',
-                items: ["Select Wall Structure", "Brick", "Concrete", "Wood"],
-                initialValue: "Select Wall Structure",
+                items: widget.masterData.wallStructure,
+                initialValue: widget.masterData.wallStructure.isNotEmpty
+                    ? widget.masterData.wallStructure.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Wall Structure"),
@@ -648,8 +633,10 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.floorStructure.localize(context) ?? '',
-                items: ["Select Floor Structure", "Concrete", "Wood", "Tile"],
-                initialValue: "Select Floor Structure",
+                items: widget.masterData.floorStructure,
+                initialValue: widget.masterData.floorStructure.isNotEmpty
+                    ? widget.masterData.floorStructure.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Floor Structure"),
@@ -666,16 +653,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.door.localize(context) ?? '',
-                items: ["Select Door", "Wooden", "Glass", "Metal"],
-                initialValue: "Select Door",
+                items: widget.masterData.door,
+                initialValue: widget.masterData.door.isNotEmpty
+                    ? widget.masterData.door.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Door"),
               ),
               CustomDropdownField(
                 label: AppString.window.localize(context) ?? '',
-                items: ["Select Window", "Sliding", "Casement", "Fixed"],
-                initialValue: "Select Window",
+                items: widget.masterData.window,
+                initialValue: widget.masterData.window.isNotEmpty
+                    ? widget.masterData.window.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Window"),
@@ -685,13 +676,10 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.windowProtection.localize(context) ?? '',
-                items: [
-                  "Select Window Protection",
-                  "Grills",
-                  "Shutters",
-                  "None"
-                ],
-                initialValue: "Select Window Protection",
+                items: widget.masterData.windowProtection,
+                initialValue: widget.masterData.windowProtection.isNotEmpty
+                    ? widget.masterData.windowProtection.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Window Protection"),
@@ -700,13 +688,11 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                 label:
                     AppString.doorsBathroomToiletFittings.localize(context) ??
                         '',
-                items: [
-                  "Select Doors Bathroom and Toilet Fittings",
-                  "Standard",
-                  "Luxury",
-                  "Basic"
-                ],
-                initialValue: "Select Doors Bathroom and Toilet Fittings",
+                items: widget.masterData.doorsBathroomAndToiletFittings,
+                initialValue:
+                    widget.masterData.doorsBathroomAndToiletFittings.isNotEmpty
+                        ? widget.masterData.doorsBathroomAndToiletFittings.first
+                        : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Doors Bathroom and Toilet Fittings"),
@@ -716,21 +702,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.doorsHandRail.localize(context) ?? '',
-                items: ["Select Doors Hand Rail", "Steel", "Wood", "Glass"],
-                initialValue: "Select Doors Hand Rail",
+                items: widget.masterData.doorsHandRail,
+                initialValue: widget.masterData.doorsHandRail.isNotEmpty
+                    ? widget.masterData.doorsHandRail.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Doors Hand Rail"),
               ),
               CustomDropdownField(
                 label: AppString.doorsPantryCupboard.localize(context) ?? '',
-                items: [
-                  "Select Doors Pantry Cupboard",
-                  "Laminated",
-                  "Wood",
-                  "PVC"
-                ],
-                initialValue: "Select Doors Pantry Cupboard",
+                items: widget.masterData.doorsPantryCupboard,
+                initialValue: widget.masterData.doorsPantryCupboard.isNotEmpty
+                    ? widget.masterData.doorsPantryCupboard.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Doors Pantry Cupboard"),
@@ -740,13 +725,10 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.doorsOther.localize(context) ?? '',
-                items: [
-                  "Select Doors Other",
-                  "Double Door",
-                  "Sliding",
-                  "Automatic"
-                ],
-                initialValue: "Select Doors Other",
+                items: widget.masterData.doorsOther,
+                initialValue: widget.masterData.doorsOther.isNotEmpty
+                    ? widget.masterData.doorsOther.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Doors Other"),
@@ -764,16 +746,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.wallFinisher.localize(context) ?? '',
-                items: ["Select Wall Finisher", "Paint", "Tiles", "Wallpaper"],
-                initialValue: "Select Wall Finisher",
+                items: widget.masterData.wallFinisher,
+                initialValue: widget.masterData.wallFinisher.isNotEmpty
+                    ? widget.masterData.wallFinisher.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Wall Finisher"),
               ),
               CustomDropdownField(
                 label: AppString.floorFinisher.localize(context) ?? '',
-                items: ["Select Floor Finisher", "Tile", "Carpet", "Wood"],
-                initialValue: "Select Floor Finisher",
+                items: widget.masterData.floorFinisher,
+                initialValue: widget.masterData.floorFinisher.isNotEmpty
+                    ? widget.masterData.floorFinisher.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Floor Finisher"),
@@ -783,21 +769,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.bathroomToilet.localize(context) ?? '',
-                items: [
-                  "Select Bathroom and Toilet",
-                  "Tiled",
-                  "PVC",
-                  "Concrete"
-                ],
-                initialValue: "Select Bathroom and Toilet",
+                items: widget.masterData.bathroomAndToilet,
+                initialValue: widget.masterData.bathroomAndToilet.isNotEmpty
+                    ? widget.masterData.bathroomAndToilet.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Bathroom and Toilet"),
               ),
               CustomDropdownField(
                 label: AppString.services.localize(context) ?? '',
-                items: ["Select Services", "Electricity", "Plumbing", "HVAC"],
-                initialValue: "Select Services",
+                items: widget.masterData.services,
+                initialValue: widget.masterData.services.isNotEmpty
+                    ? widget.masterData.services.first
+                    : null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Services"),

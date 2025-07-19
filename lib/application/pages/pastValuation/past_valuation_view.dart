@@ -15,9 +15,11 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/image_upload.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/validators/past_valuation_validator.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
 class PastValuationView extends BasePage {
-  const PastValuationView({super.key});
+  final MasterDataResponse masterData;
+  const PastValuationView({super.key, required this.masterData});
 
   @override
   _PastValuationViewState createState() => _PastValuationViewState();
@@ -67,9 +69,11 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                     ),
                     LabeledTextField(
                       label: AppString.fileNoGnDivision.localize(context)!,
-                      placeholder: AppString.fileNoGnDivision.localize(context)!,
+                      placeholder:
+                          AppString.fileNoGnDivision.localize(context)!,
                       validator: (value) =>
-                          PastValuationValidator.optionalAlphaNum(value, 255, "Assessment No"),
+                          PastValuationValidator.optionalAlphaNum(
+                              value, 255, "Assessment No"),
                     ),
                   ]),
                   _buildRow([
@@ -77,7 +81,8 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                       label: AppString.situation.localize(context)!,
                       placeholder: AppString.situation.localize(context)!,
                       validator: (value) =>
-                          PastValuationValidator.optionalAlphaNum(value, 255, "Situation"),
+                          PastValuationValidator.optionalAlphaNum(
+                              value, 255, "Situation"),
                     ),
                     LabeledTextField(
                       label: AppString.dateOfValuation.localize(context)!,
@@ -87,32 +92,44 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                   _buildRow([
                     LabeledTextField(
                       label: AppString.purposeOfValuation.localize(context)!,
-                      placeholder: AppString.purposeOfValuation.localize(context)!,
-                      validator: (value) => PastValuationValidator.optionalAlphaNum(value, 255, "Purpose of Valuation"),
+                      placeholder:
+                          AppString.purposeOfValuation.localize(context)!,
+                      validator: (value) =>
+                          PastValuationValidator.optionalAlphaNum(
+                              value, 255, "Purpose of Valuation"),
                     ),
                     LabeledTextField(
                       label: AppString.planOfParticulars.localize(context)!,
-                      placeholder: AppString.planOfParticulars.localize(context)!,
-                      validator: (value) => PastValuationValidator.optionalAlphaNum(value, 255, "Plan Particulars"),
+                      placeholder:
+                          AppString.planOfParticulars.localize(context)!,
+                      validator: (value) =>
+                          PastValuationValidator.optionalAlphaNum(
+                              value, 255, "Plan Particulars"),
                     ),
                   ]),
                   _buildRow([
                     LabeledTextField(
                       label: AppString.extent.localize(context)!,
                       placeholder: AppString.extent.localize(context)!,
-                      validator: (value) => PastValuationValidator.optionalNumeric(value, 255, "Extent"),
+                      validator: (value) =>
+                          PastValuationValidator.optionalNumeric(
+                              value, 255, "Extent"),
                     ),
                     LabeledTextField(
                       label: AppString.rate.localize(context)!,
                       placeholder: AppString.rate.localize(context)!,
-                      validator: (value) => PastValuationValidator.optionalNumeric(value, 255, "Rate per unit"),
+                      validator: (value) =>
+                          PastValuationValidator.optionalNumeric(
+                              value, 255, "Rate per unit"),
                     ),
                   ]),
                   _buildRow([
                     CustomDropdownField(
                       label: AppString.rateType.localize(context)!,
-                      items: ["Market Value", "Government Valuation"],
-                      initialValue: "Market Value",
+                      items: widget.masterData.services,
+                      initialValue: widget.masterData.services.isNotEmpty
+                          ? widget.masterData.services.first
+                          : null,
                       onChanged: (value) {},
                       width: 484,
                     ),
@@ -120,7 +137,8 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                       label: AppString.remarks.localize(context)!,
                       placeholder: AppString.remarks.localize(context)!,
                       validator: (value) =>
-                          PastValuationValidator.optionalAlphaNum(value, 255, "Remarks"),
+                          PastValuationValidator.optionalAlphaNum(
+                              value, 255, "Remarks"),
                     ),
                   ]),
                   _buildRow([
@@ -128,17 +146,20 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                       label: AppString.locationLongitude.localize(context)!,
                       placeholder: "6.123456789",
                       validator: (value) =>
-                          PastValuationValidator.optionalNumeric(value, 255, "Longitude"),
+                          PastValuationValidator.optionalNumeric(
+                              value, 255, "Longitude"),
                     ),
                     LabeledTextField(
                       label: AppString.locationLatitude.localize(context)!,
                       placeholder: "6.123456789",
                       validator: (value) =>
-                          PastValuationValidator.optionalNumeric(value, 255, "Latitude"),
+                          PastValuationValidator.optionalNumeric(
+                              value, 255, "Latitude"),
                     ),
                   ]),
                   const SizedBox(height: 24),
-                  Text(AppString.uploadImgs.localize(context)!, style: AppStyling.mediumTextSize14),
+                  Text(AppString.uploadImgs.localize(context)!,
+                      style: AppStyling.mediumTextSize14),
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 16,
@@ -181,11 +202,15 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                             onPressed: () {
                               if (_formKey.currentState?.validate() ?? false) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Form valid. Saving..."), backgroundColor: Colors.green),
+                                  const SnackBar(
+                                      content: Text("Form valid. Saving..."),
+                                      backgroundColor: Colors.green),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Please fix the errors"), backgroundColor: Colors.red),
+                                  const SnackBar(
+                                      content: Text("Please fix the errors"),
+                                      backgroundColor: Colors.red),
                                 );
                               }
                             },

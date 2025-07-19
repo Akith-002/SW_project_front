@@ -8,9 +8,11 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
 class OfficesRatingCard extends StatelessWidget {
-  const OfficesRatingCard({super.key});
+  final MasterDataResponse masterData;
+  const OfficesRatingCard({super.key, required this.masterData});
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +46,7 @@ class OfficesRatingCard extends StatelessWidget {
                 ),
               ),
               _buildRow([
+                // Intentionally static: No backend mapping for building list
                 CustomDropdownField(
                   label: AppString.selectBuilding.localize(context)!,
                   items: [
@@ -95,21 +98,20 @@ class OfficesRatingCard extends StatelessWidget {
               _buildRow([
                 CustomDropdownField(
                   label: AppString.selectWalls.localize(context)!,
-                  items: [
-                    "Select Walls",
-                    "Glass Curtain",
-                    "Concrete",
-                    "Steel Frame"
-                  ],
-                  initialValue: "Select Walls",
+                  items: masterData.wallStructure,
+                  initialValue: masterData.wallStructure.isNotEmpty
+                      ? masterData.wallStructure.first
+                      : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
                 CustomDropdownField(
                   label: AppString.floor.localize(context)!,
-                  items: ["Floor", "Carpet", "Tile", "Hardwood", "Marble"],
-                  initialValue: "Floor",
+                  items: masterData.floorStructure,
+                  initialValue: masterData.floorStructure.isNotEmpty
+                      ? masterData.floorStructure.first
+                      : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
@@ -118,18 +120,15 @@ class OfficesRatingCard extends StatelessWidget {
               _buildRow([
                 CustomDropdownField(
                   label: AppString.conveniences.localize(context)!,
-                  items: [
-                    "Select Conveniences",
-                    "HVAC",
-                    "Elevator",
-                    "Parking",
-                    "Security"
-                  ],
-                  initialValue: "Select Conveniences",
+                  items: masterData.conviences,
+                  initialValue: masterData.conviences.isNotEmpty
+                      ? masterData.conviences.first
+                      : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
+                // Intentionally static: No backend mapping for condition
                 CustomDropdownField(
                   label: AppString.condition.localize(context)!,
                   items: [
@@ -150,6 +149,7 @@ class OfficesRatingCard extends StatelessWidget {
                   label: AppString.age.localize(context)!,
                   placeholder: AppString.age.localize(context)!,
                 ),
+                // Intentionally static: No backend mapping for access
                 CustomDropdownField(
                   label: AppString.access.localize(context)!,
                   items: [
@@ -175,6 +175,7 @@ class OfficesRatingCard extends StatelessWidget {
                 ),
               ]),
               _buildRow([
+                // Intentionally static: No backend mapping for property subcategory
                 CustomDropdownField(
                   label: AppString.propertySubCategory.localize(context)!,
                   items: [
@@ -188,6 +189,7 @@ class OfficesRatingCard extends StatelessWidget {
                     debugPrint(value);
                   },
                 ),
+                // Intentionally static: No backend mapping for property type
                 CustomDropdownField(
                   label: AppString.propertyType.localize(context)!,
                   items: [

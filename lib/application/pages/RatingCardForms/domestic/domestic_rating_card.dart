@@ -17,13 +17,16 @@ import 'package:land_asset_valuation/data/models/domestic_rating_card_model.dart
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
 class DomesticRatingCard extends StatefulWidget {
   final int assetId;
+  final MasterDataResponse masterData;
 
   const DomesticRatingCard({
     super.key,
     required this.assetId,
+    required this.masterData,
   });
 
   @override
@@ -323,18 +326,21 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                           ),
                           CustomDropdownField(
                             label: AppString.selectWalls.localize(context)!,
-                            items: [
-                              "Select Wall Type",
-                              "Brick",
-                              "Concrete",
-                              "Glass Front",
-                              "Steel Frame"
-                            ],
-                            initialValue: _selectedWalls ?? "Select Wall Type",
+                            items: widget.masterData.wallStructure,
+                            initialValue: _selectedWalls ??
+                                (widget.masterData.wallStructure.isNotEmpty
+                                    ? widget.masterData.wallStructure.first
+                                    : null),
                             onChanged: (value) {
                               setState(() {
-                                _selectedWalls =
-                                    value == "Select Wall Type" ? null : value;
+                                _selectedWalls = value ==
+                                        (widget.masterData.wallStructure
+                                                .isNotEmpty
+                                            ? widget
+                                                .masterData.wallStructure.first
+                                            : null)
+                                    ? null
+                                    : value;
                               });
                             },
                             validator: (value) =>
@@ -345,18 +351,21 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                         _buildRow([
                           CustomDropdownField(
                             label: AppString.floor.localize(context)!,
-                            items: [
-                              "Select Floor Type",
-                              "Tile",
-                              "Marble",
-                              "Concrete",
-                              "Wood"
-                            ],
-                            initialValue: _selectedFloor ?? "Select Floor Type",
+                            items: widget.masterData.floorStructure,
+                            initialValue: _selectedFloor ??
+                                (widget.masterData.floorStructure.isNotEmpty
+                                    ? widget.masterData.floorStructure.first
+                                    : null),
                             onChanged: (value) {
                               setState(() {
-                                _selectedFloor =
-                                    value == "Select Floor Type" ? null : value;
+                                _selectedFloor = value ==
+                                        (widget.masterData.floorStructure
+                                                .isNotEmpty
+                                            ? widget
+                                                .masterData.floorStructure.first
+                                            : null)
+                                    ? null
+                                    : value;
                               });
                             },
                             validator: (value) =>
@@ -365,21 +374,19 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                           ),
                           CustomDropdownField(
                             label: AppString.conveniences.localize(context)!,
-                            items: [
-                              "Select Conveniences",
-                              "AC",
-                              "Parking",
-                              "Security",
-                              "Pool"
-                            ],
-                            initialValue:
-                                _selectedConveniences ?? "Select Conveniences",
+                            items: widget.masterData.conviences,
+                            initialValue: _selectedConveniences ??
+                                (widget.masterData.conviences.isNotEmpty
+                                    ? widget.masterData.conviences.first
+                                    : null),
                             onChanged: (value) {
                               setState(() {
-                                _selectedConveniences =
-                                    value == "Select Conveniences"
-                                        ? null
-                                        : value;
+                                _selectedConveniences = value ==
+                                        (widget.masterData.conviences.isNotEmpty
+                                            ? widget.masterData.conviences.first
+                                            : null)
+                                    ? null
+                                    : value;
                               });
                             },
                             validator: (value) =>
@@ -388,6 +395,7 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                           ),
                         ]),
                         _buildRow([
+                          // Intentionally static: No backend mapping for condition
                           CustomDropdownField(
                             label: AppString.condition.localize(context)!,
                             items: [
@@ -486,6 +494,7 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                           ),
                         ]),
                         _buildRow([
+                          // Intentionally static: No backend mapping for property type
                           CustomDropdownField(
                             label: AppString.propertyType.localize(context)!,
                             items: [
