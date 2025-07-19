@@ -259,7 +259,7 @@ Future<void> init() async {
   );
 
   injection.registerLazySingleton<LandMiscellaneousRepository>(
-    () => LandMiscellaneousRepositoryImpl(injection()),
+    () => LandMiscellaneousRepositoryImpl(injection(), injection()),
   );
   injection
       .registerLazySingleton(() => GetAllLmMasterFilesUseCase(injection()));

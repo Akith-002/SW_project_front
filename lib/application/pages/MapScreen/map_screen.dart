@@ -42,6 +42,15 @@ class _MapScreenState extends State<MapScreen> {
   // Key to interact with Mapbox widget's state
   final GlobalKey<MapboxState> mapboxKey = GlobalKey<MapboxState>();
 
+  // Master file data properties
+  String? _id;
+  String? _masterFileNo;
+  String? _planType;
+  String? _planNo;
+  String? _authorityRefNo;
+  String? _status;
+  String? _lots;
+
   // Mode state management
   bool isDrawingMode = false; // For drawing lot boundaries
   bool isMarkerPlacementMode = false; // For placing data markers
@@ -75,8 +84,33 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     debugPrint("MapScreen: initState called");
+
     _markerLoader = MapMarkerLoader();
     _loadMarkerImagesAsync();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Extract master file data from query parameters
+    _extractMasterFileData();
+  }
+
+  void _extractMasterFileData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+
+    _id = queryParams['id'];
+    _masterFileNo = queryParams['masterFileNo'];
+    _planType = queryParams['planType'];
+    _planNo = queryParams['planNo'];
+    _authorityRefNo = queryParams['authorityRefNo'];
+    _status = queryParams['status'];
+    _lots = queryParams['lots'];
+
+    debugPrint(
+        "MapScreen: Master File Data extracted - ID: $_id, Master File No: $_masterFileNo, Plan Type: $_planType, Plan No: $_planNo, Authority Ref: $_authorityRefNo, Status: $_status, Lots: $_lots");
   }
 
   void _onSketchMetricsUpdated(double area, double distance) {
