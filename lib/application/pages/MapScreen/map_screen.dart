@@ -590,8 +590,83 @@ class _MapScreenState extends State<MapScreen> {
     _showSnackbar("Exited sketching mode");
   }
 
+  /// Shows a confirmation dialog when user tries to cancel lot saving
+  Future<void> _showCancelConfirmationDialog(BuildContext parentContext) async {
+    final bool? shouldRemove = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext confirmContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange,
+                size: 24,
+              ),
+              SizedBox(width: 8),
+              Text('Warning'),
+            ],
+          ),
+          content: Text(
+            'The drawn lot will be removed if you don\'t assign a Lot ID. Do you want to continue?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(confirmContext).pop(false), // Don't remove
+              child: Text(
+                'Go Back',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.of(confirmContext).pop(true), // Remove lot
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Remove Lot'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldRemove == true) {
+      // User confirmed to remove the lot
+      Navigator.of(parentContext).pop(); // Close the SaveLot dialog
+
+      // Remove the drawn lot from mapbox
+      mapboxKey.currentState?.clearDrawing();
+
+      // Exit drawing mode
+      mapboxKey.currentState?.toggleDrawingMode(false);
+
+      if (mounted) {
+        setState(() {
+          isDrawingMode = false;
+        });
+        _showSnackbar("Lot drawing cancelled and removed.");
+      }
+    }
+    // If shouldRemove is false or null, do nothing (stay in SaveLot dialog)
+  }
+
   /// Shows dialog to save a lot after drawing
   void _showSaveLotDialog() {
+    // Parse the number of lots from the _lots string, default to 15 if parsing fails
+    int numberOfLots = 15; // Default fallback
+    if (_lots != null && _lots!.isNotEmpty) {
+      numberOfLots = int.tryParse(_lots!) ?? 15;
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -608,9 +683,9 @@ class _MapScreenState extends State<MapScreen> {
           content: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 446),
             child: SaveLot(
+              numberOfLots: numberOfLots,
               onCancel: () {
-                Navigator.of(dialogContext).pop();
-                _showSnackbar("Lot saving cancelled.");
+                _showCancelConfirmationDialog(dialogContext);
               },
               onSave: (String? selectedLotId) async {
                 Navigator.of(dialogContext).pop();
