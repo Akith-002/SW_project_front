@@ -9,6 +9,8 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'dart:convert';
 import 'package:land_asset_valuation/data/models/auth/login_response.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
+import 'package:land_asset_valuation/application/core/providers/auth_provider.dart';
 
 Future<UserProfile> fetchUserProfile(String username) async {
   final dio = Dio();
@@ -19,12 +21,34 @@ Future<UserProfile> fetchUserProfile(String username) async {
   return UserProfile.fromJson(response.data);
 }
 
+Future<Map<String, dynamic>> fetchTaskOverviewAndSummary(
+    String username) async {
+  final dio = Dio();
+  final overviewFuture = dio.post(
+    'http://10.0.2.2:5221/api/UserTask/overview',
+    data: {'username': username},
+  );
+  final summaryFuture = dio.post(
+    'http://10.0.2.2:5221/api/UserTask/work-summary',
+    data: {'username': username},
+  );
+  final results = await Future.wait([overviewFuture, summaryFuture]);
+  return {
+    'overview': results[0].data,
+    'summary': results[1].data,
+  };
+}
+
 class ProfileScreen extends StatelessWidget {
   final String username;
   const ProfileScreen({Key? key, required this.username}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final username = Provider.of<AuthProvider>(context, listen: false).username;
+    if (username == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     print('ProfileScreen username: ' + username);
     return FutureBuilder<UserProfile>(
       future: fetchUserProfile(username),
@@ -37,106 +61,158 @@ class ProfileScreen extends StatelessWidget {
           return const Center(child: Text('No profile data'));
         }
         final profile = snapshot.data!;
-        return Scaffold(
-          appBar: CustomAppBar(
-            title: AppString.profile.localize(context)!,
-            style: AppStyling.semiBoldTextSize16
-                .copyWith(color: colors(context).colorGrey6),
-            leftIcon: (style) => PhosphorIcons.userCircle(style),
-            rightIcon1: (style) => PhosphorIcons.bell(style),
-            rightIcon2: (style) => PhosphorIcons.user(style),
-          ),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ProfileCard(profile: profile),
-
-                // Overview section
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0, top: 16.0),
-                  child: Text(
-                    AppString.overview.localize(context)!,
-                    style: AppStyling.semiBoldTextSize14
-                        .copyWith(color: colors(context).colorGrey6),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Expanded(child: OverviewChart()), // Pie Chart
-                      SizedBox(width: 24),
-                      Expanded(child: LineChartSample2()), // Line Graph
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // My Activities Title
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: Text(
-                    AppString.myActivities.localize(context)!,
-                    style: AppStyling.semiBoldTextSize14
-                        .copyWith(color: colors(context).colorGrey6),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Horizontal scrollable cards
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0, bottom: 16.0),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: IntrinsicWidth(
+        // Fetch task overview and summary in a nested FutureBuilder
+        return FutureBuilder<Map<String, dynamic>>(
+          future: fetchTaskOverviewAndSummary(username),
+          builder: (context, taskSnapshot) {
+            if (taskSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (taskSnapshot.hasError) {
+              return Center(child: Text('Error:  [${taskSnapshot.error}'));
+            } else if (!taskSnapshot.hasData) {
+              return const Center(child: Text('No task data'));
+            }
+            final overview = taskSnapshot.data!['overview'];
+            final summary =
+                taskSnapshot.data!['summary'] as Map<String, dynamic>;
+            // Map overview data (use correct lowercase keys)
+            final double landAcquisition =
+                (overview['laTaskAssigned'] ?? 0).toDouble();
+            final double massRating =
+                (overview['mrTaskAssigned'] ?? 0).toDouble();
+            final double miscAcquisition =
+                (overview['lmTaskAssigned'] ?? 0).toDouble();
+            final double tasksDone =
+                (overview['totalTasksCompleted'] ?? 0).toDouble();
+            // Debug print for pie chart values
+            print(
+                'Pie chart values (Profile): landAcquisition=$landAcquisition, massRating=$massRating, miscAcquisition=$miscAcquisition, tasksDone=$tasksDone');
+            // Map summary data to monthly values (Jan-Dec)
+            List<double> monthlyValues = List.generate(12, (i) {
+              final monthKey = DateTime(DateTime.now().year, i + 1, 1)
+                  .toString()
+                  .substring(0, 7)
+                  .replaceAll('-', '');
+              // Try both 'yyyyMM' and 'yyyy-MM' keys
+              return (summary[monthKey] ??
+                      summary[
+                          '${DateTime.now().year}${(i + 1).toString().padLeft(2, '0')}'] ??
+                      0)
+                  .toDouble();
+            });
+            return Scaffold(
+              appBar: CustomAppBar(
+                title: AppString.profile.localize(context)!,
+                style: AppStyling.semiBoldTextSize16
+                    .copyWith(color: colors(context).colorGrey6),
+                leftIcon: (style) => PhosphorIcons.userCircle(style),
+                rightIcon1: (style) => PhosphorIcons.bell(style),
+                rightIcon2: (style) => PhosphorIcons.user(style),
+              ),
+              body: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ProfileCard(profile: profile),
+                    // Overview section
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+                      child: Text(
+                        AppString.overview.localize(context)!,
+                        style: AppStyling.semiBoldTextSize14
+                            .copyWith(color: colors(context).colorGrey6),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CustomActivityCard(
-                            title: AppString.totalActivities.localize(context)!,
-                            completed: 120,
-                            pending: 27,
-                            icon:
-                                PhosphorIcons.pulse(PhosphorIconsStyle.regular),
+                          Expanded(
+                            child: OverviewChart(
+                              landAcquisition: landAcquisition,
+                              massRating: massRating,
+                              miscAcquisition: miscAcquisition,
+                              tasksDone: tasksDone,
+                            ),
                           ),
-                          const SizedBox(width: 12),
-                          CustomActivityCard(
-                            title: AppString.landAcquisition.localize(context)!,
-                            completed: 120,
-                            pending: 27,
-                            icon: PhosphorIcons.mapTrifold(
-                                PhosphorIconsStyle.regular),
-                          ),
-                          const SizedBox(width: 12),
-                          CustomActivityCard(
-                            title: AppString.massRating.localize(context)!,
-                            completed: 120,
-                            pending: 27,
-                            icon: PhosphorIcons.pencilRuler(
-                                PhosphorIconsStyle.regular),
-                          ),
-                          const SizedBox(width: 12),
-                          CustomActivityCard(
-                            title:
-                                AppString.landMiscellaneous.localize(context)!,
-                            completed: 120,
-                            pending: 27,
-                            icon: PhosphorIcons.ticket(
-                                PhosphorIconsStyle.regular),
+                          const SizedBox(width: 24),
+                          Expanded(
+                            child: LineChartSample2(
+                              monthlyValues: monthlyValues,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    // My Activities Title
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: Text(
+                        AppString.myActivities.localize(context)!,
+                        style: AppStyling.semiBoldTextSize14
+                            .copyWith(color: colors(context).colorGrey6),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Horizontal scrollable cards
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0, bottom: 16.0),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: IntrinsicWidth(
+                          child: Row(
+                            children: [
+                              CustomActivityCard(
+                                title: AppString.totalActivities
+                                    .localize(context)!,
+                                completed: overview['TotalTasksCompleted'] ?? 0,
+                                pending: (overview['TotalTasksAssigned'] ?? 0) -
+                                    (overview['TotalTasksCompleted'] ?? 0),
+                                icon: PhosphorIcons.pulse(
+                                    PhosphorIconsStyle.regular),
+                              ),
+                              const SizedBox(width: 12),
+                              CustomActivityCard(
+                                title: AppString.landAcquisition
+                                    .localize(context)!,
+                                completed: overview['LaTaskCompleted'] ?? 0,
+                                pending: (overview['LaTaskAssigned'] ?? 0) -
+                                    (overview['LaTaskCompleted'] ?? 0),
+                                icon: PhosphorIcons.mapTrifold(
+                                    PhosphorIconsStyle.regular),
+                              ),
+                              const SizedBox(width: 12),
+                              CustomActivityCard(
+                                title: AppString.massRating.localize(context)!,
+                                completed: overview['MrTaskCompleted'] ?? 0,
+                                pending: (overview['MrTaskAssigned'] ?? 0) -
+                                    (overview['MrTaskCompleted'] ?? 0),
+                                icon: PhosphorIcons.pencilRuler(
+                                    PhosphorIconsStyle.regular),
+                              ),
+                              const SizedBox(width: 12),
+                              CustomActivityCard(
+                                title: AppString.landMiscellaneous
+                                    .localize(context)!,
+                                completed: overview['LandMiscelleneous'] ?? 0,
+                                pending: (overview['LmTaskAssigned'] ?? 0) -
+                                    (overview['LandMiscelleneous'] ?? 0),
+                                icon: PhosphorIcons.ticket(
+                                    PhosphorIconsStyle.regular),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
