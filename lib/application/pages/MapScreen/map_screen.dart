@@ -45,6 +45,7 @@ class _MapScreenState extends State<MapScreen> {
   // Master file data properties
   String? _id;
   String? _masterFileNo;
+  String? _masterFileRefNo;
   String? _planType;
   String? _planNo;
   String? _authorityRefNo;
@@ -64,6 +65,7 @@ class _MapScreenState extends State<MapScreen> {
   PolygonAnnotation? _selectedLotForSketching;
   // Field is used temporarily between async steps, ignore 'unused_field' warning - Commenting out for now as it seems unused
   // dynamic _buildingGeometryIdPendingSave;
+  String? _savedLotId; // Store the user-selected lot ID from save dialog
 
   // Marker management
   late final MapMarkerLoader _markerLoader;
@@ -103,6 +105,7 @@ class _MapScreenState extends State<MapScreen> {
 
     _id = queryParams['id'];
     _masterFileNo = queryParams['masterFileNo'];
+    _masterFileRefNo = queryParams['masterFileRefNo'];
     _planType = queryParams['planType'];
     _planNo = queryParams['planNo'];
     _authorityRefNo = queryParams['authorityRefNo'];
@@ -110,7 +113,7 @@ class _MapScreenState extends State<MapScreen> {
     _lots = queryParams['lots'];
 
     debugPrint(
-        "MapScreen: Master File Data extracted - ID: $_id, Master File No: $_masterFileNo, Plan Type: $_planType, Plan No: $_planNo, Authority Ref: $_authorityRefNo, Status: $_status, Lots: $_lots");
+        "MapScreen: Master File Data extracted - ID: $_id, Master File No: $_masterFileNo, Master File Ref No: $_masterFileRefNo, Plan Type: $_planType, Plan No: $_planNo, Authority Ref: $_authorityRefNo, Status: $_status, Lots: $_lots");
   }
 
   void _onSketchMetricsUpdated(double area, double distance) {
@@ -284,7 +287,22 @@ class _MapScreenState extends State<MapScreen> {
         },
         onInspectionReport: () {
           Navigator.pop(dialogContext);
-          context.push(Pages.routeInspectionReport.toPath());
+          // Pass master file data and saved lot ID as query parameters
+          final queryParams = {
+            if (_masterFileNo != null) 'masterFileNo': _masterFileNo!,
+            if (_masterFileRefNo != null) 'masterFileRefNo': _masterFileRefNo!,
+            if (_planType != null) 'planType': _planType!,
+            if (_planNo != null) 'planNo': _planNo!,
+            if (_authorityRefNo != null) 'authorityRefNo': _authorityRefNo!,
+            if (_savedLotId != null) 'lotId': _savedLotId!,
+          };
+
+          final uri = Uri(
+            path: Pages.routeInspectionReport.toPath(),
+            queryParameters: queryParams,
+          );
+
+          context.push(uri.toString());
         },
       ),
     );
@@ -694,6 +712,9 @@ class _MapScreenState extends State<MapScreen> {
                   _showSnackbar("Save cancelled or failed.", isError: true);
                   return;
                 }
+
+                // Store the selected lot ID for later use
+                _savedLotId = selectedLotId;
 
                 debugPrint('Selected Lot ID from Dialog: $selectedLotId');
                 // TODO: Associate selectedLotId with the drawn polygon geometry in MapboxState

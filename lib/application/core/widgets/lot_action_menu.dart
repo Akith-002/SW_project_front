@@ -43,6 +43,8 @@ class DialogClipper extends CustomClipper<Path> {
 // A dialog widget that presents a menu with two actions:
 // "Sketch tool" and a report (either "Condition Report" or "Inspection Report")
 // based on the provided source.
+// - Land Acquisition shows "Condition Report"
+// - Land Miscellaneous and other sources show "Inspection Report"
 class LotActionMenu extends StatelessWidget {
   final VoidCallback onSketchTool;
   final VoidCallback onConditionReport;
@@ -69,8 +71,9 @@ class LotActionMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Determine the appropriate report text based on the source.
-    final String reportText =
-        source == 'landAcquisition' ? 'Condition Report' : 'Inspection Report';
+    final String reportText = source == 'landAcquisition'
+        ? 'Condition Report'
+        : 'Inspection Report'; // Land Miscellaneous and other sources get Inspection Report
 
     // The main dialog widget with custom clipping and styling.
     return Dialog(
@@ -117,13 +120,14 @@ class LotActionMenu extends StatelessWidget {
                   const Divider(height: 0, thickness: 1),
                   // Second list tile for report action.
                   ListTile(
-                    title: Text(reportText,
-                        style: const TextStyle(fontSize: 14)),
+                    title:
+                        Text(reportText, style: const TextStyle(fontSize: 14)),
                     onTap: () {
                       // Invoke different callbacks based on the source.
                       if (source == 'landAcquisition') {
                         onConditionReport();
                       } else {
+                        // Land Miscellaneous and other sources use Inspection Report
                         onInspectionReport();
                       }
                       _safePop(context);

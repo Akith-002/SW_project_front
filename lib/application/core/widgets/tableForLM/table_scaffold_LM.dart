@@ -361,6 +361,8 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
                                           'id': plan.id.toString(),
                                           'masterFileNo':
                                               plan.masterFileNo.toString(),
+                                          'masterFileRefNo':
+                                              plan.masterFileRefNo,
                                           'planType': plan.planType,
                                           'planNo': plan.planNo,
                                           'authorityRefNo': plan

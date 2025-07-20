@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
@@ -75,10 +76,41 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   final _businessDetailsController = TextEditingController();
   final _remarksController = TextEditingController();
 
+  // Data passed from navigation
+  String? _masterFileNo;
+  String? _planType;
+  String? _planNo;
+  String? _authorityRefNo;
+  String? _lotId;
+  bool _dataExtracted = false;
+
   @override
   void initState() {
-    super.initState();
     _tabController = TabController(length: tabTitles.length, vsync: this);
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_dataExtracted) {
+      _extractNavigationData();
+      _dataExtracted = true;
+    }
+  }
+
+  void _extractNavigationData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+
+    _masterFileNo = queryParams['masterFileNo'];
+    _planType = queryParams['planType'];
+    _planNo = queryParams['planNo'];
+    _authorityRefNo = queryParams['authorityRefNo'];
+    _lotId = queryParams['lotId'];
+
+    debugPrint(
+        "InspectionReport: Extracted data - Master File No: $_masterFileNo, Lot ID: $_lotId");
   }
 
   @override
@@ -123,11 +155,22 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
   @override
   Widget buildView(BuildContext context) {
+    // Create dynamic titles
+    final String appBarTitle = _masterFileNo != null
+        ? "Inspection Report - #$_masterFileNo"
+        : "Inspection Report";
+
+    final String masterFileLabel =
+        _masterFileNo != null ? "Master File - #$_masterFileNo" : "Master File";
+
+    final String inspectionReportLabel =
+        _lotId != null ? "Inspection Report - #$_lotId" : "Inspection Report";
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CustomAppBar(title: "Inspection Report - #56249"),
+          CustomAppBar(title: appBarTitle),
           Container(
             width: double.infinity,
             color: const Color(0xFFF3F4F6),
@@ -136,9 +179,8 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             child: Breadcrumb(
               items: [
                 BreadcrumbItem(label: "Land Miscellaneous", onTap: () {}),
-                BreadcrumbItem(label: "Master File - #56249", onTap: () {}),
-                BreadcrumbItem(
-                    label: "Inspection Report - #56249", onTap: () {}),
+                BreadcrumbItem(label: masterFileLabel, onTap: () {}),
+                BreadcrumbItem(label: inspectionReportLabel, onTap: () {}),
               ],
             ),
           ),
