@@ -3,21 +3,26 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
+import 'dart:async' as _i8;
 
 import 'package:dartz/dartz.dart' as _i3;
 import 'package:land_asset_valuation/application/core/error/failures.dart'
-    as _i7;
-import 'package:land_asset_valuation/data/datasource/shared_preference.dart'
     as _i9;
+import 'package:land_asset_valuation/data/datasource/shared_preference.dart'
+    as _i11;
 import 'package:land_asset_valuation/data/models/condition_report_model.dart'
-    as _i8;
+    as _i10;
+import 'package:land_asset_valuation/data/models/master_data_model.dart' as _i6;
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart'
     as _i2;
-import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart'
+import 'package:land_asset_valuation/domain/repositories/master_data_repository.dart'
     as _i5;
+import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart'
+    as _i13;
+import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart'
+    as _i7;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i10;
+import 'package:mockito/src/dummies.dart' as _i12;
 import 'package:shared_preferences/shared_preferences.dart' as _i4;
 
 // ignore_for_file: type=lint
@@ -51,11 +56,23 @@ class _FakeSharedPreferences_2 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
+class _FakeMasterDataRepository_3 extends _i1.SmartFake
+    implements _i5.MasterDataRepository {
+  _FakeMasterDataRepository_3(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeMasterDataResponse_4 extends _i1.SmartFake
+    implements _i6.MasterDataResponse {
+  _FakeMasterDataResponse_4(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [SendConditionReportUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSendConditionReportUseCase extends _i1.Mock
-    implements _i5.SendConditionReportUseCase {
+    implements _i7.SendConditionReportUseCase {
   MockSendConditionReportUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -72,25 +89,25 @@ class MockSendConditionReportUseCase extends _i1.Mock
           as _i2.ConditionReportRepository);
 
   @override
-  _i6.Future<_i3.Either<_i7.Failure, bool>> call(
-    _i8.ConditionReportModel? report,
+  _i8.Future<_i3.Either<_i9.Failure, bool>> call(
+    _i10.ConditionReportModel? report,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [report]),
-            returnValue: _i6.Future<_i3.Either<_i7.Failure, bool>>.value(
-              _FakeEither_1<_i7.Failure, bool>(
+            returnValue: _i8.Future<_i3.Either<_i9.Failure, bool>>.value(
+              _FakeEither_1<_i9.Failure, bool>(
                 this,
                 Invocation.method(#call, [report]),
               ),
             ),
           )
-          as _i6.Future<_i3.Either<_i7.Failure, bool>>);
+          as _i8.Future<_i3.Either<_i9.Failure, bool>>);
 }
 
 /// A class which mocks [AppSharedData].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAppSharedData extends _i1.Mock implements _i9.AppSharedData {
+class MockAppSharedData extends _i1.Mock implements _i11.AppSharedData {
   MockAppSharedData() {
     _i1.throwOnMissingStub(this);
   }
@@ -121,7 +138,7 @@ class MockAppSharedData extends _i1.Mock implements _i9.AppSharedData {
   String getData(String? key) =>
       (super.noSuchMethod(
             Invocation.method(#getData, [key]),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i12.dummyValue<String>(
               this,
               Invocation.method(#getData, [key]),
             ),
@@ -151,4 +168,35 @@ class MockAppSharedData extends _i1.Mock implements _i9.AppSharedData {
             returnValue: false,
           )
           as bool);
+}
+
+/// A class which mocks [GetMasterDataUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetMasterDataUseCase extends _i1.Mock
+    implements _i13.GetMasterDataUseCase {
+  MockGetMasterDataUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.MasterDataRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeMasterDataRepository_3(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i5.MasterDataRepository);
+
+  @override
+  _i8.Future<_i6.MasterDataResponse> call() =>
+      (super.noSuchMethod(
+            Invocation.method(#call, []),
+            returnValue: _i8.Future<_i6.MasterDataResponse>.value(
+              _FakeMasterDataResponse_4(this, Invocation.method(#call, [])),
+            ),
+          )
+          as _i8.Future<_i6.MasterDataResponse>);
 }
