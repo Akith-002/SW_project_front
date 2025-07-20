@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For number formatting
-import 'dart:math'; // For floor function
+// For floor function
 
 class LotAreaWidget extends StatelessWidget {
   final double area; // In square meters

@@ -7,23 +7,28 @@ import 'package:land_asset_valuation/application/pages/conditionReport/cubit/con
 import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 import 'package:land_asset_valuation/data/models/condition_report_model.dart';
 import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'condition_report_cubit_test.mocks.dart';
 
-@GenerateMocks([SendConditionReportUseCase, AppSharedData])
+@GenerateMocks(
+    [SendConditionReportUseCase, AppSharedData, GetMasterDataUseCase])
 void main() {
   late ConditionReportCubit conditionReportCubit;
   late MockSendConditionReportUseCase mockSendConditionReportUseCase;
   late MockAppSharedData mockAppSharedData;
+  late MockGetMasterDataUseCase mockGetMasterDataUseCase;
 
   setUp(() {
     mockSendConditionReportUseCase = MockSendConditionReportUseCase();
     mockAppSharedData = MockAppSharedData();
+    mockGetMasterDataUseCase = MockGetMasterDataUseCase();
     conditionReportCubit = ConditionReportCubit(
       sendConditionReportUseCase: mockSendConditionReportUseCase,
       appSharedData: mockAppSharedData,
+      getMasterDataUseCase: mockGetMasterDataUseCase,
     );
   });
 

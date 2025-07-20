@@ -15,6 +15,7 @@ import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/cubit/l
 import 'package:land_asset_valuation/application/core/validators/la_sales_evidence_validator.dart';
 import 'package:land_asset_valuation/application/core/widgets/data_send_successfully_dialogbox.dart';
 import 'package:land_asset_valuation/injection.dart';
+import 'package:http/http.dart' as http;
 
 /// Sales Evidence form screen for Land Acquisition module
 /// Allows users to input and manage land sales evidence data
@@ -456,13 +457,105 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
   }
 
   /// Validates and submits the form
-  void _validateAndSubmit() {
+  void _validateAndSubmit() async {
     if (_formKey.currentState!.validate()) {
-      // Form validation passed, show success dialog
-      _showSuccessDialog();
-      // TODO: Implement actual submission logic
+      // 1. Submit form data to backend
+      final reportId = await _submitFormData();
+      if (reportId != null) {
+        // 2. Upload images with parent_id and parent_type
+        await _uploadImages(reportId);
+        _showSuccessDialog();
+      } else {
+        _showErrorMessage('Failed to submit sales evidence data.');
+      }
     } else {
       _showErrorMessage('Please fix the validation errors in the form');
+    }
+  }
+
+  /// Submits the form data to the backend and returns the new reportId
+  Future<String?> _submitFormData() async {
+    try {
+      final uri = Uri.parse('http://10.0.2.2:5221/api/SalesEvidenceLA');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: _buildFormJson(),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.body;
+        // Expecting { msg: "success", reportId: ... }
+        final reportId = RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
+        print('DEBUG: SalesEvidenceLA reportId: $reportId');
+        return reportId;
+      } else {
+        print('DEBUG: SalesEvidenceLA submission failed: ${response.statusCode} ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('DEBUG: Exception during SalesEvidenceLA submission: $e');
+      return null;
+    }
+  }
+
+  /// Builds the JSON string for the form data
+  String _buildFormJson() {
+    return '''{
+      "assetNumber": "${_assetNumberController.text}",
+      "masterFileRef": "${_masterFileRefController.text}",
+      "roadName": "${_roadNameController.text}",
+      "village": "${_villageController.text}",
+      "vendor": "${_vendorController.text}",
+      "deedNumber": "${_deedNumberController.text}",
+      "deedAttestedNumber": "${_deedAttestedNumberController.text}",
+      "notaryName": "${_notaryNameController.text}",
+      "lotNumber": "${_lotNumberController.text}",
+      "planNumber": "${_planNumberController.text}",
+      "planDate": "${_planDateController.text}",
+      "extent": "${_extentController.text}",
+      "consideration": "${_considerationController.text}",
+      "remarks": "${_remarksController.text}",
+      "rate": "${_rateController.text}",
+      "rateType": "${_rateTypeController.text}",
+      "locationLongitude": "${_locationLongitudeController.text}",
+      "locationLatitude": "${_locationLatitudeController.text}",
+      "landRegistryReferences": "${_landRegistryReferencesController.text}",
+      "situation": "${_situationController.text}",
+      "descriptionOfLand": "${_descriptionOfLandController.text}"
+    }''';
+  }
+
+  /// Uploads images to the backend after form submission
+  Future<void> _uploadImages(String reportId) async {
+    print('DEBUG: _uploadImages called with reportId: $reportId');
+    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
+    if (uploadedImages.isEmpty) return;
+    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['reportId'] = reportId
+      ..fields['parent_id'] = reportId
+      ..fields['parent_type'] = 'SalesEvidencesLA';
+    for (var image in uploadedImages) {
+      if (image is File) {
+        print('DEBUG: Adding image file: ${image.path}');
+        request.files.add(await http.MultipartFile.fromPath('files', image.path));
+      } else {
+        print('DEBUG: Skipping non-File image: $image');
+      }
+    }
+    try {
+      var response = await request.send();
+      print('DEBUG: Image upload response status: ${response.statusCode}');
+      final respStr = await response.stream.bytesToString();
+      print('DEBUG: Image upload response body: $respStr');
+      if (response.statusCode == 200) {
+        _showSuccessMessage('Images uploaded successfully.');
+      } else {
+        _showErrorMessage('Failed to upload images.');
+      }
+    } catch (e) {
+      print('DEBUG: Exception during image upload: $e');
+      _showErrorMessage('Error uploading images: $e');
     }
   }
 
