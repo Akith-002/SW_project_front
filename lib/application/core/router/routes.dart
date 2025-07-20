@@ -24,6 +24,7 @@ import 'package:land_asset_valuation/application/pages/splash/splash_view.dart';
 import 'package:land_asset_valuation/application/pages/RatingCard/rating_card_view.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/AssetMapScreen/asset_map_screen.dart';
+import 'package:land_asset_valuation/application/pages/test.dart';
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
@@ -33,6 +34,12 @@ import 'package:land_asset_valuation/application/pages/RatingCardForms/offices/o
 import 'package:land_asset_valuation/application/pages/RatingCardForms/agriculture/agriculture_rating_card.dart';
 import 'package:land_asset_valuation/application/pages/RatingCardForms/shops/shops_rating_card.dart';
 import 'package:land_asset_valuation/application/pages/RatingCardForms/special/special_rating_card.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
+import 'package:land_asset_valuation/data/repositories/master_data_repository_impl.dart';
+import 'package:land_asset_valuation/data/datasource/remote/master_data_remote_data_source.dart';
+import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
+import 'package:land_asset_valuation/injection.dart';
+import 'package:get_it/get_it.dart';
 
 class AppRouter {
   final RouterServices routerServices;
@@ -139,7 +146,18 @@ class AppRouter {
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RatingCard(),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return RatingCard(masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),
@@ -149,10 +167,17 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'massRating';
+              final String? requestIdStr =
+                  state.uri.queryParameters['requestId'];
+              final int? requestId =
+                  requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: MrAssetsList(source: source),
+                child: MrAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -162,10 +187,17 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingAssessment';
+              final String? requestIdStr =
+                  state.uri.queryParameters['requestId'];
+              final int? requestId =
+                  requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RaAssetsList(source: source),
+                child: RaAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -175,10 +207,17 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingBuilding';
+              final String? requestIdStr =
+                  state.uri.queryParameters['requestId'];
+              final int? requestId =
+                  requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RbAssetsList(source: source),
+                child: RbAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -188,10 +227,17 @@ class AppRouter {
             pageBuilder: (context, state) {
               final String source =
                   state.uri.queryParameters['source'] ?? 'ratingObject';
+              final String? requestIdStr =
+                  state.uri.queryParameters['requestId'];
+              final int? requestId =
+                  requestIdStr != null ? int.tryParse(requestIdStr) : null;
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: RoAssetsList(source: source),
+                child: RoAssetsList(
+                  source: source,
+                  requestId: requestId,
+                ),
               );
             },
           ),
@@ -231,7 +277,18 @@ class AppRouter {
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 key: state.pageKey,
-                child: I2RentalEvidence(),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return I2RentalEvidence(masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),
@@ -261,7 +318,18 @@ class AppRouter {
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 key: state.pageKey,
-                child: InspectionReportView(),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return InspectionReportView(masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),
@@ -271,7 +339,18 @@ class AppRouter {
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 key: state.pageKey,
-                child: PastValuationView(),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return PastValuationView(masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),
@@ -305,7 +384,19 @@ class AppRouter {
 
               return NoTransitionPage(
                 key: state.pageKey,
-                child: DomesticRatingCard(assetId: assetId),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return DomesticRatingCard(
+                          assetId: assetId, masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),
@@ -315,7 +406,18 @@ class AppRouter {
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 key: state.pageKey,
-                child: OfficesRatingCard(),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return OfficesRatingCard(masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),
@@ -325,7 +427,18 @@ class AppRouter {
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 key: state.pageKey,
-                child: AgricultureRatingCard(),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return AgricultureRatingCard(masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),
@@ -335,7 +448,18 @@ class AppRouter {
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 key: state.pageKey,
-                child: ShopsRatingCard(),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return ShopsRatingCard(masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),
@@ -345,7 +469,28 @@ class AppRouter {
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 key: state.pageKey,
-                child: SpecialRatingCard(),
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return SpecialRatingCard(masterData: snapshot.data!);
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeTest.toPath(),
+            name: Pages.routeTest.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const Test(), // Replace with your test page
               );
             },
           ),

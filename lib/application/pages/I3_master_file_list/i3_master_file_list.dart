@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/fileList/file_list.dart';
 import 'package:land_asset_valuation/application/core/widgets/table/table_scaffold.dart';
-import 'package:land_asset_valuation/application/core/widgets/tableForLM/table_scaffold_LM.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForMR/table_scaffold_MR.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRA/table_scaffold_RA.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRB/table_scaffold_RB.dart';
@@ -19,7 +16,6 @@ import 'package:land_asset_valuation/application/pages/mr_requests/cubit/mr_requ
 import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:flutter/foundation.dart';
 
 class I3MasterFileList extends StatefulWidget {
   final int number;
@@ -38,7 +34,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
   final GlobalKey<TableScaffoldState> _tableKey =
       GlobalKey<TableScaffoldState>();
   late final LandAcquisitionRepository _repository;
-  int _totalCount = 0;
+  int _totalCount = 8;
 
   @override
   void initState() {
@@ -98,6 +94,10 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             onSearch: (query) {
               _tableKey.currentState?.search(query);
             },
+            onSort: (sortBy) {
+              _tableKey.currentState?.refreshWithSort(sortBy);
+            },
+            pageSource: currentPageSource,
             table: TableScaffold(
               key: _tableKey,
               pageSource: currentPageSource,

@@ -12,15 +12,27 @@ class LandAcquisitionRepositoryImpl implements LandAcquisitionRepository {
   Future<PaginatedResponse<LandAcquisitionMasterFile>> getPaginatedMasterFiles({
     required int page,
     required int pageSize,
+    String? sortBy,
   }) {
     return remoteDatasource.getPaginatedMasterFiles(
       page: page,
       pageSize: pageSize,
+      sortBy: sortBy,
     );
   }
 
   @override
-  Future<List<LandAcquisitionMasterFile>> searchMasterFiles(String query) {
-    return remoteDatasource.searchMasterFiles(query);
+  Future<PaginatedResponse<LandAcquisitionMasterFile>> searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+    String? sortBy,
+  }) {
+    return remoteDatasource.searchMasterFiles(
+      query: query,
+      page: page,
+      pageSize: pageSize,
+      sortBy: sortBy,
+    );
   }
 }

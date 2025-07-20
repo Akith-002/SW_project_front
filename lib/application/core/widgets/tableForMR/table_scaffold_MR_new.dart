@@ -6,6 +6,8 @@ import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/pages/mr_requests/cubit/mr_requests_cubit.dart';
 import 'package:land_asset_valuation/data/models/mr_request_model.dart';
 import 'package:land_asset_valuation/application/core/widgets/view_download_button.dart';
+import 'package:land_asset_valuation/application/core/widgets/download_confirmation_dialog.dart';
+import 'package:land_asset_valuation/application/core/utils/download_service.dart';
 
 class TableScaffoldMr extends StatefulWidget {
   final int initialPageSize;
@@ -90,6 +92,23 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
   Widget _buildTable(List<MrRequest> requests, String? nextPageToken) {
     return Column(
       children: [
+        // All files count
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'All files (${requests.length})',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: colors(context).colorGrey7,
+                ),
+              ),
+            ],
+          ),
+        ),
         // Table Section
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -180,7 +199,7 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                               borderColor: const Color(0xff069bf1),
                               iconColor: const Color(0xff007bce),
                               onPressed: () {
-                                debugPrint("Download button pressed for request ${request.id}");
+                                _showDownloadDialog(context, request);
                               },
                             ),
                           ],
@@ -257,6 +276,54 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showDownloadDialog(BuildContext context, MrRequest request) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Material(
+          type: MaterialType.transparency,
+          child: DownloadConfirmationDialog(
+            requestNumber: request.ratingReferenceNo,
+            onConfirm: () async {
+              Navigator.of(dialogContext).pop();
+              
+              try {
+                // Download the request data as JSON
+                await DownloadService.downloadRequestAsJson(request);
+                
+                // Show success message
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Request ${request.ratingReferenceNo} shared successfully'),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                }
+              } catch (e) {
+                // Show error message
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error sharing request: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                }
+              }
+            },
+            onCancel: () {
+              Navigator.of(dialogContext).pop();
+            },
+          ),
+        );
+      },
     );
   }
 }

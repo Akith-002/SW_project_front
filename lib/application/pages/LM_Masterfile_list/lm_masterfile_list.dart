@@ -42,11 +42,19 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
     'Authority Reference No': 'requestingauthorityreferenceno',
     'Status': 'status',
   };
+
+  void _updateTotalFiles(int count) {
+    if (_totalFiles != count) {
+      setState(() {
+        _totalFiles = count;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     searchController.addListener(_onSearchChanged);
-    print('Sort options: $_sortOptions'); // Debug print
   }
 
   @override
@@ -59,7 +67,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
 
   void _onSearchChanged() {
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
       final query = searchController.text.trim();
       _tableKey.currentState?.search(query);
     });
@@ -67,21 +75,21 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
 
   @override
   Widget buildView(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Close dropdown when tapping outside
-        if (_showSortDropdown) {
-          setState(() {
-            _showSortDropdown = false;
-          });
-        }
-      },
-      child: Scaffold(
-        appBar: CustomAppBar(
-          title: AppString.landMiscellaneous.localize(context)!,
-          leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
-        ),
-        body: Stack(
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: AppString.landMiscellaneous.localize(context)!,
+        leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
+      ),
+      body: GestureDetector(
+        onTap: () {
+          // Close dropdown when tapping outside
+          if (_showSortDropdown) {
+            setState(() {
+              _showSortDropdown = false;
+            });
+          }
+        },
+        child: Stack(
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -95,57 +103,62 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        "${AppString.all_files.localize(context)!}$_totalFiles",
-                        style: AppStyling.semiBoldTextSize16
-                            .copyWith(color: colors(context).colorBlack),
+                      RepaintBoundary(
+                        child: Text(
+                          "${AppString.all_files.localize(context)!}$_totalFiles",
+                          style: AppStyling.semiBoldTextSize16
+                              .copyWith(color: colors(context).colorBlack),
+                        ),
                       ),
                       const Spacer(),
-                      SizedBox(
-                        width: 290,
-                        height: 37,
-                        child: TextField(
-                          controller: searchController,
-                          decoration: InputDecoration(
-                            hintText: AppString.search.localize(context),
-                            hintStyle: AppStyling.regularTextSize14,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: colors(context).colorGrey5!,
+                      RepaintBoundary(
+                        child: SizedBox(
+                          width: 290,
+                          height: 37,
+                          child: TextField(
+                            controller: searchController,
+                            decoration: InputDecoration(
+                              hintText: AppString.search.localize(context),
+                              hintStyle: AppStyling.regularTextSize14,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: colors(context).colorGrey5!,
+                                ),
                               ),
-                            ),
-                            filled: true,
-                            fillColor: colors(context).colorGrey1,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                              filled: true,
+                              fillColor: colors(context).colorGrey1,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      iconButtonWidget(
-                        color: colors(context).colorBlack!,
-                        iconName: PhosphorIconsRegular.funnelSimple,
-                        onPressed: () {
-                          setState(() {
-                            _showSortDropdown = !_showSortDropdown;
-                          });
-                          print(
-                              'Dropdown state: $_showSortDropdown'); // Debug print
-                        },
+                      RepaintBoundary(
+                        child: iconButtonWidget(
+                          color: colors(context).colorBlack!,
+                          iconName: PhosphorIconsRegular.funnelSimple,
+                          onPressed: () {
+                            setState(() {
+                              _showSortDropdown = !_showSortDropdown;
+                            });
+                          },
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
-                  child: TableScaffoldLM(
-                    key: _tableKey,
-                    pageSource: widget.currentPageSource,
-                    repository: _repository,
-                    onTotalCountChanged: (count) =>
-                        setState(() => _totalFiles = count),
+                  child: RepaintBoundary(
+                    child: TableScaffoldLM(
+                      key: _tableKey,
+                      pageSource: widget.currentPageSource,
+                      repository: _repository,
+                      onTotalCountChanged: _updateTotalFiles,
+                    ),
                   ),
                 ),
               ],
@@ -186,7 +199,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
                         ..._sortOptions.entries
                             .map((entry) =>
                                 _buildSortOption(entry.key, entry.value))
-                            .toList(),
+                            ,
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -204,12 +217,18 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
 
     return InkWell(
       onTap: () {
-        setState(() {
-          _selectedSortColumn = apiName;
-          _showSortDropdown = false;
-        });
-        // Trigger the table to refresh with the new sort option
-        _tableKey.currentState?.refreshWithSort(apiName);
+        if (_selectedSortColumn != apiName) {
+          setState(() {
+            _selectedSortColumn = apiName;
+            _showSortDropdown = false;
+          });
+          // Trigger the table to refresh with the new sort option
+          _tableKey.currentState?.refreshWithSort(apiName);
+        } else {
+          setState(() {
+            _showSortDropdown = false;
+          });
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

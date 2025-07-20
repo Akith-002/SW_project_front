@@ -93,6 +93,47 @@ mixin SketchManager {
     return _fadeFloorPartitions(floorName, isActive: true);
   }
 
+  // Deletes all partitions associated with a specific floor
+  Future<void> deleteFloorPartitions(String floorName) async {
+    if (!_floorPartitions.containsKey(floorName) ||
+        polygonAnnotationManager == null) {
+      debugPrint(
+          "No partitions found for floor $floorName or manager not ready.");
+      return;
+    }
+
+    final partitionsToDelete = _floorPartitions[floorName] ?? [];
+    if (partitionsToDelete.isEmpty) {
+      debugPrint("No partitions to delete for floor $floorName.");
+      _floorPartitions.remove(floorName); // Remove the key if list is empty
+      return;
+    }
+
+    try {
+      // Correct way to delete multiple annotations: iterate and delete individually
+      for (final partition in partitionsToDelete) {
+        await polygonAnnotationManager!.delete(partition);
+      }
+      debugPrint(
+          "Deleted ${partitionsToDelete.length} partitions for floor $floorName.");
+    } catch (e) {
+      debugPrint("Error deleting partitions for floor $floorName: $e");
+      // Optionally, attempt to remove remaining ones individually or handle error
+    } finally {
+      // Remove the floor entry from the map regardless of deletion success
+      _floorPartitions.remove(floorName);
+      // Ensure the map doesn't track a deleted floor
+      if (_currentFloor == floorName) {
+        // If the deleted floor was active, we might need to switch
+        // This case should be handled by FloorManager selecting a new floor first
+        debugPrint(
+            "Warning: Deleted the currently active floor's partitions. FloorManager should handle selection change.");
+        // Consider setting _currentFloor to a default like 'Ground' if necessary,
+        // but FloorManager should dictate the active floor.
+      }
+    }
+  }
+
   // Method to handle tap events in sketch mode
   Future<void> handleSketchTap(
       Point tappedPoint, dynamic widget, MapboxMap mapboxMap) async {

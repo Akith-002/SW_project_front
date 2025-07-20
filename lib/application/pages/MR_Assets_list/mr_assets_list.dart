@@ -10,6 +10,7 @@ import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dar
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_state.dart';
 import 'package:land_asset_valuation/data/models/asset.dart';
+import 'package:land_asset_valuation/domain/usecases/get_request_by_id_usecase.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 class MrAssetsList extends BasePage {
@@ -28,12 +29,36 @@ class MrAssetsList extends BasePage {
 
 class _MrAssetsListState extends BasePageState<MrAssetsList> {
   final _cubit = injection<MrAssetsListCubit>();
+  String? _requestReferenceNo;
 
   @override
   void initState() {
     super.initState();
     // Load assets with requestType = 1 for MR assets
     _loadAssets();
+    _fetchRequestDetails();
+  }
+
+  Future<void> _fetchRequestDetails() async {
+    if (widget.requestId != null) {
+      try {
+        final getRequestById = injection<GetRequestByIdUseCase>();
+        final request = await getRequestById(widget.requestId!);
+        if (mounted) {
+          setState(() {
+            _requestReferenceNo = request.ratingReferenceNo;
+          });
+        }
+      } catch (e) {
+        debugPrint('Error fetching request details: $e');
+        // Fallback to a default format
+        if (mounted) {
+          setState(() {
+            _requestReferenceNo = 'Request ${widget.requestId}';
+          });
+        }
+      }
+    }
   }
 
   void _loadAssets() {
@@ -104,13 +129,16 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
     String title;
     List<String> breadcrumbItems;
 
+    // Use request reference number if available, otherwise use 'Request'
+    final String requestLabel = _requestReferenceNo ?? AppString.request.localize(context)!;
+
     switch (widget.source) {
       case 'ratingAssessment':
         title = AppString.ratingAssessmentRA.localize(context)!;
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
           AppString.ratingAssessment.localize(context)!,
-          AppString.request.localize(context)!,
+          requestLabel,
         ];
         break;
       case 'ratingBuilding':
@@ -118,7 +146,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
           AppString.ratingBuilding.localize(context)!,
-          AppString.request.localize(context)!,
+          requestLabel,
         ];
         break;
       case 'ratingObject':
@@ -126,7 +154,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
           AppString.ratingObject.localize(context)!,
-          AppString.request.localize(context)!,
+          requestLabel,
         ];
         break;
       case 'massRating':
@@ -135,7 +163,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         breadcrumbItems = [
           AppString.massRating.localize(context)!,
           AppString.massRating.localize(context)!,
-          AppString.request.localize(context)!,
+          requestLabel,
         ];
         break;
     }
