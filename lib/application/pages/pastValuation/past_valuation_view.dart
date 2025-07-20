@@ -121,9 +121,7 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
     if (uploadedImages.isEmpty) return;
     var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
     var request = http.MultipartRequest('POST', uri)
-      ..fields['reportId'] = reportId
-      ..fields['parent_id'] = reportId
-      ..fields['parent_type'] = 'PastValuationsLA';
+      ..fields['reportId'] = reportId;
     for (var image in uploadedImages) {
       if (image is File) {
         print('DEBUG: Adding image file: ${image.path}');
