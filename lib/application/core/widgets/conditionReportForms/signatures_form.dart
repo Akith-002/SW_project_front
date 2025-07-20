@@ -80,6 +80,41 @@ class _SignaturesFormState extends State<SignaturesForm> {
               );
             },
           );
+        } else if (state is ConditionReportSavedOffline) {
+          setState(() {
+            _isSubmitting = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Report saved offline (${state.pendingCount} pending). Will sync when internet is available.'),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+          // Still close the form and go back, but with different message
+          widget.onSubmitSuccess?.call();
+          Future.delayed(const Duration(seconds: 2), () {
+            context.go(Pages.routeMapScreen.toPath());
+          });
+        } else if (state is ConditionReportSyncing) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Syncing ${state.pendingCount} pending reports...'),
+              backgroundColor: Colors.blue,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else if (state is ConditionReportSyncCompleted) {
+          if (state.syncedCount == 0) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('All reports are now synced!'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
         } else if (state is ConditionReportSubmitFailure) {
           setState(() {
             _isSubmitting = false;

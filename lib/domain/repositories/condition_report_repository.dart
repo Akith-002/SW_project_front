@@ -5,4 +5,8 @@ import 'package:land_asset_valuation/data/models/condition_report_model.dart';
 abstract class ConditionReportRepository {
   Future<Either<Failure, bool>> sendConditionReport(
       ConditionReportModel report);
+
+  Future<int> getPendingReportsCount();
+
+  Future<List<ConditionReportModel>> getPendingReports();
 }

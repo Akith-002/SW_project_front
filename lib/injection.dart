@@ -18,9 +18,13 @@ import 'package:land_asset_valuation/data/datasource/remote/api/auth_interceptor
 
 // Condition Report Feature
 import 'package:land_asset_valuation/data/datasource/remote/condition_report_remote_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/condition_report_local_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/condition_report_local_database.dart';
 import 'package:land_asset_valuation/data/repositories/condition_report_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart';
+import 'package:land_asset_valuation/data/services/connectivity_service.dart';
+import 'package:land_asset_valuation/data/services/condition_report_sync_service.dart';
 
 // Asset Division Feature
 import 'package:land_asset_valuation/data/datasource/remote/asset_division_remote_data_source.dart';
@@ -128,17 +132,47 @@ Future<void> init() async {
   injection.registerLazySingleton(() => Logger());
   injection.registerLazySingleton(() => SecureStorage());
 
+  // Initialize connectivity service
+  final connectivityService = ConnectivityService();
+  connectivityService.initialize();
+  injection.registerSingleton(connectivityService);
+
   // ------------------------------
   // Condition Report Feature
   // ------------------------------
+
+  // Core services (ConnectivityService already registered above)
+  injection.registerLazySingleton(() => ConditionReportLocalDatabase());
+
+  // Data sources
   injection.registerLazySingleton<ConditionReportRemoteDataSource>(
     () => ConditionReportRemoteDataSourceImpl(dioClient: injection()),
   );
 
-  injection.registerLazySingleton<ConditionReportRepository>(
-    () => ConditionReportRepositoryImpl(remoteDataSource: injection()),
+  injection.registerLazySingleton<ConditionReportLocalDataSource>(
+    () => ConditionReportLocalDataSourceImpl(database: injection()),
   );
 
+  // Sync service
+  final syncService = ConditionReportSyncService(
+    localDatabase: injection(),
+    remoteDataSource: injection(),
+    connectivityService: injection(),
+  );
+  syncService.initialize();
+  injection.registerSingleton(syncService);
+
+  // Repository
+  injection.registerLazySingleton<ConditionReportRepository>(
+    () => ConditionReportRepositoryImpl(
+      remoteDataSource: injection(),
+      localDataSource: injection(),
+      connectivityService: injection(),
+      syncService: injection(),
+    ),
+  );
+
+  // Use case
   injection.registerLazySingleton(
     () => SendConditionReportUseCase(injection()),
   );
@@ -343,6 +377,9 @@ Future<void> init() async {
   injection.registerFactory(() => ConditionReportCubit(
         appSharedData: injection(),
         sendConditionReportUseCase: injection(),
+        repository: injection(),
+        connectivityService: injection(),
+        syncService: injection(),
       ));
 
   injection.registerFactory(() => DomesticRatingCardCubit(
