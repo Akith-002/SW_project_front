@@ -45,3 +45,32 @@ class LoginResponse {
     };
   }
 }
+
+class UserProfile {
+  final String empName;
+  final String empEmail;
+  final String empId;
+  final String position;
+  final String assignedDivision;
+  final String? profilePicture;
+
+  UserProfile({
+    required this.empName,
+    required this.empEmail,
+    required this.empId,
+    required this.position,
+    required this.assignedDivision,
+    this.profilePicture,
+  });
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    return UserProfile(
+      empName: json['empName'],
+      empEmail: json['empEmail'],
+      empId: json['empId'],
+      position: json['position'],
+      assignedDivision: json['assignedDivision'],
+      profilePicture: json['profilePicture'],
+    );
+  }
+}

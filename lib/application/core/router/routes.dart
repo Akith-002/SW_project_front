@@ -40,6 +40,7 @@ import 'package:land_asset_valuation/data/datasource/remote/master_data_remote_d
 import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:get_it/get_it.dart';
+import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 
 class AppRouter {
   final RouterServices routerServices;
@@ -358,9 +359,12 @@ class AppRouter {
             path: Pages.routeProfileScreen.toPath(),
             name: Pages.routeProfileScreen.toPathName(),
             pageBuilder: (context, state) {
+              // Fetch username from shared preferences or session
+              final appSharedData = injection<AppSharedData>();
+              final username = appSharedData.getData('username');
               return NoTransitionPage(
                 key: state.pageKey,
-                child: ProfileScreen(),
+                child: ProfileScreen(username: username),
               );
             },
           ),
