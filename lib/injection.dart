@@ -251,7 +251,7 @@ Future<void> init() async {
     () => LandAcquisitionRemoteDatasource(injection()),
   );
   injection.registerLazySingleton<LandAcquisitionRepository>(
-    () => LandAcquisitionRepositoryImpl(injection()),
+    () => LandAcquisitionRepositoryImpl(injection(), injection()),
   );
   injection
       .registerLazySingleton(() => GetPaginatedMasterFilesUseCase(injection()));
