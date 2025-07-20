@@ -8,10 +8,10 @@ class FloorManager extends StatefulWidget {
   final Function(String)? onFloorDeleted; // Add callback for deletion
 
   const FloorManager({
-    Key? key,
+    super.key,
     this.onFloorSelected,
     this.onFloorDeleted, // Add to constructor
-  }) : super(key: key);
+  });
 
   @override
   State<FloorManager> createState() => _FloorManagerState();
@@ -162,7 +162,7 @@ class _FloorManagerState extends State<FloorManager> {
                       onDelete: () =>
                           _deleteFloor(floor), // Pass delete handler
                     ))
-                .toList(),
+                ,
           ],
         ),
       ),
@@ -176,7 +176,7 @@ class FloorItem extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete; // Add callback for delete button
 
-  const FloorItem({
+  const FloorItem({super.key, 
     required this.floorName,
     required this.onTap,
     required this.onDelete, // Require delete callback
@@ -252,6 +252,8 @@ class FloorItem extends StatelessWidget {
 }
 
 class AddFloorDialog extends StatefulWidget {
+  const AddFloorDialog({super.key});
+
   @override
   State<AddFloorDialog> createState() => _AddFloorDialogState();
 }
@@ -286,11 +288,11 @@ class _AddFloorDialogState extends State<AddFloorDialog> {
                 dropdownColor: colors(context).colorWhite,
                 items: [
                   DropdownMenuItem(
-                      child: Text(AppString.above.localize(context)!),
-                      value: 'above'),
+                      value: 'above',
+                      child: Text(AppString.above.localize(context)!)),
                   DropdownMenuItem(
-                      child: Text(AppString.below.localize(context)!),
-                      value: 'below'),
+                      value: 'below',
+                      child: Text(AppString.below.localize(context)!)),
                 ],
                 onChanged: (val) {
                   if (val != null) {

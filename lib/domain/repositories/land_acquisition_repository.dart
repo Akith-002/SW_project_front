@@ -5,6 +5,12 @@ abstract class LandAcquisitionRepository {
   Future<PaginatedResponse<LandAcquisitionMasterFile>> getPaginatedMasterFiles({
     required int page,
     required int pageSize,
+    String? sortBy,
   });
-  Future<List<LandAcquisitionMasterFile>> searchMasterFiles(String query);
+  Future<PaginatedResponse<LandAcquisitionMasterFile>> searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+    String? sortBy,
+  });
 }

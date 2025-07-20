@@ -3,5 +3,6 @@ import 'package:land_asset_valuation/application/core/error/failures.dart';
 import 'package:land_asset_valuation/data/models/rental_evidence_model.dart';
 
 abstract class RentalEvidenceRepository {
-  Future<Either<Failure, bool>> sendRentalEvidence(RentalEvidenceModel report);
+  Future<Either<Failure, String>> sendRentalEvidence(
+      RentalEvidenceModel report);
 }

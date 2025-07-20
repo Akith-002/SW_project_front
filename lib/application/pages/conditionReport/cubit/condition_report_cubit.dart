@@ -8,8 +8,9 @@ import 'package:land_asset_valuation/domain/repositories/condition_report_reposi
 import 'package:land_asset_valuation/application/core/services/condition_report_form_service.dart';
 import 'package:land_asset_valuation/data/services/connectivity_service.dart';
 import 'package:land_asset_valuation/data/services/condition_report_sync_service.dart';
+import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
 
-class ConditionReportCubit extends BaseCubit<BaseState<ConditionReportState>> {
+class ConditionReportCubit extends BaseCubit<ConditionReportState> {
   final AppSharedData appSharedData;
   final SendConditionReportUseCase sendConditionReportUseCase;
   final ConditionReportRepository repository;
@@ -17,6 +18,7 @@ class ConditionReportCubit extends BaseCubit<BaseState<ConditionReportState>> {
   final ConditionReportSyncService syncService;
 
   StreamSubscription<SyncStatus>? _syncSubscription;
+  final GetMasterDataUseCase getMasterDataUseCase;
 
   ConditionReportCubit({
     required this.appSharedData,
@@ -26,6 +28,19 @@ class ConditionReportCubit extends BaseCubit<BaseState<ConditionReportState>> {
     required this.syncService,
   }) : super(ConditionReportInitial()) {
     _listenToSyncUpdates();
+  }
+
+    required this.getMasterDataUseCase,
+  }) : super(ConditionReportInitial());
+
+  Future<void> fetchMasterData() async {
+    emit(MasterDataLoading());
+    try {
+      final masterData = await getMasterDataUseCase();
+      emit(MasterDataLoadSuccess(masterData));
+    } catch (e) {
+      emit(MasterDataLoadFailure(e.toString()));
+    }
   }
 
   Future<void> sendConditionReport(String masterFileId) async {
@@ -38,7 +53,7 @@ class ConditionReportCubit extends BaseCubit<BaseState<ConditionReportState>> {
 
     // Debug: Print in the cubit
     print('======= CUBIT: CREATING CONDITION REPORT MODEL =======');
-    print('Master File ID: ${reportModel.masterFileId}');
+    print('Master File ID:  [32m${reportModel.masterFileId} [0m');
     print('Name of Village: ${reportModel.nameOfTheVillage}');
     print('Building Description: ${reportModel.buildingDescription}');
     print('Data being prepared for API call...');

@@ -8,10 +8,17 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
-class SpecialRatingCard extends StatelessWidget {
-  const SpecialRatingCard({super.key});
+class SpecialRatingCard extends StatefulWidget {
+  final MasterDataResponse masterData;
+  const SpecialRatingCard({super.key, required this.masterData});
 
+  @override
+  State<SpecialRatingCard> createState() => _SpecialRatingCardState();
+}
+
+class _SpecialRatingCardState extends State<SpecialRatingCard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,15 +53,11 @@ class SpecialRatingCard extends StatelessWidget {
               _buildRow([
                 CustomDropdownField(
                   label: "Special Property Type",
-                  items: [
-                    "Select Special Type",
-                    "Hospital",
-                    "School",
-                    "Temple/Church",
-                    "Industrial",
-                    "Government Building"
-                  ],
-                  initialValue: "Select Special Type",
+                  items: widget.masterData.natureOfConstruction,
+                  initialValue:
+                      widget.masterData.natureOfConstruction.isNotEmpty
+                          ? widget.masterData.natureOfConstruction.first
+                          : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
@@ -97,64 +100,27 @@ class SpecialRatingCard extends StatelessWidget {
               _buildRow([
                 CustomDropdownField(
                   label: "Construction Type",
-                  items: [
-                    "Select Construction",
-                    "RCC",
-                    "Steel Frame",
-                    "Mixed",
-                    "Special"
-                  ],
-                  initialValue: "Select Construction",
+                  items: widget.masterData.foundationStructure,
+                  initialValue: widget.masterData.foundationStructure.isNotEmpty
+                      ? widget.masterData.foundationStructure.first
+                      : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
                 CustomDropdownField(
                   label: "Special Features",
-                  items: [
-                    "Select Features",
-                    "Fire Safety",
-                    "Emergency Access",
-                    "Special Equipment",
-                    "Multiple Floors"
-                  ],
-                  initialValue: "Select Features",
+                  items: widget.masterData.services,
+                  initialValue: widget.masterData.services.isNotEmpty
+                      ? widget.masterData.services.first
+                      : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
               ]),
-              _buildRow([
-                CustomDropdownField(
-                  label: "Usage Classification",
-                  items: [
-                    "Select Usage",
-                    "Public Service",
-                    "Educational",
-                    "Healthcare",
-                    "Religious",
-                    "Industrial"
-                  ],
-                  initialValue: "Select Usage",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
-                ),
-                CustomDropdownField(
-                  label: AppString.condition.localize(context)!,
-                  items: [
-                    "Select Condition",
-                    "Excellent",
-                    "Good",
-                    "Fair",
-                    "Poor"
-                  ],
-                  initialValue: "Select Condition",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
-                ),
-              ]),
+              // Remove dropdowns for usageClassification, condition, propertySubCategory, ownershipType
+              // Leave as text fields or static for now
               _buildRow([
                 LabeledTextField(
                   label: AppString.age.localize(context)!,
@@ -173,36 +139,6 @@ class SpecialRatingCard extends StatelessWidget {
                 LabeledTextField(
                   label: AppString.parkingSpace.localize(context)!,
                   placeholder: "Parking facilities",
-                ),
-              ]),
-              _buildRow([
-                CustomDropdownField(
-                  label: AppString.propertySubCategory.localize(context)!,
-                  items: [
-                    "Select Property Sub Category",
-                    "Healthcare Facility",
-                    "Educational Institution",
-                    "Religious Building",
-                    "Government Office"
-                  ],
-                  initialValue: "Select Property Sub Category",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
-                ),
-                CustomDropdownField(
-                  label: "Ownership Type",
-                  items: [
-                    "Select Ownership",
-                    "Government",
-                    "Private",
-                    "Trust",
-                    "NGO"
-                  ],
-                  initialValue: "Select Ownership",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
                 ),
               ]),
               _buildRow([

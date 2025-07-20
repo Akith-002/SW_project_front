@@ -6,7 +6,7 @@ import 'package:land_asset_valuation/data/models/rental_evidence_model.dart';
 import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 abstract class RentalEvidenceRemoteDataSource {
-  Future<bool> sendRentalEvidence(RentalEvidenceModel report);
+  Future<String> sendRentalEvidence(RentalEvidenceModel report);
 }
 
 class RentalEvidenceRemoteDataSourceImpl
@@ -17,7 +17,7 @@ class RentalEvidenceRemoteDataSourceImpl
   RentalEvidenceRemoteDataSourceImpl({required this.dioClient});
 
   @override
-  Future<bool> sendRentalEvidence(RentalEvidenceModel report) async {
+  Future<String> sendRentalEvidence(RentalEvidenceModel report) async {
     try {
       // Get the full API URL for debugging
       final String endpoint = '/RentalEvidenceLA';
@@ -41,7 +41,13 @@ class RentalEvidenceRemoteDataSourceImpl
       _logger.d('===========================================');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
+        // Expecting { msg: "success", reportId: "..." }
+        final data = response.data;
+        if (data != null && data['reportId'] != null) {
+          return data['reportId'].toString();
+        } else {
+          throw ServerException();
+        }
       } else {
         _logger.e(
             '======= REMOTE DATA SOURCE: API ERROR - UNEXPECTED STATUS CODE =======');

@@ -110,6 +110,12 @@ import 'package:land_asset_valuation/domain/usecases/save_domestic_rating_card.d
 import 'package:land_asset_valuation/domain/usecases/get_domestic_rating_card_autofill.dart';
 import 'package:land_asset_valuation/application/pages/RatingCardForms/domestic/cubit/domestic_rating_card_cubit.dart';
 
+// Master Data Feature
+import 'package:land_asset_valuation/data/datasource/remote/master_data_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/master_data_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/master_data_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
+
 final injection = GetIt.I;
 
 Future<void> init() async {
@@ -339,6 +345,19 @@ Future<void> init() async {
   injection.registerLazySingleton(() => SearchAssetsUseCase(injection()));
 
   // ------------------------------
+  // Master Data Feature
+  // ------------------------------
+  injection.registerLazySingleton<MasterDataRemoteDataSource>(
+    () => MasterDataRemoteDataSourceImpl(dioClient: injection()),
+  );
+  injection.registerLazySingleton<MasterDataRepository>(
+    () => MasterDataRepositoryImpl(remoteDataSource: injection()),
+  );
+  injection.registerLazySingleton(
+    () => GetMasterDataUseCase(injection()),
+  );
+
+  // ------------------------------
   // Cubits (UI Layer)
   // ------------------------------
   injection.registerFactory(() => SplashCubit(appSharedData: injection()));
@@ -380,6 +399,7 @@ Future<void> init() async {
         repository: injection(),
         connectivityService: injection(),
         syncService: injection(),
+        getMasterDataUseCase: injection(),
       ));
 
   injection.registerFactory(() => DomesticRatingCardCubit(
