@@ -75,7 +75,10 @@ class ProfileScreen extends StatelessWidget {
             final overview = taskSnapshot.data!['overview'];
             final summary =
                 taskSnapshot.data!['summary'] as Map<String, dynamic>;
-            // Map overview data (use correct lowercase keys)
+            // Debug: Print the overview object and its keys
+            print('DEBUG: Overview object: ' + overview.toString());
+            print('DEBUG: Overview keys: ' + overview.keys.toString());
+            // Map overview data (use correct camelCase keys)
             final double landAcquisition =
                 (overview['laTaskAssigned'] ?? 0).toDouble();
             final double massRating =
@@ -86,7 +89,7 @@ class ProfileScreen extends StatelessWidget {
                 (overview['totalTasksCompleted'] ?? 0).toDouble();
             // Debug print for pie chart values
             print(
-                'Pie chart values (Profile): landAcquisition=$landAcquisition, massRating=$massRating, miscAcquisition=$miscAcquisition, tasksDone=$tasksDone');
+                'Pie chart values (Profile): landAcquisition= [32m$landAcquisition [0m, massRating=$massRating, miscAcquisition=$miscAcquisition, tasksDone=$tasksDone');
             // Map summary data to monthly values (Jan-Dec)
             List<double> monthlyValues = List.generate(12, (i) {
               final monthKey = DateTime(DateTime.now().year, i + 1, 1)
@@ -168,9 +171,9 @@ class ProfileScreen extends StatelessWidget {
                               CustomActivityCard(
                                 title: AppString.totalActivities
                                     .localize(context)!,
-                                completed: overview['TotalTasksCompleted'] ?? 0,
-                                pending: (overview['TotalTasksAssigned'] ?? 0) -
-                                    (overview['TotalTasksCompleted'] ?? 0),
+                                completed: overview['totalTasksCompleted'] ?? 0,
+                                pending: (overview['totalTasksAssigned'] ?? 0) -
+                                    (overview['totalTasksCompleted'] ?? 0),
                                 icon: PhosphorIcons.pulse(
                                     PhosphorIconsStyle.regular),
                               ),
@@ -178,18 +181,18 @@ class ProfileScreen extends StatelessWidget {
                               CustomActivityCard(
                                 title: AppString.landAcquisition
                                     .localize(context)!,
-                                completed: overview['LaTaskCompleted'] ?? 0,
-                                pending: (overview['LaTaskAssigned'] ?? 0) -
-                                    (overview['LaTaskCompleted'] ?? 0),
+                                completed: overview['laTaskCompleted'] ?? 0,
+                                pending: (overview['laTaskAssigned'] ?? 0) -
+                                    (overview['laTaskCompleted'] ?? 0),
                                 icon: PhosphorIcons.mapTrifold(
                                     PhosphorIconsStyle.regular),
                               ),
                               const SizedBox(width: 12),
                               CustomActivityCard(
                                 title: AppString.massRating.localize(context)!,
-                                completed: overview['MrTaskCompleted'] ?? 0,
-                                pending: (overview['MrTaskAssigned'] ?? 0) -
-                                    (overview['MrTaskCompleted'] ?? 0),
+                                completed: overview['mrTaskCompleted'] ?? 0,
+                                pending: (overview['mrTaskAssigned'] ?? 0) -
+                                    (overview['mrTaskCompleted'] ?? 0),
                                 icon: PhosphorIcons.pencilRuler(
                                     PhosphorIconsStyle.regular),
                               ),
@@ -197,9 +200,9 @@ class ProfileScreen extends StatelessWidget {
                               CustomActivityCard(
                                 title: AppString.landMiscellaneous
                                     .localize(context)!,
-                                completed: overview['LandMiscelleneous'] ?? 0,
-                                pending: (overview['LmTaskAssigned'] ?? 0) -
-                                    (overview['LandMiscelleneous'] ?? 0),
+                                completed: overview['landMiscelleneous'] ?? 0,
+                                pending: (overview['lmTaskAssigned'] ?? 0) -
+                                    (overview['landMiscelleneous'] ?? 0),
                                 icon: PhosphorIcons.ticket(
                                     PhosphorIconsStyle.regular),
                               ),

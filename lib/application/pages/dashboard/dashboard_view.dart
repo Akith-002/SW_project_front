@@ -62,6 +62,8 @@ class _DashboardViewState extends BasePageState<DashboardView> {
     'Status': 'status',
   };
 
+  late Future<Map<String, dynamic>> _dashboardFuture;
+
   void _updateTotalFiles(int count) {
     if (_totalFiles != count) {
       setState(() {
@@ -74,6 +76,16 @@ class _DashboardViewState extends BasePageState<DashboardView> {
   void initState() {
     super.initState();
     searchController.addListener(_onSearchChanged);
+    // Initialize the dashboard future once
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final username =
+          Provider.of<AuthProvider>(context, listen: false).username;
+      if (username != null) {
+        setState(() {
+          _dashboardFuture = fetchTaskOverviewAndSummary(username);
+        });
+      }
+    });
   }
 
   @override
@@ -94,12 +106,11 @@ class _DashboardViewState extends BasePageState<DashboardView> {
 
   @override
   Widget buildView(BuildContext context) {
-    final username = Provider.of<AuthProvider>(context, listen: false).username;
-    if (username == null) {
+    if (_dashboardFuture == null) {
       return const Center(child: CircularProgressIndicator());
     }
     return FutureBuilder<Map<String, dynamic>>(
-      future: fetchTaskOverviewAndSummary(username),
+      future: _dashboardFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
