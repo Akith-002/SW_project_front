@@ -14,6 +14,24 @@ final class ConditionReportSubmitFailure extends ConditionReportState {
   ConditionReportSubmitFailure(this.errorMessage);
 }
 
+final class ConditionReportSavedOffline extends ConditionReportState {
+  final int pendingCount;
+
+  ConditionReportSavedOffline(this.pendingCount);
+}
+
+final class ConditionReportSyncing extends ConditionReportState {
+  final int pendingCount;
+
+  ConditionReportSyncing(this.pendingCount);
+}
+
+final class ConditionReportSyncCompleted extends ConditionReportState {
+  final int syncedCount;
+
+  ConditionReportSyncCompleted(this.syncedCount);
+}
+
 final class MasterDataLoading extends ConditionReportState {}
 
 final class MasterDataLoadSuccess extends ConditionReportState {
