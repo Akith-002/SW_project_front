@@ -26,6 +26,15 @@ import 'package:land_asset_valuation/domain/usecases/send_condition_report_useca
 import 'package:land_asset_valuation/data/services/connectivity_service.dart';
 import 'package:land_asset_valuation/data/services/condition_report_sync_service.dart';
 
+// Inspection Report Feature
+import 'package:land_asset_valuation/data/datasource/remote/inspection_report_remote_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/inspection_report_local_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/inspection_report_local_database.dart';
+import 'package:land_asset_valuation/data/repositories/inspection_report_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/inspection_report_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_inspection_report_usecase.dart';
+import 'package:land_asset_valuation/data/services/inspection_report_sync_service.dart';
+
 // Asset Division Feature
 import 'package:land_asset_valuation/data/datasource/remote/asset_division_remote_data_source.dart';
 import 'package:land_asset_valuation/data/repositories/asset_division_repository_impl.dart';
@@ -188,6 +197,44 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => SendConditionReportUseCase(injection()),
   );
+
+  // ------------------------------
+  // Inspection Report Feature
+  // ------------------------------
+  injection.registerLazySingleton(() => InspectionReportLocalDatabase());
+
+  // Data sources
+  injection.registerLazySingleton<InspectionReportRemoteDataSource>(
+    () => InspectionReportRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<InspectionReportLocalDataSource>(
+    () => InspectionReportLocalDataSourceImpl(database: injection()),
+  );
+
+  // Sync service
+  final inspectionSyncService = InspectionReportSyncService(
+    remoteDataSource: injection(),
+    localDataSource: injection(),
+    connectivityService: injection(),
+  );
+  injection.registerSingleton(inspectionSyncService);
+
+  // Repository
+  injection.registerLazySingleton<InspectionReportRepository>(
+    () => InspectionReportRepositoryImpl(
+      remoteDataSource: injection(),
+      localDataSource: injection(),
+      connectivityService: injection(),
+      syncService: injection(),
+    ),
+  );
+
+  // Use case
+  injection.registerLazySingleton(
+    () => SendInspectionReportUseCase(injection()),
+  );
+
   // ------------------------------
   // Asset Division Feature
   // ------------------------------
@@ -432,8 +479,15 @@ Future<void> init() async {
 
   injection
       .registerFactory(() => PastValuationCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+
+  injection.registerFactory(() => InspectionReportCubit(
+        appSharedData: injection(),
+        sendInspectionReportUseCase: injection(),
+        repository: injection(),
+        connectivityService: injection(),
+        syncService: injection(),
+        getMasterDataUseCase: injection(),
+      ));
 
   // ------------------------------
   // Auth Dependencies

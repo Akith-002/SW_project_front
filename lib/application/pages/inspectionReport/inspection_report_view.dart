@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
@@ -8,17 +9,24 @@ import 'package:land_asset_valuation/application/core/configurations/app_config.
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
-import 'package:land_asset_valuation/application/core/widgets/custom_button.dart';
-import 'package:land_asset_valuation/application/core/widgets/image_upload.dart';
-import 'package:land_asset_valuation/application/core/widgets/labeled_text_field.dart';
-import 'package:land_asset_valuation/application/core/widgets/custom_dropdown_field.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
-import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/pages/inspectionReport/cubit/inspection_report_cubit.dart';
-import 'package:land_asset_valuation/application/core/validators/inspection_validator.dart';
+import 'package:land_asset_valuation/application/pages/inspectionReport/cubit/inspection_report_state.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
-import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/data/models/building.dart';
+import 'package:land_asset_valuation/data/services/inspection_report_service.dart';
+import 'package:land_asset_valuation/data/services/building_service.dart';
+import 'package:land_asset_valuation/application/core/widgets/saved_reports_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+
+// Import the new widgets
+import 'package:land_asset_valuation/application/pages/inspectionReport/widgets/land_info_tab.dart';
+import 'package:land_asset_valuation/application/pages/inspectionReport/widgets/building_info_tab.dart';
+import 'package:land_asset_valuation/application/pages/inspectionReport/widgets/other_constructions_tab.dart';
+
+// Import the new helpers
+import 'package:land_asset_valuation/application/pages/inspectionReport/helpers/inspection_form_helpers.dart';
 
 class InspectionReportView extends BasePage {
   final MasterDataResponse masterData;
@@ -51,13 +59,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   final _districtController = TextEditingController();
   final _provinceController = TextEditingController();
 
-  // State for Building Info Tab
-  String? _selectedBuildingName;
-  final List<String> _buildingNames = [
-    'B1',
-    'B2',
-    'B3'
-  ]; // Example building names
+  // State for Building Info Tab - Dynamic Buildings
+  Building? _selectedBuilding;
+  List<Building> _availableBuildings = [];
+  bool _buildingsLoaded = false;
+  final BuildingService _buildingService = BuildingService();
+  final InspectionReportService _inspectionReportService =
+      InspectionReportService();
 
   // Add controllers for building info form
   final _buildingIdController = TextEditingController();
@@ -73,6 +81,32 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   final _structureController = TextEditingController();
   final _buildingConditionsController = TextEditingController();
 
+  // Dropdown selection variables for validation
+  String? _selectedBuildingCategory;
+  String? _selectedBuildingClass;
+  String? _selectedNatureOfConstruction;
+  String? _selectedBuildingConditions;
+
+  // Building specification dropdown variables
+  String? _selectedRoofMaterial;
+  String? _selectedRoofFrame;
+  String? _selectedRoofFinisher;
+  String? _selectedCeiling;
+  String? _selectedFoundationStructure;
+  String? _selectedWallStructure;
+  String? _selectedFloorStructure;
+  String? _selectedDoor;
+  String? _selectedWindow;
+  String? _selectedWindowProtection;
+  String? _selectedBathroomToiletDoorsFittings;
+  String? _selectedHandRail;
+  String? _selectedPantryCupboard;
+  String? _selectedOtherDoors;
+  String? _selectedWallFinisher;
+  String? _selectedFloorFinisher;
+  String? _selectedBathroomToilet;
+  String? _selectedServices;
+
   // Add controllers for other constructions form
   final _otherInfoController = TextEditingController();
   final _otherConstructionDetailsController = TextEditingController();
@@ -82,16 +116,48 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
   // Data passed from navigation
   String? _masterFileNo;
-  String? _planType;
-  String? _planNo;
-  String? _authorityRefNo;
   String? _lotId;
   bool _dataExtracted = false;
+
+  // Building form completion tracking
+  Map<String, bool> _buildingFormCompletionStatus = {};
+  Map<String, Map<String, dynamic>> _savedBuildingForms = {};
 
   @override
   void initState() {
     _tabController = TabController(length: tabTitles.length, vsync: this);
+    _addFormListeners();
     super.initState();
+  }
+
+  // Method to add listeners to form controllers for real-time validation
+  void _addFormListeners() {
+    // Add listeners to required text controllers for building form
+    _buildingIdController.addListener(_updateSaveButtonState);
+    _buildingNameController.addListener(_updateSaveButtonState);
+    _noOfFloorsGPlusController.addListener(_updateSaveButtonState);
+    _noOfFloorsGMinusController.addListener(_updateSaveButtonState);
+    _ageController.addListener(_updateSaveButtonState);
+    _expectedLifePeriodController.addListener(_updateSaveButtonState);
+    _structureController.addListener(_updateSaveButtonState);
+
+    // Add listeners to land info form controllers
+    _masterFileRefController.addListener(_updateSaveButtonState);
+    _inspectionDateController.addListener(_updateSaveButtonState);
+    _districtController.addListener(_updateSaveButtonState);
+    _provinceController.addListener(_updateSaveButtonState);
+
+    // Add listeners to other constructions form controllers
+    _otherInfoController.addListener(_updateSaveButtonState);
+    _otherConstructionDetailsController.addListener(_updateSaveButtonState);
+  }
+
+  // Method to update save button state when form changes
+  void _updateSaveButtonState() {
+    // Trigger a rebuild to update the save button state
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -100,6 +166,36 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     if (!_dataExtracted) {
       _extractNavigationData();
       _dataExtracted = true;
+      _loadBuildingsForLot();
+    }
+  }
+
+  /// Load buildings for the current lot and master file
+  Future<void> _loadBuildingsForLot() async {
+    if (_lotId != null && _masterFileNo != null) {
+      debugPrint(
+          "Loading buildings for lot: $_lotId, masterFile: $_masterFileNo");
+      try {
+        final buildings =
+            await _buildingService.getBuildingsForLot(_lotId!, _masterFileNo!);
+        setState(() {
+          _availableBuildings = buildings;
+          _buildingsLoaded = true;
+        });
+        debugPrint("Loaded ${buildings.length} buildings");
+      } catch (e) {
+        debugPrint("Error loading buildings: $e");
+        setState(() {
+          _availableBuildings = [];
+          _buildingsLoaded = true;
+        });
+      }
+    } else {
+      debugPrint(
+          "Cannot load buildings: lotId=$_lotId, masterFileNo=$_masterFileNo");
+      setState(() {
+        _buildingsLoaded = true;
+      });
     }
   }
 
@@ -108,17 +204,33 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     final queryParams = state.uri.queryParameters;
 
     _masterFileNo = queryParams['masterFileNo'];
-    _planType = queryParams['planType'];
-    _planNo = queryParams['planNo'];
-    _authorityRefNo = queryParams['authorityRefNo'];
     _lotId = queryParams['lotId'];
+
+    _autoFillFormFields();
 
     debugPrint(
         "InspectionReport: Extracted data - Master File No: $_masterFileNo, Lot ID: $_lotId");
   }
 
+  void _autoFillFormFields() {
+    if (_masterFileNo != null && _masterFileNo!.isNotEmpty) {
+      _masterFileRefController.text = _masterFileNo!;
+    }
+
+    final DateTime now = DateTime.now();
+    final String todayDate =
+        "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+    _inspectionDateController.text = todayDate;
+
+    debugPrint(
+        "InspectionReport: Auto-filled Master File Ref: ${_masterFileRefController.text}");
+    debugPrint(
+        "InspectionReport: Auto-filled Inspection Date: ${_inspectionDateController.text}");
+  }
+
   @override
   void dispose() {
+    _removeFormListeners();
     _tabController.dispose();
     _masterFileRefController.dispose();
     _inspectionDateController.dispose();
@@ -145,6 +257,24 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     super.dispose();
   }
 
+  void _removeFormListeners() {
+    _buildingIdController.removeListener(_updateSaveButtonState);
+    _buildingNameController.removeListener(_updateSaveButtonState);
+    _noOfFloorsGPlusController.removeListener(_updateSaveButtonState);
+    _noOfFloorsGMinusController.removeListener(_updateSaveButtonState);
+    _ageController.removeListener(_updateSaveButtonState);
+    _expectedLifePeriodController.removeListener(_updateSaveButtonState);
+    _structureController.removeListener(_updateSaveButtonState);
+
+    _masterFileRefController.removeListener(_updateSaveButtonState);
+    _inspectionDateController.removeListener(_updateSaveButtonState);
+    _districtController.removeListener(_updateSaveButtonState);
+    _provinceController.removeListener(_updateSaveButtonState);
+
+    _otherInfoController.removeListener(_updateSaveButtonState);
+    _otherConstructionDetailsController.removeListener(_updateSaveButtonState);
+  }
+
   void _onImagePicked(File file) {
     setState(() {
       uploadedImages.add(file);
@@ -157,165 +287,475 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     });
   }
 
-  // Add this function to handle validation, submission, and image upload
-  void _validateAndSubmit() async {
+  // Function to handle validation and save data locally
+  void _validateAndSaveLocally() async {
+    if (_selectedBuilding == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a building first'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final isEmpty = InspectionFormHelpers.isBuildingFormEmpty(
+      buildingDetailsController: _buildingDetailsController,
+      noOfFloorsGPlusController: _noOfFloorsGPlusController,
+      noOfFloorsGMinusController: _noOfFloorsGMinusController,
+      ageController: _ageController,
+      expectedLifePeriodController: _expectedLifePeriodController,
+      structureController: _structureController,
+      parkingSpaceController: _parkingSpaceController,
+      designController: _designController,
+      conveniencesController: _conveniencesController,
+      selectedBuildingCategory: _selectedBuildingCategory,
+      selectedBuildingClass: _selectedBuildingClass,
+      selectedNatureOfConstruction: _selectedNatureOfConstruction,
+      selectedBuildingConditions: _selectedBuildingConditions,
+      uploadedImages: uploadedImages,
+    );
+
+    if (isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill the building information before saving'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
+
+    final isPartiallyFilled =
+        InspectionFormHelpers.isBuildingFormPartiallyFilled(
+      noOfFloorsGPlusController: _noOfFloorsGPlusController,
+      noOfFloorsGMinusController: _noOfFloorsGMinusController,
+      ageController: _ageController,
+      expectedLifePeriodController: _expectedLifePeriodController,
+      structureController: _structureController,
+      selectedBuildingCategory: _selectedBuildingCategory,
+      selectedBuildingClass: _selectedBuildingClass,
+      selectedNatureOfConstruction: _selectedNatureOfConstruction,
+      selectedBuildingConditions: _selectedBuildingConditions,
+    );
+
+    if (isPartiallyFilled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Please complete all required building fields before saving'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
+
+    // Validate the building form
     if (_buildingInfoFormKey.currentState?.validate() ?? false) {
-      final reportId = await _submitFormData();
-      if (reportId != null) {
-        await _uploadImages(reportId);
+      final validationErrors = InspectionFormHelpers.validateRequiredFields(
+        buildingIdController: _buildingIdController,
+        buildingNameController: _buildingNameController,
+        noOfFloorsGPlusController: _noOfFloorsGPlusController,
+        noOfFloorsGMinusController: _noOfFloorsGMinusController,
+        ageController: _ageController,
+        expectedLifePeriodController: _expectedLifePeriodController,
+        structureController: _structureController,
+        selectedBuildingCategory: _selectedBuildingCategory,
+        selectedBuildingClass: _selectedBuildingClass,
+        selectedNatureOfConstruction: _selectedNatureOfConstruction,
+        selectedBuildingConditions: _selectedBuildingConditions,
+      );
+
+      if (validationErrors.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Inspection report submitted successfully!'),
-              backgroundColor: Colors.green),
+          SnackBar(
+            content: Text(
+                'Please fill required fields: ${validationErrors.join(', ')}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
         );
+        return;
+      }
+
+      // Collect all form data
+      final formData = InspectionFormHelpers.collectFormData(
+        masterFileRefController: _masterFileRefController,
+        inspectionDateController: _inspectionDateController,
+        dsDivisionController: _dsDivisionController,
+        districtController: _districtController,
+        provinceController: _provinceController,
+        buildingIdController: _buildingIdController,
+        buildingNameController: _buildingNameController,
+        buildingDetailsController: _buildingDetailsController,
+        noOfFloorsGPlusController: _noOfFloorsGPlusController,
+        noOfFloorsGMinusController: _noOfFloorsGMinusController,
+        ageController: _ageController,
+        expectedLifePeriodController: _expectedLifePeriodController,
+        parkingSpaceController: _parkingSpaceController,
+        designController: _designController,
+        conveniencesController: _conveniencesController,
+        structureController: _structureController,
+        selectedBuildingConditions: _selectedBuildingConditions,
+        selectedBuildingCategory: _selectedBuildingCategory,
+        selectedBuildingClass: _selectedBuildingClass,
+        selectedNatureOfConstruction: _selectedNatureOfConstruction,
+        selectedRoofMaterial: _selectedRoofMaterial,
+        selectedRoofFrame: _selectedRoofFrame,
+        selectedRoofFinisher: _selectedRoofFinisher,
+        selectedCeiling: _selectedCeiling,
+        selectedFoundationStructure: _selectedFoundationStructure,
+        selectedWallStructure: _selectedWallStructure,
+        selectedFloorStructure: _selectedFloorStructure,
+        selectedDoor: _selectedDoor,
+        selectedWindow: _selectedWindow,
+        selectedWindowProtection: _selectedWindowProtection,
+        selectedBathroomToiletDoorsFittings:
+            _selectedBathroomToiletDoorsFittings,
+        selectedHandRail: _selectedHandRail,
+        selectedPantryCupboard: _selectedPantryCupboard,
+        selectedOtherDoors: _selectedOtherDoors,
+        selectedWallFinisher: _selectedWallFinisher,
+        selectedFloorFinisher: _selectedFloorFinisher,
+        selectedBathroomToilet: _selectedBathroomToilet,
+        selectedServices: _selectedServices,
+        selectedBuilding: _selectedBuilding,
+        uploadedImages: uploadedImages,
+      );
+
+      // Save data locally using the inspection report service
+      final success =
+          await _inspectionReportService.saveInspectionReportLocally(
+        masterFileRef: _masterFileRefController.text,
+        buildingId: _buildingIdController.text,
+        buildingName: _buildingNameController.text,
+        formData: formData,
+      );
+
+      if (success) {
+        if (mounted) {
+          setState(() {
+            _buildingFormCompletionStatus[_selectedBuilding!.id] = true;
+            _savedBuildingForms[_selectedBuilding!.id] = formData;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Building inspection data saved successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
+          );
+
+          setState(() {
+            _selectedBuilding = null;
+            _clearBuildingForm();
+          });
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Failed to submit inspection report.'),
-              backgroundColor: Colors.red),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content:
+                  Text('Failed to save inspection data. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please fix the validation errors in the form'),
-            backgroundColor: Colors.red),
+          content: Text('Please fix the validation errors in the form'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
+  
+  // Helper methods for form validation and state management
+  bool _isBuildingFormComplete(String buildingId) {
+    return _buildingFormCompletionStatus[buildingId] ?? false;
+  }
 
-  Future<String?> _submitFormData() async {
-    try {
-      final uri = Uri.parse('${AppConfig.apiBaseUrl}InspectionReport');
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: _buildFormJson(),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.body;
-        final reportId =
-            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
-        print('DEBUG: InspectionReport reportId: $reportId');
-        return reportId;
-      } else {
-        print(
-            'DEBUG: InspectionReport submission failed: ${response.statusCode} ${response.body}');
-        return null;
+  bool _areAllBuildingFormsComplete() {
+    if (_availableBuildings.isEmpty) return true;
+    for (Building building in _availableBuildings) {
+      if (!_isBuildingFormComplete(building.id)) {
+        return false;
       }
-    } catch (e) {
-      print('DEBUG: Exception during InspectionReport submission: $e');
-      return null;
+    }
+    return true;
+  }
+
+  bool _isLandInfoComplete() {
+    return _landInfoFormKey.currentState?.validate() ?? false;
+  }
+
+  bool _isOtherConstructionsComplete() {
+    return true; // Optional for now
+  }
+
+  bool _isInspectionReportComplete() {
+    return _isLandInfoComplete() &&
+        _areAllBuildingFormsComplete() &&
+        _isOtherConstructionsComplete();
+  }
+
+  String _getGlobalSaveButtonText() {
+    if (_canSaveInspectionReport()) {
+      return 'Save Inspection Report';
+    } else {
+      return 'Complete All Required Fields';
     }
   }
 
-  String _buildFormJson() {
-    // Build JSON string for the form data (add more fields as needed)
-    return '''{
-      "masterFileRef": "", // Add actual value if needed
-      "inspectionDate": "", // Add actual value if needed
-      "dsDivision": "", // Add actual value if needed
-      "district": "", // Add actual value if needed
-      "province": "", // Add actual value if needed
-      "buildingId": "", // Add actual value if needed
-      "buildingName": "", // Add actual value if needed
-      "buildingDetails": "", // Add actual value if needed
-      "noOfFloorsGPlus": "", // Add actual value if needed
-      "noOfFloorsGMinus": "", // Add actual value if needed
-      "age": "", // Add actual value if needed
-      "expectedLifePeriod": "", // Add actual value if needed
-      "parkingSpace": "", // Add actual value if needed
-      "design": "", // Add actual value if needed
-      "conveniences": "", // Add actual value if needed
-      "structure": "", // Add actual value if needed
-      "buildingConditions": "", // Add actual value if needed
-      "otherInfo": "", // Add actual value if needed
-      "otherConstructionDetails": "", // Add actual value if needed
-      "assetDetails": "", // Add actual value if needed
-      "businessDetails": "", // Add actual value if needed
-      "remarks": "" // Add actual value if needed
-    }''';
+  bool _canSaveInspectionReport() {
+    return _isInspectionReportComplete();
   }
 
-  Future<void> _uploadImages(String reportId) async {
-    print('DEBUG: _uploadImages called with reportId: $reportId');
-    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
-    if (uploadedImages.isEmpty) return;
-    var uri = Uri.parse('${AppConfig.apiBaseUrl}ImageData/upload');
-    var request = http.MultipartRequest('POST', uri)
-      ..fields['reportId'] = reportId;
-    for (var image in uploadedImages) {
-      if (image is File) {
-        print('DEBUG: Adding image file: ${image.path}');
-        request.files
-            .add(await http.MultipartFile.fromPath('files', image.path));
-      } else {
-        print('DEBUG: Skipping non-File image: $image');
-      }
+  // Global save method for complete inspection report
+  void _saveCompleteInspectionReport() async {
+    if (!_canSaveInspectionReport()) {
+      _showIncompleteSaveMessage();
+      return;
     }
-    try {
-      var response = await request.send();
-      print('DEBUG: Image upload response status: ${response.statusCode}');
-      final respStr = await response.stream.bytesToString();
-      print('DEBUG: Image upload response body: $respStr');
-      if (response.statusCode == 200) {
+
+    if (_masterFileNo == null) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Images uploaded successfully.'),
-              backgroundColor: Colors.green),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Failed to upload images.'),
-              backgroundColor: Colors.red),
+            content:
+                Text('Master File number is required to submit the report.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
-    } catch (e) {
-      print('DEBUG: Exception during image upload: $e');
+      return;
+    }
+
+    // Show loading indicator
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error uploading images: $e'),
-            backgroundColor: Colors.red),
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              SizedBox(width: 16),
+              Text('Submitting inspection report...'),
+            ],
+          ),
+          backgroundColor: Colors.blue,
+          duration: Duration(seconds: 30),
+        ),
       );
     }
+
+    // Collect all data from all tabs
+    final landInfoData = InspectionFormHelpers.collectLandInfoData(
+      masterFileRefController: _masterFileRefController,
+      inspectionDateController: _inspectionDateController,
+      dsDivisionController: _dsDivisionController,
+      districtController: _districtController,
+      provinceController: _provinceController,
+    );
+
+    final otherConstructionsData =
+        InspectionFormHelpers.collectOtherConstructionsData(
+      otherInfoController: _otherInfoController,
+      otherConstructionDetailsController: _otherConstructionDetailsController,
+      assetDetailsController: _assetDetailsController,
+      businessDetailsController: _businessDetailsController,
+      remarksController: _remarksController,
+    );
+
+    // Populate form service with collected data
+    await _cubit.populateFormData(
+      landInfo: landInfoData,
+      buildingForms: _savedBuildingForms,
+      otherConstructions: otherConstructionsData,
+      masterFileNo: _masterFileNo!,
+      lotId: _lotId,
+    );
+
+    // Submit the complete inspection report using cubit
+    await _cubit.sendInspectionReport(_masterFileNo!);
+  }
+
+  void _showIncompleteSaveMessage() {
+    String message = '';
+    if (!_isLandInfoComplete()) {
+      message = 'Please complete the Land Info tab first';
+    } else if (!_areAllBuildingFormsComplete()) {
+      int completedBuildings = _buildingFormCompletionStatus.values
+          .where((completed) => completed)
+          .length;
+      message =
+          'Please complete all building forms (${completedBuildings}/${_availableBuildings.length} completed)';
+    } else if (!_isOtherConstructionsComplete()) {
+      message = 'Please complete the Other Constructions tab';
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
+  void _clearBuildingForm() {
+    InspectionFormHelpers.clearBuildingForm(
+      buildingIdController: _buildingIdController,
+      buildingNameController: _buildingNameController,
+      buildingDetailsController: _buildingDetailsController,
+      noOfFloorsGPlusController: _noOfFloorsGPlusController,
+      noOfFloorsGMinusController: _noOfFloorsGMinusController,
+      ageController: _ageController,
+      expectedLifePeriodController: _expectedLifePeriodController,
+      parkingSpaceController: _parkingSpaceController,
+      designController: _designController,
+      conveniencesController: _conveniencesController,
+      structureController: _structureController,
+      buildingConditionsController: _buildingConditionsController,
+      uploadedImages: uploadedImages,
+      onClearDropdowns: () {
+        setState(() {
+          _selectedBuildingCategory = null;
+          _selectedBuildingClass = null;
+          _selectedNatureOfConstruction = null;
+          _selectedBuildingConditions = null;
+          _selectedRoofMaterial = null;
+          _selectedRoofFrame = null;
+          _selectedRoofFinisher = null;
+          _selectedCeiling = null;
+          _selectedFoundationStructure = null;
+          _selectedWallStructure = null;
+          _selectedFloorStructure = null;
+          _selectedDoor = null;
+          _selectedWindow = null;
+          _selectedWindowProtection = null;
+          _selectedBathroomToiletDoorsFittings = null;
+          _selectedHandRail = null;
+          _selectedPantryCupboard = null;
+          _selectedOtherDoors = null;
+          _selectedWallFinisher = null;
+          _selectedFloorFinisher = null;
+          _selectedBathroomToilet = null;
+          _selectedServices = null;
+        });
+      },
+    );
+  }
+
+  void _showSavedReportsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const SavedReportsDialog(),
+    );
   }
 
   @override
   Widget buildView(BuildContext context) {
-    // Create dynamic titles
     final String appBarTitle = _masterFileNo != null
         ? "Inspection Report - #$_masterFileNo"
         : "Inspection Report";
-
     final String masterFileLabel =
         _masterFileNo != null ? "Master File - #$_masterFileNo" : "Master File";
-
     final String inspectionReportLabel =
         _lotId != null ? "Inspection Report - #$_lotId" : "Inspection Report";
 
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomAppBar(title: appBarTitle),
-          Container(
-            width: double.infinity,
-            color: const Color(0xFFF3F4F6),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Breadcrumb(
-              items: [
-                BreadcrumbItem(label: "Land Miscellaneous", onTap: () {}),
-                BreadcrumbItem(label: masterFileLabel, onTap: () {}),
-                BreadcrumbItem(label: inspectionReportLabel, onTap: () {}),
-              ],
+    return BlocListener<InspectionReportCubit,
+        BaseState<InspectionReportState>>(
+      bloc: _cubit,
+      listener: (context, state) {
+        if (state is InspectionReportLoading) {
+          // Loading state is already handled in _saveCompleteInspectionReport with SnackBar
+        } else if (state is InspectionReportSubmitSuccess) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Inspection report submitted successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
             ),
-          ),
-          Expanded(
-            child: _buildInspectionReportTabs(),
-          ),
-        ],
+          );
+          Navigator.pop(context);
+        } else if (state is InspectionReportSubmitFailure) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Submission failed: ${state.errorMessage}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        } else if (state is InspectionReportSavedOffline) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Report saved offline. ${state.pendingCount} reports pending sync.'),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+          Navigator.pop(context);
+        } else if (state is InspectionReportSyncing) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Syncing ${state.pendingCount} pending reports...'),
+              backgroundColor: Colors.blue,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        } else if (state is InspectionReportSyncCompleted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('All reports synced successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomAppBar(
+              title: appBarTitle,
+              rightIcon1: (style) => PhosphorIcons.archive(style),
+              onRightIcon1Pressed: _showSavedReportsDialog,
+            ),
+            Container(
+              width: double.infinity,
+              color: const Color(0xFFF3F4F6),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Breadcrumb(
+                items: [
+                  BreadcrumbItem(label: "Land Miscellaneous", onTap: () {}),
+                  BreadcrumbItem(label: masterFileLabel, onTap: () {}),
+                  BreadcrumbItem(label: inspectionReportLabel, onTap: () {}),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _buildInspectionReportTabs(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -328,10 +768,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
           alignment: Alignment.centerLeft,
           child: Padding(
             padding: const EdgeInsets.only(
-                top: 8.0,
-                bottom: 0.0,
-                left: 16.0,
-                right: 16.0), // Added padding to match image
+                top: 8.0, bottom: 0.0, left: 16.0, right: 16.0),
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
@@ -373,756 +810,301 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildLandInfoTab(),
-              _buildBuildingInfoTab(), // This will now be conditional
-              _buildOtherConstructionsTab(),
+              LandInfoTab(
+                formKey: _landInfoFormKey,
+                masterFileRefController: _masterFileRefController,
+                inspectionDateController: _inspectionDateController,
+                dsDivisionController: _dsDivisionController,
+                districtController: _districtController,
+                provinceController: _provinceController,
+                onCancel: () => Navigator.pop(context),
+                onSave: _canSaveInspectionReport()
+                    ? _saveCompleteInspectionReport
+                    : null,
+                saveButtonText: _getGlobalSaveButtonText(),
+              ),
+              BuildingInfoTab(
+                buildingsLoaded: _buildingsLoaded,
+                availableBuildings: _availableBuildings,
+                selectedBuilding: _selectedBuilding,
+                onBuildingSelected: (building) {
+                  setState(() {
+                    _selectedBuilding = building;
+                    _buildingIdController.text = building.id;
+                    _buildingNameController.text = building.name;
+                    // Reset dropdown selections
+                    _selectedBuildingCategory = null;
+                    _selectedBuildingClass = null;
+                    _selectedNatureOfConstruction = null;
+                    _selectedBuildingConditions = null;
+                  });
+                },
+                isBuildingFormComplete: _isBuildingFormComplete,
+                onGoBack: () => Navigator.pop(context),
+                formKey: _buildingInfoFormKey,
+                onBackToList: () {
+                  setState(() {
+                    _selectedBuilding = null;
+                    _clearBuildingForm();
+                  });
+                },
+                buildingIdController: _buildingIdController,
+                buildingNameController: _buildingNameController,
+                buildingDetailsController: _buildingDetailsController,
+                noOfFloorsGPlusController: _noOfFloorsGPlusController,
+                noOfFloorsGMinusController: _noOfFloorsGMinusController,
+                ageController: _ageController,
+                expectedLifePeriodController: _expectedLifePeriodController,
+                parkingSpaceController: _parkingSpaceController,
+                designController: _designController,
+                conveniencesController: _conveniencesController,
+                structureController: _structureController,
+                selectedBuildingCategory: _selectedBuildingCategory,
+                selectedBuildingClass: _selectedBuildingClass,
+                selectedNatureOfConstruction: _selectedNatureOfConstruction,
+                selectedBuildingConditions: _selectedBuildingConditions,
+                selectedRoofMaterial: _selectedRoofMaterial,
+                selectedRoofFrame: _selectedRoofFrame,
+                selectedRoofFinisher: _selectedRoofFinisher,
+                selectedCeiling: _selectedCeiling,
+                selectedFoundationStructure: _selectedFoundationStructure,
+                selectedWallStructure: _selectedWallStructure,
+                selectedFloorStructure: _selectedFloorStructure,
+                selectedDoor: _selectedDoor,
+                selectedWindow: _selectedWindow,
+                selectedWindowProtection: _selectedWindowProtection,
+                selectedBathroomToiletDoorsFittings:
+                    _selectedBathroomToiletDoorsFittings,
+                selectedHandRail: _selectedHandRail,
+                selectedPantryCupboard: _selectedPantryCupboard,
+                selectedOtherDoors: _selectedOtherDoors,
+                selectedWallFinisher: _selectedWallFinisher,
+                selectedFloorFinisher: _selectedFloorFinisher,
+                selectedBathroomToilet: _selectedBathroomToilet,
+                selectedServices: _selectedServices,
+                onBuildingCategoryChanged: (value) {
+                  setState(() {
+                    _selectedBuildingCategory = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onBuildingClassChanged: (value) {
+                  setState(() {
+                    _selectedBuildingClass = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onNatureOfConstructionChanged: (value) {
+                  setState(() {
+                    _selectedNatureOfConstruction = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onBuildingConditionsChanged: (value) {
+                  setState(() {
+                    _selectedBuildingConditions = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onRoofMaterialChanged: (value) {
+                  setState(() {
+                    _selectedRoofMaterial = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onRoofFrameChanged: (value) {
+                  setState(() {
+                    _selectedRoofFrame = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onRoofFinisherChanged: (value) {
+                  setState(() {
+                    _selectedRoofFinisher = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onCeilingChanged: (value) {
+                  setState(() {
+                    _selectedCeiling = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onFoundationStructureChanged: (value) {
+                  setState(() {
+                    _selectedFoundationStructure = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onWallStructureChanged: (value) {
+                  setState(() {
+                    _selectedWallStructure = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onFloorStructureChanged: (value) {
+                  setState(() {
+                    _selectedFloorStructure = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onDoorChanged: (value) {
+                  setState(() {
+                    _selectedDoor = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onWindowChanged: (value) {
+                  setState(() {
+                    _selectedWindow = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onWindowProtectionChanged: (value) {
+                  setState(() {
+                    _selectedWindowProtection = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onBathroomToiletDoorsFittingsChanged: (value) {
+                  setState(() {
+                    _selectedBathroomToiletDoorsFittings = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onHandRailChanged: (value) {
+                  setState(() {
+                    _selectedHandRail = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onPantryCupboardChanged: (value) {
+                  setState(() {
+                    _selectedPantryCupboard = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onOtherDoorsChanged: (value) {
+                  setState(() {
+                    _selectedOtherDoors = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onWallFinisherChanged: (value) {
+                  setState(() {
+                    _selectedWallFinisher = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onFloorFinisherChanged: (value) {
+                  setState(() {
+                    _selectedFloorFinisher = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onBathroomToiletChanged: (value) {
+                  setState(() {
+                    _selectedBathroomToilet = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                onServicesChanged: (value) {
+                  setState(() {
+                    _selectedServices = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                uploadedImages: uploadedImages,
+                onImagePicked: _onImagePicked,
+                onDeleteImage: _deleteImage,
+                onSave: InspectionFormHelpers.isBuildingFormEmpty(
+                          buildingDetailsController: _buildingDetailsController,
+                          noOfFloorsGPlusController: _noOfFloorsGPlusController,
+                          noOfFloorsGMinusController:
+                              _noOfFloorsGMinusController,
+                          ageController: _ageController,
+                          expectedLifePeriodController:
+                              _expectedLifePeriodController,
+                          structureController: _structureController,
+                          parkingSpaceController: _parkingSpaceController,
+                          designController: _designController,
+                          conveniencesController: _conveniencesController,
+                          selectedBuildingCategory: _selectedBuildingCategory,
+                          selectedBuildingClass: _selectedBuildingClass,
+                          selectedNatureOfConstruction:
+                              _selectedNatureOfConstruction,
+                          selectedBuildingConditions:
+                              _selectedBuildingConditions,
+                          uploadedImages: uploadedImages,
+                        ) ||
+                        InspectionFormHelpers.isBuildingFormPartiallyFilled(
+                          noOfFloorsGPlusController: _noOfFloorsGPlusController,
+                          noOfFloorsGMinusController:
+                              _noOfFloorsGMinusController,
+                          ageController: _ageController,
+                          expectedLifePeriodController:
+                              _expectedLifePeriodController,
+                          structureController: _structureController,
+                          selectedBuildingCategory: _selectedBuildingCategory,
+                          selectedBuildingClass: _selectedBuildingClass,
+                          selectedNatureOfConstruction:
+                              _selectedNatureOfConstruction,
+                          selectedBuildingConditions:
+                              _selectedBuildingConditions,
+                        )
+                    ? null
+                    : _validateAndSaveLocally,
+                saveButtonText: InspectionFormHelpers.getSaveButtonText(
+                  isEmpty: InspectionFormHelpers.isBuildingFormEmpty(
+                    buildingDetailsController: _buildingDetailsController,
+                    noOfFloorsGPlusController: _noOfFloorsGPlusController,
+                    noOfFloorsGMinusController: _noOfFloorsGMinusController,
+                    ageController: _ageController,
+                    expectedLifePeriodController: _expectedLifePeriodController,
+                    structureController: _structureController,
+                    parkingSpaceController: _parkingSpaceController,
+                    designController: _designController,
+                    conveniencesController: _conveniencesController,
+                    selectedBuildingCategory: _selectedBuildingCategory,
+                    selectedBuildingClass: _selectedBuildingClass,
+                    selectedNatureOfConstruction: _selectedNatureOfConstruction,
+                    selectedBuildingConditions: _selectedBuildingConditions,
+                    uploadedImages: uploadedImages,
+                  ),
+                  isPartiallyFilled:
+                      InspectionFormHelpers.isBuildingFormPartiallyFilled(
+                    noOfFloorsGPlusController: _noOfFloorsGPlusController,
+                    noOfFloorsGMinusController: _noOfFloorsGMinusController,
+                    ageController: _ageController,
+                    expectedLifePeriodController: _expectedLifePeriodController,
+                    structureController: _structureController,
+                    selectedBuildingCategory: _selectedBuildingCategory,
+                    selectedBuildingClass: _selectedBuildingClass,
+                    selectedNatureOfConstruction: _selectedNatureOfConstruction,
+                    selectedBuildingConditions: _selectedBuildingConditions,
+                  ),
+                  defaultText: AppString.save.localize(context) ?? 'Save Data',
+                ),
+                onCancel: () => Navigator.pop(context),
+              ),
+              OtherConstructionsTab(
+                formKey: _otherConstructionsFormKey,
+                otherInfoController: _otherInfoController,
+                otherConstructionDetailsController:
+                    _otherConstructionDetailsController,
+                assetDetailsController: _assetDetailsController,
+                businessDetailsController: _businessDetailsController,
+                remarksController: _remarksController,
+                onCancel: () => Navigator.pop(context),
+                onSave: _canSaveInspectionReport()
+                    ? _saveCompleteInspectionReport
+                    : null,
+                saveButtonText: _getGlobalSaveButtonText(),
+              ),
             ],
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildLandInfoTab() {
-    return Form(
-      key: _landInfoFormKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LabeledTextField(
-              label: "Master File Ref No",
-              placeholder: "Enter Master File Reference Number",
-              controller: _masterFileRefController,
-              validator: (value) => InspectionValidator.required(
-                  value, "Master File Reference Number"),
-            ),
-            LabeledTextField(
-              label: "Inspection Date",
-              placeholder: "Enter Inspection Date",
-              controller: _inspectionDateController,
-              validator: (value) =>
-                  InspectionValidator.required(value, "Inspection Date"),
-            ),
-            LabeledTextField(
-              label: "DS Division",
-              placeholder: "Enter DS Division",
-              controller: _dsDivisionController,
-              validator: (value) => InspectionValidator.optionalAlphaNum(
-                  value, 50, "DS Division"),
-            ),
-            LabeledTextField(
-              label: "District",
-              placeholder: "Enter District",
-              controller: _districtController,
-              validator: (value) =>
-                  InspectionValidator.required(value, "District"),
-            ),
-            LabeledTextField(
-              label: "Province",
-              placeholder: "Enter Province",
-              controller: _provinceController,
-              validator: (value) =>
-                  InspectionValidator.required(value, "Province"),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Village/GN Division",
-                    style: AppStyling.mediumTextSize14.copyWith(
-                      color: colors(context).labelTextColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  CustomButton(
-                    text: "GN Division and Village",
-                    onPressed: () {},
-                    width: 380,
-                    height: 48,
-                    backgroundColor: colors(context).colorPrimary1!,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              height: 1,
-              margin: const EdgeInsets.all(16),
-              width: double.infinity,
-              color: Colors.grey,
-            ),
-            Row(
-              children: [
-                CustomButton(
-                  text: AppString.cancel.localize(context) ?? 'Cancel',
-                  onPressed: () => Navigator.pop(context),
-                  backgroundColor: colors(context).colorGrey1!,
-                ),
-                const Spacer(),
-                CustomButton(
-                  text: AppString.save.localize(context) ?? 'Save',
-                  onPressed: () {
-                    if (_landInfoFormKey.currentState?.validate() ?? false) {
-                      // Handle save logic here
-                    }
-                  },
-                  backgroundColor: colors(context).colorPrimary1!,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBuildingInfoTab() {
-    // Conditionally show list or form
-    if (_selectedBuildingName == null) {
-      return _buildBuildingList();
-    } else {
-      return _buildBuildingForm();
-    }
-  }
-
-  Widget _buildBuildingList() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Building List",
-            style: TextStyle(
-              fontSize: 20, // Or adjust as per your app's typography
-              fontWeight: FontWeight.bold,
-              color: colors(context).colorBlack,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics:
-                const NeverScrollableScrollPhysics(), // if the list itself shouldn't scroll within its parent
-            itemCount: _buildingNames.length,
-            itemBuilder: (context, index) {
-              final buildingName = _buildingNames[index];
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedBuildingName = buildingName;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 1.0,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Building name:",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color:
-                              colors(context).labelTextColor ?? Colors.black87,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        buildingName,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: colors(context).colorBlack,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.chevron_right,
-                        color: colors(context).colorBlack ?? Colors.black54,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBuildingForm() {
-    return Form(
-      key: _buildingInfoFormKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Back button section remains the same...
-
-            _buildRow([
-              LabeledTextField(
-                label:
-                    "${AppString.buildingId.localize(context) ?? 'Building ID'} ($_selectedBuildingName)",
-                placeholder: "Enter Building ID",
-                controller: _buildingIdController,
-                validator: (value) =>
-                    InspectionValidator.required(value, "Building ID"),
-              ),
-              LabeledTextField(
-                label: AppString.buildingName.localize(context) ?? '',
-                placeholder: "Enter Building Name",
-                controller: _buildingNameController,
-                validator: (value) =>
-                    InspectionValidator.required(value, "Building Name"),
-              ),
-            ]),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.buildingCategory.localize(context) ?? '',
-                items: widget.masterData.buildingCategory,
-                initialValue: widget.masterData.buildingCategory.isNotEmpty
-                    ? widget.masterData.buildingCategory.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Building Category"),
-              ),
-              CustomDropdownField(
-                label: AppString.buildingClass.localize(context) ?? '',
-                items: widget.masterData.buildingClass,
-                initialValue: widget.masterData.buildingClass.isNotEmpty
-                    ? widget.masterData.buildingClass.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Building Class"),
-              ),
-            ]),
-
-            _buildRow([
-              LabeledTextField(
-                label: AppString.detailOfBuilding.localize(context) ?? '',
-                placeholder: "Enter Details",
-                controller: _buildingDetailsController,
-                validator: (value) => InspectionValidator.optionalAlphaNum(
-                    value, 200, "Building Details"),
-              ),
-              LabeledTextField(
-                label: AppString.noOfFloorsGPlus.localize(context) ?? '',
-                placeholder: "Enter Number of Floors",
-                controller: _noOfFloorsGPlusController,
-                validator: (value) => InspectionValidator.required(
-                    value, "Number of Floors (G+)"),
-              ),
-            ]),
-
-            _buildRow([
-              LabeledTextField(
-                label: AppString.noOfFloorsGMinus.localize(context) ?? '',
-                placeholder: "Enter Number of Floors",
-                controller: _noOfFloorsGMinusController,
-                validator: (value) => InspectionValidator.required(
-                    value, "Number of Floors (G-)"),
-              ),
-              LabeledTextField(
-                label: AppString.age.localize(context) ?? '',
-                placeholder: "Enter Age",
-                controller: _ageController,
-                validator: (value) =>
-                    InspectionValidator.required(value, "Age"),
-              ),
-            ]),
-
-            _buildRow([
-              LabeledTextField(
-                label: AppString.expectedLifePeriod.localize(context) ?? '',
-                placeholder: "Enter Expected Life Period",
-                controller: _expectedLifePeriodController,
-                validator: (value) =>
-                    InspectionValidator.required(value, "Expected Life Period"),
-              ),
-              LabeledTextField(
-                label: AppString.parkingSpace.localize(context) ?? '',
-                placeholder: "Enter Parking Space",
-                controller: _parkingSpaceController,
-                validator: (value) => InspectionValidator.optionalAlphaNum(
-                    value, 100, "Parking Space"),
-              ),
-            ]),
-
-            _buildRow([
-              LabeledTextField(
-                label: AppString.design.localize(context) ?? '',
-                placeholder: "Design",
-                controller: _designController,
-                validator: (value) =>
-                    InspectionValidator.optionalAlphaNum(value, 100, "Design"),
-              ),
-              LabeledTextField(
-                label: AppString.conveniences.localize(context) ?? '',
-                placeholder: "Conveniences",
-                controller: _conveniencesController,
-                validator: (value) => InspectionValidator.optionalAlphaNum(
-                    value, 100, "Conveniences"),
-              ),
-            ]),
-
-            _buildRow([
-              LabeledTextField(
-                label: AppString.structure.localize(context) ?? '',
-                placeholder: "Structure",
-                controller: _structureController,
-                validator: (value) =>
-                    InspectionValidator.required(value, "Structure"),
-              ),
-              LabeledTextField(
-                label: AppString.buildingConditions.localize(context) ?? '',
-                placeholder: "Building Conditions",
-                controller: _buildingConditionsController,
-                validator: (value) =>
-                    InspectionValidator.required(value, "Building Conditions"),
-              ),
-            ]),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.natureOfConstruction.localize(context) ?? '',
-                items: widget.masterData.natureOfConstruction,
-                initialValue: widget.masterData.natureOfConstruction.isNotEmpty
-                    ? widget.masterData.natureOfConstruction.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Nature of Building"),
-              ),
-            ]),
-
-            const SizedBox(height: 16),
-            Text(
-              AppString.roofDetails.localize(context) ?? '',
-              style: AppStyling.mediumTextSize14
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.roofMaterial.localize(context) ?? '',
-                items: widget.masterData.roofMaterial,
-                initialValue: widget.masterData.roofMaterial.isNotEmpty
-                    ? widget.masterData.roofMaterial.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Roof Material"),
-              ),
-              CustomDropdownField(
-                label: AppString.roofFrame.localize(context) ?? '',
-                items: widget.masterData.roofFrame,
-                initialValue: widget.masterData.roofFrame.isNotEmpty
-                    ? widget.masterData.roofFrame.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) =>
-                    InspectionValidator.validateDropdown(value, "Roof Frame"),
-              ),
-            ]),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.roofFinisher.localize(context) ?? '',
-                items: widget.masterData.roofFinisher,
-                initialValue: widget.masterData.roofFinisher.isNotEmpty
-                    ? widget.masterData.roofFinisher.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Roof Finisher"),
-              ),
-              CustomDropdownField(
-                label: AppString.ceiling.localize(context) ?? '',
-                items: widget.masterData.celing,
-                initialValue: widget.masterData.celing.isNotEmpty
-                    ? widget.masterData.celing.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) =>
-                    InspectionValidator.validateDropdown(value, "Ceiling"),
-              ),
-            ]),
-
-            const SizedBox(height: 16),
-            Text(
-              AppString.structureDetails.localize(context) ?? '',
-              style: AppStyling.mediumTextSize14
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.foundationStructure.localize(context) ?? '',
-                items: widget.masterData.foundationStructure,
-                initialValue: widget.masterData.foundationStructure.isNotEmpty
-                    ? widget.masterData.foundationStructure.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Foundation Structure"),
-              ),
-              CustomDropdownField(
-                label: AppString.wallStructure.localize(context) ?? '',
-                items: widget.masterData.wallStructure,
-                initialValue: widget.masterData.wallStructure.isNotEmpty
-                    ? widget.masterData.wallStructure.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Wall Structure"),
-              ),
-            ]),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.floorStructure.localize(context) ?? '',
-                items: widget.masterData.floorStructure,
-                initialValue: widget.masterData.floorStructure.isNotEmpty
-                    ? widget.masterData.floorStructure.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Floor Structure"),
-              ),
-            ]),
-
-            Text(
-              AppString.fixedAndFittingDetails.localize(context) ?? '',
-              style: AppStyling.mediumTextSize14
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.door.localize(context) ?? '',
-                items: widget.masterData.door,
-                initialValue: widget.masterData.door.isNotEmpty
-                    ? widget.masterData.door.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) =>
-                    InspectionValidator.validateDropdown(value, "Door"),
-              ),
-              CustomDropdownField(
-                label: AppString.window.localize(context) ?? '',
-                items: widget.masterData.window,
-                initialValue: widget.masterData.window.isNotEmpty
-                    ? widget.masterData.window.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) =>
-                    InspectionValidator.validateDropdown(value, "Window"),
-              ),
-            ]),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.windowProtection.localize(context) ?? '',
-                items: widget.masterData.windowProtection,
-                initialValue: widget.masterData.windowProtection.isNotEmpty
-                    ? widget.masterData.windowProtection.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Window Protection"),
-              ),
-              CustomDropdownField(
-                label:
-                    AppString.doorsBathroomToiletFittings.localize(context) ??
-                        '',
-                items: widget.masterData.doorsBathroomAndToiletFittings,
-                initialValue:
-                    widget.masterData.doorsBathroomAndToiletFittings.isNotEmpty
-                        ? widget.masterData.doorsBathroomAndToiletFittings.first
-                        : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Doors Bathroom and Toilet Fittings"),
-              ),
-            ]),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.doorsHandRail.localize(context) ?? '',
-                items: widget.masterData.doorsHandRail,
-                initialValue: widget.masterData.doorsHandRail.isNotEmpty
-                    ? widget.masterData.doorsHandRail.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Doors Hand Rail"),
-              ),
-              CustomDropdownField(
-                label: AppString.doorsPantryCupboard.localize(context) ?? '',
-                items: widget.masterData.doorsPantryCupboard,
-                initialValue: widget.masterData.doorsPantryCupboard.isNotEmpty
-                    ? widget.masterData.doorsPantryCupboard.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Doors Pantry Cupboard"),
-              ),
-            ]),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.doorsOther.localize(context) ?? '',
-                items: widget.masterData.doorsOther,
-                initialValue: widget.masterData.doorsOther.isNotEmpty
-                    ? widget.masterData.doorsOther.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) =>
-                    InspectionValidator.validateDropdown(value, "Doors Other"),
-              ),
-            ]),
-
-            const SizedBox(height: 16),
-            Text(
-              AppString.finishersServiceDetails.localize(context) ?? '',
-              style: AppStyling.mediumTextSize14
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.wallFinisher.localize(context) ?? '',
-                items: widget.masterData.wallFinisher,
-                initialValue: widget.masterData.wallFinisher.isNotEmpty
-                    ? widget.masterData.wallFinisher.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Wall Finisher"),
-              ),
-              CustomDropdownField(
-                label: AppString.floorFinisher.localize(context) ?? '',
-                items: widget.masterData.floorFinisher,
-                initialValue: widget.masterData.floorFinisher.isNotEmpty
-                    ? widget.masterData.floorFinisher.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Floor Finisher"),
-              ),
-            ]),
-
-            _buildRow([
-              CustomDropdownField(
-                label: AppString.bathroomToilet.localize(context) ?? '',
-                items: widget.masterData.bathroomAndToilet,
-                initialValue: widget.masterData.bathroomAndToilet.isNotEmpty
-                    ? widget.masterData.bathroomAndToilet.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) => InspectionValidator.validateDropdown(
-                    value, "Bathroom and Toilet"),
-              ),
-              CustomDropdownField(
-                label: AppString.services.localize(context) ?? '',
-                items: widget.masterData.services,
-                initialValue: widget.masterData.services.isNotEmpty
-                    ? widget.masterData.services.first
-                    : null,
-                onChanged: (value) {},
-                validator: (value) =>
-                    InspectionValidator.validateDropdown(value, "Services"),
-              ),
-            ]),
-
-            const SizedBox(height: 16),
-            Text(
-              AppString.finishersServiceDetails.localize(context) ?? '',
-              style: AppStyling.mediumTextSize14
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            CustomButton(
-              text: AppString.addOwner.localize(context) ?? '',
-              onPressed: () {},
-              backgroundColor: colors(context).colorGrey1!,
-              width: 150,
-              height: 48,
-            ),
-
-            const SizedBox(height: 16),
-            Text(
-              AppString.imageCapturingUpload.localize(context) ?? '',
-              style: AppStyling.mediumTextSize14
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                ...List.generate(
-                  uploadedImages.length,
-                  (index) {
-                    final image = uploadedImages[index];
-                    return ImageUpload(
-                      imageFile: image is File ? image : null,
-                      imagePath: image is String ? image : null,
-                      onDelete: () => _deleteImage(index),
-                      size: 128,
-                    );
-                  },
-                ),
-                ImageUpload(
-                  isUploadButton: true,
-                  onImagePicked: _onImagePicked,
-                  onDelete: () {},
-                  size: 128,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-            Container(
-              height: 1,
-              margin: const EdgeInsets.all(16),
-              width: double.infinity,
-              color: Colors.grey,
-            ),
-
-            Row(
-              children: [
-                CustomButton(
-                  text: AppString.cancel.localize(context) ?? '',
-                  onPressed: () => Navigator.pop(context),
-                  backgroundColor: colors(context).colorGrey1!,
-                ),
-                const Spacer(),
-                CustomButton(
-                  text: AppString.sendData.localize(context) ?? '',
-                  onPressed: _validateAndSubmit,
-                  backgroundColor: colors(context).colorPrimary5!,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOtherConstructionsTab() {
-    return Form(
-      key: _otherConstructionsFormKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LabeledTextField(
-              label: "Other Information",
-              placeholder: "Enter other information",
-              controller: _otherInfoController,
-              validator: (value) => InspectionValidator.optionalAlphaNum(
-                  value, 200, "Other Information"),
-            ),
-            LabeledTextField(
-              label: "Other Construction Details",
-              placeholder: "Enter construction details",
-              controller: _otherConstructionDetailsController,
-              validator: (value) => InspectionValidator.optionalAlphaNum(
-                  value, 200, "Other Construction Details"),
-            ),
-            LabeledTextField(
-              label: "Details of Assets/Inventory Items",
-              placeholder: "Enter asset details",
-              controller: _assetDetailsController,
-              validator: (value) => InspectionValidator.optionalAlphaNum(
-                  value, 200, "Asset Details"),
-            ),
-            LabeledTextField(
-              label: "Details of Business",
-              placeholder: "Enter business details",
-              controller: _businessDetailsController,
-              validator: (value) => InspectionValidator.optionalAlphaNum(
-                  value, 200, "Business Details"),
-            ),
-            LabeledTextField(
-              label: "Remarks",
-              placeholder: "Enter remarks",
-              controller: _remarksController,
-              validator: (value) =>
-                  InspectionValidator.optionalAlphaNum(value, 500, "Remarks"),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              height: 1,
-              margin: const EdgeInsets.all(16),
-              width: double.infinity,
-              color: Colors.grey,
-            ),
-            Row(
-              children: [
-                CustomButton(
-                  text: AppString.cancel.localize(context) ?? 'Cancel',
-                  onPressed: () => Navigator.pop(context),
-                  backgroundColor: colors(context).colorGrey1!,
-                ),
-                const Spacer(),
-                CustomButton(
-                  text: AppString.save.localize(context) ?? 'Save',
-                  onPressed: () {
-                    if (_otherConstructionsFormKey.currentState?.validate() ??
-                        false) {
-                      // Handle save logic here
-                    }
-                  },
-                  backgroundColor: colors(context).colorPrimary1!,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRow(List<Widget> children) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: children
-            .map((widget) => Expanded(
-                child: Padding(
-                    // Added padding around each item in the row
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: widget)))
-            .toList(),
-      ),
     );
   }
 
