@@ -18,8 +18,10 @@ import 'package:land_asset_valuation/application/core/validators/inspection_vali
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
 import 'package:land_asset_valuation/data/models/building.dart';
+import 'package:land_asset_valuation/data/services/inspection_report_service.dart';
 import 'package:land_asset_valuation/data/services/building_service.dart';
-import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/application/core/widgets/saved_reports_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class InspectionReportView extends BasePage {
   final MasterDataResponse masterData;
@@ -57,6 +59,8 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   List<Building> _availableBuildings = [];
   bool _buildingsLoaded = false;
   final BuildingService _buildingService = BuildingService();
+  final InspectionReportService _inspectionReportService =
+      InspectionReportService();
 
   // Add controllers for building info form
   final _buildingIdController = TextEditingController();
@@ -72,6 +76,12 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   final _structureController = TextEditingController();
   final _buildingConditionsController = TextEditingController();
 
+  // Dropdown selection variables for validation
+  String? _selectedBuildingCategory;
+  String? _selectedBuildingClass;
+  String? _selectedNatureOfConstruction;
+  String? _selectedBuildingConditions;
+
   // Add controllers for other constructions form
   final _otherInfoController = TextEditingController();
   final _otherConstructionDetailsController = TextEditingController();
@@ -81,16 +91,51 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
   // Data passed from navigation
   String? _masterFileNo;
-  String? _planType;
-  String? _planNo;
-  String? _authorityRefNo;
   String? _lotId;
   bool _dataExtracted = false;
+
+  // Building form completion tracking
+  Map<String, bool> _buildingFormCompletionStatus = {};
+  Map<String, Map<String, dynamic>> _savedBuildingForms = {};
 
   @override
   void initState() {
     _tabController = TabController(length: tabTitles.length, vsync: this);
+
+    // Add listeners to text controllers to update save button state
+    _addFormListeners();
+
     super.initState();
+  }
+
+  // Method to add listeners to form controllers for real-time validation
+  void _addFormListeners() {
+    // Add listeners to required text controllers for building form
+    _buildingIdController.addListener(_updateSaveButtonState);
+    _buildingNameController.addListener(_updateSaveButtonState);
+    _noOfFloorsGPlusController.addListener(_updateSaveButtonState);
+    _noOfFloorsGMinusController.addListener(_updateSaveButtonState);
+    _ageController.addListener(_updateSaveButtonState);
+    _expectedLifePeriodController.addListener(_updateSaveButtonState);
+    _structureController.addListener(_updateSaveButtonState);
+
+    // Add listeners to land info form controllers
+    _masterFileRefController.addListener(_updateSaveButtonState);
+    _inspectionDateController.addListener(_updateSaveButtonState);
+    _districtController.addListener(_updateSaveButtonState);
+    _provinceController.addListener(_updateSaveButtonState);
+
+    // Add listeners to other constructions form controllers
+    _otherInfoController.addListener(_updateSaveButtonState);
+    _otherConstructionDetailsController.addListener(_updateSaveButtonState);
+  }
+
+  // Method to update save button state when form changes
+  void _updateSaveButtonState() {
+    // Trigger a rebuild to update the save button state
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -138,9 +183,6 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     final queryParams = state.uri.queryParameters;
 
     _masterFileNo = queryParams['masterFileNo'];
-    _planType = queryParams['planType'];
-    _planNo = queryParams['planNo'];
-    _authorityRefNo = queryParams['authorityRefNo'];
     _lotId = queryParams['lotId'];
 
     // Auto-fill the form fields
@@ -170,6 +212,9 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
 
   @override
   void dispose() {
+    // Remove listeners before disposing controllers
+    _removeFormListeners();
+
     _tabController.dispose();
     _masterFileRefController.dispose();
     _inspectionDateController.dispose();
@@ -196,6 +241,28 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     super.dispose();
   }
 
+  // Method to remove listeners from form controllers
+  void _removeFormListeners() {
+    // Remove building form listeners
+    _buildingIdController.removeListener(_updateSaveButtonState);
+    _buildingNameController.removeListener(_updateSaveButtonState);
+    _noOfFloorsGPlusController.removeListener(_updateSaveButtonState);
+    _noOfFloorsGMinusController.removeListener(_updateSaveButtonState);
+    _ageController.removeListener(_updateSaveButtonState);
+    _expectedLifePeriodController.removeListener(_updateSaveButtonState);
+    _structureController.removeListener(_updateSaveButtonState);
+
+    // Remove land info form listeners
+    _masterFileRefController.removeListener(_updateSaveButtonState);
+    _inspectionDateController.removeListener(_updateSaveButtonState);
+    _districtController.removeListener(_updateSaveButtonState);
+    _provinceController.removeListener(_updateSaveButtonState);
+
+    // Remove other constructions form listeners
+    _otherInfoController.removeListener(_updateSaveButtonState);
+    _otherConstructionDetailsController.removeListener(_updateSaveButtonState);
+  }
+
   void _onImagePicked(File file) {
     setState(() {
       uploadedImages.add(file);
@@ -208,128 +275,611 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     });
   }
 
-  // Add this function to handle validation, submission, and image upload
-  void _validateAndSubmit() async {
+  // Function to handle validation and save data locally
+  void _validateAndSaveLocally() async {
+    // Check if we have required building information
+    if (_selectedBuilding == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a building first'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Check if the building form is completely empty (newly drawn building)
+    if (_isBuildingFormEmpty()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill the building information before saving'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
+
+    // Check if the form is partially filled but incomplete
+    if (_isBuildingFormPartiallyFilled()) {
+      // Show a more specific message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Please complete all required building fields before saving'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return; // Add return statement to prevent further execution
+    }
+
+    // Validate the building form
     if (_buildingInfoFormKey.currentState?.validate() ?? false) {
-      final reportId = await _submitFormData();
-      if (reportId != null) {
-        await _uploadImages(reportId);
+      // Additional manual validation for critical fields
+      final validationErrors = _validateRequiredFields();
+
+      if (validationErrors.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Inspection report submitted successfully!'),
-              backgroundColor: Colors.green),
+          SnackBar(
+            content: Text(
+                'Please fill required fields: ${validationErrors.join(', ')}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
         );
+        return;
+      }
+
+      // Collect all form data
+      final formData = _collectFormData();
+
+      // Save data locally using the inspection report service
+      final success =
+          await _inspectionReportService.saveInspectionReportLocally(
+        masterFileRef: _masterFileRefController.text,
+        buildingId: _buildingIdController.text,
+        buildingName: _buildingNameController.text,
+        formData: formData,
+      );
+
+      if (success) {
+        if (mounted) {
+          // Mark this building as complete
+          setState(() {
+            _buildingFormCompletionStatus[_selectedBuilding!.id] = true;
+            _savedBuildingForms[_selectedBuilding!.id] = formData;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Building inspection data saved successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
+          );
+
+          // Optionally clear the form or navigate back
+          setState(() {
+            _selectedBuilding = null;
+            _clearBuildingForm();
+          });
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Failed to submit inspection report.'),
-              backgroundColor: Colors.red),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content:
+                  Text('Failed to save inspection data. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please fix the validation errors in the form'),
-            backgroundColor: Colors.red),
+          content: Text('Please fix the validation errors in the form'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
-  Future<String?> _submitFormData() async {
-    try {
-      final uri = Uri.parse('http://10.0.2.2:5221/api/InspectionReport');
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: _buildFormJson(),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.body;
-        final reportId =
-            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
-        print('DEBUG: InspectionReport reportId: $reportId');
-        return reportId;
-      } else {
-        print(
-            'DEBUG: InspectionReport submission failed: ${response.statusCode} ${response.body}');
-        return null;
-      }
-    } catch (e) {
-      print('DEBUG: Exception during InspectionReport submission: $e');
-      return null;
+  // Method to check if building form is completely empty
+  bool _isBuildingFormEmpty() {
+    // Don't count building ID and name as they are auto-filled when building is selected
+    // Check if all user-entered required text controllers are empty
+    bool userTextFieldsEmpty = _buildingDetailsController.text.trim().isEmpty &&
+        _noOfFloorsGPlusController.text.trim().isEmpty &&
+        _noOfFloorsGMinusController.text.trim().isEmpty &&
+        _ageController.text.trim().isEmpty &&
+        _expectedLifePeriodController.text.trim().isEmpty &&
+        _structureController.text.trim().isEmpty;
+
+    // Check if all required dropdowns are empty
+    bool dropdownsEmpty = _selectedBuildingCategory == null &&
+        _selectedBuildingClass == null &&
+        _selectedNatureOfConstruction == null &&
+        _selectedBuildingConditions == null;
+
+    // Check if optional fields are also empty
+    bool optionalFieldsEmpty = _parkingSpaceController.text.trim().isEmpty &&
+        _designController.text.trim().isEmpty &&
+        _conveniencesController.text.trim().isEmpty;
+
+    // Check if no images are uploaded
+    bool noImages = uploadedImages.isEmpty;
+
+    // Form is considered empty if all user-filled required fields and dropdowns are empty
+    return userTextFieldsEmpty &&
+        dropdownsEmpty &&
+        optionalFieldsEmpty &&
+        noImages;
+  }
+
+  // Method to check if user has started filling form but hasn't completed it
+  bool _isBuildingFormPartiallyFilled() {
+    // Count filled required fields (excluding auto-filled Building ID and Name)
+    int filledRequiredFields = 0;
+    int totalRequiredFields =
+        9; // Floors G+, Floors G-, Age, Expected Life, Structure + 4 dropdowns
+
+    // Don't count auto-filled fields: _buildingIdController and _buildingNameController
+    if (_noOfFloorsGPlusController.text.trim().isNotEmpty)
+      filledRequiredFields++;
+    if (_noOfFloorsGMinusController.text.trim().isNotEmpty)
+      filledRequiredFields++;
+    if (_ageController.text.trim().isNotEmpty) filledRequiredFields++;
+    if (_expectedLifePeriodController.text.trim().isNotEmpty)
+      filledRequiredFields++;
+    if (_structureController.text.trim().isNotEmpty) filledRequiredFields++;
+    if (_selectedBuildingCategory != null) filledRequiredFields++;
+    if (_selectedBuildingClass != null) filledRequiredFields++;
+    if (_selectedNatureOfConstruction != null) filledRequiredFields++;
+    if (_selectedBuildingConditions != null) filledRequiredFields++;
+
+    // Return true if some but not all required fields are filled
+    return filledRequiredFields > 0 &&
+        filledRequiredFields < totalRequiredFields;
+  }
+
+  // Method to get appropriate save button text based on form state
+  String _getSaveButtonText() {
+    if (_isBuildingFormEmpty()) {
+      return 'Fill Form to Save';
+    } else if (_isBuildingFormPartiallyFilled()) {
+      return 'Complete Required Fields';
+    } else {
+      return AppString.save.localize(context) ?? 'Save Data';
     }
   }
 
-  String _buildFormJson() {
-    // Build JSON string for the form data (add more fields as needed)
-    return '''{
-      "masterFileRef": "", // Add actual value if needed
-      "inspectionDate": "", // Add actual value if needed
-      "dsDivision": "", // Add actual value if needed
-      "district": "", // Add actual value if needed
-      "province": "", // Add actual value if needed
-      "buildingId": "", // Add actual value if needed
-      "buildingName": "", // Add actual value if needed
-      "buildingDetails": "", // Add actual value if needed
-      "noOfFloorsGPlus": "", // Add actual value if needed
-      "noOfFloorsGMinus": "", // Add actual value if needed
-      "age": "", // Add actual value if needed
-      "expectedLifePeriod": "", // Add actual value if needed
-      "parkingSpace": "", // Add actual value if needed
-      "design": "", // Add actual value if needed
-      "conveniences": "", // Add actual value if needed
-      "structure": "", // Add actual value if needed
-      "buildingConditions": "", // Add actual value if needed
-      "otherInfo": "", // Add actual value if needed
-      "otherConstructionDetails": "", // Add actual value if needed
-      "assetDetails": "", // Add actual value if needed
-      "businessDetails": "", // Add actual value if needed
-      "remarks": "" // Add actual value if needed
-    }''';
+  // Method to check if a building form is complete
+  bool _isBuildingFormComplete(String buildingId) {
+    return _buildingFormCompletionStatus[buildingId] ?? false;
   }
 
-  Future<void> _uploadImages(String reportId) async {
-    print('DEBUG: _uploadImages called with reportId: $reportId');
-    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
-    if (uploadedImages.isEmpty) return;
-    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
-    var request = http.MultipartRequest('POST', uri)
-      ..fields['reportId'] = reportId;
-    for (var image in uploadedImages) {
-      if (image is File) {
-        print('DEBUG: Adding image file: ${image.path}');
-        request.files
-            .add(await http.MultipartFile.fromPath('files', image.path));
-      } else {
-        print('DEBUG: Skipping non-File image: $image');
+  // Method to check if all building forms are complete
+  bool _areAllBuildingFormsComplete() {
+    if (_availableBuildings.isEmpty) return true; // No buildings to complete
+
+    for (Building building in _availableBuildings) {
+      if (!_isBuildingFormComplete(building.id)) {
+        return false;
       }
     }
-    try {
-      var response = await request.send();
-      print('DEBUG: Image upload response status: ${response.statusCode}');
-      final respStr = await response.stream.bytesToString();
-      print('DEBUG: Image upload response body: $respStr');
-      if (response.statusCode == 200) {
+    return true;
+  }
+
+  // Individual tab validation methods
+  bool _isLandInfoComplete() {
+    return _landInfoFormKey.currentState?.validate() ?? false;
+  }
+
+  bool _isOtherConstructionsComplete() {
+    // Other constructions are optional, so always return true for now
+    return true;
+  }
+
+  // Comprehensive validation for all tabs
+  bool _isInspectionReportComplete() {
+    return _isLandInfoComplete() &&
+        _areAllBuildingFormsComplete() &&
+        _isOtherConstructionsComplete();
+  }
+
+  // Global save button text and state
+  String _getGlobalSaveButtonText() {
+    if (_canSaveInspectionReport()) {
+      return 'Save Inspection Report';
+    } else {
+      return 'Complete All Required Fields';
+    }
+  }
+
+  bool _canSaveInspectionReport() {
+    return _isInspectionReportComplete();
+  }
+
+  // Data collection methods
+  Map<String, dynamic> _collectLandInfoData() {
+    return {
+      'masterFileRef': _masterFileRefController.text,
+      'inspectionDate': _inspectionDateController.text,
+      'dsDivision': _dsDivisionController.text,
+      'district': _districtController.text,
+      'province': _provinceController.text,
+    };
+  }
+
+  Map<String, dynamic> _collectOtherConstructionsData() {
+    return {
+      'otherInfo': _otherInfoController.text,
+      'otherConstructionDetails': _otherConstructionDetailsController.text,
+      'assetDetails': _assetDetailsController.text,
+      'businessDetails': _businessDetailsController.text,
+      'remarks': _remarksController.text,
+    };
+  }
+
+  // Global save method for complete inspection report
+  void _saveCompleteInspectionReport() async {
+    if (!_canSaveInspectionReport()) {
+      _showIncompleteSaveMessage();
+      return;
+    }
+
+    // Collect all data from all tabs
+    final completeReportData = {
+      'landInfo': _collectLandInfoData(),
+      'buildingForms': _savedBuildingForms,
+      'otherConstructions': _collectOtherConstructionsData(),
+      'masterFileNo': _masterFileNo,
+      'lotId': _lotId,
+      'savedAt': DateTime.now().toIso8601String(),
+    };
+
+    // Save complete inspection report
+    // TODO: Implement saveCompleteInspectionReport method in InspectionReportService
+    // For now, use the existing method as a placeholder
+    final success = await _inspectionReportService.saveInspectionReportLocally(
+      masterFileRef: _masterFileRefController.text,
+      buildingId: 'COMPLETE_REPORT',
+      buildingName: 'Complete Inspection Report',
+      formData: completeReportData,
+    );
+
+    if (success) {
+      if (mounted) {
+        // Show success and navigate away
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Images uploaded successfully.'),
-              backgroundColor: Colors.green),
+            content: Text('Complete inspection report saved successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
         );
-      } else {
+        Navigator.pop(context);
+      }
+    } else {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Failed to upload images.'),
-              backgroundColor: Colors.red),
+            content: Text(
+                'Failed to save complete inspection report. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
-    } catch (e) {
-      print('DEBUG: Exception during image upload: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error uploading images: $e'),
-            backgroundColor: Colors.red),
-      );
     }
+  }
+
+  void _showIncompleteSaveMessage() {
+    String message = '';
+    if (!_isLandInfoComplete()) {
+      message = 'Please complete the Land Info tab first';
+    } else if (!_areAllBuildingFormsComplete()) {
+      int completedBuildings = _buildingFormCompletionStatus.values
+          .where((completed) => completed)
+          .length;
+      message =
+          'Please complete all building forms (${completedBuildings}/${_availableBuildings.length} completed)';
+    } else if (!_isOtherConstructionsComplete()) {
+      message = 'Please complete the Other Constructions tab';
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
+  // Method to validate required fields manually
+  List<String> _validateRequiredFields() {
+    List<String> errors = [];
+
+    // Check required text fields
+    if (_buildingIdController.text.trim().isEmpty) {
+      errors.add('Building ID');
+    }
+    if (_buildingNameController.text.trim().isEmpty) {
+      errors.add('Building Name');
+    }
+    if (_noOfFloorsGPlusController.text.trim().isEmpty) {
+      errors.add('Number of Floors (G+)');
+    }
+    if (_noOfFloorsGMinusController.text.trim().isEmpty) {
+      errors.add('Number of Floors (G-)');
+    }
+    if (_ageController.text.trim().isEmpty) {
+      errors.add('Age');
+    }
+    if (_expectedLifePeriodController.text.trim().isEmpty) {
+      errors.add('Expected Life Period');
+    }
+    if (_structureController.text.trim().isEmpty) {
+      errors.add('Structure');
+    }
+
+    // Check required dropdown fields
+    if (_selectedBuildingCategory == null ||
+        _selectedBuildingCategory!.isEmpty) {
+      errors.add('Building Category');
+    }
+    if (_selectedBuildingClass == null || _selectedBuildingClass!.isEmpty) {
+      errors.add('Building Class');
+    }
+    if (_selectedNatureOfConstruction == null ||
+        _selectedNatureOfConstruction!.isEmpty) {
+      errors.add('Nature of Construction');
+    }
+    if (_selectedBuildingConditions == null ||
+        _selectedBuildingConditions!.isEmpty) {
+      errors.add('Building Conditions');
+    }
+
+    return errors;
+  }
+
+  // Helper method to collect all form data
+  Map<String, dynamic> _collectFormData() {
+    return {
+      'masterFileRef': _masterFileRefController.text,
+      'inspectionDate': _inspectionDateController.text,
+      'dsDivision': _dsDivisionController.text,
+      'district': _districtController.text,
+      'province': _provinceController.text,
+      'buildingId': _buildingIdController.text,
+      'buildingName': _buildingNameController.text,
+      'buildingDetails': _buildingDetailsController.text,
+      'noOfFloorsGPlus': _noOfFloorsGPlusController.text,
+      'noOfFloorsGMinus': _noOfFloorsGMinusController.text,
+      'age': _ageController.text,
+      'expectedLifePeriod': _expectedLifePeriodController.text,
+      'parkingSpace': _parkingSpaceController.text,
+      'design': _designController.text,
+      'conveniences': _conveniencesController.text,
+      'structure': _structureController.text,
+      'buildingConditions': _selectedBuildingConditions,
+      'buildingCategory': _selectedBuildingCategory,
+      'buildingClass': _selectedBuildingClass,
+      'natureOfConstruction': _selectedNatureOfConstruction,
+      'selectedBuilding': _selectedBuilding?.toJson(),
+      'images': uploadedImages
+          .map((img) => img is File ? img.path : img.toString())
+          .toList(),
+      'savedAt': DateTime.now().toIso8601String(),
+    };
+  }
+
+  // Method to clear building form data
+  void _clearBuildingForm() {
+    _buildingIdController.clear();
+    _buildingNameController.clear();
+    _buildingDetailsController.clear();
+    _noOfFloorsGPlusController.clear();
+    _noOfFloorsGMinusController.clear();
+    _ageController.clear();
+    _expectedLifePeriodController.clear();
+    _parkingSpaceController.clear();
+    _designController.clear();
+    _conveniencesController.clear();
+    _structureController.clear();
+    _buildingConditionsController.clear();
+
+    // Reset dropdown selections
+    _selectedBuildingCategory = null;
+    _selectedBuildingClass = null;
+    _selectedNatureOfConstruction = null;
+    _selectedBuildingConditions = null;
+
+    // Clear uploaded images
+    uploadedImages.clear();
+  }
+
+  // Method to show saved reports dialog
+  void _showSavedReportsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const SavedReportsDialog(),
+    );
+  }
+
+  // Helper method to get building category options from structured data
+  List<String> _getBuildingCategoryOptions() {
+    return [
+      "Residential Building -Single storied",
+      "Commercial Building  Multistoried",
+      "Commercial Building",
+      "Residential Building -Multi storied",
+      "Industrial Building",
+      "Tenement",
+      "Sheds",
+      "Stair Case"
+    ];
+  }
+
+  // Helper method to get building class options from structured data
+  List<String> _getBuildingClassOptions() {
+    return [
+      "Special Type",
+      "Ultra Modern",
+      "Modern",
+      "Semi Modern",
+      "Obsolete",
+      "Non",
+      "Building Hight 12 feet",
+      "Building Hight 15feet",
+      "Concrete",
+      "Iron"
+    ];
+  }
+
+  // Helper method to get nature of construction options from structured data
+  List<String> _getNatureOfConstructionOptions() {
+    return [
+      "Permanent",
+      "Renovated",
+      "Temporary",
+      "Incomplete",
+      "Under Construction",
+      "Converted",
+      "Abandon Building"
+    ];
+  }
+
+  // Helper method to get building conditions options from structured data
+  List<String> _getBuildingConditionsOptions() {
+    return ["Sel", "V.Good", "Good", "Faire+", "Faire-", "Poor", "V,Poor"];
+  }
+
+  // Helper methods for roof section
+  List<String> _getRoofMaterialOptions() {
+    return [
+      "Color-Con Tiled",
+      "Calicut Tiled -Color up",
+      "Reinforced Cement Concrete",
+      "Fiber glass Sheets",
+      "Clay Tiled",
+      "Galvanized (Aluminium) Corrugated Sheets",
+      "Zink aluminum tile sheet",
+      "ASB Color up sheets",
+      "Asbestos Sheets",
+      "Aluminum Sheets Roofed plane",
+      "Corrugated iron sheet",
+      "Plastic Sheets",
+      "Tar Sheets",
+      "Cajon"
+    ];
+  }
+
+  List<String> _getRoofFrameOptions() {
+    return [
+      "Sawn Timber class 1",
+      "Detail Timber Frame",
+      "Sawn Timber class 2",
+      "Sawn coconut rafter",
+      "C purlin -GI",
+      "Coconut rafter",
+      "Iron Craft",
+      "GI Pipe",
+      "Round timber"
+    ];
+  }
+
+  List<String> _getRoofFinisherOptions() {
+    return [
+      "Valance board - Wooden calss 1 or 2",
+      "Gutters-Aluminum",
+      "Downpipes-Aluminum",
+      "Valance boards - Aluminum",
+      "Downpipes-Plastic"
+    ];
+  }
+
+  List<String> _getCeilingOptions() {
+    return [
+      "Timber Plank",
+      "Decorative timber plank",
+      "Detail celling",
+      "Asb Exposed rafter"
+    ];
+  }
+
+  // Helper methods for structure section
+  List<String> _getFoundationStructureOptions() {
+    return [
+      "RCC",
+      "Pile",
+      "Mini plie",
+      "Random rubble with Rcc Column and beam"
+    ];
+  }
+
+  List<String> _getWallStructureOptions() {
+    return [
+      "Columns with 9\" brick all 9\"",
+      "Brick 9\"",
+      "Glass",
+      "Cement hollow block"
+    ];
+  }
+
+  List<String> _getFloorStructureOptions() {
+    return ["RCC Concrete", "Concrete", "Brick"];
+  }
+
+  // Helper methods for fixture and fitting section
+  List<String> _getDoorOptions() {
+    return ["Timber panel with timber frame", "Iron Roller shutter"];
+  }
+
+  List<String> _getWindowOptions() {
+    return ["Timber panel with timber frame", "Glazed with timber frame"];
+  }
+
+  List<String> _getWindowProtectionOptions() {
+    return ["Stainless Steel", "Iron Drill", "Iron rode"];
+  }
+
+  List<String> _getDoorsBathroomAndToiletFittingsOptions() {
+    return [
+      "Full furnished bath room with class 1 fittings -Unit",
+      "Full furnished bath room with class 2-3 fittings  Unit"
+    ];
+  }
+
+  List<String> _getDoorsHandRailOptions() {
+    return ["Wooden- Class 01 unit", "Wooden landing- Class 01 unit"];
+  }
+
+  List<String> _getDoorsPantryCupboardOptions() {
+    return ["Wooden pantry cupboard class 1 unit", "Aluminum unit"];
+  }
+
+  List<String> _getDoorsOtherOptions() {
+    return ["Air conditions-central unit", "Sola panel- unit"];
+  }
+
+  // Helper methods for finishers and services section
+  List<String> _getWallFinisherOptions() {
+    return ["Tiled", "Wall Papers"];
+  }
+
+  List<String> _getFloorFinisherOptions() {
+    return ["Granite", "Terrazzo"];
+  }
+
+  List<String> _getBathroomAndToiletOptions() {
+    return [" tile Grade A- Floor+Wall", "Tile Class 2- Floor+Wall"];
+  }
+
+  List<String> _getServicesOptions() {
+    return ["Three phase electricity", "Additional transformer"];
   }
 
   @override
@@ -349,7 +899,11 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomAppBar(title: appBarTitle),
+          CustomAppBar(
+            title: appBarTitle,
+            rightIcon1: (style) => PhosphorIcons.archive(style),
+            onRightIcon1Pressed: _showSavedReportsDialog,
+          ),
           Container(
             width: double.infinity,
             color: const Color(0xFFF3F4F6),
@@ -517,13 +1071,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                 ),
                 const Spacer(),
                 CustomButton(
-                  text: AppString.save.localize(context) ?? 'Save',
-                  onPressed: () {
-                    if (_landInfoFormKey.currentState?.validate() ?? false) {
-                      // Handle save logic here
-                    }
-                  },
-                  backgroundColor: colors(context).colorPrimary1!,
+                  text: _getGlobalSaveButtonText(),
+                  onPressed: _canSaveInspectionReport()
+                      ? _saveCompleteInspectionReport
+                      : null,
+                  backgroundColor: _canSaveInspectionReport()
+                      ? colors(context).colorPrimary1!
+                      : colors(context).colorGrey1!,
                 ),
               ],
             ),
@@ -623,12 +1177,20 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
               itemCount: _availableBuildings.length,
               itemBuilder: (context, index) {
                 final building = _availableBuildings[index];
+                final isComplete = _isBuildingFormComplete(building.id);
                 return InkWell(
                   onTap: () {
                     setState(() {
                       _selectedBuilding = building;
                       // Pre-fill form with building data
+                      _buildingIdController.text =
+                          building.id; // Auto-fill building ID
                       _buildingNameController.text = building.name;
+                      // Reset dropdown selections to ensure validation
+                      _selectedBuildingCategory = null;
+                      _selectedBuildingClass = null;
+                      _selectedNatureOfConstruction = null;
+                      _selectedBuildingConditions = null;
                     });
                   },
                   child: Container(
@@ -643,6 +1205,18 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     ),
                     child: Row(
                       children: [
+                        // Completion status indicator
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isComplete
+                                ? Colors.green
+                                : Colors.grey.shade400,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
                         Text(
                           "Building name:",
                           style: TextStyle(
@@ -656,10 +1230,19 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                           building.name,
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: isComplete
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                             color: colors(context).colorBlack,
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        if (isComplete)
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                            size: 16,
+                          ),
                         const SizedBox(width: 8),
                         Icon(
                           Icons.chevron_right,
@@ -692,6 +1275,8 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                   onTap: () {
                     setState(() {
                       _selectedBuilding = null;
+                      // Clear form data
+                      _clearBuildingForm();
                     });
                   },
                   child: Row(
@@ -738,21 +1323,27 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.buildingCategory.localize(context) ?? '',
-                items: widget.masterData.buildingCategory,
-                initialValue: widget.masterData.buildingCategory.isNotEmpty
-                    ? widget.masterData.buildingCategory.first
-                    : null,
-                onChanged: (value) {},
+                items: _getBuildingCategoryOptions(),
+                initialValue: _selectedBuildingCategory,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedBuildingCategory = value;
+                  });
+                  _updateSaveButtonState();
+                },
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Building Category"),
               ),
               CustomDropdownField(
                 label: AppString.buildingClass.localize(context) ?? '',
-                items: widget.masterData.buildingClass,
-                initialValue: widget.masterData.buildingClass.isNotEmpty
-                    ? widget.masterData.buildingClass.first
-                    : null,
-                onChanged: (value) {},
+                items: _getBuildingClassOptions(),
+                initialValue: _selectedBuildingClass,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedBuildingClass = value;
+                  });
+                  _updateSaveButtonState();
+                },
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Building Class"),
               ),
@@ -834,23 +1425,32 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                 validator: (value) =>
                     InspectionValidator.required(value, "Structure"),
               ),
-              LabeledTextField(
+              CustomDropdownField(
                 label: AppString.buildingConditions.localize(context) ?? '',
-                placeholder: "Building Conditions",
-                controller: _buildingConditionsController,
-                validator: (value) =>
-                    InspectionValidator.required(value, "Building Conditions"),
+                items: _getBuildingConditionsOptions(),
+                initialValue: _selectedBuildingConditions,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedBuildingConditions = value;
+                  });
+                  _updateSaveButtonState();
+                },
+                validator: (value) => InspectionValidator.validateDropdown(
+                    value, "Building Conditions"),
               ),
             ]),
 
             _buildRow([
               CustomDropdownField(
                 label: AppString.natureOfConstruction.localize(context) ?? '',
-                items: widget.masterData.natureOfConstruction,
-                initialValue: widget.masterData.natureOfConstruction.isNotEmpty
-                    ? widget.masterData.natureOfConstruction.first
-                    : null,
-                onChanged: (value) {},
+                items: _getNatureOfConstructionOptions(),
+                initialValue: _selectedNatureOfConstruction,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedNatureOfConstruction = value;
+                  });
+                  _updateSaveButtonState();
+                },
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Nature of Building"),
               ),
@@ -867,20 +1467,16 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.roofMaterial.localize(context) ?? '',
-                items: widget.masterData.roofMaterial,
-                initialValue: widget.masterData.roofMaterial.isNotEmpty
-                    ? widget.masterData.roofMaterial.first
-                    : null,
+                items: _getRoofMaterialOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Roof Material"),
               ),
               CustomDropdownField(
                 label: AppString.roofFrame.localize(context) ?? '',
-                items: widget.masterData.roofFrame,
-                initialValue: widget.masterData.roofFrame.isNotEmpty
-                    ? widget.masterData.roofFrame.first
-                    : null,
+                items: _getRoofFrameOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Roof Frame"),
@@ -890,20 +1486,16 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.roofFinisher.localize(context) ?? '',
-                items: widget.masterData.roofFinisher,
-                initialValue: widget.masterData.roofFinisher.isNotEmpty
-                    ? widget.masterData.roofFinisher.first
-                    : null,
+                items: _getRoofFinisherOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Roof Finisher"),
               ),
               CustomDropdownField(
                 label: AppString.ceiling.localize(context) ?? '',
-                items: widget.masterData.celing,
-                initialValue: widget.masterData.celing.isNotEmpty
-                    ? widget.masterData.celing.first
-                    : null,
+                items: _getCeilingOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Ceiling"),
@@ -921,20 +1513,16 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.foundationStructure.localize(context) ?? '',
-                items: widget.masterData.foundationStructure,
-                initialValue: widget.masterData.foundationStructure.isNotEmpty
-                    ? widget.masterData.foundationStructure.first
-                    : null,
+                items: _getFoundationStructureOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Foundation Structure"),
               ),
               CustomDropdownField(
                 label: AppString.wallStructure.localize(context) ?? '',
-                items: widget.masterData.wallStructure,
-                initialValue: widget.masterData.wallStructure.isNotEmpty
-                    ? widget.masterData.wallStructure.first
-                    : null,
+                items: _getWallStructureOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Wall Structure"),
@@ -944,10 +1532,8 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.floorStructure.localize(context) ?? '',
-                items: widget.masterData.floorStructure,
-                initialValue: widget.masterData.floorStructure.isNotEmpty
-                    ? widget.masterData.floorStructure.first
-                    : null,
+                items: _getFloorStructureOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Floor Structure"),
@@ -964,20 +1550,16 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.door.localize(context) ?? '',
-                items: widget.masterData.door,
-                initialValue: widget.masterData.door.isNotEmpty
-                    ? widget.masterData.door.first
-                    : null,
+                items: _getDoorOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Door"),
               ),
               CustomDropdownField(
                 label: AppString.window.localize(context) ?? '',
-                items: widget.masterData.window,
-                initialValue: widget.masterData.window.isNotEmpty
-                    ? widget.masterData.window.first
-                    : null,
+                items: _getWindowOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Window"),
@@ -987,10 +1569,8 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.windowProtection.localize(context) ?? '',
-                items: widget.masterData.windowProtection,
-                initialValue: widget.masterData.windowProtection.isNotEmpty
-                    ? widget.masterData.windowProtection.first
-                    : null,
+                items: _getWindowProtectionOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Window Protection"),
@@ -999,11 +1579,8 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                 label:
                     AppString.doorsBathroomToiletFittings.localize(context) ??
                         '',
-                items: widget.masterData.doorsBathroomAndToiletFittings,
-                initialValue:
-                    widget.masterData.doorsBathroomAndToiletFittings.isNotEmpty
-                        ? widget.masterData.doorsBathroomAndToiletFittings.first
-                        : null,
+                items: _getDoorsBathroomAndToiletFittingsOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Doors Bathroom and Toilet Fittings"),
@@ -1013,20 +1590,16 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.doorsHandRail.localize(context) ?? '',
-                items: widget.masterData.doorsHandRail,
-                initialValue: widget.masterData.doorsHandRail.isNotEmpty
-                    ? widget.masterData.doorsHandRail.first
-                    : null,
+                items: _getDoorsHandRailOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Doors Hand Rail"),
               ),
               CustomDropdownField(
                 label: AppString.doorsPantryCupboard.localize(context) ?? '',
-                items: widget.masterData.doorsPantryCupboard,
-                initialValue: widget.masterData.doorsPantryCupboard.isNotEmpty
-                    ? widget.masterData.doorsPantryCupboard.first
-                    : null,
+                items: _getDoorsPantryCupboardOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Doors Pantry Cupboard"),
@@ -1036,10 +1609,8 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.doorsOther.localize(context) ?? '',
-                items: widget.masterData.doorsOther,
-                initialValue: widget.masterData.doorsOther.isNotEmpty
-                    ? widget.masterData.doorsOther.first
-                    : null,
+                items: _getDoorsOtherOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Doors Other"),
@@ -1057,20 +1628,16 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.wallFinisher.localize(context) ?? '',
-                items: widget.masterData.wallFinisher,
-                initialValue: widget.masterData.wallFinisher.isNotEmpty
-                    ? widget.masterData.wallFinisher.first
-                    : null,
+                items: _getWallFinisherOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Wall Finisher"),
               ),
               CustomDropdownField(
                 label: AppString.floorFinisher.localize(context) ?? '',
-                items: widget.masterData.floorFinisher,
-                initialValue: widget.masterData.floorFinisher.isNotEmpty
-                    ? widget.masterData.floorFinisher.first
-                    : null,
+                items: _getFloorFinisherOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Floor Finisher"),
@@ -1080,20 +1647,16 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               CustomDropdownField(
                 label: AppString.bathroomToilet.localize(context) ?? '',
-                items: widget.masterData.bathroomAndToilet,
-                initialValue: widget.masterData.bathroomAndToilet.isNotEmpty
-                    ? widget.masterData.bathroomAndToilet.first
-                    : null,
+                items: _getBathroomAndToiletOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) => InspectionValidator.validateDropdown(
                     value, "Bathroom and Toilet"),
               ),
               CustomDropdownField(
                 label: AppString.services.localize(context) ?? '',
-                items: widget.masterData.services,
-                initialValue: widget.masterData.services.isNotEmpty
-                    ? widget.masterData.services.first
-                    : null,
+                items: _getServicesOptions(),
+                initialValue: null,
                 onChanged: (value) {},
                 validator: (value) =>
                     InspectionValidator.validateDropdown(value, "Services"),
@@ -1164,15 +1727,19 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                   onPressed: () {
                     setState(() {
                       _selectedBuilding = null;
+                      _clearBuildingForm();
                     });
                   },
                   backgroundColor: colors(context).colorGrey1!,
                 ),
                 const Spacer(),
                 CustomButton(
-                  text: AppString.sendData.localize(context) ?? '',
-                  onPressed: _validateAndSubmit,
-                  backgroundColor: colors(context).colorPrimary5!,
+                  text: _getSaveButtonText(),
+                  onPressed:
+                      _isBuildingFormEmpty() ? null : _validateAndSaveLocally,
+                  backgroundColor: _isBuildingFormEmpty()
+                      ? colors(context).colorGrey1!
+                      : colors(context).colorPrimary5!,
                 ),
               ],
             ),
@@ -1241,14 +1808,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                 ),
                 const Spacer(),
                 CustomButton(
-                  text: AppString.save.localize(context) ?? 'Save',
-                  onPressed: () {
-                    if (_otherConstructionsFormKey.currentState?.validate() ??
-                        false) {
-                      // Handle save logic here
-                    }
-                  },
-                  backgroundColor: colors(context).colorPrimary1!,
+                  text: _getGlobalSaveButtonText(),
+                  onPressed: _canSaveInspectionReport()
+                      ? _saveCompleteInspectionReport
+                      : null,
+                  backgroundColor: _canSaveInspectionReport()
+                      ? colors(context).colorPrimary1!
+                      : colors(context).colorGrey1!,
                 ),
               ],
             ),
