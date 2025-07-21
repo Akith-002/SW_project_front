@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
-import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
@@ -13,10 +13,11 @@ import 'package:land_asset_valuation/application/core/widgets/custom_button.dart
 import 'package:land_asset_valuation/application/core/widgets/image_upload.dart';
 import 'package:land_asset_valuation/application/core/widgets/labeled_text_field.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/cubit/la_sales_evidence_cubit.dart';
+import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/cubit/la_sales_evidence_state.dart';
 import 'package:land_asset_valuation/application/core/validators/la_sales_evidence_validator.dart';
 import 'package:land_asset_valuation/application/core/widgets/data_send_successfully_dialogbox.dart';
+import 'package:land_asset_valuation/data/models/la_sales_evidence_model.dart';
 import 'package:land_asset_valuation/injection.dart';
-import 'package:http/http.dart' as http;
 
 /// Sales Evidence form screen for Land Acquisition module
 /// Allows users to input and manage land sales evidence data
@@ -30,8 +31,11 @@ class LaSalesEvidence extends BasePage {
 class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
   final _cubit = injection<LaSalesEvidenceCubit>();
 
-  // Form key for validation
+  // Form validation key
   final _formKey = GlobalKey<FormState>();
+
+  // Auto-validation mode
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
   // Controllers for form fields
   final _assetNumberController = TextEditingController();
@@ -101,339 +105,399 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
   @override
   Widget buildView(BuildContext context) {
-    return Scaffold(
-      appBar:
-          CustomAppBar(title: AppString.salesEvidencesForm.localize(context)!),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Calculate the width for form fields based on available screen width
-          double fieldWidth = constraints.maxWidth * 0.47;
+    return BlocProvider<LaSalesEvidenceCubit>.value(
+      value: _cubit,
+      child: BlocConsumer<LaSalesEvidenceCubit, dynamic>(
+        listener: (context, state) {
+          if (state is LaSalesEvidenceSubmitSuccess) {
+            _showSuccessDialog();
+          } else if (state is LaSalesEvidenceSubmitFailure) {
+            _showErrorMessage(state.errorMessage);
+          }
+        },
+        builder: (context, state) {
+          return Scaffold(
+            appBar: CustomAppBar(
+                title: AppString.salesEvidencesForm.localize(context)!),
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                // Calculate the width for form fields based on available screen width
+                double fieldWidth = constraints.maxWidth * 0.47;
 
-          return Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // Navigation breadcrumb
-                  Breadcrumb(
-                    items: [
-                      BreadcrumbItem(
-                          label: AppString.landAcquisition.localize(context)!),
-                      BreadcrumbItem(
-                          label: AppString.masterFile.localize(context)!),
-                      BreadcrumbItem(
-                          label: AppString.salesEvidences.localize(context)!),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
+                return Form(
+                  key: _formKey,
+                  autovalidateMode: _autovalidateMode,
+                  child: SingleChildScrollView(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        // Form fields section
-                        Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          alignment: WrapAlignment.start,
-                          children: [
-                            // Property identification fields
-                            LabeledTextField(
-                              label: AppString.assetNumber.localize(context)!,
-                              placeholder:
-                                  AppString.assetNumber.localize(context)!,
-                              width: fieldWidth,
-                              controller: _assetNumberController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.requiredAlphaNum(
-                                      value, 50, "Asset Number"),
-                            ),
-                            LabeledTextField(
-                              label:
-                                  AppString.masterFilerefno.localize(context)!,
-                              placeholder:
-                                  AppString.masterFilerefno.localize(context)!,
-                              width: fieldWidth,
-                              controller: _masterFileRefController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.requiredAlphaNum(
-                                      value, 50, "Master File Reference"),
-                            ),
-
-                            // Location information fields
-                            LabeledTextField(
-                              label: AppString.roadName.localize(context)!,
-                              placeholder: AppString.owner.localize(context)!,
-                              width: fieldWidth,
-                              controller: _roadNameController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 100, "Road Name"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.village.localize(context)!,
-                              placeholder:
-                                  AppString.occupier.localize(context)!,
-                              width: fieldWidth,
-                              controller: _villageController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 100, "Village"),
-                            ),
-
-                            // Transaction information fields
-                            LabeledTextField(
-                              label: AppString.vendor.localize(context)!,
-                              placeholder:
-                                  AppString.situation.localize(context)!,
-                              width: fieldWidth,
-                              controller: _vendorController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.requiredAlphaNum(
-                                      value, 100, "Vendor"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.deedNumber.localize(context)!,
-                              placeholder:
-                                  AppString.floorRate.localize(context)!,
-                              width: fieldWidth,
-                              controller: _deedNumberController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.requiredDeedNumber(
-                                      value, 50, "Deed Number"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.deedAttestedNumber
-                                  .localize(context)!,
-                              placeholder: AppString.deedAttestedNumber
-                                  .localize(context)!,
-                              width: fieldWidth,
-                              controller: _deedAttestedNumberController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalDeedNumber(
-                                      value, 50, "Deed Attested Number"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.notaryName.localize(context)!,
-                              placeholder:
-                                  AppString.notaryName.localize(context)!,
-                              width: fieldWidth,
-                              controller: _notaryNameController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.requiredAlphaNum(
-                                      value, 100, "Notary Name"),
-                            ),
-
-                            // Land specification fields
-                            LabeledTextField(
-                              label: AppString.lotNumber.localize(context)!,
-                              placeholder: AppString.noofLotNumbergiven
-                                  .localize(context)!,
-                              width: fieldWidth,
-                              controller: _lotNumberController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 50, "Lot Number"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.planNumber.localize(context)!,
-                              placeholder:
-                                  AppString.planNumber.localize(context)!,
-                              width: fieldWidth,
-                              controller: _planNumberController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 50, "Plan Number"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.planDate.localize(context)!,
-                              placeholder:
-                                  AppString.planDate.localize(context)!,
-                              width: fieldWidth,
-                              controller: _planDateController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalDate(
-                                      value, "Plan Date"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.extent.localize(context)!,
-                              placeholder: AppString.extent.localize(context)!,
-                              width: fieldWidth,
-                              controller: _extentController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalNumeric(
-                                      value, 20, "Extent"),
-                            ),
-
-                            // Financial and valuation fields
-                            LabeledTextField(
-                              label: AppString.consideration.localize(context)!,
-                              placeholder:
-                                  AppString.consideration.localize(context)!,
-                              width: fieldWidth,
-                              controller: _considerationController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.requiredNumeric(
-                                      value, 20, "Consideration"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.remarks.localize(context)!,
-                              placeholder: AppString.remarks.localize(context)!,
-                              width: fieldWidth,
-                              controller: _remarksController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 500, "Remarks"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.rate.localize(context)!,
-                              placeholder: AppString.rate.localize(context)!,
-                              width: fieldWidth,
-                              controller: _rateController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.requiredNumeric(
-                                      value, 20, "Rate"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.rateType.localize(context)!,
-                              placeholder:
-                                  AppString.rateType.localize(context)!,
-                              width: fieldWidth,
-                              controller: _rateTypeController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 50, "Rate Type"),
-                            ),
-
-                            // Geolocation fields
-                            LabeledTextField(
-                              label: AppString.locationLongitude
-                                  .localize(context)!,
-                              placeholder: AppString.locationLongitude
-                                  .localize(context)!,
-                              width: fieldWidth,
-                              controller: _locationLongitudeController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalCoordinate(
-                                      value, "Location Longitude"),
-                            ),
-                            LabeledTextField(
-                              label:
-                                  AppString.locationLatitude.localize(context)!,
-                              placeholder:
-                                  AppString.locationLatitude.localize(context)!,
-                              width: fieldWidth,
-                              controller: _locationLatitudeController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalCoordinate(
-                                      value, "Location Latitude"),
-                            ),
-
-                            // Additional reference and description fields
-                            LabeledTextField(
-                              label: AppString.landRegistryReferences
-                                  .localize(context)!,
-                              placeholder: AppString.landRegistryReferences
-                                  .localize(context)!,
-                              width: fieldWidth,
-                              controller: _landRegistryReferencesController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 200, "Land Registry References"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.situation.localize(context)!,
-                              placeholder:
-                                  AppString.situation.localize(context)!,
-                              width: fieldWidth,
-                              controller: _situationController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 200, "Situation"),
-                            ),
-                            LabeledTextField(
-                              label: AppString.descriptionOfLand
-                                  .localize(context)!,
-                              placeholder: AppString.descriptionOfLand
-                                  .localize(context)!,
-                              width: fieldWidth,
-                              controller: _descriptionOfLandController,
-                              validator: (value) =>
-                                  LaSalesEvidenceValidator.optionalAlphaNum(
-                                      value, 500, "Description of Land"),
-                            ),
+                        // Navigation breadcrumb
+                        Breadcrumb(
+                          items: [
+                            BreadcrumbItem(
+                                label: AppString.landAcquisition
+                                    .localize(context)!),
+                            BreadcrumbItem(
+                                label: AppString.masterFile.localize(context)!),
+                            BreadcrumbItem(
+                                label: AppString.salesEvidences
+                                    .localize(context)!),
                           ],
                         ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Form fields section
+                              Wrap(
+                                spacing: 16,
+                                runSpacing: 16,
+                                alignment: WrapAlignment.start,
+                                children: [
+                                  // Property identification fields
+                                  LabeledTextField(
+                                    label: AppString.assetNumber
+                                        .localize(context)!,
+                                    placeholder: AppString.assetNumber
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _assetNumberController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .requiredAlphaNum(
+                                                value, 50, "Asset Number"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.masterFilerefno
+                                        .localize(context)!,
+                                    placeholder: AppString.masterFilerefno
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _masterFileRefController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .requiredAlphaNum(value, 50,
+                                                "Master File Reference"),
+                                  ),
+                                  LabeledTextField(
+                                    label:
+                                        AppString.roadName.localize(context)!,
+                                    placeholder:
+                                        AppString.owner.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _roadNameController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(
+                                                value, 100, "Road Name"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.village.localize(context)!,
+                                    placeholder:
+                                        AppString.occupier.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _villageController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(
+                                                value, 100, "Village"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.vendor.localize(context)!,
+                                    placeholder:
+                                        AppString.situation.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _vendorController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .requiredAlphaNum(
+                                                value, 100, "Vendor"),
+                                  ),
+                                  LabeledTextField(
+                                    label:
+                                        AppString.deedNumber.localize(context)!,
+                                    placeholder:
+                                        AppString.floorRate.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _deedNumberController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .requiredDeedNumber(
+                                                value, "Deed Number"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.deedAttestedNumber
+                                        .localize(context)!,
+                                    placeholder: AppString.deedAttestedNumber
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _deedAttestedNumberController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalDeedNumber(value, 50,
+                                                "Deed Attested Number"),
+                                  ),
+                                  LabeledTextField(
+                                    label:
+                                        AppString.notaryName.localize(context)!,
+                                    placeholder:
+                                        AppString.notaryName.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _notaryNameController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .requiredAlphaNum(
+                                                value, 100, "Notary Name"),
+                                  ),
+                                  LabeledTextField(
+                                    label:
+                                        AppString.lotNumber.localize(context)!,
+                                    placeholder: AppString.noofLotNumbergiven
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _lotNumberController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(
+                                                value, 50, "Lot Number"),
+                                  ),
+                                  LabeledTextField(
+                                    label:
+                                        AppString.planNumber.localize(context)!,
+                                    placeholder:
+                                        AppString.planNumber.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _planNumberController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(
+                                                value, 50, "Plan Number"),
+                                  ),
+                                  LabeledTextField(
+                                    label:
+                                        AppString.planDate.localize(context)!,
+                                    placeholder:
+                                        AppString.planDate.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _planDateController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator.optionalDate(
+                                            value, "Plan Date"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.extent.localize(context)!,
+                                    placeholder:
+                                        AppString.extent.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _extentController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalNumeric(
+                                                value, 20, "Extent"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.consideration
+                                        .localize(context)!,
+                                    placeholder: AppString.consideration
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _considerationController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .requiredNumeric(
+                                                value, 20, "Consideration"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.remarks.localize(context)!,
+                                    placeholder:
+                                        AppString.remarks.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _remarksController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(
+                                                value, 500, "Remarks"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.rate.localize(context)!,
+                                    placeholder:
+                                        AppString.rate.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _rateController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .requiredNumeric(value, 20, "Rate"),
+                                  ),
+                                  LabeledTextField(
+                                    label:
+                                        AppString.rateType.localize(context)!,
+                                    placeholder:
+                                        AppString.rateType.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _rateTypeController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(
+                                                value, 50, "Rate Type"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.locationLongitude
+                                        .localize(context)!,
+                                    placeholder: AppString.locationLongitude
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _locationLongitudeController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalCoordinate(
+                                                value, "Location Longitude"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.locationLatitude
+                                        .localize(context)!,
+                                    placeholder: AppString.locationLatitude
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _locationLatitudeController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalCoordinate(
+                                                value, "Location Latitude"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.landRegistryReferences
+                                        .localize(context)!,
+                                    placeholder: AppString
+                                        .landRegistryReferences
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller:
+                                        _landRegistryReferencesController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(value, 200,
+                                                "Land Registry References"),
+                                  ),
+                                  LabeledTextField(
+                                    label:
+                                        AppString.situation.localize(context)!,
+                                    placeholder:
+                                        AppString.situation.localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _situationController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(
+                                                value, 200, "Situation"),
+                                  ),
+                                  LabeledTextField(
+                                    label: AppString.descriptionOfLand
+                                        .localize(context)!,
+                                    placeholder: AppString.descriptionOfLand
+                                        .localize(context)!,
+                                    width: fieldWidth,
+                                    controller: _descriptionOfLandController,
+                                    validator: (value) =>
+                                        LaSalesEvidenceValidator
+                                            .optionalAlphaNum(value, 500,
+                                                "Description of Land"),
+                                  ),
+                                ],
+                              ),
 
-                        // Image upload section
-                        const SizedBox(height: 24),
-                        Text(
-                          AppString.imageCapturing.localize(context)!,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          children: [
-                            // Display all previously uploaded images
-                            ...List.generate(
-                              uploadedImages.length,
-                              (index) {
-                                final image = uploadedImages[index];
-                                return ImageUpload(
-                                  imageFile: image is File ? image : null,
-                                  imagePath: image is String ? image : null,
-                                  onDelete: () => _deleteImage(index),
-                                  size: 128,
-                                );
-                              },
-                            ),
-                            // Upload button for adding new images
-                            ImageUpload(
-                              isUploadButton: true,
-                              onImagePicked: _onImagePicked,
-                              onDelete: () {}, // Not used for upload button
-                              size: 128,
-                            ),
-                          ],
-                        ),
+                              // Image upload section
+                              const SizedBox(height: 24),
+                              Text(
+                                AppString.imageCapturing.localize(context)!,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 16),
+                              Wrap(
+                                spacing: 16,
+                                runSpacing: 16,
+                                children: [
+                                  // Display all previously uploaded images
+                                  ...List.generate(
+                                    uploadedImages.length,
+                                    (index) {
+                                      final image = uploadedImages[index];
+                                      return ImageUpload(
+                                        imageFile: image is File ? image : null,
+                                        imagePath:
+                                            image is String ? image : null,
+                                        onDelete: () => _deleteImage(index),
+                                        size: 128,
+                                      );
+                                    },
+                                  ),
+                                  // Upload button for adding new images
+                                  ImageUpload(
+                                    isUploadButton: true,
+                                    onImagePicked: _onImagePicked,
+                                    onDelete:
+                                        () {}, // Not used for upload button
+                                    size: 128,
+                                  ),
+                                ],
+                              ),
 
-                        // Divider
-                        Container(
-                          height: 1,
-                          margin: const EdgeInsets.all(16),
-                          width: double.infinity,
-                          color: Colors.grey,
-                        ),
+                              // Divider
+                              Container(
+                                height: 1,
+                                margin: const EdgeInsets.all(16),
+                                width: double.infinity,
+                                color: Colors.grey,
+                              ),
 
-                        // Action buttons section
-                        Row(
-                          children: [
-                            CustomButton(
-                              text: AppString.cancel.localize(context)!,
-                              onPressed: () {},
-                              backgroundColor: colors(context).colorGrey1!,
-                            ),
-                            const Spacer(),
-                            CustomButton(
-                              text: AppString.save.localize(context)!,
-                              onPressed: _validateAndSave,
-                              backgroundColor: colors(context).colorPrimary1!,
-                            ),
-                            const SizedBox(width: 40),
-                            CustomButton(
-                              text: AppString.sendData.localize(context)!,
-                              onPressed: _validateAndSubmit,
-                              backgroundColor: colors(context).colorPrimary5!,
-                            ),
-                          ],
+                              // Action buttons section
+                              Row(
+                                children: [
+                                  CustomButton(
+                                    text: AppString.cancel.localize(context)!,
+                                    onPressed: () {},
+                                    backgroundColor:
+                                        colors(context).colorGrey1!,
+                                  ),
+                                  const Spacer(),
+                                  CustomButton(
+                                    text: AppString.save.localize(context)!,
+                                    onPressed: _validateAndSave,
+                                    backgroundColor:
+                                        colors(context).colorPrimary1!,
+                                  ),
+                                  const SizedBox(width: 40),
+                                  CustomButton(
+                                    text: AppString.sendData.localize(context)!,
+                                    onPressed: state is LaSalesEvidenceLoading
+                                        ? null
+                                        : _validateAndSubmit,
+                                    backgroundColor:
+                                        colors(context).colorPrimary5!,
+                                  ),
+                                ],
+                              ),
+                              // Show loading indicator when submitting
+                              if (state is LaSalesEvidenceLoading)
+                                Container(
+                                  margin: EdgeInsets.only(top: 16),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircularProgressIndicator(),
+                                      SizedBox(width: 16),
+                                      Text('Sending data...'),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
           );
         },
@@ -441,14 +505,17 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
     );
   }
 
-  @override
-  BaseCubit<BaseState> getCubit() {
-    return _cubit;
-  }
-
   /// Validates and saves the form
   void _validateAndSave() {
-    if (_formKey.currentState!.validate()) {
+    // Enable auto-validation mode to show validation errors
+    setState(() {
+      _autovalidateMode = AutovalidateMode.onUserInteraction;
+    });
+
+    // Validate the form
+    bool isFormValid = _formKey.currentState?.validate() ?? false;
+
+    if (isFormValid) {
       // Form is valid, save the data
       _showSuccessMessage('Sales evidence data saved successfully');
       // TODO: Implement actual save logic
@@ -457,111 +524,60 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
     }
   }
 
-  /// Validates and submits the form
+  /// Validates form and submits data to server
   void _validateAndSubmit() async {
-    if (_formKey.currentState!.validate()) {
-      // 1. Submit form data to backend
-      final reportId = await _submitFormData();
-      if (reportId != null) {
-        // 2. Upload images with reportId
-        await _uploadImages(reportId);
-        _showSuccessDialog();
-      } else {
-        _showErrorMessage('Failed to submit sales evidence data.');
-      }
-    } else {
+    // Enable auto-validation mode to show validation errors
+    setState(() {
+      _autovalidateMode = AutovalidateMode.onUserInteraction;
+    });
+
+    // Validate the form using the validators
+    bool isFormValid = _formKey.currentState?.validate() ?? false;
+
+    if (!isFormValid) {
       _showErrorMessage('Please fix the validation errors in the form');
+      return;
     }
-  }
 
-  /// Submits the form data to the backend and returns the new reportId
-  Future<String?> _submitFormData() async {
     try {
-      final uri = Uri.parse('${AppConfig.apiBaseUrl}SalesEvidenceLA');
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: _buildFormJson(),
+      // Create the model from form data
+      final salesEvidenceModel = LaSalesEvidenceModel(
+        assetNumber: _assetNumberController.text.trim(),
+        masterFileRef: _masterFileRefController.text.trim(),
+        roadName: _roadNameController.text.trim(),
+        village: _villageController.text.trim(),
+        vendor: _vendorController.text.trim(),
+        deedNumber: _deedNumberController.text.trim(),
+        deedAttestedNumber: _deedAttestedNumberController.text.trim(),
+        notaryName: _notaryNameController.text.trim(),
+        lotNumber: _lotNumberController.text.trim(),
+        planNumber: _planNumberController.text.trim(),
+        planDate: _planDateController.text.trim(),
+        extent: _extentController.text.trim(),
+        consideration: _considerationController.text.trim(),
+        remarks: _remarksController.text.trim(),
+        rate: _rateController.text.trim(),
+        rateType: _rateTypeController.text.trim(),
+        locationLongitude: _locationLongitudeController.text.trim(),
+        locationLatitude: _locationLatitudeController.text.trim(),
+        landRegistryReferences: _landRegistryReferencesController.text.trim(),
+        situation: _situationController.text.trim(),
+        descriptionOfLand: _descriptionOfLandController.text.trim(),
       );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.body;
-        // Expecting { msg: "success", reportId: ... }
-        final reportId =
-            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
-        print('DEBUG: SalesEvidenceLA reportId: $reportId');
-        return reportId;
-      } else {
-        print(
-            'DEBUG: SalesEvidenceLA submission failed: ${response.statusCode} ${response.body}');
-        return null;
-      }
+
+      // Send data using cubit
+      await _cubit.sendLaSalesEvidence(salesEvidenceModel);
+
+      // TODO: Handle image upload separately after successful form submission
+      // if (success && uploadedImages.isNotEmpty) {
+      //   await _uploadImages(reportId);
+      // }
     } catch (e) {
-      print('DEBUG: Exception during SalesEvidenceLA submission: $e');
-      return null;
+      _showErrorMessage('Error preparing form data: ${e.toString()}');
     }
   }
 
-  /// Builds the JSON string for the form data
-  String _buildFormJson() {
-    return '''{
-      "assetNumber": "${_assetNumberController.text}",
-      "masterFileRef": "${_masterFileRefController.text}",
-      "roadName": "${_roadNameController.text}",
-      "village": "${_villageController.text}",
-      "vendor": "${_vendorController.text}",
-      "deedNumber": "${_deedNumberController.text}",
-      "deedAttestedNumber": "${_deedAttestedNumberController.text}",
-      "notaryName": "${_notaryNameController.text}",
-      "lotNumber": "${_lotNumberController.text}",
-      "planNumber": "${_planNumberController.text}",
-      "planDate": "${_planDateController.text}",
-      "extent": "${_extentController.text}",
-      "consideration": "${_considerationController.text}",
-      "remarks": "${_remarksController.text}",
-      "rate": "${_rateController.text}",
-      "rateType": "${_rateTypeController.text}",
-      "locationLongitude": "${_locationLongitudeController.text}",
-      "locationLatitude": "${_locationLatitudeController.text}",
-      "landRegistryReferences": "${_landRegistryReferencesController.text}",
-      "situation": "${_situationController.text}",
-      "descriptionOfLand": "${_descriptionOfLandController.text}"
-    }''';
-  }
-
-  /// Uploads images to the backend after form submission
-  Future<void> _uploadImages(String reportId) async {
-    print('DEBUG: _uploadImages called with reportId: $reportId');
-    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
-    if (uploadedImages.isEmpty) return;
-    var uri = Uri.parse('${AppConfig.apiBaseUrl}ImageData/upload');
-    var request = http.MultipartRequest('POST', uri)
-      ..fields['reportId'] = reportId;
-    for (var image in uploadedImages) {
-      if (image is File) {
-        print('DEBUG: Adding image file: ${image.path}');
-        request.files
-            .add(await http.MultipartFile.fromPath('files', image.path));
-      } else {
-        print('DEBUG: Skipping non-File image: $image');
-      }
-    }
-    try {
-      var response = await request.send();
-      print('DEBUG: Image upload response status: ${response.statusCode}');
-      final respStr = await response.stream.bytesToString();
-      print('DEBUG: Image upload response body: $respStr');
-      if (response.statusCode == 200) {
-        _showSuccessMessage('Images uploaded successfully.');
-      } else {
-        _showErrorMessage('Failed to upload images.');
-      }
-    } catch (e) {
-      print('DEBUG: Exception during image upload: $e');
-      _showErrorMessage('Error uploading images: $e');
-    }
-  }
-
-  /// Shows success message to user
+  /// Displays success message using SnackBar
   void _showSuccessMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -587,7 +603,7 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
     );
   }
 
-  /// Shows error message to user
+  /// Displays error message using SnackBar
   void _showErrorMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -596,5 +612,10 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
         duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  @override
+  BaseCubit<BaseState> getCubit() {
+    return _cubit;
   }
 }
