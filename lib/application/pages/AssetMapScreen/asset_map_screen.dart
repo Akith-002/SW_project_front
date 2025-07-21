@@ -18,6 +18,8 @@ import 'package:land_asset_valuation/application/core/widgets/sketch_mode.dart';
 import 'package:land_asset_valuation/application/core/widgets/save_lot.dart';
 import 'package:land_asset_valuation/application/core/widgets/lot_area_widget.dart';
 import 'package:land_asset_valuation/application/pages/AssetMapbox/asset_mapbox.dart';
+import 'package:land_asset_valuation/data/models/building.dart';
+import 'package:land_asset_valuation/data/services/building_service.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -41,6 +43,13 @@ class AssetMapScreen extends StatefulWidget {
 class _AssetMapScreenState extends State<AssetMapScreen> {
   // Key to interact with Mapbox widget's state
   final GlobalKey<AssetMapboxState> mapboxKey = GlobalKey<AssetMapboxState>();
+
+  // Building service for persistence
+  final BuildingService _buildingService = BuildingService();
+
+  // Master file data properties
+  String? _masterFileNo;
+  bool _dataExtracted = false;
 
   // Mode state management
   bool isDrawingMode = false; // For drawing lot boundaries
@@ -76,6 +85,22 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
     debugPrint("AssetMapScreen: initState called");
     _markerLoader = MapMarkerLoader();
     _loadMarkerImagesAsync();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_dataExtracted) {
+      _extractNavigationData();
+      _dataExtracted = true;
+    }
+  }
+
+  void _extractNavigationData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+    _masterFileNo = queryParams['masterFileNo'];
+    debugPrint("AssetMapScreen: Extracted Master File No: $_masterFileNo");
   }
 
   void _onSketchMetricsUpdated(double area, double distance) {
@@ -642,9 +667,6 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
       return;
     }
 
-    // Parent lot ID might be null for MR Rental Evidence
-    final String? parentLotId = _selectedLotForSketching?.id;
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -668,27 +690,61 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
                 });
                 _showSnackbar("Building save cancelled.");
               },
-              onSave: (String buildingName, String constructionType) {
+              onSave: (String buildingName, String constructionType) async {
                 Navigator.of(dialogContext).pop();
                 debugPrint("--- Save Building Details ---");
                 debugPrint(
-                    "Parent Lot ID: ${parentLotId ?? 'None (MR Rental Evidence)'}");
-                debugPrint("Building Geometry ID/Data: $buildingGeometryId");
+                    "Parent Lot ID: ${_selectedLotForSketching?.id ?? 'None'}");
                 debugPrint("Building Name: $buildingName");
                 debugPrint("Construction Type: $constructionType");
+                debugPrint("Master File No: $_masterFileNo");
                 debugPrint("-----------------------------");
 
-                // TODO: Implement actual saving logic here (API/Bloc/Repo)
+                // Get the finalized polygon coordinates from the last sketch
+                final finalPolygons =
+                    mapboxKey.currentState?.finalSketchPolygons;
+                if (finalPolygons != null && finalPolygons.isNotEmpty) {
+                  final lastPolygon = finalPolygons.last;
+                  final coordinates = lastPolygon.geometry.coordinates.first;
 
-                if (mounted) {
-                  _showSnackbar("Building '$buildingName' saved successfully!");
-                  setState(() {
-                    selectedSketchTool = null; // Deselect tool
-                    _selectedSketchSubMode = SketchToolMode.marker;
-                    _showSaveButton =
-                        false; // Hide save button after successful save
-                    mapboxKey.currentState?.clearCurrentSketchGuideAndPoints();
-                  });
+                  // Create building object
+                  final building = Building(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: buildingName,
+                    constructionType: constructionType,
+                    lotId: _selectedLotForSketching?.id ?? 'unknown',
+                    masterFileNo: _masterFileNo ?? 'unknown',
+                    coordinates: coordinates,
+                    createdAt: DateTime.now(),
+                  );
+
+                  // Save building to storage
+                  final success = await _buildingService.saveBuilding(building);
+
+                  if (success) {
+                    if (mounted) {
+                      _showSnackbar(
+                          "Building '$buildingName' saved successfully!");
+                      setState(() {
+                        selectedSketchTool = null; // Deselect tool
+                        _selectedSketchSubMode = SketchToolMode.marker;
+                        _showSaveButton =
+                            false; // Hide save button after successful save
+                        mapboxKey.currentState
+                            ?.clearCurrentSketchGuideAndPoints();
+                      });
+                    }
+                  } else {
+                    if (mounted) {
+                      _showSnackbar("Failed to save building '$buildingName'",
+                          isError: true);
+                    }
+                  }
+                } else {
+                  if (mounted) {
+                    _showSnackbar("No building polygon found to save",
+                        isError: true);
+                  }
                 }
               },
             ),

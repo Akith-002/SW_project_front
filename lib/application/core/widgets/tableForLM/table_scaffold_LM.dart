@@ -9,6 +9,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:land_asset_valuation/data/models/paginated_response.dart';
 import 'package:land_asset_valuation/data/models/land_miscellaneous_master_file_model.dart';
 import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repository.dart';
+import 'package:land_asset_valuation/data/services/building_service.dart';
 
 class TableScaffoldLM extends StatefulWidget {
   final int initialPageSize;
@@ -42,6 +43,7 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
   String? _sortColumn;
   int?
       _previousTotalCount; // Cache previous count to prevent unnecessary callbacks
+  final BuildingService _buildingService = BuildingService();
 
   @override
   void initState() {
@@ -388,7 +390,26 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
                                       child: iconButtonWidget(
                                         color: colors(context).colorGrey8!,
                                         iconName: PhosphorIconsRegular.eye,
-                                        onPressed: () {
+                                        onPressed: () async {
+                                          // Clear buildings for this master file when View button is tapped
+                                          debugPrint(
+                                              "🗑️ LM Table: View button tapped for master file ${plan.masterFileNo}");
+                                          debugPrint(
+                                              "   Clearing existing buildings for this master file...");
+
+                                          try {
+                                            await _buildingService
+                                                .clearBuildingsForMasterFile(
+                                                    plan.masterFileNo
+                                                        .toString());
+                                            debugPrint(
+                                                "✅ LM Table: Successfully cleared buildings for master file ${plan.masterFileNo}");
+                                          } catch (e) {
+                                            debugPrint(
+                                                "❌ LM Table: Error clearing buildings: $e");
+                                          }
+
+                                          // Navigate to map screen
                                           context.pushNamed(
                                             Pages.routeMapScreen.toPathName(),
                                             queryParameters: {

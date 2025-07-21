@@ -17,6 +17,8 @@ import 'package:land_asset_valuation/application/pages/inspectionReport/cubit/in
 import 'package:land_asset_valuation/application/core/validators/inspection_validator.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
+import 'package:land_asset_valuation/data/models/building.dart';
+import 'package:land_asset_valuation/data/services/building_service.dart';
 import 'package:http/http.dart' as http;
 
 class InspectionReportView extends BasePage {
@@ -50,13 +52,11 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   final _districtController = TextEditingController();
   final _provinceController = TextEditingController();
 
-  // State for Building Info Tab
-  String? _selectedBuildingName;
-  final List<String> _buildingNames = [
-    'B1',
-    'B2',
-    'B3'
-  ]; // Example building names
+  // State for Building Info Tab - Dynamic Buildings
+  Building? _selectedBuilding;
+  List<Building> _availableBuildings = [];
+  bool _buildingsLoaded = false;
+  final BuildingService _buildingService = BuildingService();
 
   // Add controllers for building info form
   final _buildingIdController = TextEditingController();
@@ -99,6 +99,37 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     if (!_dataExtracted) {
       _extractNavigationData();
       _dataExtracted = true;
+      // Load buildings after extracting navigation data
+      _loadBuildingsForLot();
+    }
+  }
+
+  /// Load buildings for the current lot and master file
+  Future<void> _loadBuildingsForLot() async {
+    if (_lotId != null && _masterFileNo != null) {
+      debugPrint(
+          "Loading buildings for lot: $_lotId, masterFile: $_masterFileNo");
+      try {
+        final buildings =
+            await _buildingService.getBuildingsForLot(_lotId!, _masterFileNo!);
+        setState(() {
+          _availableBuildings = buildings;
+          _buildingsLoaded = true;
+        });
+        debugPrint("Loaded ${buildings.length} buildings");
+      } catch (e) {
+        debugPrint("Error loading buildings: $e");
+        setState(() {
+          _availableBuildings = [];
+          _buildingsLoaded = true;
+        });
+      }
+    } else {
+      debugPrint(
+          "Cannot load buildings: lotId=$_lotId, masterFileNo=$_masterFileNo");
+      setState(() {
+        _buildingsLoaded = true;
+      });
     }
   }
 
@@ -503,12 +534,68 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   }
 
   Widget _buildBuildingInfoTab() {
-    // Conditionally show list or form
-    if (_selectedBuildingName == null) {
+    // Show loading indicator while buildings are being loaded
+    if (!_buildingsLoaded) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    // Show empty state if no buildings found
+    if (_availableBuildings.isEmpty) {
+      return _buildNoBuildingsState();
+    }
+
+    // Show building list or form based on selection
+    if (_selectedBuilding == null) {
       return _buildBuildingList();
     } else {
       return _buildBuildingForm();
     }
+  }
+
+  Widget _buildNoBuildingsState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.business,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "No buildings found for this lot",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Draw buildings in the map sketch tools first",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            CustomButton(
+              text: "Go Back to Map",
+              onPressed: () => Navigator.pop(context),
+              backgroundColor: colors(context).colorPrimary1!,
+              width: 200,
+              height: 48,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildBuildingList() {
@@ -517,67 +604,73 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Building List",
-            style: TextStyle(
-              fontSize: 20, // Or adjust as per your app's typography
-              fontWeight: FontWeight.bold,
-              color: colors(context).colorBlack,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Buildings (${_availableBuildings.length})",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: colors(context).colorBlack,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics:
-                const NeverScrollableScrollPhysics(), // if the list itself shouldn't scroll within its parent
-            itemCount: _buildingNames.length,
-            itemBuilder: (context, index) {
-              final buildingName = _buildingNames[index];
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedBuildingName = buildingName;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 1.0,
+          Expanded(
+            child: ListView.builder(
+              itemCount: _availableBuildings.length,
+              itemBuilder: (context, index) {
+                final building = _availableBuildings[index];
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedBuilding = building;
+                      // Pre-fill form with building data
+                      _buildingNameController.text = building.name;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.grey.shade300,
+                          width: 1.0,
+                        ),
                       ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Building name:",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color:
-                              colors(context).labelTextColor ?? Colors.black87,
+                    child: Row(
+                      children: [
+                        Text(
+                          "Building name:",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: colors(context).labelTextColor ??
+                                Colors.black87,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        buildingName,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: colors(context).colorBlack,
+                        const Spacer(),
+                        Text(
+                          building.name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: colors(context).colorBlack,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.chevron_right,
-                        color: colors(context).colorBlack ?? Colors.black54,
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.chevron_right,
+                          color: colors(context).colorBlack ?? Colors.black54,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -598,7 +691,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                 InkWell(
                   onTap: () {
                     setState(() {
-                      _selectedBuildingName = null;
+                      _selectedBuilding = null;
                     });
                   },
                   child: Row(
@@ -627,7 +720,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _buildRow([
               LabeledTextField(
                 label:
-                    "${AppString.buildingId.localize(context) ?? 'Building ID'} ($_selectedBuildingName)",
+                    "${AppString.buildingId.localize(context) ?? 'Building ID'} (${_selectedBuilding?.name ?? 'Unknown'})",
                 placeholder: "Enter Building ID",
                 controller: _buildingIdController,
                 validator: (value) =>
@@ -1070,7 +1163,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                   text: AppString.cancel.localize(context) ?? '',
                   onPressed: () {
                     setState(() {
-                      _selectedBuildingName = null;
+                      _selectedBuilding = null;
                     });
                   },
                   backgroundColor: colors(context).colorGrey1!,
