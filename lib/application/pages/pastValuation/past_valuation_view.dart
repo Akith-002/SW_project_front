@@ -17,6 +17,7 @@ import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/validators/past_valuation_validator.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 class PastValuationView extends BasePage {
   final MasterDataResponse masterData;
@@ -74,7 +75,7 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
 
   Future<String?> _submitFormData() async {
     try {
-      final uri = Uri.parse('http://10.0.2.2:5221/api/PastValuationsLA');
+      final uri = Uri.parse('${AppConfig.apiBaseUrl}PastValuationsLA');
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -119,7 +120,7 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
     print('DEBUG: _uploadImages called with reportId: $reportId');
     print('DEBUG: Number of images to upload: ${uploadedImages.length}');
     if (uploadedImages.isEmpty) return;
-    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
+    var uri = Uri.parse('${AppConfig.apiBaseUrl}ImageData/upload');
     var request = http.MultipartRequest('POST', uri)
       ..fields['reportId'] = reportId
       ..fields['parent_id'] = reportId

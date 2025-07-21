@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'plan.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 class PaginatedResponse<T> {
   final List<T> items;
@@ -20,7 +21,7 @@ class PlanRepository {
   }) async {
     if (source == 'landAcquisition') {
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:5221/api/LAMasterfile"),
+        Uri.parse("${AppConfig.apiBaseUrl}LAMasterfile"),
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body)['masterFiles'];
@@ -91,7 +92,7 @@ class PlanRepository {
   /// 🔍 Search endpoint via POST /api/LAMasterfile/search
   static Future<List<Plan>> searchPlans(String query) async {
     final response = await http.post(
-      Uri.parse("http://10.0.2.2:5221/api/LAMasterfile/search"),
+      Uri.parse("${AppConfig.apiBaseUrl}LAMasterfile/search"),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'query': query}),
     );

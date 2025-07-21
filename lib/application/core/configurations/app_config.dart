@@ -30,7 +30,9 @@ class AppConfig {
 
     if (kIsWeb) {
       // Web apps can use relative URLs or localhost
-      return "http://localhost:5221/api/";
+            return "http://127.0.0.1:5221/api/";
+
+      // return "http://56.228.29.54:5000/api/";
     } else if (defaultTargetPlatform == TargetPlatform.android) {
       // Android emulator special IP that points to host machine
       return "http://10.0.2.2:5221/api/";

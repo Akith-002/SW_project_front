@@ -105,6 +105,14 @@ import 'package:land_asset_valuation/domain/usecases/save_domestic_rating_card.d
 import 'package:land_asset_valuation/domain/usecases/get_domestic_rating_card_autofill.dart';
 import 'package:land_asset_valuation/application/pages/RatingCardForms/domestic/cubit/domestic_rating_card_cubit.dart';
 
+// Offices Rating Card
+import 'package:land_asset_valuation/data/datasource/remote/offices_rating_card_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/offices_rating_card_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/offices_rating_card_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/save_offices_rating_card.dart';
+import 'package:land_asset_valuation/domain/usecases/get_offices_rating_card_autofill.dart';
+import 'package:land_asset_valuation/application/pages/RatingCardForms/offices/cubit/offices_rating_card_cubit.dart';
+
 // Master Data Feature
 import 'package:land_asset_valuation/data/datasource/remote/master_data_remote_data_source.dart';
 import 'package:land_asset_valuation/data/repositories/master_data_repository_impl.dart';
@@ -182,6 +190,28 @@ Future<void> init() async {
 
   injection.registerLazySingleton(
     () => GetDomesticRatingCardAutofill(injection()),
+  );
+
+  // ------------------------------
+  // Offices Rating Card Feature
+  // ------------------------------
+  injection.registerLazySingleton<OfficesRatingCardRemoteDataSource>(
+    () => OfficesRatingCardRemoteDataSourceImpl(
+      client: injection(),
+      logger: injection(),
+    ),
+  );
+
+  injection.registerLazySingleton<OfficesRatingCardRepository>(
+    () => OfficesRatingCardRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SaveOfficesRatingCard(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetOfficesRatingCardAutofill(injection()),
   );
 
   // ------------------------------
@@ -363,6 +393,11 @@ Future<void> init() async {
   injection.registerFactory(() => DomesticRatingCardCubit(
         saveDomesticRatingCard: injection(),
         getDomesticRatingCardAutofill: injection(),
+      ));
+
+  injection.registerFactory(() => OfficesRatingCardCubit(
+        saveOfficesRatingCard: injection(),
+        getOfficesRatingCardAutofill: injection(),
       ));
 
   injection

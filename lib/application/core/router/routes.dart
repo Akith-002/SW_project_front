@@ -404,6 +404,10 @@ class AppRouter {
             path: Pages.routeOfficesRatingCard.toPath(),
             name: Pages.routeOfficesRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -414,7 +418,8 @@ class AppRouter {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Failed to load master data'));
                     } else {
-                      return OfficesRatingCard(masterData: snapshot.data!);
+                      return OfficesRatingCard(
+                          assetId: assetId, masterData: snapshot.data!);
                     }
                   },
                 ),

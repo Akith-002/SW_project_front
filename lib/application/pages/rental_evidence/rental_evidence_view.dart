@@ -20,6 +20,7 @@ import 'package:land_asset_valuation/application/pages/rental_evidence/cubit/ren
 import 'package:land_asset_valuation/application/pages/rental_evidence/cubit/rental_evidence_state.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 /// RentalEvidenceView is the main view for displaying the rental evidence form.
 class RentalEvidenceView extends BasePage {
@@ -247,7 +248,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
     print('DEBUG: Number of images to upload: ${uploadedImages.length}');
     if (uploadedImages.isEmpty) return;
     var uri = Uri.parse(
-        'http://10.0.2.2:5221/api/ImageData/upload'); // Make sure this matches your backend
+        '${AppConfig.apiBaseUrl}ImageData/upload'); // Make sure this matches your backend
     var request = http.MultipartRequest('POST', uri)
       ..fields['reportId'] = reportId
       ..fields['parent_id'] = reportId
