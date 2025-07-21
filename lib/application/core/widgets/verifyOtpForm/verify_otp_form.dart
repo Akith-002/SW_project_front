@@ -10,7 +10,8 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 
 class VerifyOtpForm extends StatefulWidget {
-  const VerifyOtpForm({Key? key}) : super(key: key);
+  final String email;
+  const VerifyOtpForm({Key? key, required this.email}) : super(key: key);
 
   @override
   State<VerifyOtpForm> createState() => _VerifyOtpFormState();
@@ -25,7 +26,10 @@ class _VerifyOtpFormState extends State<VerifyOtpForm> {
     return BlocConsumer<VerifyOtpCubit, VerifyOtpState>(
       listener: (context, state) {
         if (state is VerifyOtpSuccess) {
-          context.go(Pages.routeCreatePassword.toPath());
+          context.go(
+            Pages.routeCreatePassword.toPath(),
+            extra: {'email': widget.email, 'otp': otpController.text},
+          );
         } else if (state is VerifyOtpError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message), backgroundColor: Colors.red),
@@ -129,7 +133,7 @@ class _VerifyOtpFormState extends State<VerifyOtpForm> {
                   : () {
                       context
                           .read<VerifyOtpCubit>()
-                          .verifyOtp('user@email.com', otpController.text);
+                          .verifyOtp(widget.email, otpController.text);
                     },
               width: 440,
               height: 56,

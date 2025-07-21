@@ -101,9 +101,11 @@ class AppRouter {
         name: Pages.routeVerifyOtp.toPathName(),
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final email = extra != null ? extra['email'] as String : '';
           return NoTransitionPage(
             key: state.pageKey,
-            child: const VerifyOtpView(),
+            child: VerifyOtpView(email: email),
           );
         },
       ),
@@ -112,9 +114,12 @@ class AppRouter {
         name: Pages.routeCreatePassword.toPathName(),
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final email = extra != null ? extra['email'] as String : '';
+          final otp = extra != null ? extra['otp'] as String : '';
           return NoTransitionPage(
             key: state.pageKey,
-            child: const CreatePasswordView(),
+            child: CreatePasswordView(email: email, otp: otp),
           );
         },
       ),

@@ -3,6 +3,7 @@ import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/application/pages/resetPassword/cubit/reset_password_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:land_asset_valuation/application/core/widgets/resetPasswordForm/reset_password_form.dart';
+import 'package:land_asset_valuation/injection.dart';
 
 class ResetPasswordView extends BasePage {
   const ResetPasswordView({Key? key}) : super(key: key);
@@ -12,7 +13,13 @@ class ResetPasswordView extends BasePage {
 }
 
 class _ResetPasswordViewState extends BasePageState<ResetPasswordView> {
-  final _cubit = ResetPasswordCubit();
+  late final ResetPasswordCubit _cubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit = ResetPasswordCubit(authRepository: injection());
+  }
 
   @override
   Widget buildView(BuildContext context) {

@@ -10,7 +10,10 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 
 class CreatePasswordForm extends StatefulWidget {
-  const CreatePasswordForm({Key? key}) : super(key: key);
+  final String email;
+  final String otp;
+  const CreatePasswordForm({Key? key, required this.email, required this.otp})
+      : super(key: key);
 
   @override
   State<CreatePasswordForm> createState() => _CreatePasswordFormState();
@@ -232,7 +235,10 @@ class _CreatePasswordFormState extends State<CreatePasswordForm> {
                   ? null
                   : () {
                       context.read<CreatePasswordCubit>().createPassword(
-                          'user@email.com', passwordController.text);
+                            widget.email,
+                            widget.otp,
+                            passwordController.text,
+                          );
                     },
               width: 440,
               height: 56,

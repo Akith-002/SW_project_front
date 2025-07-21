@@ -4,6 +4,7 @@ import 'package:land_asset_valuation/application/pages/signIn/cubit/signin_state
 import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 import 'package:land_asset_valuation/data/models/auth/login_request.dart';
 import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
+import 'package:land_asset_valuation/application/core/error/exceptions.dart';
 
 class SigninCubit extends BaseCubit<BaseState<SigninState>> {
   final AppSharedData appSharedData;
@@ -26,7 +27,15 @@ class SigninCubit extends BaseCubit<BaseState<SigninState>> {
     );
 
     result.fold(
-      (failure) => emit(SigninError(failure.toString())),
+      (failure) {
+        String message = 'Login failed. Please try again.';
+        if (failure is DioErrorException) {
+          message = failure.message;
+        } else if (failure is ServerException) {
+          message = failure.message;
+        }
+        emit(SigninError(message));
+      },
       (response) {
         // Store username in appSharedData for profile page
         appSharedData.setData('username', response.username);

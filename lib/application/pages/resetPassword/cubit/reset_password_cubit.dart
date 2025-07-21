@@ -1,27 +1,37 @@
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'reset_password_state.dart';
+import 'package:land_asset_valuation/data/repositories/auth_repository.dart';
 
 class ResetPasswordCubit extends BaseCubit<ResetPasswordState> {
-  ResetPasswordCubit() : super(ResetPasswordInitial());
+  final AuthRepository authRepository;
+  ResetPasswordCubit({required this.authRepository})
+      : super(ResetPasswordInitial());
 
   Future<void> requestOtp(String email) async {
     emit(ResetPasswordLoading());
-    // TODO: Implement actual OTP request logic
-    await Future.delayed(const Duration(seconds: 1));
-    emit(ResetPasswordOtpSent());
+    final result = await authRepository.requestPasswordReset(email);
+    result.fold(
+      (failure) => emit(ResetPasswordError(failure.toString())),
+      (_) => emit(ResetPasswordOtpSent()),
+    );
   }
 
   Future<void> verifyOtp(String email, String otp) async {
     emit(ResetPasswordLoading());
-    // TODO: Implement actual OTP verification logic
-    await Future.delayed(const Duration(seconds: 1));
-    emit(ResetPasswordOtpVerified());
+    final result = await authRepository.verifyOtp(email, otp);
+    result.fold(
+      (failure) => emit(ResetPasswordError(failure.toString())),
+      (_) => emit(ResetPasswordOtpVerified()),
+    );
   }
 
-  Future<void> resetPassword(String email, String newPassword) async {
+  Future<void> resetPassword(
+      String email, String otp, String newPassword) async {
     emit(ResetPasswordLoading());
-    // TODO: Implement actual password reset logic
-    await Future.delayed(const Duration(seconds: 1));
-    emit(ResetPasswordSuccess());
+    final result = await authRepository.resetPassword(email, otp, newPassword);
+    result.fold(
+      (failure) => emit(ResetPasswordError(failure.toString())),
+      (_) => emit(ResetPasswordSuccess()),
+    );
   }
 }

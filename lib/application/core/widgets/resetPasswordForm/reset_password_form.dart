@@ -25,7 +25,10 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
     return BlocConsumer<ResetPasswordCubit, ResetPasswordState>(
       listener: (context, state) {
         if (state is ResetPasswordOtpSent) {
-          context.go(Pages.routeVerifyOtp.toPath());
+          context.go(
+            Pages.routeVerifyOtp.toPath(),
+            extra: {'email': emailController.text},
+          );
         } else if (state is ResetPasswordError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message), backgroundColor: Colors.red),
