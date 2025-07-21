@@ -539,7 +539,80 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
       return;
     }
 
+    // Additional manual validation (similar to rental evidence form)
     try {
+      // Create a map to track all validation issues
+      Map<String, String> validationErrors = {};
+
+      // Validate required fields are not empty
+      _validateRequiredField(
+          _assetNumberController.text, 'Asset Number', validationErrors);
+      _validateRequiredField(_masterFileRefController.text,
+          'Master File Reference', validationErrors);
+      _validateRequiredField(
+          _vendorController.text, 'Vendor', validationErrors);
+      _validateRequiredField(
+          _deedNumberController.text, 'Deed Number', validationErrors);
+      _validateRequiredField(
+          _notaryNameController.text, 'Notary Name', validationErrors);
+      _validateRequiredField(
+          _considerationController.text, 'Consideration', validationErrors);
+      _validateRequiredField(_rateController.text, 'Rate', validationErrors);
+
+      // Validate numeric fields
+      _validateNumericField(
+          _considerationController.text, 'Consideration', validationErrors);
+      _validateNumericField(_rateController.text, 'Rate', validationErrors);
+
+      // Validate optional numeric fields if provided
+      if (_extentController.text.trim().isNotEmpty) {
+        _validateNumericField(
+            _extentController.text, 'Extent', validationErrors);
+      }
+
+      // Validate coordinate fields (optional)
+      if (_locationLatitudeController.text.trim().isNotEmpty) {
+        _validateCoordinateField(
+            _locationLatitudeController.text, 'Latitude', validationErrors);
+      }
+      if (_locationLongitudeController.text.trim().isNotEmpty) {
+        _validateCoordinateField(
+            _locationLongitudeController.text, 'Longitude', validationErrors);
+      }
+
+      // If there are validation errors, show them and stop
+      if (validationErrors.isNotEmpty) {
+        String errorMessage = 'Validation errors:\n';
+        validationErrors.forEach((field, error) {
+          errorMessage += '• $field: $error\n';
+        });
+        _showErrorMessage(errorMessage);
+        return;
+      }
+
+      // Double-check numeric conversions before sending to the backend
+      try {
+        // Ensure required numeric fields are valid
+        double.parse(_considerationController.text);
+        double.parse(_rateController.text);
+
+        // Parse optional numeric fields if provided
+        if (_extentController.text.trim().isNotEmpty) {
+          double.parse(_extentController.text);
+        }
+
+        // Parse optional coordinates if provided
+        if (_locationLatitudeController.text.trim().isNotEmpty) {
+          double.parse(_locationLatitudeController.text);
+        }
+        if (_locationLongitudeController.text.trim().isNotEmpty) {
+          double.parse(_locationLongitudeController.text);
+        }
+      } catch (e) {
+        _showErrorMessage('Error converting numeric values: ${e.toString()}');
+        return;
+      }
+
       // Create the model from form data
       final salesEvidenceModel = LaSalesEvidenceModel(
         assetNumber: _assetNumberController.text.trim(),
@@ -612,6 +685,72 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
         duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  /// Validates that required fields are not empty
+  void _validateRequiredField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+    }
+  }
+
+  /// Validates numeric field
+  void _validateNumericField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    double? numericValue = double.tryParse(value);
+    if (numericValue == null) {
+      errors[fieldName] = 'Must be a valid number';
+      return;
+    }
+
+    if (numericValue < 0) {
+      errors[fieldName] = 'Cannot be negative';
+      return;
+    }
+
+    // Check for reasonableness based on field type
+    if (fieldName.toLowerCase().contains('consideration') &&
+        numericValue > 1000000000) {
+      errors[fieldName] = 'Value seems too high, please verify';
+    } else if (fieldName.toLowerCase().contains('rate') &&
+        numericValue > 1000000) {
+      errors[fieldName] = 'Rate seems too high, please verify';
+    } else if (fieldName.toLowerCase().contains('extent') &&
+        numericValue > 10000) {
+      errors[fieldName] = 'Extent seems too large, please verify';
+    }
+  }
+
+  /// Validates coordinate field (latitude/longitude)
+  void _validateCoordinateField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    double? coordinate = double.tryParse(value);
+    if (coordinate == null) {
+      errors[fieldName] = 'Must be a valid coordinate value';
+      return;
+    }
+
+    // Detailed coordinate validation
+    if (fieldName == 'Latitude') {
+      if (coordinate < -90 || coordinate > 90) {
+        errors[fieldName] = 'Must be between -90 and 90 degrees';
+      }
+    } else if (fieldName == 'Longitude') {
+      if (coordinate < -180 || coordinate > 180) {
+        errors[fieldName] = 'Must be between -180 and 180 degrees';
+      }
+    }
   }
 
   @override
