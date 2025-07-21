@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/light_color_list.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
@@ -247,7 +248,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
     print('DEBUG: Number of images to upload: ${uploadedImages.length}');
     if (uploadedImages.isEmpty) return;
     var uri = Uri.parse(
-        'http://10.0.2.2:5221/api/ImageData/upload'); // Make sure this matches your backend
+        '${AppConfig.apiBaseUrl}ImageData/upload'); // Make sure this matches your backend
     var request = http.MultipartRequest('POST', uri)
       ..fields['reportId'] = reportId;
     for (var image in uploadedImages) {
