@@ -126,7 +126,7 @@ class _AssetDivisionDialogState extends State<AssetDivisionDialog> {
       },
       child: Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
+        child: SizedBox(
           width: 800,
           height: 700,
           child: Column(

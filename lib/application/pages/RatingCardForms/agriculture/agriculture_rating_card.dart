@@ -8,10 +8,17 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
-class AgricultureRatingCard extends StatelessWidget {
-  const AgricultureRatingCard({super.key});
+class AgricultureRatingCard extends StatefulWidget {
+  final MasterDataResponse masterData;
+  const AgricultureRatingCard({super.key, required this.masterData});
 
+  @override
+  State<AgricultureRatingCard> createState() => _AgricultureRatingCardState();
+}
+
+class _AgricultureRatingCardState extends State<AgricultureRatingCard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,14 +53,11 @@ class AgricultureRatingCard extends StatelessWidget {
               _buildRow([
                 CustomDropdownField(
                   label: "Land Type",
-                  items: [
-                    "Select Land Type",
-                    "Paddy Field",
-                    "Tea Estate",
-                    "Coconut Plantation",
-                    "Rubber Estate"
-                  ],
-                  initialValue: "Select Land Type",
+                  items: widget.masterData.natureOfConstruction,
+                  initialValue:
+                      widget.masterData.natureOfConstruction.isNotEmpty
+                          ? widget.masterData.natureOfConstruction.first
+                          : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
@@ -96,59 +100,20 @@ class AgricultureRatingCard extends StatelessWidget {
               _buildRow([
                 CustomDropdownField(
                   label: "Soil Type",
-                  items: [
-                    "Select Soil Type",
-                    "Clay",
-                    "Sandy",
-                    "Loamy",
-                    "Rocky"
-                  ],
-                  initialValue: "Select Soil Type",
+                  items: widget.masterData.floorStructure,
+                  initialValue: widget.masterData.floorStructure.isNotEmpty
+                      ? widget.masterData.floorStructure.first
+                      : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
                 ),
                 CustomDropdownField(
                   label: "Irrigation Type",
-                  items: [
-                    "Select Irrigation",
-                    "Rainfed",
-                    "Irrigated",
-                    "Well Water",
-                    "Canal"
-                  ],
-                  initialValue: "Select Irrigation",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
-                ),
-              ]),
-              _buildRow([
-                CustomDropdownField(
-                  label: "Crop Type",
-                  items: [
-                    "Select Crop",
-                    "Rice",
-                    "Tea",
-                    "Coconut",
-                    "Rubber",
-                    "Vegetables"
-                  ],
-                  initialValue: "Select Crop",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
-                ),
-                CustomDropdownField(
-                  label: "Land Condition",
-                  items: [
-                    "Select Condition",
-                    "Excellent",
-                    "Good",
-                    "Fair",
-                    "Poor"
-                  ],
-                  initialValue: "Select Condition",
+                  items: widget.masterData.services,
+                  initialValue: widget.masterData.services.isNotEmpty
+                      ? widget.masterData.services.first
+                      : null,
                   onChanged: (value) {
                     debugPrint(value);
                   },
@@ -159,18 +124,9 @@ class AgricultureRatingCard extends StatelessWidget {
                   label: "Plantation Age",
                   placeholder: "Age of crops/plantation",
                 ),
-                CustomDropdownField(
+                LabeledTextField(
                   label: AppString.access.localize(context)!,
-                  items: [
-                    "Select Access",
-                    "Paved Road",
-                    "Gravel Road",
-                    "Farm Track"
-                  ],
-                  initialValue: "Select Access",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
+                  placeholder: "Access type",
                 ),
               ]),
               _buildRow([
@@ -181,34 +137,6 @@ class AgricultureRatingCard extends StatelessWidget {
                 LabeledTextField(
                   label: "Water Source",
                   placeholder: "Primary water source",
-                ),
-              ]),
-              _buildRow([
-                CustomDropdownField(
-                  label: AppString.propertySubCategory.localize(context)!,
-                  items: [
-                    "Select Property Sub Category",
-                    "Agricultural Land",
-                    "Plantation",
-                    "Farm Land"
-                  ],
-                  initialValue: "Select Property Sub Category",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
-                ),
-                CustomDropdownField(
-                  label: AppString.propertyType.localize(context)!,
-                  items: [
-                    "Select Property Type",
-                    "Agricultural",
-                    "Plantation",
-                    "Mixed Farming"
-                  ],
-                  initialValue: "Select Property Type",
-                  onChanged: (value) {
-                    debugPrint(value);
-                  },
                 ),
               ]),
               _buildRow([

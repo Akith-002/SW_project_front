@@ -3,9 +3,11 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/widgets/conditionReportForms/land_info_form.dart';
 import 'package:land_asset_valuation/application/core/widgets/conditionReportForms/construction_form.dart';
 import 'package:land_asset_valuation/application/core/widgets/conditionReportForms/signatures_form.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
 class FormTabIcons extends StatefulWidget {
-  const FormTabIcons({super.key});
+  final MasterDataResponse masterData;
+  const FormTabIcons({super.key, required this.masterData});
 
   @override
   State<FormTabIcons> createState() => _FormTabIconsState();
@@ -53,7 +55,7 @@ class _FormTabIconsState extends State<FormTabIcons>
             dividerColor: colors(context).colorBlack ?? Colors.transparent,
             labelColor: colors(context).colorWhite ?? Colors.white,
             unselectedLabelColor: colors(context).colorBlack ?? Colors.black87,
-            overlayColor: MaterialStateProperty.all(Colors.transparent),
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
             labelPadding: EdgeInsets.zero, // Remove extra padding
             tabs: tabTitles.map((title) {
               return Container(
@@ -84,9 +86,15 @@ class _FormTabIconsState extends State<FormTabIcons>
           child: TabBarView(
             controller: _tabController,
             children: [
-              const LandInfoForm(),
-              ConstructionForm(tabIndex: 1, tabController: _tabController),
-              ConstructionForm(tabIndex: 2, tabController: _tabController),
+              LandInfoForm(masterData: widget.masterData),
+              ConstructionForm(
+                  tabIndex: 1,
+                  tabController: _tabController,
+                  masterData: widget.masterData),
+              ConstructionForm(
+                  tabIndex: 2,
+                  tabController: _tabController,
+                  masterData: widget.masterData),
               const SignaturesForm(),
             ],
           ),

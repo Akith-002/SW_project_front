@@ -10,13 +10,13 @@ class LabeledDateField extends StatefulWidget {
   final Function(bool)? onErrorChange;
 
   const LabeledDateField({
-    Key? key,
+    super.key,
     this.label,
     required this.placeholder,
     required this.controller,
     this.validator,
     this.onErrorChange,
-  }) : super(key: key);
+  });
 
   @override
   State<LabeledDateField> createState() => _LabeledDateFieldState();
@@ -67,7 +67,7 @@ class _LabeledDateFieldState extends State<LabeledDateField> {
       widget.onErrorChange?.call(_errorMessage != null);
 
       // Force the form field to revalidate
-      Form.of(context)?.validate();
+      Form.of(context).validate();
     }
   }
 

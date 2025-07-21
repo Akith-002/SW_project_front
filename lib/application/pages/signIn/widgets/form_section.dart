@@ -12,6 +12,8 @@ import 'package:land_asset_valuation/application/core/widgets/password_text_fiel
 import 'package:land_asset_valuation/application/pages/signIn/cubit/signin_cubit.dart';
 import 'package:land_asset_valuation/application/pages/signIn/cubit/signin_state.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:land_asset_valuation/application/core/providers/auth_provider.dart';
 
 class FormSection extends StatefulWidget {
   const FormSection({super.key});
@@ -29,6 +31,9 @@ class _FormSectionState extends State<FormSection> {
     return BlocConsumer<SigninCubit, BaseState<SigninState>>(
       listener: (context, state) {
         if (state is SigninAuthenticated) {
+          // Set the username in AuthProvider before navigating
+          Provider.of<AuthProvider>(context, listen: false)
+              .setUsername(_usernameController.text);
           context.go(Pages.routeDashboard.toPath());
         } else if (state is SigninError) {
           ScaffoldMessenger.of(context).showSnackBar(

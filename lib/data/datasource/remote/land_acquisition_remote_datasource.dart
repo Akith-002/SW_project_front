@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
 import 'package:land_asset_valuation/data/models/land_acquisition_master_file_model.dart';
 import 'package:land_asset_valuation/data/models/paginated_response.dart';
-import 'dart:math' as math;
 
 class LandAcquisitionRemoteDatasource {
   final DioClient dioClient;
@@ -13,18 +12,28 @@ class LandAcquisitionRemoteDatasource {
   Future<PaginatedResponse<LandAcquisitionMasterFile>> getPaginatedMasterFiles({
     required int page,
     required int pageSize,
+    required int assignedToUserId,
+    String? sortBy,
   }) async {
     try {
       if (kDebugMode) {
-        print('Fetching data - Page: $page, Size: $pageSize');
+        print(
+            'Fetching data - Page: $page, Size: $pageSize, SortBy: $sortBy, AssignedToUserId: $assignedToUserId');
+      }
+
+      final Map<String, dynamic> queryParams = {
+        'pageNumber': page - 1, // Convert to 0-based for API
+        'pageSize': pageSize,
+        'assignedToUserId': assignedToUserId,
+      };
+
+      if (sortBy != null) {
+        queryParams['sortBy'] = sortBy;
       }
 
       final response = await dioClient.get(
         '/LAMasterfile',
-        queryParameters: {
-          'pageNumber': page - 1, // Convert to 0-based for API
-          'pageSize': pageSize,
-        },
+        queryParameters: queryParams,
       );
 
       if (kDebugMode) {
@@ -77,20 +86,61 @@ class LandAcquisitionRemoteDatasource {
     }
   }
 
-  Future<List<LandAcquisitionMasterFile>> searchMasterFiles(
-      String query) async {
+  Future<PaginatedResponse<LandAcquisitionMasterFile>> searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+    required int assignedToUserId,
+    String? sortBy,
+  }) async {
     try {
-      final response = await dioClient.post('/LAMasterfile/search', data: {
-        'query': query,
-      });
-      final List<dynamic> data = response.data['masterFiles'] ?? [];
-      return data.map((e) => LandAcquisitionMasterFile.fromJson(e)).toList();
+      final Map<String, dynamic> queryParams = {
+        'page': page,
+        'pageSize': pageSize,
+        'assignedToUserId': assignedToUserId,
+      };
+
+      if (sortBy != null) {
+        queryParams['sortBy'] = sortBy;
+      }
+
+      final response = await dioClient.post(
+        '/LAMasterfile/search/paged',
+        data: {'query': query},
+        queryParameters: queryParams,
+      );
+
+      final data = response.data;
+      final List<dynamic> masterFiles = data['masterFiles'] as List<dynamic>;
+      final totalCount = data['totalCount'] as int;
+      final currentPage = data['currentPage'] as int;
+      final totalPages = data['totalPages'] as int;
+      final hasPrevious = data['hasPrevious'] as bool;
+      final hasNext = data['hasNext'] as bool;
+
+      final items = masterFiles
+          .map((e) =>
+              LandAcquisitionMasterFile.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      return PaginatedResponse(
+        items: items,
+        totalCount: totalCount,
+        currentPage: currentPage,
+        pageSize: pageSize,
+        totalPages: totalPages,
+        hasPrevious: hasPrevious,
+        hasNext: hasNext,
+      );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         // If search endpoint fails, fall back to getting all records and filtering client-side
-        final allRecords =
-            await getPaginatedMasterFiles(page: 1, pageSize: 100);
-        return allRecords.items.where((file) {
+        final allRecords = await getPaginatedMasterFiles(
+            page: 1,
+            pageSize: 100,
+            assignedToUserId: assignedToUserId,
+            sortBy: sortBy);
+        final filteredItems = allRecords.items.where((file) {
           final searchTerm = query.toLowerCase();
           return file.masterFileNo
                   .toString()
@@ -103,6 +153,16 @@ class LandAcquisitionRemoteDatasource {
                   .contains(searchTerm) ||
               file.status.toLowerCase().contains(searchTerm);
         }).toList();
+
+        return PaginatedResponse(
+          items: filteredItems,
+          totalCount: filteredItems.length,
+          currentPage: 1,
+          pageSize: filteredItems.length,
+          totalPages: 1,
+          hasPrevious: false,
+          hasNext: false,
+        );
       }
       rethrow;
     }

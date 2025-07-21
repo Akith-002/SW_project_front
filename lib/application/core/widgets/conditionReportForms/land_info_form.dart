@@ -7,11 +7,13 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/services/condition_report_form_service.dart';
 import 'package:land_asset_valuation/application/core/widgets/labeled_date_field.dart';
+import 'package:land_asset_valuation/data/models/master_data_model.dart';
 
 import '../../validators/land_info_validator.dart';
 
 class LandInfoForm extends StatefulWidget {
-  const LandInfoForm({super.key});
+  final MasterDataResponse masterData;
+  const LandInfoForm({super.key, required this.masterData});
 
   @override
   State<LandInfoForm> createState() => _LandInfoFormState();
@@ -49,9 +51,9 @@ class _LandInfoFormState extends State<LandInfoForm> {
   final _bottomController = TextEditingController();
 
   // Selected dropdown values
-  String _selectedVillage = "Village A";
-  String _selectedAccessCategory = "Category 1";
-  String _selectedLandUseType = "Residential";
+  String? _selectedVillage;
+  String? _selectedAccessCategory;
+  String? _selectedLandUseType;
 
   final _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
@@ -59,6 +61,16 @@ class _LandInfoFormState extends State<LandInfoForm> {
   @override
   void initState() {
     super.initState();
+    // Set initial values from masterData if available
+    _selectedVillage = widget.masterData.buildingCategory.isNotEmpty
+        ? widget.masterData.buildingCategory.first
+        : null;
+    _selectedAccessCategory = widget.masterData.conviences.isNotEmpty
+        ? widget.masterData.conviences.first
+        : null;
+    _selectedLandUseType = widget.masterData.natureOfConstruction.isNotEmpty
+        ? widget.masterData.natureOfConstruction.first
+        : null;
     // Load existing data if available
     _loadExistingData();
   }
@@ -94,14 +106,18 @@ class _LandInfoFormState extends State<LandInfoForm> {
     _southController.text = formData.boundarySouth;
     _bottomController.text = formData.boundaryBottom;
 
-    // Load dropdown values
-    if (formData.nameOfTheVillage.isNotEmpty) {
+    // Load dropdown values if present in formData and in masterData
+    if (formData.nameOfTheVillage.isNotEmpty &&
+        widget.masterData.buildingCategory
+            .contains(formData.nameOfTheVillage)) {
       _selectedVillage = formData.nameOfTheVillage;
     }
-    if (formData.accessCategory.isNotEmpty) {
+    if (formData.accessCategory.isNotEmpty &&
+        widget.masterData.conviences.contains(formData.accessCategory)) {
       _selectedAccessCategory = formData.accessCategory;
     }
-    if (formData.landUseType.isNotEmpty) {
+    if (formData.landUseType.isNotEmpty &&
+        widget.masterData.natureOfConstruction.contains(formData.landUseType)) {
       _selectedLandUseType = formData.landUseType;
     }
   }
@@ -260,7 +276,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 _buildRow([
                   CustomDropdownField(
                     label: AppString.nameOfVillage.localize(context)!,
-                    items: ["Village A", "Village B", "Village C"],
+                    items: widget.masterData.buildingCategory,
                     initialValue: _selectedVillage,
                     onChanged: (value) {
                       if (value != null) {
@@ -341,7 +357,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
                   ),
                   CustomDropdownField(
                     label: AppString.accessCategory.localize(context)!,
-                    items: ["Category 1", "Category 2", "Category 3"],
+                    items: widget.masterData.conviences,
                     initialValue: _selectedAccessCategory,
                     onChanged: (value) {
                       if (value != null) {
@@ -407,7 +423,7 @@ class _LandInfoFormState extends State<LandInfoForm> {
                 _buildRow([
                   CustomDropdownField(
                     label: AppString.landUseType.localize(context)!,
-                    items: ["Residential", "Commercial", "Agricultural"],
+                    items: widget.masterData.natureOfConstruction,
                     initialValue: _selectedLandUseType,
                     onChanged: (value) {
                       if (value != null) {

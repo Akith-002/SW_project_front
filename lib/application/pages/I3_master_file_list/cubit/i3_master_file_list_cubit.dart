@@ -21,12 +21,14 @@ class I3MasterFileListCubit extends Cubit<I3MasterFileListState> {
   Future<void> getPaginatedMasterFiles({
     required int page,
     required int pageSize,
+    String? sortBy,
   }) async {
     try {
       emit(const I3MasterFileListLoading());
       final result = await getPaginatedUseCase(
         page: page,
         pageSize: pageSize,
+        sortBy: sortBy,
       );
       emit(I3MasterFileListLoaded(result));
     } catch (e) {
@@ -34,11 +36,21 @@ class I3MasterFileListCubit extends Cubit<I3MasterFileListState> {
     }
   }
 
-  Future<void> searchMasterFiles(String query) async {
+  Future<void> searchMasterFiles({
+    required String query,
+    required int page,
+    required int pageSize,
+    String? sortBy,
+  }) async {
     try {
       emit(const I3MasterFileListLoading());
-      final result = await searchUseCase(query);
-      emit(I3MasterFileListSearchResults(result));
+      final result = await searchUseCase(
+        query: query,
+        page: page,
+        pageSize: pageSize,
+        sortBy: sortBy,
+      );
+      emit(I3MasterFileListSearchResults(result.items));
     } catch (e) {
       emit(I3MasterFileListError(e.toString()));
     }

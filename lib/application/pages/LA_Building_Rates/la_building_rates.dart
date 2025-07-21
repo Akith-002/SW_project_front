@@ -14,6 +14,7 @@ import 'package:land_asset_valuation/application/pages/LA_Building_Rates/cubit/l
 import 'package:land_asset_valuation/application/core/validators/la_building_rates_validator.dart';
 import 'package:land_asset_valuation/application/core/widgets/data_send_successfully_dialogbox.dart';
 import 'package:land_asset_valuation/injection.dart';
+import 'package:http/http.dart' as http;
 
 /// LA Building Rates form page for collecting building valuation data
 class LaBuildingRates extends BasePage {
@@ -315,13 +316,96 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
   }
 
   /// Validates form and submits data to server
-  void _validateAndSubmit() {
+  void _validateAndSubmit() async {
     if (_formKey.currentState!.validate()) {
-      // Form validation passed, show success dialog
-      _showSuccessDialog();
-      // TODO: Implement actual submission logic
+      // 1. Submit form data to backend
+      final reportId = await _submitFormData();
+      if (reportId != null) {
+        // 2. Upload images with reportId
+        await _uploadImages(reportId);
+        _showSuccessDialog();
+      } else {
+        _showErrorMessage('Failed to submit building rates data.');
+      }
     } else {
       _showErrorMessage('Please fix the validation errors in the form');
+    }
+  }
+
+  /// Submits the form data to the backend and returns the new reportId
+  Future<String?> _submitFormData() async {
+    try {
+      final uri = Uri.parse('http://10.0.2.2:5221/api/BuildingRatesLA');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: _buildFormJson(),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.body;
+        // Expecting { msg: "success", reportId: ... }
+        final reportId =
+            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
+        print('DEBUG: BuildingRatesLA reportId: $reportId');
+        return reportId;
+      } else {
+        print(
+            'DEBUG: BuildingRatesLA submission failed: ${response.statusCode} ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('DEBUG: Exception during BuildingRatesLA submission: $e');
+      return null;
+    }
+  }
+
+  /// Builds the JSON string for the form data
+  String _buildFormJson() {
+    return '''{
+      "assessmentNumber": "${_assessmentNumberController.text}",
+      "owner": "${_ownerController.text}",
+      "constructedBy": "${_constructedByController.text}",
+      "yearOfConstruction": "${_yearOfConstructionController.text}",
+      "descriptionOfProperty": "${_descriptionOfPropertyController.text}",
+      "floorAreaSQFT": "${_floorAreaSQFTController.text}",
+      "ratePerSQFT": "${_ratePerSQFTController.text}",
+      "cost": "${_costController.text}",
+      "remarks": "${_remarksController.text}",
+      "locationLatitude": "${_locationLatitudeController.text}",
+      "locationLongitude": "${_locationLongitudeController.text}"
+    }''';
+  }
+
+  /// Uploads images to the backend after form submission
+  Future<void> _uploadImages(String reportId) async {
+    print('DEBUG: _uploadImages called with reportId: $reportId');
+    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
+    if (uploadedImages.isEmpty) return;
+    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['reportId'] = reportId;
+    for (var image in uploadedImages) {
+      if (image is File) {
+        print('DEBUG: Adding image file: ${image.path}');
+        request.files
+            .add(await http.MultipartFile.fromPath('files', image.path));
+      } else {
+        print('DEBUG: Skipping non-File image: $image');
+      }
+    }
+    try {
+      var response = await request.send();
+      print('DEBUG: Image upload response status: ${response.statusCode}');
+      final respStr = await response.stream.bytesToString();
+      print('DEBUG: Image upload response body: $respStr');
+      if (response.statusCode == 200) {
+        _showSuccessMessage('Images uploaded successfully.');
+      } else {
+        _showErrorMessage('Failed to upload images.');
+      }
+    } catch (e) {
+      print('DEBUG: Exception during image upload: $e');
+      _showErrorMessage('Error uploading images: $e');
     }
   }
 

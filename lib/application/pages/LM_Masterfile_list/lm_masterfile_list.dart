@@ -199,7 +199,7 @@ class _LmMasterfileListState extends BasePageState<LmMasterfileList> {
                         ..._sortOptions.entries
                             .map((entry) =>
                                 _buildSortOption(entry.key, entry.value))
-                            .toList(),
+                            ,
                         const SizedBox(height: 8),
                       ],
                     ),

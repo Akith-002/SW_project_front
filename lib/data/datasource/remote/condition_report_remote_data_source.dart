@@ -3,7 +3,6 @@ import 'package:logger/logger.dart';
 import 'package:land_asset_valuation/application/core/error/exceptions.dart';
 import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
 import 'package:land_asset_valuation/data/models/condition_report_model.dart';
-import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 abstract class ConditionReportRemoteDataSource {
   Future<bool> sendConditionReport(ConditionReportModel report);
