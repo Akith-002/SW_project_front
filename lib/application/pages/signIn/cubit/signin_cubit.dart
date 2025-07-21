@@ -27,7 +27,11 @@ class SigninCubit extends BaseCubit<BaseState<SigninState>> {
 
     result.fold(
       (failure) => emit(SigninError(failure.toString())),
-      (response) => emit(SigninAuthenticated(response)),
+      (response) {
+        // Store username in appSharedData for profile page
+        appSharedData.setData('username', response.username);
+        emit(SigninAuthenticated(response));
+      },
     );
   }
 

@@ -2,7 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class LineChartSample2 extends StatefulWidget {
-  const LineChartSample2({super.key});
+  final List<double> monthlyValues;
+  const LineChartSample2({Key? key, required this.monthlyValues})
+      : super(key: key);
 
   @override
   State<LineChartSample2> createState() => _LineChartSample2State();
@@ -26,7 +28,6 @@ class _LineChartSample2State extends State<LineChartSample2> {
             padding: const EdgeInsets.only(
               // right: 18,
               left: 12,
-            
             ),
             child: LineChart(
               showAvg ? avgData() : mainData(),
@@ -116,38 +117,25 @@ class _LineChartSample2State extends State<LineChartSample2> {
   }
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
-    const style = TextStyle(
-      fontWeight: FontWeight.normal,
-      fontFamily: 'Roboto',
-      color: Color(0xff6D717F),
-      fontSize: 10,
+    // Show a label for every grid line
+    return Text(
+      value.toInt().toString(),
+      style: const TextStyle(
+        fontWeight: FontWeight.normal,
+        fontFamily: 'Roboto',
+        color: Color(0xff6D717F),
+        fontSize: 10,
+      ),
+      textAlign: TextAlign.left,
     );
-    String text;
-    switch (value.toInt()) {
-      case 1:
-        text = '0';
-        break;
-      case 2:
-        text = '25';
-        break;
-      case 3:
-        text = '50';
-        break;
-      case 4:
-        text = '75';
-        break;
-      case 5:
-        text = '100';
-        break;
-
-      default:
-        return Container();
-    }
-
-    return Text(text, style: style, textAlign: TextAlign.left);
   }
 
   LineChartData mainData() {
+    final double maxYValue = (widget.monthlyValues.isNotEmpty)
+        ? widget.monthlyValues.reduce((a, b) => a > b ? a : b)
+        : 0;
+    final double chartMaxY =
+        maxYValue > 0 ? (maxYValue * 1.2).ceilToDouble() : 10;
     return LineChartData(
       gridData: FlGridData(
         show: true,
@@ -172,7 +160,7 @@ class _LineChartSample2State extends State<LineChartSample2> {
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize:100,
+            reservedSize: 100,
             interval: 1,
             getTitlesWidget: bottomTitleWidgets,
           ),
@@ -180,9 +168,9 @@ class _LineChartSample2State extends State<LineChartSample2> {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            interval: 1,
+            interval: chartMaxY / 10,
             getTitlesWidget: leftTitleWidgets,
-            reservedSize:20,
+            reservedSize: 30,
           ),
         ),
       ),
@@ -193,25 +181,12 @@ class _LineChartSample2State extends State<LineChartSample2> {
       minX: 0,
       maxX: 12,
       minY: 0,
-      maxY: 5,
+      maxY: chartMaxY,
       lineBarsData: [
         LineChartBarData(
           show: true,
-          spots: const [
-            FlSpot(0, 3),
-            FlSpot(1, 2),
-            FlSpot(2, 5),
-            FlSpot(3, 3.1),
-            FlSpot(4, 4),
-            FlSpot(5, 3),
-            FlSpot(6, 4),
-            FlSpot(7, 4),
-            FlSpot(8, 4),
-            FlSpot(9, 4),
-            FlSpot(10, 4),
-            FlSpot(11, 4),
-            FlSpot(12, 4),
-          ],
+          spots: List.generate(widget.monthlyValues.length,
+              (i) => FlSpot(i.toDouble() + 1, widget.monthlyValues[i])),
           isCurved: true,
           color: const Color(0xff007BCE),
           // gradient: LinearGradient(
@@ -222,20 +197,19 @@ class _LineChartSample2State extends State<LineChartSample2> {
           dotData: const FlDotData(
             show: false,
           ),
-belowBarData: BarAreaData(
-  show: true,
-  gradient: LinearGradient(
-    colors: [
-      Colors.white,  // Bottom part fully white
-      Color(0x7378CEFF), // Transition zone
-      Color(0xff78CEFF),// Completely transparent at bottom
-    ],
- stops: [0.0, 0.9, 1.0], // 0.0 = bottom, 1.0 = top
-    begin: Alignment.bottomCenter,
-    end: Alignment.topCenter,
-  ),
-),
-
+          belowBarData: BarAreaData(
+            show: true,
+            gradient: LinearGradient(
+              colors: [
+                Colors.white,
+                Color(0x7378CEFF),
+                Color(0xff78CEFF),
+              ],
+              stops: [0.0, 0.9, 1.0],
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+            ),
+          ),
         ),
       ],
     );
@@ -258,7 +232,7 @@ belowBarData: BarAreaData(
         getDrawingHorizontalLine: (value) {
           return const FlLine(
             color: Color.fromARGB(255, 155, 125, 50),
-            strokeWidth:5,
+            strokeWidth: 5,
           );
         },
       ),
@@ -297,9 +271,9 @@ belowBarData: BarAreaData(
       maxY: 6,
       lineBarsData: [
         LineChartBarData(
-       // Change this to modify the line color
-       show: true,
-       color: Colors.red,
+          // Change this to modify the line color
+          show: true,
+          color: Colors.red,
           spots: const [
             FlSpot(0, 3.44),
             FlSpot(2.6, 3.44),
@@ -311,25 +285,24 @@ belowBarData: BarAreaData(
           ],
           isCurved: true,
 
-          barWidth:4,
+          barWidth: 4,
           isStrokeCapRound: true,
           dotData: const FlDotData(
             show: false,
           ),
-       belowBarData: BarAreaData(
-  show: true,
-  gradient: LinearGradient(
-    colors: [
-      Colors.cyan.withOpacity(0.4), 
-      Colors.cyan.withOpacity(0.2),
-      Colors.white, 
-    ],
-    stops: [0.4, 0.6, 1.0], 
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  ),
-),
-
+          belowBarData: BarAreaData(
+            show: true,
+            gradient: LinearGradient(
+              colors: [
+                Colors.cyan.withOpacity(0.4),
+                Colors.cyan.withOpacity(0.2),
+                Colors.white,
+              ],
+              stops: [0.4, 0.6, 1.0],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
         ),
       ],
     );

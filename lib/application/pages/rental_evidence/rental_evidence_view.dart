@@ -19,6 +19,7 @@ import 'package:land_asset_valuation/application/core/widgets/labeled_text_field
 import 'package:land_asset_valuation/application/pages/rental_evidence/cubit/rental_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/rental_evidence/cubit/rental_evidence_state.dart';
 import 'package:land_asset_valuation/injection.dart';
+import 'package:http/http.dart' as http;
 
 /// RentalEvidenceView is the main view for displaying the rental evidence form.
 class RentalEvidenceView extends BasePage {
@@ -240,23 +241,47 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
     });
   }
 
+  /// Upload images to the backend after form submission
+  Future<void> uploadImages(String reportId) async {
+    print('DEBUG: uploadImages called with reportId: $reportId');
+    print('DEBUG: Number of images to upload: ${uploadedImages.length}');
+    if (uploadedImages.isEmpty) return;
+    var uri = Uri.parse(
+        'http://10.0.2.2:5221/api/ImageData/upload'); // Make sure this matches your backend
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['reportId'] = reportId;
+    for (var image in uploadedImages) {
+      if (image is File) {
+        print('DEBUG: Adding image file: ${image.path}');
+        request.files
+            .add(await http.MultipartFile.fromPath('files', image.path));
+      } else {
+        print('DEBUG: Skipping non-File image: $image');
+      }
+    }
+    try {
+      var response = await request.send();
+      print('DEBUG: Image upload response status: ${response.statusCode}');
+      final respStr = await response.stream.bytesToString();
+      print('DEBUG: Image upload response body: $respStr');
+      if (response.statusCode == 200) {
+        _showSuccessMessage('Images uploaded successfully.');
+      } else {
+        _showErrorMessage('Failed to upload images.');
+      }
+    } catch (e) {
+      print('DEBUG: Exception during image upload: $e');
+      _showErrorMessage('Error uploading images: $e');
+    }
+  }
+
   @override
   Widget buildView(BuildContext context) {
     return BlocListener<RentalEvidenceCubit, BaseState<RentalEvidenceState>>(
       bloc: _cubit,
       listener: (context, state) {
         if (state is RentalEvidenceSubmitSuccess) {
-          setState(() {
-            _isSubmitting = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Rental evidence submitted successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Navigate to map screen after successful submission
-          context.go(Pages.routeMapScreen.toPath());
+          _handleSuccess(state.reportId);
         } else if (state is RentalEvidenceSubmitFailure) {
           setState(() {
             _isSubmitting = false;
@@ -615,6 +640,22 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
         ),
       ), // Closing Scaffold
     ); // Closing BlocListener
+  }
+
+  /// Handles post-success logic: show message, upload images, then navigate
+  Future<void> _handleSuccess(String reportId) async {
+    setState(() {
+      _isSubmitting = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Rental evidence submitted successfully!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    await uploadImages(reportId);
+    if (!mounted) return;
+    context.go(Pages.routeMapScreen.toPath());
   }
 
   // Returns the cubit instance for managing state.

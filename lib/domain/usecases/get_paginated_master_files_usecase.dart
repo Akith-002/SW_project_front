@@ -10,10 +10,12 @@ class GetPaginatedMasterFilesUseCase {
   Future<PaginatedResponse<LandAcquisitionMasterFile>> call({
     required int page,
     required int pageSize,
+    String? sortBy,
   }) {
     return repository.getPaginatedMasterFiles(
       page: page,
       pageSize: pageSize,
+      sortBy: sortBy,
     );
   }
 }

@@ -62,7 +62,7 @@ class RentalEvidenceCubit extends BaseCubit<BaseState<RentalEvidenceState>> {
 
     // Debug: Print result
     print('======= CUBIT: GOT RESULT FROM USE CASE =======');
-    print('Success: ${result.isRight()}');
+    print('Success:  [32m${result.isRight()} [0m');
     if (result.isLeft()) {
       print('Error: ${result.fold((l) => l.message, (r) => "No error")}');
     }
@@ -70,7 +70,7 @@ class RentalEvidenceCubit extends BaseCubit<BaseState<RentalEvidenceState>> {
 
     result.fold(
       (failure) => emit(RentalEvidenceSubmitFailure(failure.message)),
-      (success) => emit(RentalEvidenceSubmitSuccess()),
+      (reportId) => emit(RentalEvidenceSubmitSuccess(reportId)),
     );
   }
 }

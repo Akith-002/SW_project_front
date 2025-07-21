@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/widgets/draw_polygon/drawPolygonDialog.dart';
 import 'package:land_asset_valuation/application/core/widgets/sketch_mode.dart';
 import 'package:land_asset_valuation/application/core/widgets/sketch_polygon_action_menu.dart';
 import 'package:land_asset_valuation/application/pages/mapbox/managers/text_label_manager.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
-import 'dart:typed_data';
 
 import 'constants/mapbox_constants.dart';
 import 'listeners/annotation_listeners.dart';

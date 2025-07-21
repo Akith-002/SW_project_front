@@ -6,7 +6,10 @@ final class RentalEvidenceInitial extends RentalEvidenceState {}
 
 final class RentalEvidenceLoading extends RentalEvidenceState {}
 
-final class RentalEvidenceSubmitSuccess extends RentalEvidenceState {}
+final class RentalEvidenceSubmitSuccess extends RentalEvidenceState {
+  final String reportId;
+  RentalEvidenceSubmitSuccess(this.reportId);
+}
 
 final class RentalEvidenceSubmitFailure extends RentalEvidenceState {
   final String errorMessage;

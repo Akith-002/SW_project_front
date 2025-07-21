@@ -13,7 +13,7 @@ class RentalEvidenceRepositoryImpl implements RentalEvidenceRepository {
   RentalEvidenceRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, bool>> sendRentalEvidence(
+  Future<Either<Failure, String>> sendRentalEvidence(
       RentalEvidenceModel report) async {
     try {
       // Debug: Log in repository before sending to remote data source
@@ -25,21 +25,18 @@ class RentalEvidenceRepositoryImpl implements RentalEvidenceRepository {
       _logger.d('Data being sent to API...');
       _logger.d('===========================================');
 
-      final result = await remoteDataSource.sendRentalEvidence(report);
+      final reportId = await remoteDataSource.sendRentalEvidence(report);
 
       // Debug: Log result from remote data source
       _logger.d(
           '======= REPOSITORY: RECEIVED RESULT FROM REMOTE DATA SOURCE =======');
-      _logger.d('Success: $result');
+      _logger.d('Report ID: $reportId');
       _logger.d('===========================================');
 
-      return Right(result);
+      return Right(reportId);
     } on ServerException {
       _logger.e('======= REPOSITORY: SERVER EXCEPTION OCCURRED =======');
       return const Left(ServerFailure('Server error occurred'));
-    } on DioErrorException {
-      _logger.e('======= REPOSITORY: DIO ERROR EXCEPTION OCCURRED =======');
-      return const Left(NetworkFailure('Network error occurred'));
     } catch (e) {
       _logger.e('======= REPOSITORY: UNEXPECTED ERROR OCCURRED =======');
       _logger.e('Error: $e');
