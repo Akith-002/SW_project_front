@@ -109,8 +109,29 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     _authorityRefNo = queryParams['authorityRefNo'];
     _lotId = queryParams['lotId'];
 
+    // Auto-fill the form fields
+    _autoFillFormFields();
+
     debugPrint(
         "InspectionReport: Extracted data - Master File No: $_masterFileNo, Lot ID: $_lotId");
+  }
+
+  void _autoFillFormFields() {
+    // Auto-fill Master File Reference Number if available
+    if (_masterFileNo != null && _masterFileNo!.isNotEmpty) {
+      _masterFileRefController.text = _masterFileNo!;
+    }
+
+    // Auto-fill Inspection Date with today's date
+    final DateTime now = DateTime.now();
+    final String todayDate =
+        "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+    _inspectionDateController.text = todayDate;
+
+    debugPrint(
+        "InspectionReport: Auto-filled Master File Ref: ${_masterFileRefController.text}");
+    debugPrint(
+        "InspectionReport: Auto-filled Inspection Date: ${_inspectionDateController.text}");
   }
 
   @override
@@ -444,7 +465,37 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back button section remains the same...
+            // Back button to return to building list
+            Row(
+              children: [
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedBuildingName = null;
+                    });
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.arrow_back,
+                        color: colors(context).colorPrimary5,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Back to Building List",
+                        style: TextStyle(
+                          color: colors(context).colorPrimary5,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
 
             _buildRow([
               LabeledTextField(
@@ -907,7 +958,11 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
               children: [
                 CustomButton(
                   text: AppString.cancel.localize(context) ?? '',
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    setState(() {
+                      _selectedBuildingName = null;
+                    });
+                  },
                   backgroundColor: colors(context).colorGrey1!,
                 ),
                 const Spacer(),
@@ -917,6 +972,10 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
                     if (_buildingInfoFormKey.currentState?.validate() ??
                         false) {
                       // Handle save logic here
+                      // After successful save, optionally return to building list
+                      setState(() {
+                        _selectedBuildingName = null;
+                      });
                     }
                   },
                   backgroundColor: colors(context).colorPrimary1!,
