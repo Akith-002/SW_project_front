@@ -26,12 +26,10 @@ class ConditionReportCubit extends BaseCubit<ConditionReportState> {
     required this.repository,
     required this.connectivityService,
     required this.syncService,
+    required this.getMasterDataUseCase,
   }) : super(ConditionReportInitial()) {
     _listenToSyncUpdates();
   }
-
-    required this.getMasterDataUseCase,
-  }) : super(ConditionReportInitial());
 
   Future<void> fetchMasterData() async {
     emit(MasterDataLoading());

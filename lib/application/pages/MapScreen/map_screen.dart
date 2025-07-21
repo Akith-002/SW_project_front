@@ -18,6 +18,8 @@ import 'package:land_asset_valuation/application/core/widgets/sketch_mode.dart';
 import 'package:land_asset_valuation/application/core/widgets/save_lot.dart';
 import 'package:land_asset_valuation/application/core/widgets/lot_area_widget.dart';
 import 'package:land_asset_valuation/application/pages/mapbox/mapbox.dart';
+import 'package:land_asset_valuation/data/models/building.dart';
+import 'package:land_asset_valuation/data/services/building_service.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -41,6 +43,9 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   // Key to interact with Mapbox widget's state
   final GlobalKey<MapboxState> mapboxKey = GlobalKey<MapboxState>();
+
+  // Building service for persistence
+  final BuildingService _buildingService = BuildingService();
 
   // Master file data properties
   String? _id;
@@ -823,14 +828,23 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Shows dialog to save building details
   void _showSaveBuildingDialog(dynamic buildingGeometryId) {
+    debugPrint("🔥 _showSaveBuildingDialog called!");
+    debugPrint("   Building Geometry ID: $buildingGeometryId");
+    debugPrint(
+        "   Selected Lot (polygon ID): ${_selectedLotForSketching?.id ?? 'None'}");
+    debugPrint("   Saved Lot ID (dropdown): $_savedLotId");
+    debugPrint("   Master File No: $_masterFileNo");
+
     // Get the current source from route parameters
     final GoRouterState state = GoRouterState.of(context);
     final String source = state.uri.queryParameters['source'] ?? '';
+    debugPrint("   Route source: $source");
     // Remove unused variable
     // final bool isMRRentalEvidenceRoute = source == 'MRrentalEvidence';
 
     if (_selectedLotForSketching == null && source != 'MRrentalEvidence') {
       // Allow null lot for MR Rental
+      debugPrint("❌ Error: No parent lot selected");
       _showSnackbar("Error: No parent lot selected.", isError: true);
       _exitSketchingMode();
       return;
@@ -838,6 +852,7 @@ class _MapScreenState extends State<MapScreen> {
 
     // Parent lot ID might be null for MR Rental Evidence
     final String? parentLotId = _selectedLotForSketching?.id;
+    debugPrint("   Parent Lot ID: $parentLotId");
 
     showDialog(
       context: context,
@@ -862,27 +877,76 @@ class _MapScreenState extends State<MapScreen> {
                 });
                 _showSnackbar("Building save cancelled.");
               },
-              onSave: (String buildingName, String constructionType) {
+              onSave: (String buildingName, String constructionType) async {
                 Navigator.of(dialogContext).pop();
-                debugPrint("--- Save Building Details ---");
+                debugPrint("🏗️ === SAVE BUILDING DIALOG TRIGGERED ===");
                 debugPrint(
-                    "Parent Lot ID: ${parentLotId ?? 'None (MR Rental Evidence)'}");
-                debugPrint("Building Geometry ID/Data: $buildingGeometryId");
+                    "Parent Lot ID (polygon): ${_selectedLotForSketching?.id ?? 'None'}");
+                debugPrint("Saved Lot ID (dropdown): $_savedLotId");
                 debugPrint("Building Name: $buildingName");
                 debugPrint("Construction Type: $constructionType");
-                debugPrint("-----------------------------");
+                debugPrint("Master File No: $_masterFileNo");
+                debugPrint("=====================================");
 
-                // TODO: Implement actual saving logic here (API/Bloc/Repo)
+                // Get the finalized polygon coordinates from the last sketch
+                final finalPolygons =
+                    mapboxKey.currentState?.finalSketchPolygons;
+                debugPrint(
+                    "🔍 Final polygons count: ${finalPolygons?.length ?? 0}");
 
-                if (mounted) {
-                  _showSnackbar("Building '$buildingName' saved successfully!");
-                  setState(() {
-                    selectedSketchTool = null; // Deselect tool
-                    _selectedSketchSubMode = SketchToolMode.marker;
-                    _showSaveButton =
-                        false; // Hide save button after successful save
-                    mapboxKey.currentState?.clearCurrentSketchGuideAndPoints();
-                  });
+                if (finalPolygons != null && finalPolygons.isNotEmpty) {
+                  final lastPolygon = finalPolygons.last;
+                  final coordinates = lastPolygon.geometry.coordinates.first;
+                  debugPrint("📍 Coordinates count: ${coordinates.length}");
+
+                  // Create building object
+                  final building = Building(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: buildingName,
+                    constructionType: constructionType,
+                    lotId: _savedLotId ??
+                        'unknown', // Use the saved lot ID from dropdown, not the polygon ID
+                    masterFileNo: _masterFileNo ?? 'unknown',
+                    coordinates: coordinates,
+                    createdAt: DateTime.now(),
+                  );
+
+                  debugPrint(
+                      "🏢 Created building object: ${building.name} (ID: ${building.id})");
+                  debugPrint(
+                      "   Lot ID: ${building.lotId} (using _savedLotId instead of polygon ID)");
+                  debugPrint("   Master File: ${building.masterFileNo}");
+
+                  // Save building to storage
+                  final success = await _buildingService.saveBuilding(building);
+
+                  if (success) {
+                    debugPrint("✅ Building saved successfully to storage");
+                    if (mounted) {
+                      _showSnackbar(
+                          "Building '$buildingName' saved successfully!");
+                      setState(() {
+                        selectedSketchTool = null; // Deselect tool
+                        _selectedSketchSubMode = SketchToolMode.marker;
+                        _showSaveButton =
+                            false; // Hide save button after successful save
+                        mapboxKey.currentState
+                            ?.clearCurrentSketchGuideAndPoints();
+                      });
+                    }
+                  } else {
+                    debugPrint("❌ Failed to save building to storage");
+                    if (mounted) {
+                      _showSnackbar("Failed to save building '$buildingName'",
+                          isError: true);
+                    }
+                  }
+                } else {
+                  debugPrint("❌ No building polygon found to save");
+                  if (mounted) {
+                    _showSnackbar("No building polygon found to save",
+                        isError: true);
+                  }
                 }
               },
             ),
@@ -896,8 +960,12 @@ class _MapScreenState extends State<MapScreen> {
   void _handleSaveAction() async {
     if (!mounted) return;
 
+    debugPrint("🚀 === SAVE BUTTON PRESSED ===");
     debugPrint(
-        "MapScreen: Save Action Triggered. DrawMode:$isDrawingMode, SketchMode:$isSketchingMode, Tool:$selectedSketchTool");
+        "DrawMode: $isDrawingMode, SketchMode: $isSketchingMode, Tool: $selectedSketchTool");
+    debugPrint(
+        "Current Sketch Points: ${mapboxKey.currentState?.currentSketchPoints.length ?? 0}");
+    debugPrint("============================");
 
     if (isDrawingMode) {
       // Finalize the initial lot drawing and show save dialog
@@ -912,11 +980,13 @@ class _MapScreenState extends State<MapScreen> {
       try {
         // For building sketches - if using polygon tool and not in a specific mode that handles its own save
         if (selectedSketchTool == 'polygon') {
+          debugPrint("🏗️ Processing polygon tool save...");
           // Get points from the mapbox state
           final sketchPoints = mapboxKey.currentState?.currentSketchPoints;
 
           // Check if we have enough points to form a polygon
           if (sketchPoints == null || sketchPoints.length < 3) {
+            debugPrint("❌ Not enough points: ${sketchPoints?.length ?? 0}");
             _showSnackbar("Need at least 3 points to save a building.",
                 isError: true);
             return;
