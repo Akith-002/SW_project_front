@@ -522,11 +522,20 @@ class AppRouter {
     final String source = state.uri.queryParameters['source'] ?? '';
 
     print("DEBUG: _getSelectedIndexFromRoute called");
-    print("DEBUG: Path: $path");
-    print("DEBUG: Source: $source");
-    print("DEBUG: MapScreen path should be: ${Pages.routeMapScreen.toPath()}");
+    print("DEBUG: Path: '$path'");
+    print("DEBUG: Source: '$source'");
+    print(
+        "DEBUG: Inspection Report path: '${Pages.routeInspectionReport.toPath()}'");
+    print(
+        "DEBUG: Does path start with InspectionReport? ${path.startsWith(Pages.routeInspectionReport.toPath())}");
+    print(
+        "DEBUG: MapScreen path should be: '${Pages.routeMapScreen.toPath()}'");
+    print(
+        "DEBUG: I3MasterFileList path: '${Pages.routeI3MasterFileList.toPath()}'");
     print(
         "DEBUG: Does path start with MapScreen? ${path.startsWith(Pages.routeMapScreen.toPath())}");
+    print(
+        "DEBUG: Does path start with I3MasterFileList? ${path.startsWith(Pages.routeI3MasterFileList.toPath())}");
     print("DEBUG: All query parameters: ${state.uri.queryParameters}");
 
     // Check for selectedIndex in query parameters first
@@ -568,6 +577,18 @@ class AppRouter {
     if (path.startsWith(Pages.routeMapScreen.toPath()) ||
         path.startsWith(Pages.routeI3MasterFileList.toPath())) {
       print("DEBUG: MapScreen route detected with source: '$source'");
+      print(
+          "DEBUG: Path starts with MapScreen: ${path.startsWith(Pages.routeMapScreen.toPath())}");
+      print(
+          "DEBUG: Path starts with I3MasterFileList: ${path.startsWith(Pages.routeI3MasterFileList.toPath())}");
+
+      // Special case: If we have inspection report query parameters, treat as Land Miscellaneous
+      if (state.uri.queryParameters.containsKey('masterFileNo') &&
+          state.uri.queryParameters.containsKey('lotId')) {
+        print(
+            "DEBUG: Detected Inspection Report context with masterFileNo and lotId - returning index 7");
+        return 7; // Land Miscellaneous for Inspection Report
+      }
 
       if (source == 'MRrentalEvidence') {
         print("DEBUG: Returning index 6 for MRrentalEvidence");
@@ -624,14 +645,24 @@ class AppRouter {
     } else if (path.startsWith(Pages.routeLaSalesEvidence.toPath()) ||
         path.startsWith(Pages.routeLaBuildingRates.toPath())) {
       return 1; // Land Acquisition
+    } else if (path.startsWith(Pages.routeConditionReport.toPath())) {
+      return 1; // Land Acquisition - Condition Report belongs to Land Acquisition
+    } else if (path.startsWith(Pages.routePastValuation.toPath())) {
+      return 1; // Land Acquisition - Past Valuation belongs to Land Acquisition
     } else if (path.startsWith(Pages.routeRentalEvidence.toPath()) ||
         path.startsWith(Pages.routeI2RentalEvidence.toPath())) {
       return 6; // MR Rental Evidence
     } else if (path.startsWith(Pages.routeLmMasterfileList.toPath())) {
       return 7; // Land Miscellaneous
+    } else if (path.startsWith(Pages.routeInspectionReport.toPath())) {
+      print("DEBUG: Inspection Report route detected! Path: $path");
+      print(
+          "DEBUG: Returning index 7 for Inspection Report (Land Miscellaneous)");
+      return 7; // Land Miscellaneous - Inspection Report belongs to Land Miscellaneous
     }
 
     // Default
+    print("DEBUG: No matching route found, defaulting to index 0. Path: $path");
     return 0;
   }
 
