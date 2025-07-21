@@ -109,17 +109,7 @@ class _FormSectionState extends State<FormSection> {
                 alignment: Alignment.centerLeft,
                 child: GestureDetector(
                   onTap: () {
-                    if (_usernameController.text.isNotEmpty) {
-                      context.read<SigninCubit>().forgotPassword(
-                            _usernameController.text,
-                          );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please enter your username'),
-                        ),
-                      );
-                    }
+                    context.go(Pages.routeResetPassword.toPath());
                   },
                   child: Text(
                     AppString.forgotPassword.localize(context)!,

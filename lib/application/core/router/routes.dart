@@ -25,6 +25,11 @@ import 'package:land_asset_valuation/application/pages/RatingCard/rating_card_vi
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/AssetMapScreen/asset_map_screen.dart';
 import 'package:land_asset_valuation/application/pages/test.dart';
+import 'package:land_asset_valuation/application/pages/resetPassword/reset_password_view.dart';
+import 'package:land_asset_valuation/application/pages/verifyOtp/verify_otp_view.dart';
+import 'package:land_asset_valuation/application/pages/createPassword/create_password_view.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:land_asset_valuation/application/pages/resetPassword/cubit/reset_password_cubit.dart';
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
@@ -77,6 +82,40 @@ class AppRouter {
         pageBuilder: (context, state) {
           return NoTransitionPage(
               key: state.pageKey, child: const SignInView());
+        },
+      ),
+
+      GoRoute(
+        path: Pages.routeResetPassword.toPath(),
+        name: Pages.routeResetPassword.toPathName(),
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          return NoTransitionPage(
+            key: state.pageKey,
+            child: const ResetPasswordView(),
+          );
+        },
+      ),
+      GoRoute(
+        path: Pages.routeVerifyOtp.toPath(),
+        name: Pages.routeVerifyOtp.toPathName(),
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          return NoTransitionPage(
+            key: state.pageKey,
+            child: const VerifyOtpView(),
+          );
+        },
+      ),
+      GoRoute(
+        path: Pages.routeCreatePassword.toPath(),
+        name: Pages.routeCreatePassword.toPathName(),
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          return NoTransitionPage(
+            key: state.pageKey,
+            child: const CreatePasswordView(),
+          );
         },
       ),
 
