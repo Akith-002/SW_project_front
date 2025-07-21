@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
-import 'package:land_asset_valuation/app/cubit/base_state.dart';
 import 'package:land_asset_valuation/application/pages/conditionReport/cubit/condition_report_state.dart';
 import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart';
@@ -26,12 +25,10 @@ class ConditionReportCubit extends BaseCubit<ConditionReportState> {
     required this.repository,
     required this.connectivityService,
     required this.syncService,
+    required this.getMasterDataUseCase,
   }) : super(ConditionReportInitial()) {
     _listenToSyncUpdates();
   }
-
-    required this.getMasterDataUseCase,
-  }) : super(ConditionReportInitial());
 
   Future<void> fetchMasterData() async {
     emit(MasterDataLoading());
