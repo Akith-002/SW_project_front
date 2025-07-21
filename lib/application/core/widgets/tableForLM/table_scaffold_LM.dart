@@ -9,6 +9,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:land_asset_valuation/data/models/paginated_response.dart';
 import 'package:land_asset_valuation/data/models/land_miscellaneous_master_file_model.dart';
 import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repository.dart';
+import 'package:land_asset_valuation/data/services/building_service.dart';
 
 class TableScaffoldLM extends StatefulWidget {
   final int initialPageSize;
@@ -42,6 +43,7 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
   String? _sortColumn;
   int?
       _previousTotalCount; // Cache previous count to prevent unnecessary callbacks
+  final BuildingService _buildingService = BuildingService();
 
   @override
   void initState() {
@@ -230,235 +232,305 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
 
     return Column(
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: 1000,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: colors(context).colorGrey3 ??
-                          colors(context).colorGrey9!,
-                      width: 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: DataTable(
-                    headingRowColor: WidgetStateProperty.all(
-                      colors(context).colorGrey9!,
-                    ),
-                    columnSpacing: 16,
-                    horizontalMargin: 16,
-                    columns: [
-                      DataColumn(
-                        label: Container(
-                          width: 100,
-                          child: Text("Master File No"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Container(
-                          width: 150,
-                          child: Text("Plan Type"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Container(
-                          width: 100,
-                          child: Text("Plan No"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Container(
-                          width: 200,
-                          child: Text("Requesting Authority Reference No"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Container(
-                          width: 100,
-                          alignment: Alignment.center,
-                          child: Text("Status"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Container(
-                          width: 100,
-                          alignment: Alignment.center,
-                          child: Text("Action"),
-                        ),
-                      ),
-                    ],
-                    rows: plans.map((plan) {
-                      return DataRow(cells: [
-                        DataCell(
-                          Container(
-                            width: 100,
-                            child: Text(plan.masterFileNo.toString()),
-                          ),
-                        ),
-                        DataCell(
-                          Container(
-                            width: 150,
-                            child: Text(plan.planType),
-                          ),
-                        ),
-                        DataCell(
-                          Container(
-                            width: 100,
-                            child: Text(plan.planNo.toString()),
-                          ),
-                        ),
-                        DataCell(
-                          Container(
-                            width: 200,
-                            child: Text(plan.requestingAuthorityReferenceNo),
-                          ),
-                        ),
-                        DataCell(
-                          Container(
-                            width: 100,
-                            alignment: Alignment.center,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(plan.status)
-                                    .withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                plan.status,
-                                style: TextStyle(
-                                  color: _getStatusColor(plan.status),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Container(
-                            width: 100,
-                            alignment: Alignment.center,
-                            child: SizedBox(
-                              height: 52,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  iconButtonWidget(
-                                    color: colors(context).colorGrey8!,
-                                    iconName: PhosphorIconsRegular.eye,
-                                    onPressed: () {
-                                      context.pushNamed(
-                                        Pages.routeMapScreen.toPathName(),
-                                        queryParameters: {
-                                          'source': 'landMiscellaneous',
-                                          'id': plan.id.toString(),
-                                          'masterFileNo':
-                                              plan.masterFileNo.toString(),
-                                          'masterFileRefNo':
-                                              plan.masterFileRefNo,
-                                          'planType': plan.planType,
-                                          'planNo': plan.planNo,
-                                          'authorityRefNo': plan
-                                              .requestingAuthorityReferenceNo,
-                                          'status': plan.status,
-                                          'lots': plan.lots.toString(),
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ]);
-                    }).toList(),
-                  ),
+        // Table Section - Use Flexible to only take needed space
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color:
+                      colors(context).colorGrey3 ?? colors(context).colorGrey9!,
+                  width: 0.5,
                 ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Fixed header
+                  Container(
+                    color: colors(context).colorGrey9!,
+                    child: const Row(
+                      children: [
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Master File No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Plan Type",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Plan No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 3,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Authority Reference No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Center(
+                                  child: Text("Status",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold))),
+                            )),
+                        Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Center(
+                                  child: Text("Action",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold))),
+                            )),
+                      ],
+                    ),
+                  ),
+                  // Scrollable body - use Flexible to allow overflow scrolling
+                  Flexible(
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: plans.length,
+                      itemBuilder: (context, index) {
+                        final plan = plans[index];
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: colors(context).colorGrey3 ??
+                                    colors(context).colorGrey9!,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Text(plan.masterFileNo.toString()),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Text(plan.planType),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Text(plan.planNo),
+                                  )),
+                              Expanded(
+                                  flex: 3,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Text(
+                                        plan.requestingAuthorityReferenceNo),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: _getStatusColor(plan.status)
+                                              .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          plan.status,
+                                          style: TextStyle(
+                                            color: _getStatusColor(plan.status),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )),
+                              Expanded(
+                                  flex: 1,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Center(
+                                      child: iconButtonWidget(
+                                        color: colors(context).colorGrey8!,
+                                        iconName: PhosphorIconsRegular.eye,
+                                        onPressed: () async {
+                                          // Clear buildings for this master file when View button is tapped
+                                          debugPrint(
+                                              "🗑️ LM Table: View button tapped for master file ${plan.masterFileNo}");
+                                          debugPrint(
+                                              "   Clearing existing buildings for this master file...");
+
+                                          try {
+                                            await _buildingService
+                                                .clearBuildingsForMasterFile(
+                                                    plan.masterFileNo
+                                                        .toString());
+                                            debugPrint(
+                                                "✅ LM Table: Successfully cleared buildings for master file ${plan.masterFileNo}");
+                                          } catch (e) {
+                                            debugPrint(
+                                                "❌ LM Table: Error clearing buildings: $e");
+                                          }
+
+                                          // Navigate to map screen
+                                          context.pushNamed(
+                                            Pages.routeMapScreen.toPathName(),
+                                            queryParameters: {
+                                              'source': 'landMiscellaneous',
+                                              'id': plan.id.toString(),
+                                              'masterFileNo':
+                                                  plan.masterFileNo.toString(),
+                                              'masterFileRefNo':
+                                                  plan.masterFileRefNo,
+                                              'planType': plan.planType,
+                                              'planNo': plan.planNo,
+                                              'authorityRefNo': plan
+                                                  .requestingAuthorityReferenceNo,
+                                              'status': plan.status,
+                                              'lots': plan.lots.toString(),
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  )),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text("Show "),
-                  DropdownButton<int>(
-                    value: _pageSize,
-                    items: _pageSizeOptions.map((size) {
-                      return DropdownMenuItem<int>(
-                        value: size,
-                        child: Text("$size"),
-                      );
-                    }).toList(),
-                    onChanged: (newSize) {
-                      if (newSize != null) {
-                        setState(() {
-                          _pageSize = newSize;
-                          _currentPage = 1;
-                        });
-                        if (_currentSearchQuery != null) {
-                          _searchWithPagination(_currentSearchQuery!, 1);
-                        } else {
-                          _fetchPlans();
+        // Pagination controls
+        if (paginationData != null && paginationData.totalPages > 1)
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text("Show "),
+                    DropdownButton<int>(
+                      value: _pageSize,
+                      items: _pageSizeOptions.map((size) {
+                        return DropdownMenuItem<int>(
+                          value: size,
+                          child: Text("$size"),
+                        );
+                      }).toList(),
+                      onChanged: (newSize) {
+                        if (newSize != null && newSize != _pageSize) {
+                          setState(() {
+                            _pageSize = newSize;
+                            _currentPage = 1; // Reset to first page
+                            _searchResults = null; // Clear search results
+                          });
+                          if (_currentSearchQuery != null) {
+                            _searchWithPagination(_currentSearchQuery!, 1);
+                          } else {
+                            _fetchPlans();
+                          }
                         }
-                      }
-                    },
+                      },
+                    ),
+                    Text(" per page"),
+                  ],
+                ),
+                Text(
+                  'Showing $startRecord to $endRecord of $totalCount entries',
+                  style: TextStyle(
+                    color: colors(context).colorGrey2,
+                    fontSize: 14,
                   ),
-                  Text(" per page"),
-                ],
-              ),
-              Text("$startRecord-$endRecord of $totalCount Records"),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.chevron_left),
-                    onPressed: paginationData?.hasPrevious == true
-                        ? () {
-                            setState(() {
-                              _currentPage--;
-                            });
-                            if (_currentSearchQuery != null) {
-                              _searchWithPagination(
-                                  _currentSearchQuery!, _currentPage);
-                            } else {
-                              _fetchPlans();
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: paginationData.hasPrevious
+                          ? () {
+                              setState(() {
+                                _currentPage = paginationData.currentPage - 1;
+                              });
+                              if (_currentSearchQuery != null) {
+                                _searchWithPagination(
+                                    _currentSearchQuery!, _currentPage);
+                              } else {
+                                _fetchPlans();
+                              }
                             }
-                          }
-                        : null,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.chevron_right),
-                    onPressed: paginationData?.hasNext == true
-                        ? () {
-                            setState(() {
-                              _currentPage++;
-                            });
-                            if (_currentSearchQuery != null) {
-                              _searchWithPagination(
-                                  _currentSearchQuery!, _currentPage);
-                            } else {
-                              _fetchPlans();
+                          : null,
+                      icon: const Icon(Icons.chevron_left),
+                    ),
+                    Text(
+                      'Page ${paginationData.currentPage} of ${paginationData.totalPages}',
+                      style: TextStyle(
+                        color: colors(context).colorGrey2,
+                        fontSize: 14,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: paginationData.hasNext
+                          ? () {
+                              setState(() {
+                                _currentPage = paginationData.currentPage + 1;
+                              });
+                              if (_currentSearchQuery != null) {
+                                _searchWithPagination(
+                                    _currentSearchQuery!, _currentPage);
+                              } else {
+                                _fetchPlans();
+                              }
                             }
-                          }
-                        : null,
-                  ),
-                ],
-              ),
-            ],
+                          : null,
+                      icon: const Icon(Icons.chevron_right),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
