@@ -2,7 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class OverviewChart extends StatelessWidget {
-  const OverviewChart({super.key});
+  final double landAcquisition;
+  final double massRating;
+  final double miscAcquisition;
+  final double tasksDone;
+
+  const OverviewChart({
+    Key? key,
+    required this.landAcquisition,
+    required this.massRating,
+    required this.miscAcquisition,
+    required this.tasksDone,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -10,19 +21,34 @@ class OverviewChart extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center, // Aligns items to the top
       children: [
-
         SizedBox(
           height: 128,
           width: 128,
           child: PieChart(
             PieChartData(
               sectionsSpace: 2,
-              centerSpaceRadius:50, // Adjust if needed
+              centerSpaceRadius: 50, // Adjust if needed
               sections: [
-                PieChartSectionData(value: 40, color: Colors.green, radius: 15, title: ''),
-                PieChartSectionData(value: 30, color: Colors.red, radius: 15, title: ''),
-                PieChartSectionData(value: 20, color: Colors.blue, radius: 15, title: ''),
-                PieChartSectionData(value: 10, color: Colors.grey, radius: 15, title: ''),
+                PieChartSectionData(
+                    value: landAcquisition,
+                    color: Colors.green,
+                    radius: 15,
+                    title: ''),
+                PieChartSectionData(
+                    value: massRating,
+                    color: Colors.red,
+                    radius: 15,
+                    title: ''),
+                PieChartSectionData(
+                    value: miscAcquisition,
+                    color: Colors.blue,
+                    radius: 15,
+                    title: ''),
+                PieChartSectionData(
+                    value: tasksDone,
+                    color: Colors.grey,
+                    radius: 15,
+                    title: ''),
               ],
             ),
           ),
@@ -43,7 +69,8 @@ class OverviewChart extends StatelessWidget {
 
   Widget _buildLabel(String text, Color color) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6), // Reduced vertical padding
+      padding:
+          const EdgeInsets.symmetric(vertical: 6), // Reduced vertical padding
       child: Row(
         children: [
           Container(

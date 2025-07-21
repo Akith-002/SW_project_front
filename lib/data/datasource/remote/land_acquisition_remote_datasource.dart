@@ -12,16 +12,19 @@ class LandAcquisitionRemoteDatasource {
   Future<PaginatedResponse<LandAcquisitionMasterFile>> getPaginatedMasterFiles({
     required int page,
     required int pageSize,
+    required int assignedToUserId,
     String? sortBy,
   }) async {
     try {
       if (kDebugMode) {
-        print('Fetching data - Page: $page, Size: $pageSize, SortBy: $sortBy');
+        print(
+            'Fetching data - Page: $page, Size: $pageSize, SortBy: $sortBy, AssignedToUserId: $assignedToUserId');
       }
 
       final Map<String, dynamic> queryParams = {
         'pageNumber': page - 1, // Convert to 0-based for API
         'pageSize': pageSize,
+        'assignedToUserId': assignedToUserId,
       };
 
       if (sortBy != null) {
@@ -87,12 +90,14 @@ class LandAcquisitionRemoteDatasource {
     required String query,
     required int page,
     required int pageSize,
+    required int assignedToUserId,
     String? sortBy,
   }) async {
     try {
       final Map<String, dynamic> queryParams = {
         'page': page,
         'pageSize': pageSize,
+        'assignedToUserId': assignedToUserId,
       };
 
       if (sortBy != null) {
@@ -131,7 +136,10 @@ class LandAcquisitionRemoteDatasource {
       if (e.response?.statusCode == 404) {
         // If search endpoint fails, fall back to getting all records and filtering client-side
         final allRecords = await getPaginatedMasterFiles(
-            page: 1, pageSize: 100, sortBy: sortBy);
+            page: 1,
+            pageSize: 100,
+            assignedToUserId: assignedToUserId,
+            sortBy: sortBy);
         final filteredItems = allRecords.items.where((file) {
           final searchTerm = query.toLowerCase();
           return file.masterFileNo
