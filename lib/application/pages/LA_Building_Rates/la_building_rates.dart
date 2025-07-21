@@ -32,6 +32,9 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
   // Form validation key
   final _formKey = GlobalKey<FormState>();
 
+  // Auto-validation mode
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
+
   // Text controllers for all form fields
   final _assessmentNumberController = TextEditingController();
   final _ownerController = TextEditingController();
@@ -102,6 +105,7 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
 
                 return Form(
                   key: _formKey,
+                  autovalidateMode: _autovalidateMode,
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
@@ -356,7 +360,15 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
 
   /// Validates form and saves data locally
   void _validateAndSave() {
-    if (_formKey.currentState!.validate()) {
+    // Enable auto-validation mode to show validation errors
+    setState(() {
+      _autovalidateMode = AutovalidateMode.onUserInteraction;
+    });
+
+    // Validate the form
+    bool isFormValid = _formKey.currentState?.validate() ?? false;
+
+    if (isFormValid) {
       // Form is valid, save the data
       _showSuccessMessage('Building rates data saved successfully');
       // TODO: Implement actual save logic
@@ -367,7 +379,85 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
 
   /// Validates form and submits data to server
   void _validateAndSubmit() async {
-    if (_formKey.currentState!.validate()) {
+    // Enable auto-validation mode to show validation errors
+    setState(() {
+      _autovalidateMode = AutovalidateMode.onUserInteraction;
+    });
+
+    // Validate the form using the validators you've defined
+    bool isFormValid = _formKey.currentState?.validate() ?? false;
+
+    if (!isFormValid) {
+      _showErrorMessage('Please fix the validation errors in the form');
+      return;
+    }
+
+    // Additional manual validation (similar to rental evidence form)
+    try {
+      // Create a map to track all validation issues
+      Map<String, String> validationErrors = {};
+
+      // Validate required fields are not empty
+      _validateRequiredField(_assessmentNumberController.text,
+          'Assessment Number', validationErrors);
+      _validateRequiredField(_ownerController.text, 'Owner', validationErrors);
+      _validateRequiredField(_yearOfConstructionController.text,
+          'Year of Construction', validationErrors);
+      _validateRequiredField(
+          _floorAreaSQFTController.text, 'Floor Area (SQFT)', validationErrors);
+      _validateRequiredField(
+          _ratePerSQFTController.text, 'Rate Per SQFT', validationErrors);
+      _validateRequiredField(_costController.text, 'Cost', validationErrors);
+
+      // Validate numeric fields
+      _validateYearField(_yearOfConstructionController.text,
+          'Year of Construction', validationErrors);
+      _validateAreaField(
+          _floorAreaSQFTController.text, 'Floor Area (SQFT)', validationErrors);
+      _validateRateField(
+          _ratePerSQFTController.text, 'Rate Per SQFT', validationErrors);
+      _validateCostField(_costController.text, 'Cost', validationErrors);
+
+      // Validate coordinate fields (optional)
+      if (_locationLatitudeController.text.trim().isNotEmpty) {
+        _validateCoordinateField(
+            _locationLatitudeController.text, 'Latitude', validationErrors);
+      }
+      if (_locationLongitudeController.text.trim().isNotEmpty) {
+        _validateCoordinateField(
+            _locationLongitudeController.text, 'Longitude', validationErrors);
+      }
+
+      // If there are validation errors, show them and stop
+      if (validationErrors.isNotEmpty) {
+        String errorMessage = 'Validation errors:\n';
+        validationErrors.forEach((field, error) {
+          errorMessage += '• $field: $error\n';
+        });
+        _showErrorMessage(errorMessage);
+        return;
+      }
+
+      // Double-check numeric conversions before sending to the backend
+      try {
+        // Ensure these are valid numbers before sending
+        int.parse(_yearOfConstructionController.text);
+        double.parse(_floorAreaSQFTController.text);
+        double.parse(_ratePerSQFTController.text);
+        double.parse(_costController.text);
+
+        // Parse optional coordinates if provided
+        if (_locationLatitudeController.text.trim().isNotEmpty) {
+          double.parse(_locationLatitudeController.text);
+        }
+        if (_locationLongitudeController.text.trim().isNotEmpty) {
+          double.parse(_locationLongitudeController.text);
+        }
+      } catch (e) {
+        _showErrorMessage('Error converting numeric values: ${e.toString()}');
+        return;
+      }
+
       // Create the model from form data
       final buildingRatesModel = LaBuildingRatesModel(
         assessmentNumber: _assessmentNumberController.text.trim(),
@@ -390,8 +480,8 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
       // if (success && uploadedImages.isNotEmpty) {
       //   await _uploadImages(reportId);
       // }
-    } else {
-      _showErrorMessage('Please fix the validation errors in the form');
+    } catch (e) {
+      _showErrorMessage('Error preparing form data: ${e.toString()}');
     }
   }
 
@@ -430,6 +520,138 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
         duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  /// Validates that required fields are not empty
+  void _validateRequiredField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+    }
+  }
+
+  /// Validates year field
+  void _validateYearField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    // Check if it's a valid 4-digit year
+    if (!RegExp(r'^\d{4}$').hasMatch(value)) {
+      errors[fieldName] = 'Must be a valid 4-digit year';
+      return;
+    }
+
+    int? year = int.tryParse(value);
+    if (year == null) {
+      errors[fieldName] = 'Must be a valid year';
+      return;
+    }
+
+    int currentYear = DateTime.now().year;
+    if (year < 1800 || year > currentYear + 10) {
+      errors[fieldName] = 'Must be between 1800 and ${currentYear + 10}';
+    }
+  }
+
+  /// Validates area field
+  void _validateAreaField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    double? area = double.tryParse(value);
+    if (area == null) {
+      errors[fieldName] = 'Must be a valid number';
+      return;
+    }
+
+    if (area <= 0) {
+      errors[fieldName] = 'Must be greater than 0';
+      return;
+    }
+
+    if (area > 1000000) {
+      errors[fieldName] = 'Value seems too large, please verify';
+    }
+  }
+
+  /// Validates rate field
+  void _validateRateField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    double? rate = double.tryParse(value);
+    if (rate == null) {
+      errors[fieldName] = 'Must be a valid number';
+      return;
+    }
+
+    if (rate <= 0) {
+      errors[fieldName] = 'Must be greater than 0';
+      return;
+    }
+
+    if (rate > 100000) {
+      errors[fieldName] = 'Value seems too high, please verify';
+    }
+  }
+
+  /// Validates cost field
+  void _validateCostField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    double? cost = double.tryParse(value);
+    if (cost == null) {
+      errors[fieldName] = 'Must be a valid number';
+      return;
+    }
+
+    if (cost < 0) {
+      errors[fieldName] = 'Cannot be negative';
+      return;
+    }
+
+    if (cost > 1000000000) {
+      errors[fieldName] = 'Value seems too high, please verify';
+    }
+  }
+
+  /// Validates coordinate field (latitude/longitude)
+  void _validateCoordinateField(
+      String value, String fieldName, Map<String, String> errors) {
+    if (value.trim().isEmpty) {
+      errors[fieldName] = 'Cannot be empty';
+      return;
+    }
+
+    double? coordinate = double.tryParse(value);
+    if (coordinate == null) {
+      errors[fieldName] = 'Must be a valid coordinate value';
+      return;
+    }
+
+    // Detailed coordinate validation
+    if (fieldName == 'Latitude') {
+      if (coordinate < -90 || coordinate > 90) {
+        errors[fieldName] = 'Must be between -90 and 90 degrees';
+      }
+    } else if (fieldName == 'Longitude') {
+      if (coordinate < -180 || coordinate > 180) {
+        errors[fieldName] = 'Must be between -180 and 180 degrees';
+      }
+    }
   }
 
   @override
