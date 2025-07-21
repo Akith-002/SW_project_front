@@ -230,191 +230,163 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
 
     return Column(
       children: [
-        // Table Section - Use Expanded to take available space
         Expanded(
-          // Use a more efficient table implementation
-          child: Padding(
-            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color:
-                      colors(context).colorGrey3 ?? colors(context).colorGrey9!,
-                  width: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                children: [
-                  // Fixed header
-                  Container(
-                    color: colors(context).colorGrey9!,
-                    child: const Row(
-                      children: [
-                        Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Text("Master File No",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            )),
-                        Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Text("Plan Type",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            )),
-                        Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Text("Plan No",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            )),
-                        Expanded(
-                            flex: 3,
-                            child: Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Text("Authority Reference No",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            )),
-                        Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Center(
-                                  child: Text("Status",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                            )),
-                        Expanded(
-                            flex: 1,
-                            child: Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Center(
-                                  child: Text("Action",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                            )),
-                      ],
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: 1000,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: colors(context).colorGrey3 ??
+                          colors(context).colorGrey9!,
+                      width: 0.5,
                     ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  // Scrollable body
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: plans.length,
-                      itemBuilder: (context, index) {
-                        final plan = plans[index];
-                        return Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: colors(context).colorGrey3 ??
-                                    colors(context).colorGrey9!,
-                                width: 0.5,
+                  child: DataTable(
+                    headingRowColor: WidgetStateProperty.all(
+                      colors(context).colorGrey9!,
+                    ),
+                    columnSpacing: 16,
+                    horizontalMargin: 16,
+                    columns: [
+                      DataColumn(
+                        label: Container(
+                          width: 100,
+                          child: Text("Master File No"),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Container(
+                          width: 150,
+                          child: Text("Plan Type"),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Container(
+                          width: 100,
+                          child: Text("Plan No"),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Container(
+                          width: 200,
+                          child: Text("Requesting Authority Reference No"),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Container(
+                          width: 100,
+                          alignment: Alignment.center,
+                          child: Text("Status"),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Container(
+                          width: 100,
+                          alignment: Alignment.center,
+                          child: Text("Action"),
+                        ),
+                      ),
+                    ],
+                    rows: plans.map((plan) {
+                      return DataRow(cells: [
+                        DataCell(
+                          Container(
+                            width: 100,
+                            child: Text(plan.masterFileNo.toString()),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: 150,
+                            child: Text(plan.planType),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: 100,
+                            child: Text(plan.planNo.toString()),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: 200,
+                            child: Text(plan.requestingAuthorityReferenceNo),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: 100,
+                            alignment: Alignment.center,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(plan.status)
+                                    .withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                plan.status,
+                                style: TextStyle(
+                                  color: _getStatusColor(plan.status),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Text(plan.masterFileNo.toString()),
-                                  )),
-                              Expanded(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Text(plan.planType),
-                                  )),
-                              Expanded(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Text(plan.planNo.toString()),
-                                  )),
-                              Expanded(
-                                  flex: 3,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Text(
-                                        plan.requestingAuthorityReferenceNo),
-                                  )),
-                              Expanded(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Center(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: _getStatusColor(plan.status)
-                                              .withOpacity(0.2),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          plan.status,
-                                          style: TextStyle(
-                                            color: _getStatusColor(plan.status),
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )),
-                              Expanded(
-                                  flex: 1,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Center(
-                                      child: iconButtonWidget(
-                                        color: colors(context).colorGrey8!,
-                                        iconName: PhosphorIconsRegular.eye,
-                                        onPressed: () {
-                                          context.pushNamed(
-                                            Pages.routeMapScreen.toPathName(),
-                                            queryParameters: {
-                                              'source': 'landMiscellaneous',
-                                              'id': plan.id.toString(),
-                                              'masterFileNo':
-                                                  plan.masterFileNo.toString(),
-                                              'planType': plan.planType,
-                                              'planNo': plan.planNo,
-                                              'authorityRefNo': plan
-                                                  .requestingAuthorityReferenceNo,
-                                              'status': plan.status,
-                                              'lots': plan.lots.toString(),
-                                            },
-                                          );
+                        ),
+                        DataCell(
+                          Container(
+                            width: 100,
+                            alignment: Alignment.center,
+                            child: SizedBox(
+                              height: 52,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  iconButtonWidget(
+                                    color: colors(context).colorGrey8!,
+                                    iconName: PhosphorIconsRegular.eye,
+                                    onPressed: () {
+                                      context.pushNamed(
+                                        Pages.routeMapScreen.toPathName(),
+                                        queryParameters: {
+                                          'source': 'landMiscellaneous',
+                                          'id': plan.id.toString(),
+                                          'masterFileNo':
+                                              plan.masterFileNo.toString(),
+                                          'masterFileRefNo':
+                                              plan.masterFileRefNo,
+                                          'planType': plan.planType,
+                                          'planNo': plan.planNo,
+                                          'authorityRefNo': plan
+                                              .requestingAuthorityReferenceNo,
+                                          'status': plan.status,
+                                          'lots': plan.lots.toString(),
                                         },
-                                      ),
-                                    ),
-                                  )),
-                            ],
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      ]);
+                    }).toList(),
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ),
-
-        // Pagination Section - Fixed at bottom
-        const SizedBox(height: 16),
-        Container(
-          color: Theme.of(context).scaffoldBackgroundColor,
+        Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -7,11 +7,13 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 class SaveLot extends StatefulWidget {
   final Function(String? selectedLotId) onSave;
   final VoidCallback onCancel;
+  final int numberOfLots;
 
   const SaveLot({
     super.key,
     required this.onSave,
     required this.onCancel,
+    this.numberOfLots = 15, // Default fallback value
   });
 
   @override
@@ -70,7 +72,9 @@ class _LotIdSearchDialogState extends State<_LotIdSearchDialog> {
     // Target Dialog Height (312) - Other Elements (~190) = ~122 for the list view
     const double targetDialogHeight = 312.0;
     const double nonListHeight = 190.0; // Approximate height of other elements
-    const double listMaxHeight = targetDialogHeight - nonListHeight > 0 ? targetDialogHeight - nonListHeight : 100; // Ensure positive height
+    const double listMaxHeight = targetDialogHeight - nonListHeight > 0
+        ? targetDialogHeight - nonListHeight
+        : 100; // Ensure positive height
 
     return AlertDialog(
       backgroundColor: Colors.white,
@@ -122,7 +126,8 @@ class _LotIdSearchDialogState extends State<_LotIdSearchDialog> {
                     final item = _filteredItems[index];
                     return ListTile(
                       title: Text(item),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 8.0),
                       dense: true,
                       // Return the selected lot id and close the dialog.
                       onTap: () {
@@ -152,24 +157,18 @@ class _SaveLotState extends State<SaveLot> {
   String? _selectedLotId;
   final TextEditingController _lotIdDisplayController = TextEditingController();
 
-  // List of available lot IDs.
-  final List<String> _allLotIds = [
-    "LOT-001",
-    "LOT-002",
-    "LOT-003",
-    "LOT-004",
-    "LOT-005",
-    "LOT-006",
-    "LOT-007",
-    "LOT-008",
-    "LOT-009",
-    "LOT-010",
-    "LOT-011", // Added more items to test scrolling
-    "LOT-012",
-    "LOT-013",
-    "LOT-014",
-    "LOT-015",
-  ];
+  // List of available lot IDs - generated dynamically based on numberOfLots.
+  late final List<String> _allLotIds;
+
+  @override
+  void initState() {
+    super.initState();
+    // Generate lot IDs dynamically based on the numberOfLots parameter
+    _allLotIds = List.generate(
+      widget.numberOfLots,
+      (index) => "LOT-${(index + 1).toString().padLeft(3, '0')}",
+    );
+  }
 
   @override
   void dispose() {
@@ -208,7 +207,8 @@ class _SaveLotState extends State<SaveLot> {
         // Main column holding title, lot id selection, and action buttons.
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, // Important for height based on content
+          mainAxisSize:
+              MainAxisSize.min, // Important for height based on content
           children: [
             // Main title.
             Text(
@@ -275,7 +275,8 @@ class _SaveLotState extends State<SaveLot> {
             // Row containing Cancel and Save buttons.
             Row(
               // Let the buttons determine their size based on padding
-              mainAxisAlignment: MainAxisAlignment.end, // Align buttons to the end
+              mainAxisAlignment:
+                  MainAxisAlignment.end, // Align buttons to the end
               children: [
                 OutlinedButton(
                   onPressed: widget.onCancel,
@@ -286,8 +287,8 @@ class _SaveLotState extends State<SaveLot> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25, vertical: 12),
                   ),
                   child: Text(AppString.cancel.localize(context)!,
                       style: AppStyling.semiBoldTextSize14.copyWith(
@@ -308,16 +309,16 @@ class _SaveLotState extends State<SaveLot> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 35, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 35, vertical: 12),
                     elevation: _selectedLotId != null ? 2 : 0,
                     disabledBackgroundColor: Colors.grey.shade300,
                     disabledForegroundColor: Colors.grey.shade500,
                   ),
                   child: Text(AppString.save.localize(context)!,
                       style: AppStyling.semiBoldTextSize14.copyWith(
-                            color: colors(context).colorWhite,
-                          )),
+                        color: colors(context).colorWhite,
+                      )),
                 )
               ],
             ),

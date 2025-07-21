@@ -462,7 +462,7 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
       // 1. Submit form data to backend
       final reportId = await _submitFormData();
       if (reportId != null) {
-        // 2. Upload images with parent_id and parent_type
+        // 2. Upload images with reportId
         await _uploadImages(reportId);
         _showSuccessDialog();
       } else {
@@ -485,11 +485,13 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.body;
         // Expecting { msg: "success", reportId: ... }
-        final reportId = RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
+        final reportId =
+            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
         print('DEBUG: SalesEvidenceLA reportId: $reportId');
         return reportId;
       } else {
-        print('DEBUG: SalesEvidenceLA submission failed: ${response.statusCode} ${response.body}');
+        print(
+            'DEBUG: SalesEvidenceLA submission failed: ${response.statusCode} ${response.body}');
         return null;
       }
     } catch (e) {
@@ -532,13 +534,12 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
     if (uploadedImages.isEmpty) return;
     var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
     var request = http.MultipartRequest('POST', uri)
-      ..fields['reportId'] = reportId
-      ..fields['parent_id'] = reportId
-      ..fields['parent_type'] = 'SalesEvidencesLA';
+      ..fields['reportId'] = reportId;
     for (var image in uploadedImages) {
       if (image is File) {
         print('DEBUG: Adding image file: ${image.path}');
-        request.files.add(await http.MultipartFile.fromPath('files', image.path));
+        request.files
+            .add(await http.MultipartFile.fromPath('files', image.path));
       } else {
         print('DEBUG: Skipping non-File image: $image');
       }

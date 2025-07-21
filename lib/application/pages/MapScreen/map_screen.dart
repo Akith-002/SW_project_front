@@ -45,6 +45,7 @@ class _MapScreenState extends State<MapScreen> {
   // Master file data properties
   String? _id;
   String? _masterFileNo;
+  String? _masterFileRefNo;
   String? _planType;
   String? _planNo;
   String? _authorityRefNo;
@@ -64,6 +65,7 @@ class _MapScreenState extends State<MapScreen> {
   PolygonAnnotation? _selectedLotForSketching;
   // Field is used temporarily between async steps, ignore 'unused_field' warning - Commenting out for now as it seems unused
   // dynamic _buildingGeometryIdPendingSave;
+  String? _savedLotId; // Store the user-selected lot ID from save dialog
 
   // Marker management
   late final MapMarkerLoader _markerLoader;
@@ -103,6 +105,7 @@ class _MapScreenState extends State<MapScreen> {
 
     _id = queryParams['id'];
     _masterFileNo = queryParams['masterFileNo'];
+    _masterFileRefNo = queryParams['masterFileRefNo'];
     _planType = queryParams['planType'];
     _planNo = queryParams['planNo'];
     _authorityRefNo = queryParams['authorityRefNo'];
@@ -110,7 +113,7 @@ class _MapScreenState extends State<MapScreen> {
     _lots = queryParams['lots'];
 
     debugPrint(
-        "MapScreen: Master File Data extracted - ID: $_id, Master File No: $_masterFileNo, Plan Type: $_planType, Plan No: $_planNo, Authority Ref: $_authorityRefNo, Status: $_status, Lots: $_lots");
+        "MapScreen: Master File Data extracted - ID: $_id, Master File No: $_masterFileNo, Master File Ref No: $_masterFileRefNo, Plan Type: $_planType, Plan No: $_planNo, Authority Ref: $_authorityRefNo, Status: $_status, Lots: $_lots");
   }
 
   void _onSketchMetricsUpdated(double area, double distance) {
@@ -284,7 +287,22 @@ class _MapScreenState extends State<MapScreen> {
         },
         onInspectionReport: () {
           Navigator.pop(dialogContext);
-          context.push(Pages.routeInspectionReport.toPath());
+          // Pass master file data and saved lot ID as query parameters
+          final queryParams = {
+            if (_masterFileNo != null) 'masterFileNo': _masterFileNo!,
+            if (_masterFileRefNo != null) 'masterFileRefNo': _masterFileRefNo!,
+            if (_planType != null) 'planType': _planType!,
+            if (_planNo != null) 'planNo': _planNo!,
+            if (_authorityRefNo != null) 'authorityRefNo': _authorityRefNo!,
+            if (_savedLotId != null) 'lotId': _savedLotId!,
+          };
+
+          final uri = Uri(
+            path: Pages.routeInspectionReport.toPath(),
+            queryParameters: queryParams,
+          );
+
+          context.push(uri.toString());
         },
       ),
     );
@@ -590,8 +608,83 @@ class _MapScreenState extends State<MapScreen> {
     _showSnackbar("Exited sketching mode");
   }
 
+  /// Shows a confirmation dialog when user tries to cancel lot saving
+  Future<void> _showCancelConfirmationDialog(BuildContext parentContext) async {
+    final bool? shouldRemove = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext confirmContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange,
+                size: 24,
+              ),
+              SizedBox(width: 8),
+              Text('Warning'),
+            ],
+          ),
+          content: Text(
+            'The drawn lot will be removed if you don\'t assign a Lot ID. Do you want to continue?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(confirmContext).pop(false), // Don't remove
+              child: Text(
+                'Go Back',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.of(confirmContext).pop(true), // Remove lot
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Remove Lot'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldRemove == true) {
+      // User confirmed to remove the lot
+      Navigator.of(parentContext).pop(); // Close the SaveLot dialog
+
+      // Remove the drawn lot from mapbox
+      mapboxKey.currentState?.clearDrawing();
+
+      // Exit drawing mode
+      mapboxKey.currentState?.toggleDrawingMode(false);
+
+      if (mounted) {
+        setState(() {
+          isDrawingMode = false;
+        });
+        _showSnackbar("Lot drawing cancelled and removed.");
+      }
+    }
+    // If shouldRemove is false or null, do nothing (stay in SaveLot dialog)
+  }
+
   /// Shows dialog to save a lot after drawing
   void _showSaveLotDialog() {
+    // Parse the number of lots from the _lots string, default to 15 if parsing fails
+    int numberOfLots = 15; // Default fallback
+    if (_lots != null && _lots!.isNotEmpty) {
+      numberOfLots = int.tryParse(_lots!) ?? 15;
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -608,9 +701,9 @@ class _MapScreenState extends State<MapScreen> {
           content: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 446),
             child: SaveLot(
+              numberOfLots: numberOfLots,
               onCancel: () {
-                Navigator.of(dialogContext).pop();
-                _showSnackbar("Lot saving cancelled.");
+                _showCancelConfirmationDialog(dialogContext);
               },
               onSave: (String? selectedLotId) async {
                 Navigator.of(dialogContext).pop();
@@ -619,6 +712,9 @@ class _MapScreenState extends State<MapScreen> {
                   _showSnackbar("Save cancelled or failed.", isError: true);
                   return;
                 }
+
+                // Store the selected lot ID for later use
+                _savedLotId = selectedLotId;
 
                 debugPrint('Selected Lot ID from Dialog: $selectedLotId');
                 // TODO: Associate selectedLotId with the drawn polygon geometry in MapboxState
