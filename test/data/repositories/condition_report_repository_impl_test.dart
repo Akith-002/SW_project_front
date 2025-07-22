@@ -5,20 +5,40 @@ import 'package:mockito/mockito.dart';
 import 'package:land_asset_valuation/application/core/error/exceptions.dart';
 import 'package:land_asset_valuation/application/core/error/failures.dart';
 import 'package:land_asset_valuation/data/datasource/remote/condition_report_remote_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/condition_report_local_data_source.dart';
+import 'package:land_asset_valuation/data/services/connectivity_service.dart';
+import 'package:land_asset_valuation/data/services/condition_report_sync_service.dart';
 import 'package:land_asset_valuation/data/models/condition_report_model.dart';
 import 'package:land_asset_valuation/data/repositories/condition_report_repository_impl.dart';
 
 import 'condition_report_repository_impl_test.mocks.dart';
 
-@GenerateMocks([ConditionReportRemoteDataSource])
+// NOTE: If you see errors about missing MockConditionReportLocalDataSource, MockConnectivityService, or MockConditionReportSyncService,
+// you need to re-run `flutter pub run build_runner build` to regenerate the mocks in condition_report_repository_impl_test.mocks.dart
+@GenerateMocks([
+  ConditionReportRemoteDataSource,
+  ConditionReportLocalDataSource,
+  ConnectivityService,
+  ConditionReportSyncService,
+])
 void main() {
   late ConditionReportRepositoryImpl repository;
   late MockConditionReportRemoteDataSource mockRemoteDataSource;
+  late MockConditionReportLocalDataSource mockLocalDataSource;
+  late MockConnectivityService mockConnectivityService;
+  late MockConditionReportSyncService mockSyncService;
 
   setUp(() {
     mockRemoteDataSource = MockConditionReportRemoteDataSource();
-    repository =
-        ConditionReportRepositoryImpl(remoteDataSource: mockRemoteDataSource);
+    mockLocalDataSource = MockConditionReportLocalDataSource();
+    mockConnectivityService = MockConnectivityService();
+    mockSyncService = MockConditionReportSyncService();
+    repository = ConditionReportRepositoryImpl(
+      remoteDataSource: mockRemoteDataSource,
+      localDataSource: mockLocalDataSource,
+      connectivityService: mockConnectivityService,
+      syncService: mockSyncService,
+    );
   });
 
   final tConditionReportModel = ConditionReportModel(

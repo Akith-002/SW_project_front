@@ -56,4 +56,22 @@ class MockConditionReportRepository extends _i1.Mock
             ),
           )
           as _i4.Future<_i2.Either<_i5.Failure, bool>>);
+
+  @override
+  _i4.Future<int> getPendingReportsCount() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPendingReportsCount, []),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<List<_i6.ConditionReportModel>> getPendingReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPendingReports, []),
+            returnValue: _i4.Future<List<_i6.ConditionReportModel>>.value(
+              <_i6.ConditionReportModel>[],
+            ),
+          )
+          as _i4.Future<List<_i6.ConditionReportModel>>);
 }
