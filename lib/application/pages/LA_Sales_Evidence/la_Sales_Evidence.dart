@@ -18,6 +18,7 @@ import 'package:land_asset_valuation/application/core/validators/la_sales_eviden
 import 'package:land_asset_valuation/application/core/widgets/data_send_successfully_dialogbox.dart';
 import 'package:land_asset_valuation/data/models/la_sales_evidence_model.dart';
 import 'package:land_asset_valuation/injection.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 /// Sales Evidence form screen for Land Acquisition module
 /// Allows users to input and manage land sales evidence data

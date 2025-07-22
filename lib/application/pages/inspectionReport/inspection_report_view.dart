@@ -27,6 +27,7 @@ import 'package:land_asset_valuation/application/pages/inspectionReport/widgets/
 
 // Import the new helpers
 import 'package:land_asset_valuation/application/pages/inspectionReport/helpers/inspection_form_helpers.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 class InspectionReportView extends BasePage {
   final MasterDataResponse masterData;
