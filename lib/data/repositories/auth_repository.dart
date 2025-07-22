@@ -3,20 +3,32 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:land_asset_valuation/application/core/error/exceptions.dart';
 import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
+import 'package:land_asset_valuation/data/datasource/remote/password_reset_remote_data_source.dart';
 import 'package:land_asset_valuation/data/models/auth/login_request.dart';
 import 'package:land_asset_valuation/data/models/auth/login_response.dart';
+import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
+import 'dart:convert'; // Added for jsonDecode
 
 abstract class AuthRepository {
   Future<Either<Exception, LoginResponse>> login(LoginRequest request);
   Future<Either<Exception, bool>> logout(String username);
   Future<Either<Exception, bool>> forgotPassword(String username);
+  // Password reset flow
+  Future<Either<Exception, bool>> requestPasswordReset(String email);
+  Future<Either<Exception, bool>> verifyOtp(String email, String otp);
+  Future<Either<Exception, bool>> resetPassword(
+      String email, String otp, String newPassword);
 }
 
 class AuthRepositoryImpl implements AuthRepository {
   final Dio _dio;
   final SecureStorage _secureStorage;
+  final PasswordResetRemoteDataSource _passwordResetRemoteDataSource;
 
-  AuthRepositoryImpl(this._dio, this._secureStorage);
+  AuthRepositoryImpl(this._dio, this._secureStorage)
+      : _passwordResetRemoteDataSource = PasswordResetRemoteDataSource(
+          dioClient: DioClient(_dio),
+        );
 
   @override
   Future<Either<Exception, LoginResponse>> login(LoginRequest request) async {
@@ -66,16 +78,28 @@ class AuthRepositoryImpl implements AuthRepository {
         print('DioError error: ${e.error}');
       }
 
-      if (e.response?.data != null && e.response?.data['message'] != null) {
-        final errorMessage = e.response?.data['message'];
+      String? errorMessage;
+      // Try to extract error message from backend
+      if (e.response?.data != null) {
+        if (e.response?.data is Map && e.response?.data['message'] != null) {
+          errorMessage = e.response?.data['message'];
+        } else if (e.response?.data is String) {
+          try {
+            final decoded = jsonDecode(e.response?.data);
+            if (decoded is Map && decoded['message'] != null) {
+              errorMessage = decoded['message'];
+            }
+          } catch (_) {}
+        }
+      }
+      if (errorMessage != null) {
         if (kDebugMode) {
           print('Server error message: $errorMessage');
         }
         return Left(DioErrorException(message: errorMessage));
       }
 
-      String errorMessage =
-          'Network error occurred. Please check your connection.';
+      errorMessage = 'Network error occurred. Please check your connection.';
       switch (e.type) {
         case DioExceptionType.connectionTimeout:
           errorMessage = 'Connection timeout. Please try again.';
@@ -163,6 +187,38 @@ class AuthRepositoryImpl implements AuthRepository {
           message: 'Network error occurred. Please check your connection.'));
     } catch (e) {
       return Left(ServerException(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Exception, bool>> requestPasswordReset(String email) async {
+    try {
+      await _passwordResetRemoteDataSource.requestPasswordReset(email);
+      return const Right(true);
+    } catch (e) {
+      return Left(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Exception, bool>> verifyOtp(String email, String otp) async {
+    try {
+      await _passwordResetRemoteDataSource.verifyOtp(email, otp);
+      return const Right(true);
+    } catch (e) {
+      return Left(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Exception, bool>> resetPassword(
+      String email, String otp, String newPassword) async {
+    try {
+      await _passwordResetRemoteDataSource.resetPassword(
+          email, otp, newPassword);
+      return const Right(true);
+    } catch (e) {
+      return Left(Exception(e.toString()));
     }
   }
 }
