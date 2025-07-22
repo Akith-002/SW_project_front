@@ -151,6 +151,12 @@ import 'package:land_asset_valuation/data/repositories/master_data_repository_im
 import 'package:land_asset_valuation/domain/repositories/master_data_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
 
+// LA Lot Feature
+import 'package:land_asset_valuation/data/datasource/remote/la_lot_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/la_lot_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/la_lot_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
+
 final injection = GetIt.I;
 
 Future<void> init() async {
@@ -604,4 +610,23 @@ Future<void> init() async {
         getPaginatedUseCase: injection(),
         searchUseCase: injection(),
       ));
+
+  // ------------------------------
+  // LA Lot Feature
+  // ------------------------------
+
+  // Data sources
+  injection.registerLazySingleton<LALotRemoteDataSource>(
+    () => LALotRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  // Repository
+  injection.registerLazySingleton<LALotRepository>(
+    () => LALotRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  // Use case
+  injection.registerLazySingleton(
+    () => SaveLALotUseCase(injection()),
+  );
 }

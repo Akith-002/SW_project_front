@@ -22,6 +22,9 @@ import 'package:land_asset_valuation/data/models/building.dart';
 import 'package:land_asset_valuation/data/services/building_service.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'dart:convert';
+import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
+import 'package:land_asset_valuation/injection.dart';
 
 // Import for calculations if needed here (likely not)
 
@@ -722,15 +725,63 @@ class _MapScreenState extends State<MapScreen> {
                 _savedLotId = selectedLotId;
 
                 debugPrint('Selected Lot ID from Dialog: $selectedLotId');
-                // TODO: Associate selectedLotId with the drawn polygon geometry in MapboxState
-                // For now, just toggle drawing mode off. Replace finalizeLotDrawing.
-                mapboxKey.currentState?.toggleDrawingMode(false);
 
-                if (mounted) {
-                  setState(() {
-                    isDrawingMode = false;
-                  });
-                  _showSnackbar("Lot drawing saved (ID: $selectedLotId).");
+                // Get the coordinates from the drawn polygon
+                try {
+                  final drawnPoints = mapboxKey.currentState?.drawnPoints;
+
+                  if (drawnPoints == null || drawnPoints.isEmpty) {
+                    _showSnackbar("No coordinates found to save.",
+                        isError: true);
+                    return;
+                  }
+
+                  // Convert coordinates to string format
+                  final coordinatesString =
+                      _convertCoordinatesToString(drawnPoints);
+
+                  // Get master file ID from the URL parameters
+                  final masterFileIdString = _id;
+                  if (masterFileIdString == null) {
+                    _showSnackbar("Master file ID not found.", isError: true);
+                    return;
+                  }
+
+                  final masterFileId = int.tryParse(masterFileIdString);
+                  if (masterFileId == null) {
+                    _showSnackbar("Invalid master file ID.", isError: true);
+                    return;
+                  }
+
+                  // Save lot to backend
+                  final saveLALotUseCase = injection<SaveLALotUseCase>();
+                  final result = await saveLALotUseCase(
+                    masterFileId: masterFileId,
+                    coordinates: coordinatesString,
+                  );
+
+                  result.fold(
+                    (failure) {
+                      _showSnackbar("Failed to save lot: ${failure.message}",
+                          isError: true);
+                    },
+                    (response) {
+                      _showSnackbar(
+                          "Lot saved successfully! ${response.message ?? ''}");
+
+                      // Finalize the drawing mode
+                      mapboxKey.currentState?.toggleDrawingMode(false);
+
+                      if (mounted) {
+                        setState(() {
+                          isDrawingMode = false;
+                        });
+                      }
+                    },
+                  );
+                } catch (e) {
+                  debugPrint('Error saving lot: $e');
+                  _showSnackbar("Error saving lot: $e", isError: true);
                 }
               },
             ),
@@ -1039,6 +1090,18 @@ class _MapScreenState extends State<MapScreen> {
     } else {
       _showSnackbar("Nothing to save. Draw a lot or sketch first.");
     }
+  }
+
+  /// Converts list of Points to JSON string format for API
+  String _convertCoordinatesToString(List<Point> points) {
+    final coordinates = points
+        .map((point) => {
+              'lng': point.coordinates.lng,
+              'lat': point.coordinates.lat,
+            })
+        .toList();
+
+    return jsonEncode(coordinates);
   }
 
   // Add the build method at the class level
