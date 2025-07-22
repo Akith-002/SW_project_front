@@ -381,6 +381,11 @@ class AppRouter {
                     state.uri.queryParameters['assetId'] ?? '0',
                   ) ??
                   0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
 
               return NoTransitionPage(
                 key: state.pageKey,
@@ -393,7 +398,12 @@ class AppRouter {
                       return Center(child: Text('Failed to load master data'));
                     } else {
                       return DomesticRatingCard(
-                          assetId: assetId, masterData: snapshot.data!);
+                        assetId: assetId, 
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -408,6 +418,12 @@ class AppRouter {
                     state.uri.queryParameters['assetId'] ?? '0',
                   ) ??
                   0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -419,7 +435,12 @@ class AppRouter {
                       return Center(child: Text('Failed to load master data'));
                     } else {
                       return OfficesRatingCard(
-                          assetId: assetId, masterData: snapshot.data!);
+                        assetId: assetId, 
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -430,6 +451,16 @@ class AppRouter {
             path: Pages.routeAgricultureRatingCard.toPath(),
             name: Pages.routeAgricultureRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -440,7 +471,13 @@ class AppRouter {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Failed to load master data'));
                     } else {
-                      return AgricultureRatingCard(masterData: snapshot.data!);
+                      return AgricultureRatingCard(
+                        assetId: assetId,
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -451,6 +488,16 @@ class AppRouter {
             path: Pages.routeShopsRatingCard.toPath(),
             name: Pages.routeShopsRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -461,7 +508,13 @@ class AppRouter {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Failed to load master data'));
                     } else {
-                      return ShopsRatingCard(masterData: snapshot.data!);
+                      return ShopsRatingCard(
+                        assetId: assetId,
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -472,6 +525,16 @@ class AppRouter {
             path: Pages.routeSpecialRatingCard.toPath(),
             name: Pages.routeSpecialRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -482,7 +545,13 @@ class AppRouter {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Failed to load master data'));
                     } else {
-                      return SpecialRatingCard(masterData: snapshot.data!);
+                      return SpecialRatingCard(
+                        assetId: assetId,
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -649,10 +718,28 @@ class AppRouter {
         );
         break;
       case 2:
+        // Mass Rating
+        context.goNamed(
+          Pages.routeI3MasterFileList.toPathName(),
+          queryParameters: {'selectedIndex': index.toString()},
+        );
+        break;
       case 3:
+        // Rating Assessment - show requests table first
+        context.goNamed(
+          Pages.routeI3MasterFileList.toPathName(),
+          queryParameters: {'selectedIndex': index.toString()},
+        );
+        break;
       case 4:
+        // Rating Building - show requests table first
+        context.goNamed(
+          Pages.routeI3MasterFileList.toPathName(),
+          queryParameters: {'selectedIndex': index.toString()},
+        );
+        break;
       case 5:
-        // Mass Rating section
+        // Rating Object - show requests table first
         context.goNamed(
           Pages.routeI3MasterFileList.toPathName(),
           queryParameters: {'selectedIndex': index.toString()},
