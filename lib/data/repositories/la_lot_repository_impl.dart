@@ -42,4 +42,35 @@ class LALotRepositoryImpl implements LALotRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<LALotModel>>> getLotsByMasterFileId(
+      int masterFileId) async {
+    try {
+      _logger.d('======= LA LOT REPOSITORY: GETTING LOTS =======');
+      _logger.d('Master File ID: $masterFileId');
+      _logger.d('===========================================');
+
+      final lots = await remoteDataSource.getLotsByMasterFileId(masterFileId);
+
+      _logger.d('======= LA LOT REPOSITORY: GET LOTS SUCCESS =======');
+      _logger.d('Found ${lots.length} lots');
+      _logger.d('===========================================');
+
+      return Right(lots);
+    } on ServerException {
+      _logger.e('======= LA LOT REPOSITORY: GET LOTS SERVER ERROR =======');
+      return const Left(
+          ServerFailure('Server error occurred while fetching lots'));
+    } on DioErrorException {
+      _logger.e('======= LA LOT REPOSITORY: GET LOTS NETWORK ERROR =======');
+      return const Left(
+          NetworkFailure('Network error occurred while fetching lots'));
+    } catch (e) {
+      _logger.e('======= LA LOT REPOSITORY: GET LOTS UNEXPECTED ERROR =======');
+      _logger.e('Error: $e');
+      _logger.e('===========================================');
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

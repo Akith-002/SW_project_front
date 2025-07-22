@@ -156,6 +156,7 @@ import 'package:land_asset_valuation/data/datasource/remote/la_lot_remote_data_s
 import 'package:land_asset_valuation/data/repositories/la_lot_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/la_lot_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_la_lots_usecase.dart';
 
 final injection = GetIt.I;
 
@@ -628,5 +629,9 @@ Future<void> init() async {
   // Use case
   injection.registerLazySingleton(
     () => SaveLALotUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetLALotsUseCase(injection()),
   );
 }

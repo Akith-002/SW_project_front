@@ -24,6 +24,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'dart:convert';
 import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_la_lots_usecase.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 // Import for calculations if needed here (likely not)
@@ -122,6 +123,64 @@ class _MapScreenState extends State<MapScreen> {
 
     debugPrint(
         "MapScreen: Master File Data extracted - ID: $_id, Master File No: $_masterFileNo, Master File Ref No: $_masterFileRefNo, Plan Type: $_planType, Plan No: $_planNo, Authority Ref: $_authorityRefNo, Status: $_status, Lots: $_lots");
+
+    // Load existing lots after extracting master file data
+    _loadExistingLots();
+  }
+
+  /// Loads existing lots for the current master file and displays them on the map
+  void _loadExistingLots() async {
+    if (_id == null) {
+      debugPrint("MapScreen: No master file ID available to load lots");
+      return;
+    }
+
+    final masterFileId = int.tryParse(_id!);
+    if (masterFileId == null) {
+      debugPrint("MapScreen: Invalid master file ID: $_id");
+      return;
+    }
+
+    try {
+      debugPrint(
+          "MapScreen: Loading existing lots for master file ID: $masterFileId");
+
+      final getLALotsUseCase = injection<GetLALotsUseCase>();
+      final result = await getLALotsUseCase(masterFileId: masterFileId);
+
+      result.fold(
+        (failure) {
+          debugPrint(
+              "MapScreen: Failed to load existing lots: ${failure.message}");
+          // Don't show error to user as this is not critical - might be no existing lots
+        },
+        (lots) {
+          debugPrint(
+              "MapScreen: Successfully loaded ${lots.length} existing lots");
+
+          if (lots.isNotEmpty) {
+            // Convert LALotModel to Map format expected by mapbox
+            final lotsData = lots
+                .map((lot) => {
+                      'masterFileId': lot.masterFileId,
+                      'coordinates': lot.coordinates,
+                    })
+                .toList();
+
+            // Load the lots into the mapbox widget
+            mapboxKey.currentState?.loadExistingLots(lotsData);
+
+            _showSnackbar("Loaded ${lots.length} existing lot(s)");
+          } else {
+            debugPrint(
+                "MapScreen: No existing lots found for this master file");
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint("MapScreen: Error loading existing lots: $e");
+      // Don't show error to user as this is not critical
+    }
   }
 
   void _onSketchMetricsUpdated(double area, double distance) {
