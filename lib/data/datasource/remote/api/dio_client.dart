@@ -5,7 +5,7 @@ import 'package:land_asset_valuation/application/core/configurations/app_config.
 class DioClient {
   final Dio dio;
 
-  DioClient(this.dio) {
+  DioClient(this.dio, {List<Interceptor>? additionalInterceptors}) {
     dio
       ..options.baseUrl = AppConfig.apiBaseUrl
       ..options.connectTimeout = const Duration(seconds: 30)
@@ -19,6 +19,11 @@ class DioClient {
         responseBody: kDebugMode,
         error: kDebugMode,
       ));
+
+    // Add any additional interceptors
+    if (additionalInterceptors != null) {
+      dio.interceptors.addAll(additionalInterceptors);
+    }
   }
 
   // GET request

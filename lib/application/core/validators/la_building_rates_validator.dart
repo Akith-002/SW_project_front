@@ -104,7 +104,10 @@ class LaBuildingRatesValidator {
     if (value == null || value.trim().isEmpty) {
       return null; // Optional field can be empty
     }
-    return alphanumeric(value, fieldName) ?? maxLength(value, max, fieldName);
+    String? alphanumericError = alphanumeric(value, fieldName);
+    if (alphanumericError != null) return alphanumericError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates optional numeric fields with max length
@@ -112,7 +115,10 @@ class LaBuildingRatesValidator {
     if (value == null || value.trim().isEmpty) {
       return null; // Optional field can be empty
     }
-    return numeric(value, fieldName) ?? maxLength(value, max, fieldName);
+    String? numericError = numeric(value, fieldName);
+    if (numericError != null) return numericError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates optional integer fields with max length
@@ -120,33 +126,51 @@ class LaBuildingRatesValidator {
     if (value == null || value.trim().isEmpty) {
       return null; // Optional field can be empty
     }
-    return integer(value, fieldName) ?? maxLength(value, max, fieldName);
+    String? integerError = integer(value, fieldName);
+    if (integerError != null) return integerError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates a required alphanumeric field with max length
   static String? requiredAlphaNum(String? value, int max, String fieldName) {
-    return required(value, fieldName) ??
-        alphanumeric(value, fieldName) ??
-        maxLength(value, max, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    String? alphanumericError = alphanumeric(value, fieldName);
+    if (alphanumericError != null) return alphanumericError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates a required numeric field with max length
   static String? requiredNumeric(String? value, int max, String fieldName) {
-    return required(value, fieldName) ??
-        numeric(value, fieldName) ??
-        maxLength(value, max, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    String? numericError = numeric(value, fieldName);
+    if (numericError != null) return numericError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates a required integer field with max length
   static String? requiredInteger(String? value, int max, String fieldName) {
-    return required(value, fieldName) ??
-        integer(value, fieldName) ??
-        maxLength(value, max, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    String? integerError = integer(value, fieldName);
+    if (integerError != null) return integerError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates a coordinate field (latitude/longitude)
   static String? requiredCoordinate(String? value, String fieldName) {
-    return required(value, fieldName) ?? coordinate(value, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    return coordinate(value, fieldName);
   }
 
   /// Validates an optional coordinate field
@@ -160,9 +184,13 @@ class LaBuildingRatesValidator {
   /// Validates a required assessment number field
   static String? requiredAssessmentNumber(
       String? value, int max, String fieldName) {
-    return required(value, fieldName) ??
-        assessmentNumber(value, fieldName) ??
-        maxLength(value, max, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    String? assessmentError = assessmentNumber(value, fieldName);
+    if (assessmentError != null) return assessmentError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates an optional assessment number field
@@ -171,13 +199,18 @@ class LaBuildingRatesValidator {
     if (value == null || value.trim().isEmpty) {
       return null; // Optional field can be empty
     }
-    return assessmentNumber(value, fieldName) ??
-        maxLength(value, max, fieldName);
+    String? assessmentError = assessmentNumber(value, fieldName);
+    if (assessmentError != null) return assessmentError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates a required year field
   static String? requiredYear(String? value, String fieldName) {
-    return required(value, fieldName) ?? year(value, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    return year(value, fieldName);
   }
 
   /// Validates an optional year field
@@ -208,7 +241,10 @@ class LaBuildingRatesValidator {
 
   /// Validates a required area field
   static String? requiredArea(String? value, String fieldName) {
-    return required(value, fieldName) ?? areaSquareFeet(value, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    return areaSquareFeet(value, fieldName);
   }
 
   /// Validates an optional area field
@@ -239,7 +275,10 @@ class LaBuildingRatesValidator {
 
   /// Validates a required rate field
   static String? requiredRate(String? value, String fieldName) {
-    return required(value, fieldName) ?? ratePerSquareFoot(value, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    return ratePerSquareFoot(value, fieldName);
   }
 
   /// Validates an optional rate field
@@ -270,7 +309,10 @@ class LaBuildingRatesValidator {
 
   /// Validates a required cost field
   static String? requiredCost(String? value, String fieldName) {
-    return required(value, fieldName) ?? cost(value, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    return cost(value, fieldName);
   }
 
   /// Validates an optional cost field

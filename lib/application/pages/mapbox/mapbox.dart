@@ -727,6 +727,15 @@ class MapboxState extends State<Mapbox>
         debugPrint("Mapbox: Deleted initial lot outline from map.");
       }
 
+      // Clear vertex dots
+      if (circleAnnotationManager != null && _vertexDots.isNotEmpty) {
+        for (var dot in _vertexDots) {
+          await circleAnnotationManager!.delete(dot);
+        }
+        _vertexDots.clear();
+        debugPrint("Mapbox: Cleared ${_vertexDots.length} vertex dots.");
+      }
+
       debugPrint("Mapbox: Cleared initial lot state.");
     } catch (e) {
       debugPrint("Error during clearDrawing's polygon deletion: $e");
