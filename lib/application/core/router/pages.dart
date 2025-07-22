@@ -21,6 +21,9 @@ class Pages {
   static const routeInspectionReport = "inspection-report";
   static const routeSketchTool = "sketch-tool";
   static const routeLmMasterfileList = "lm-masterfile-list";
+  static const routeResetPassword = "reset-password";
+  static const routeVerifyOtp = "verify-otp";
+  static const routeCreatePassword = "create-password";
 
   // Rating Card Forms
   static const routeDomesticRatingCard = "domestic-rating-card";

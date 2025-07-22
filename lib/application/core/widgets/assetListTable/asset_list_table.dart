@@ -21,6 +21,8 @@ class AssetListTable extends StatefulWidget {
   final Function(Asset)? onAssetSelected;
   final Function(List<Asset>)? onAssetsSelected;
   final VoidCallback? onRefresh;
+  final TextEditingController? searchController;
+  final Function(String)? onSearch;
 
   const AssetListTable({
     super.key,
@@ -29,6 +31,8 @@ class AssetListTable extends StatefulWidget {
     this.onAssetSelected,
     this.onAssetsSelected,
     this.onRefresh,
+    this.searchController,
+    this.onSearch,
   });
 
   @override
@@ -227,6 +231,8 @@ class _AssetListTableState extends State<AssetListTable> {
                   width: 290,
                   height: 37,
                   child: TextField(
+                    controller: widget.searchController,
+                    onChanged: widget.onSearch,
                     decoration: InputDecoration(
                       hintText: AppString.search.localize(context),
                       hintStyle: AppStyling.regularTextSize14,
@@ -243,6 +249,15 @@ class _AssetListTableState extends State<AssetListTable> {
                         horizontal: 12,
                         vertical: 8,
                       ),
+                      suffixIcon: widget.searchController?.text.isNotEmpty ?? false
+                          ? IconButton(
+                              icon: Icon(Icons.clear),
+                              onPressed: () {
+                                widget.searchController?.clear();
+                                widget.onSearch?.call('');
+                              },
+                            )
+                          : null,
                     ),
                   ),
                 ),

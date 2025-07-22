@@ -20,10 +20,21 @@ import 'package:land_asset_valuation/injection.dart';
 
 class EditRatingCardDialog {
   static void showEditRatingCardDialog(BuildContext context, {Asset? asset}) {
+    // Capture router state before showing dialog
+    String? requestId;
+    try {
+      final currentRoute = GoRouterState.of(context);
+      requestId = currentRoute.uri.queryParameters['requestId'];
+    } catch (e) {
+      // If we can't get the router state, that's okay
+      debugPrint('Could not get router state: $e');
+    }
+    
     showDialog(
       context: context,
       builder: (context) {
         int selectedValue = 1; // Default selected value
+        final capturedRequestId = requestId; // Capture requestId for use in dialog
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -219,11 +230,22 @@ class EditRatingCardDialog {
     bool hasSameOwner =
         selectedAssets.every((asset) => asset.owner == firstOwner);
 
+    // Capture router state before showing dialog
+    String? requestId;
+    try {
+      final currentRoute = GoRouterState.of(context);
+      requestId = currentRoute.uri.queryParameters['requestId'];
+    } catch (e) {
+      // If we can't get the router state, that's okay
+      debugPrint('Could not get router state: $e');
+    }
+
     // Proceed with normal multi-select dialog if owners match
     showDialog(
       context: context,
       builder: (context) {
         int selectedValue = 1; // Default selected value
+        final capturedRequestId = requestId; // Capture requestId for use in dialog
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -391,10 +413,21 @@ class EditRatingCardDialog {
 
   static void showAddRatingCardDialog(BuildContext context,
       {String? sourceContext, Asset? asset}) {
+    // Capture router state before showing dialog
+    String? requestId;
+    try {
+      final currentRoute = GoRouterState.of(context);
+      requestId = currentRoute.uri.queryParameters['requestId'];
+    } catch (e) {
+      // If we can't get the router state, that's okay
+      debugPrint('Could not get router state: $e');
+    }
+    
     showDialog(
       context: context,
       builder: (context) {
         int selectedValue = 1; // Default selected value
+        final capturedRequestId = requestId; // Capture requestId for use in dialog
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -579,6 +612,11 @@ class EditRatingCardDialog {
                             }
                             if (asset != null) {
                               queryParams['assetId'] = asset.id.toString();
+                            }
+                            
+                            // Use the captured requestId
+                            if (capturedRequestId != null) {
+                              queryParams['requestId'] = capturedRequestId;
                             }
 
                             switch (selectedValue) {
@@ -779,10 +817,21 @@ class EditRatingCardDialog {
 
   static void showEditRatingCardTypeDialog(BuildContext context,
       {required Asset asset, String? sourceContext}) {
+    // Capture router state before showing dialog
+    String? requestId;
+    try {
+      final currentRoute = GoRouterState.of(context);
+      requestId = currentRoute.uri.queryParameters['requestId'];
+    } catch (e) {
+      // If we can't get the router state, that's okay
+      debugPrint('Could not get router state: $e');
+    }
+    
     showDialog(
       context: context,
       builder: (context) {
         int selectedValue = 1; // Default selected value
+        final capturedRequestId = requestId; // Capture requestId for use in dialog
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -969,6 +1018,11 @@ class EditRatingCardDialog {
                             }
                             // Include the asset ID for existing rating cards
                             queryParams['assetId'] = asset.id.toString();
+                            
+                            // Use the captured requestId
+                            if (capturedRequestId != null) {
+                              queryParams['requestId'] = capturedRequestId;
+                            }
 
                             switch (selectedValue) {
                               case 1:

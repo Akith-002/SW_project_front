@@ -13,6 +13,10 @@ import 'package:land_asset_valuation/data/datasource/shared_preference.dart'
 import 'package:land_asset_valuation/data/models/condition_report_model.dart'
     as _i10;
 import 'package:land_asset_valuation/data/models/master_data_model.dart' as _i6;
+import 'package:land_asset_valuation/data/services/condition_report_sync_service.dart'
+    as _i15;
+import 'package:land_asset_valuation/data/services/connectivity_service.dart'
+    as _i14;
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart'
     as _i2;
 import 'package:land_asset_valuation/domain/repositories/master_data_repository.dart'
@@ -199,4 +203,141 @@ class MockGetMasterDataUseCase extends _i1.Mock
             ),
           )
           as _i8.Future<_i6.MasterDataResponse>);
+}
+
+/// A class which mocks [ConditionReportRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockConditionReportRepository extends _i1.Mock
+    implements _i2.ConditionReportRepository {
+  MockConditionReportRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i8.Future<_i3.Either<_i9.Failure, bool>> sendConditionReport(
+    _i10.ConditionReportModel? report,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#sendConditionReport, [report]),
+            returnValue: _i8.Future<_i3.Either<_i9.Failure, bool>>.value(
+              _FakeEither_1<_i9.Failure, bool>(
+                this,
+                Invocation.method(#sendConditionReport, [report]),
+              ),
+            ),
+          )
+          as _i8.Future<_i3.Either<_i9.Failure, bool>>);
+
+  @override
+  _i8.Future<int> getPendingReportsCount() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPendingReportsCount, []),
+            returnValue: _i8.Future<int>.value(0),
+          )
+          as _i8.Future<int>);
+
+  @override
+  _i8.Future<List<_i10.ConditionReportModel>> getPendingReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPendingReports, []),
+            returnValue: _i8.Future<List<_i10.ConditionReportModel>>.value(
+              <_i10.ConditionReportModel>[],
+            ),
+          )
+          as _i8.Future<List<_i10.ConditionReportModel>>);
+}
+
+/// A class which mocks [ConnectivityService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockConnectivityService extends _i1.Mock
+    implements _i14.ConnectivityService {
+  MockConnectivityService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i8.Stream<bool> get connectivityStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#connectivityStream),
+            returnValue: _i8.Stream<bool>.empty(),
+          )
+          as _i8.Stream<bool>);
+
+  @override
+  _i8.Future<bool> get isConnected =>
+      (super.noSuchMethod(
+            Invocation.getter(#isConnected),
+            returnValue: _i8.Future<bool>.value(false),
+          )
+          as _i8.Future<bool>);
+
+  @override
+  void initialize() => super.noSuchMethod(
+    Invocation.method(#initialize, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+}
+
+/// A class which mocks [ConditionReportSyncService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockConditionReportSyncService extends _i1.Mock
+    implements _i15.ConditionReportSyncService {
+  MockConditionReportSyncService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i8.Stream<_i15.SyncStatus> get syncStatusStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#syncStatusStream),
+            returnValue: _i8.Stream<_i15.SyncStatus>.empty(),
+          )
+          as _i8.Stream<_i15.SyncStatus>);
+
+  @override
+  void initialize() => super.noSuchMethod(
+    Invocation.method(#initialize, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i8.Future<void> syncPendingReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#syncPendingReports, []),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
+
+  @override
+  _i8.Future<int> getPendingReportsCount() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPendingReportsCount, []),
+            returnValue: _i8.Future<int>.value(0),
+          )
+          as _i8.Future<int>);
+
+  @override
+  _i8.Future<void> retryFailedReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#retryFailedReports, []),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
 }

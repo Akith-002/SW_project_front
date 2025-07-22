@@ -5,10 +5,16 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
+import 'package:land_asset_valuation/data/datasource/local/condition_report_local_data_source.dart'
+    as _i5;
 import 'package:land_asset_valuation/data/datasource/remote/condition_report_remote_data_source.dart'
     as _i2;
 import 'package:land_asset_valuation/data/models/condition_report_model.dart'
     as _i4;
+import 'package:land_asset_valuation/data/services/condition_report_sync_service.dart'
+    as _i7;
+import 'package:land_asset_valuation/data/services/connectivity_service.dart'
+    as _i6;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -41,4 +47,162 @@ class MockConditionReportRemoteDataSource extends _i1.Mock
             returnValue: _i3.Future<bool>.value(false),
           )
           as _i3.Future<bool>);
+}
+
+/// A class which mocks [ConditionReportLocalDataSource].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockConditionReportLocalDataSource extends _i1.Mock
+    implements _i5.ConditionReportLocalDataSource {
+  MockConditionReportLocalDataSource() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<int> saveConditionReport(_i4.ConditionReportModel? report) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveConditionReport, [report]),
+            returnValue: _i3.Future<int>.value(0),
+          )
+          as _i3.Future<int>);
+
+  @override
+  _i3.Future<List<_i4.ConditionReportModel>> getAllReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAllReports, []),
+            returnValue: _i3.Future<List<_i4.ConditionReportModel>>.value(
+              <_i4.ConditionReportModel>[],
+            ),
+          )
+          as _i3.Future<List<_i4.ConditionReportModel>>);
+
+  @override
+  _i3.Future<List<_i4.ConditionReportModel>> getPendingReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPendingReports, []),
+            returnValue: _i3.Future<List<_i4.ConditionReportModel>>.value(
+              <_i4.ConditionReportModel>[],
+            ),
+          )
+          as _i3.Future<List<_i4.ConditionReportModel>>);
+
+  @override
+  _i3.Future<int> getPendingReportsCount() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPendingReportsCount, []),
+            returnValue: _i3.Future<int>.value(0),
+          )
+          as _i3.Future<int>);
+
+  @override
+  _i3.Future<void> deleteReport(int? localId) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteReport, [localId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> clearSyncedReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearSyncedReports, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+}
+
+/// A class which mocks [ConnectivityService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockConnectivityService extends _i1.Mock
+    implements _i6.ConnectivityService {
+  MockConnectivityService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Stream<bool> get connectivityStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#connectivityStream),
+            returnValue: _i3.Stream<bool>.empty(),
+          )
+          as _i3.Stream<bool>);
+
+  @override
+  _i3.Future<bool> get isConnected =>
+      (super.noSuchMethod(
+            Invocation.getter(#isConnected),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  void initialize() => super.noSuchMethod(
+    Invocation.method(#initialize, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+}
+
+/// A class which mocks [ConditionReportSyncService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockConditionReportSyncService extends _i1.Mock
+    implements _i7.ConditionReportSyncService {
+  MockConditionReportSyncService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Stream<_i7.SyncStatus> get syncStatusStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#syncStatusStream),
+            returnValue: _i3.Stream<_i7.SyncStatus>.empty(),
+          )
+          as _i3.Stream<_i7.SyncStatus>);
+
+  @override
+  void initialize() => super.noSuchMethod(
+    Invocation.method(#initialize, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i3.Future<void> syncPendingReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#syncPendingReports, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<int> getPendingReportsCount() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPendingReportsCount, []),
+            returnValue: _i3.Future<int>.value(0),
+          )
+          as _i3.Future<int>);
+
+  @override
+  _i3.Future<void> retryFailedReports() =>
+      (super.noSuchMethod(
+            Invocation.method(#retryFailedReports, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
 }

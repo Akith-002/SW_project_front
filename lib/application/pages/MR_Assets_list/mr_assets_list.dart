@@ -30,6 +30,7 @@ class MrAssetsList extends BasePage {
 class _MrAssetsListState extends BasePageState<MrAssetsList> {
   final _cubit = injection<MrAssetsListCubit>();
   String? _requestReferenceNo;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -112,15 +113,25 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
   void _refreshAssets() {
     debugPrint('Refreshing assets...');
 
+    // Clear any existing search
+    _searchController.clear();
+    
     // Show a brief loading indicator
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Refreshing assets...'),
         duration: Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
       ),
     );
 
-    _loadAssets();
+    // Force a fresh load by emitting loading state first
+    _cubit.emit(MrAssetsListLoading());
+    
+    // Small delay to ensure loading state is shown
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _loadAssets();
+    });
   }
 
   @override
@@ -224,6 +235,8 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
                     onAssetSelected: _onAssetSelected,
                     onAssetsSelected: _onAssetsSelected,
                     onRefresh: _refreshAssets,
+                    searchController: _searchController,
+                    onSearch: _searchAssets,
                   );
                 } else if (state is MrAssetsListSearchLoaded) {
                   return AssetListTable(
@@ -232,6 +245,8 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
                     onAssetSelected: _onAssetSelected,
                     onAssetsSelected: _onAssetsSelected,
                     onRefresh: _refreshAssets,
+                    searchController: _searchController,
+                    onSearch: _searchAssets,
                   );
                 } else {
                   // Initial state - show empty state or loading
@@ -248,6 +263,12 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
