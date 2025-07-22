@@ -246,144 +246,185 @@ class TableScaffoldState extends State<TableScaffold> {
 
     return Column(
       children: [
+        // Table Section - Use Expanded to take available space
         Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: 1000,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: colors(context).colorGrey3 ??
-                          colors(context).colorGrey9!,
-                      width: 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: DataTable(
-                    headingRowColor: WidgetStateProperty.all(
-                      colors(context).colorGrey9!,
-                    ),
-                    columnSpacing: 16,
-                    horizontalMargin: 16,
-                    columns: [
-                      DataColumn(
-                        label: SizedBox(
-                          width: 100,
-                          child: Text("Master File No"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: 150,
-                          child: Text("Plan Type"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: 100,
-                          child: Text("Plan No"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: 200,
-                          child: Text("Requesting Authority Reference No"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Container(
-                          width: 100,
-                          alignment: Alignment.center,
-                          child: Text("Status"),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Container(
-                          width: 100,
-                          alignment: Alignment.center,
-                          child: Text("Action"),
-                        ),
-                      ),
-                    ],
-                    rows: plans.map((plan) {
-                      return DataRow(
-                        cells: [
-                          DataCell(Text(plan.masterFileNo.toString())),
-                          DataCell(Text(plan.planType)),
-                          DataCell(Text(plan.planNo)),
-                          DataCell(Text(plan.requestingAuthorityReferenceNo)),
-                          DataCell(
-                            Container(
-                              alignment: Alignment.center,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: plan.status.toLowerCase() == 'success'
-                                      ? Colors.green.withOpacity(0.1)
-                                      : Colors.orange.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  plan.status,
-                                  style: TextStyle(
-                                    color:
-                                        plan.status.toLowerCase() == 'success'
-                                            ? Colors.green
-                                            : Colors.orange,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          DataCell(
-                            Container(
-                              alignment: Alignment.center,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.visibility),
-                                    onPressed: () {
-                                      context.pushNamed(
-                                        Pages.routeMapScreen.toPathName(),
-                                        queryParameters: {
-                                          'source': widget.pageSource,
-                                          'selectedIndex': '1',
-                                        },
-                                      );
-                                    },
-                                    tooltip: 'View Details',
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    onPressed: () {
-                                      context.pushNamed(
-                                        Pages.routeMapScreen.toPathName(),
-                                        queryParameters: {
-                                          'source': widget.pageSource,
-                                          'selectedIndex': '1',
-                                        },
-                                      );
-                                    },
-                                    tooltip: 'Edit',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color:
+                      colors(context).colorGrey3 ?? colors(context).colorGrey9!,
+                  width: 0.5,
                 ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                children: [
+                  // Fixed header
+                  Container(
+                    color: colors(context).colorGrey9!,
+                    child: const Row(
+                      children: [
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Master File No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Plan Type",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Plan No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 3,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text("Authority Reference No",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            )),
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Center(
+                                  child: Text("Status",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold))),
+                            )),
+                        Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Center(
+                                  child: Text("Action",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold))),
+                            )),
+                      ],
+                    ),
+                  ),
+                  // Scrollable body
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: plans.length,
+                      itemBuilder: (context, index) {
+                        final plan = plans[index];
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: colors(context).colorGrey3 ??
+                                    colors(context).colorGrey9!,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Text(plan.masterFileNo.toString()),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Text(plan.planType),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Text(plan.planNo),
+                                  )),
+                              Expanded(
+                                  flex: 3,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Text(
+                                        plan.requestingAuthorityReferenceNo),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: plan.status.toLowerCase() ==
+                                                  'success'
+                                              ? Colors.green.withOpacity(0.1)
+                                              : Colors.orange.withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          plan.status,
+                                          style: TextStyle(
+                                            color: plan.status.toLowerCase() ==
+                                                    'success'
+                                                ? Colors.green
+                                                : Colors.orange,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )),
+                              Expanded(
+                                  flex: 1,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    child: Center(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.visibility),
+                                        onPressed: () {
+                                          context.pushNamed(
+                                            Pages.routeMapScreen.toPathName(),
+                                            queryParameters: {
+                                              'source': widget.pageSource,
+                                              'selectedIndex': '1',
+                                            },
+                                          );
+                                        },
+                                        tooltip: 'View Details',
+                                      ),
+                                    ),
+                                  )),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

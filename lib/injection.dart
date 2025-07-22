@@ -14,12 +14,26 @@ import 'package:land_asset_valuation/data/datasource/shared_preference.dart';
 
 // Dio client
 import 'package:land_asset_valuation/data/datasource/remote/api/dio_client.dart';
+import 'package:land_asset_valuation/data/datasource/remote/api/auth_interceptor.dart';
 
 // Condition Report Feature
 import 'package:land_asset_valuation/data/datasource/remote/condition_report_remote_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/condition_report_local_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/condition_report_local_database.dart';
 import 'package:land_asset_valuation/data/repositories/condition_report_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_condition_report_usecase.dart';
+import 'package:land_asset_valuation/data/services/connectivity_service.dart';
+import 'package:land_asset_valuation/data/services/condition_report_sync_service.dart';
+
+// Inspection Report Feature
+import 'package:land_asset_valuation/data/datasource/remote/inspection_report_remote_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/inspection_report_local_data_source.dart';
+import 'package:land_asset_valuation/data/datasource/local/inspection_report_local_database.dart';
+import 'package:land_asset_valuation/data/repositories/inspection_report_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/inspection_report_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_inspection_report_usecase.dart';
+import 'package:land_asset_valuation/data/services/inspection_report_sync_service.dart';
 
 // Asset Division Feature
 import 'package:land_asset_valuation/data/datasource/remote/asset_division_remote_data_source.dart';
@@ -67,6 +81,18 @@ import 'package:land_asset_valuation/data/datasource/remote/asset_change_remote_
 import 'package:land_asset_valuation/data/repositories/asset_change_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/asset_change_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/change_asset_number_usecase.dart';
+
+// LA Building Rates Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/la_building_rates_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/la_building_rates_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/la_building_rates_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_la_building_rates_usecase.dart';
+
+// LA Sales Evidence Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/la_sales_evidence_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/la_sales_evidence_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/la_sales_evidence_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_la_sales_evidence_usecase.dart';
 
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
@@ -149,23 +175,95 @@ Future<void> init() async {
     dio.options.baseUrl = AppConfig.apiBaseUrl;
     return dio;
   });
-  injection.registerLazySingleton(() => DioClient(injection()));
+  injection.registerLazySingleton(() => DioClient(
+        injection(),
+        additionalInterceptors: [AuthInterceptor(injection())],
+      ));
   injection.registerLazySingleton(() => Logger());
+  injection.registerLazySingleton(() => SecureStorage());
+
+  // Initialize connectivity service
+  final connectivityService = ConnectivityService();
+  connectivityService.initialize();
+  injection.registerSingleton(connectivityService);
 
   // ------------------------------
   // Condition Report Feature
   // ------------------------------
+
+  // Core services (ConnectivityService already registered above)
+  injection.registerLazySingleton(() => ConditionReportLocalDatabase());
+
+  // Data sources
   injection.registerLazySingleton<ConditionReportRemoteDataSource>(
     () => ConditionReportRemoteDataSourceImpl(dioClient: injection()),
   );
 
-  injection.registerLazySingleton<ConditionReportRepository>(
-    () => ConditionReportRepositoryImpl(remoteDataSource: injection()),
+  injection.registerLazySingleton<ConditionReportLocalDataSource>(
+    () => ConditionReportLocalDataSourceImpl(database: injection()),
   );
 
+  // Sync service
+  final syncService = ConditionReportSyncService(
+    localDatabase: injection(),
+    remoteDataSource: injection(),
+    connectivityService: injection(),
+  );
+  syncService.initialize();
+  injection.registerSingleton(syncService);
+
+  // Repository
+  injection.registerLazySingleton<ConditionReportRepository>(
+    () => ConditionReportRepositoryImpl(
+      remoteDataSource: injection(),
+      localDataSource: injection(),
+      connectivityService: injection(),
+      syncService: injection(),
+    ),
+  );
+
+  // Use case
   injection.registerLazySingleton(
     () => SendConditionReportUseCase(injection()),
   );
+
+  // ------------------------------
+  // Inspection Report Feature
+  // ------------------------------
+  injection.registerLazySingleton(() => InspectionReportLocalDatabase());
+
+  // Data sources
+  injection.registerLazySingleton<InspectionReportRemoteDataSource>(
+    () => InspectionReportRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<InspectionReportLocalDataSource>(
+    () => InspectionReportLocalDataSourceImpl(database: injection()),
+  );
+
+  // Sync service
+  final inspectionSyncService = InspectionReportSyncService(
+    remoteDataSource: injection(),
+    localDataSource: injection(),
+    connectivityService: injection(),
+  );
+  injection.registerSingleton(inspectionSyncService);
+
+  // Repository
+  injection.registerLazySingleton<InspectionReportRepository>(
+    () => InspectionReportRepositoryImpl(
+      remoteDataSource: injection(),
+      localDataSource: injection(),
+      connectivityService: injection(),
+      syncService: injection(),
+    ),
+  );
+
+  // Use case
+  injection.registerLazySingleton(
+    () => SendInspectionReportUseCase(injection()),
+  );
+
   // ------------------------------
   // Asset Division Feature
   // ------------------------------
@@ -245,6 +343,39 @@ Future<void> init() async {
   );
 
   // ------------------------------
+  // LA Building Rates Feature
+  // ------------------------------
+  injection.registerLazySingleton<LaBuildingRatesRemoteDataSource>(
+    () => LaBuildingRatesRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<LaBuildingRatesRepository>(
+    () => LaBuildingRatesRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SendLaBuildingRatesUseCase(injection()),
+  );
+
+  // ------------------------------
+  // LA Sales Evidence Feature
+  // ------------------------------
+  injection.registerLazySingleton<LaSalesEvidenceRemoteDataSource>(
+    () => LaSalesEvidenceRemoteDataSourceImpl(
+      dioClient: injection(),
+      logger: injection(),
+    ),
+  );
+
+  injection.registerLazySingleton<LaSalesEvidenceRepository>(
+    () => LaSalesEvidenceRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SendLaSalesEvidenceUseCase(repository: injection()),
+  );
+
+  // ------------------------------
   // Rental Assessment Feature
   // ------------------------------
   if (!injection.isRegistered<RentalAssessmentRemoteDataSource>()) {
@@ -296,7 +427,7 @@ Future<void> init() async {
     () => LandAcquisitionRemoteDatasource(injection()),
   );
   injection.registerLazySingleton<LandAcquisitionRepository>(
-    () => LandAcquisitionRepositoryImpl(injection()),
+    () => LandAcquisitionRepositoryImpl(injection(), injection()),
   );
   injection
       .registerLazySingleton(() => GetPaginatedMasterFilesUseCase(injection()));
@@ -372,8 +503,10 @@ Future<void> init() async {
         appSharedData: injection(),
         authRepository: injection(),
       ));
-  injection
-      .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
+  injection.registerFactory(() => LaBuildingRatesCubit(
+        appSharedData: injection(),
+        sendLaBuildingRatesUseCase: injection(),
+      ));
   injection.registerFactory(() => MrAssetsListCubit(
         appSharedData: injection(),
         getAssetsUseCase: injection(),
@@ -400,12 +533,18 @@ Future<void> init() async {
       .registerFactory(() => I2RentalEvidenceCubit(appSharedData: injection()));
   injection
       .registerFactory(() => SettingsScreenCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => LaSalesEvidenceCubit(appSharedData: injection()));
+  injection.registerFactory(() => LaSalesEvidenceCubit(
+        appSharedData: injection(),
+        sendLaSalesEvidenceUseCase: injection(),
+        logger: injection(),
+      ));
 
   injection.registerFactory(() => ConditionReportCubit(
         appSharedData: injection(),
         sendConditionReportUseCase: injection(),
+        repository: injection(),
+        connectivityService: injection(),
+        syncService: injection(),
         getMasterDataUseCase: injection(),
       ));
 
@@ -451,13 +590,19 @@ Future<void> init() async {
 
   injection
       .registerFactory(() => PastValuationCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => InspectionReportCubit(appSharedData: injection()));
+
+  injection.registerFactory(() => InspectionReportCubit(
+        appSharedData: injection(),
+        sendInspectionReportUseCase: injection(),
+        repository: injection(),
+        connectivityService: injection(),
+        syncService: injection(),
+        getMasterDataUseCase: injection(),
+      ));
 
   // ------------------------------
   // Auth Dependencies
   // ------------------------------
-  injection.registerLazySingleton(() => SecureStorage());
   injection.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(injection(), injection()),
   );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/application/pages/pastValuation/cubit/past_valuation_cubit.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
@@ -122,9 +123,7 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
     if (uploadedImages.isEmpty) return;
     var uri = Uri.parse('${AppConfig.apiBaseUrl}ImageData/upload');
     var request = http.MultipartRequest('POST', uri)
-      ..fields['reportId'] = reportId
-      ..fields['parent_id'] = reportId
-      ..fields['parent_type'] = 'PastValuationsLA';
+      ..fields['reportId'] = reportId;
     for (var image in uploadedImages) {
       if (image is File) {
         print('DEBUG: Adding image file: ${image.path}');

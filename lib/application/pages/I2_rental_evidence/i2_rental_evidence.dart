@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
@@ -143,9 +144,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     if (uploadedImages.isEmpty) return;
     var uri = Uri.parse('${AppConfig.apiBaseUrl}ImageData/upload');
     var request = http.MultipartRequest('POST', uri)
-      ..fields['reportId'] = reportId
-      ..fields['parent_id'] = reportId
-      ..fields['parent_type'] = 'LMRentalEvidences';
+      ..fields['reportId'] = reportId;
     for (var image in uploadedImages) {
       if (image is File) {
         print('DEBUG: Adding image file: ${image.path}');

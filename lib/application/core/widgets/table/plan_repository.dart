@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'plan.dart';
 import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
@@ -48,9 +49,11 @@ class PlanRepository {
 
     // Apply search filter
     if (searchQuery != null && searchQuery.isNotEmpty) {
-      plans = plans.where((plan) =>
-          plan.planType.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          plan.planNo.toLowerCase().contains(searchQuery.toLowerCase())).toList();
+      plans = plans
+          .where((plan) =>
+              plan.planType.toLowerCase().contains(searchQuery.toLowerCase()) ||
+              plan.planNo.toLowerCase().contains(searchQuery.toLowerCase()))
+          .toList();
     }
 
     // Apply sorting
@@ -68,7 +71,8 @@ class PlanRepository {
             comparison = a.planNo.compareTo(b.planNo);
             break;
           case "requestingAuthorityRefNo":
-            comparison = a.authorityReferenceNo.compareTo(b.authorityReferenceNo);
+            comparison =
+                a.authorityReferenceNo.compareTo(b.authorityReferenceNo);
             break;
           case "status":
             comparison = a.status.compareTo(b.status);
@@ -84,9 +88,11 @@ class PlanRepository {
     int startIndex = pageToken == null ? 0 : int.tryParse(pageToken) ?? 0;
     int endIndex = (startIndex + pageSize).clamp(0, plans.length);
     List<Plan> paginatedPlans = plans.sublist(startIndex, endIndex);
-    String? nextPageToken = endIndex < plans.length ? endIndex.toString() : null;
+    String? nextPageToken =
+        endIndex < plans.length ? endIndex.toString() : null;
 
-    return PaginatedResponse(items: paginatedPlans, nextPageToken: nextPageToken);
+    return PaginatedResponse(
+        items: paginatedPlans, nextPageToken: nextPageToken);
   }
 
   /// 🔍 Search endpoint via POST /api/LAMasterfile/search

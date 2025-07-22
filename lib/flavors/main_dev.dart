@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:provider/provider.dart' as provider;
 import 'package:land_asset_valuation/application/pages/mapbox/mapbox_setup.dart';
+import 'package:land_asset_valuation/application/core/providers/auth_provider.dart';
 
 // @pragma('vm:entry-point')
 // Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage? message) async {
@@ -77,6 +78,9 @@ Future<void> main() async {
       providers: [
         provider.ChangeNotifierProvider<TextScaleFactorModel>(
           create: (_) => TextScaleFactorModel(),
+        ),
+        provider.ChangeNotifierProvider<AuthProvider>(
+          create: (_) => AuthProvider(),
         ),
       ],
       child: const ProviderScope(child: VD()),
