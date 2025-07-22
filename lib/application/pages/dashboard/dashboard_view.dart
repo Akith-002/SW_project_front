@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/table/table_scaffold.dart';
@@ -21,11 +22,11 @@ Future<Map<String, dynamic>> fetchTaskOverviewAndSummary(
     String username) async {
   final dio = Dio();
   final overviewFuture = dio.post(
-    'http://10.0.2.2:5221/api/UserTask/overview',
+    '${AppConfig.apiBaseUrl}UserTask/overview',
     data: {'username': username},
   );
   final summaryFuture = dio.post(
-    'http://10.0.2.2:5221/api/UserTask/work-summary',
+    '${AppConfig.apiBaseUrl}UserTask/work-summary',
     data: {'username': username},
   );
   final results = await Future.wait([overviewFuture, summaryFuture]);

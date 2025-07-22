@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForLM/planLM.dart';
 
 class PlanlmRepository {
@@ -13,7 +14,7 @@ class PlanlmRepository {
     String? searchQuery, // searchQuery is not used by this specific endpoint
   }) async {
     final uri = Uri.parse(
-        'http://10.0.2.2:5221/api/LandMiscellaneous/paginated?pageNumber=$pageNumber&pageSize=$pageSize');
+        '${AppConfig.apiBaseUrl}LandMiscellaneous/paginated?pageNumber=$pageNumber&pageSize=$pageSize');
 
     try {
       final response = await http.get(uri);

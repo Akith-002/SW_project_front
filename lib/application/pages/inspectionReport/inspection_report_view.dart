@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
@@ -473,7 +474,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
       );
     }
   }
-
+  
   // Helper methods for form validation and state management
   bool _isBuildingFormComplete(String buildingId) {
     return _buildingFormCompletionStatus[buildingId] ?? false;

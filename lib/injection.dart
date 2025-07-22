@@ -82,6 +82,18 @@ import 'package:land_asset_valuation/data/repositories/asset_change_repository_i
 import 'package:land_asset_valuation/domain/repositories/asset_change_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/change_asset_number_usecase.dart';
 
+// LA Building Rates Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/la_building_rates_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/la_building_rates_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/la_building_rates_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_la_building_rates_usecase.dart';
+
+// LA Sales Evidence Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/la_sales_evidence_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/la_sales_evidence_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/la_sales_evidence_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_la_sales_evidence_usecase.dart';
+
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
@@ -286,6 +298,39 @@ Future<void> init() async {
   );
 
   // ------------------------------
+  // LA Building Rates Feature
+  // ------------------------------
+  injection.registerLazySingleton<LaBuildingRatesRemoteDataSource>(
+    () => LaBuildingRatesRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<LaBuildingRatesRepository>(
+    () => LaBuildingRatesRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SendLaBuildingRatesUseCase(injection()),
+  );
+
+  // ------------------------------
+  // LA Sales Evidence Feature
+  // ------------------------------
+  injection.registerLazySingleton<LaSalesEvidenceRemoteDataSource>(
+    () => LaSalesEvidenceRemoteDataSourceImpl(
+      dioClient: injection(),
+      logger: injection(),
+    ),
+  );
+
+  injection.registerLazySingleton<LaSalesEvidenceRepository>(
+    () => LaSalesEvidenceRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SendLaSalesEvidenceUseCase(repository: injection()),
+  );
+
+  // ------------------------------
   // Rental Assessment Feature
   // ------------------------------
   if (!injection.isRegistered<RentalAssessmentRemoteDataSource>()) {
@@ -413,8 +458,10 @@ Future<void> init() async {
         appSharedData: injection(),
         authRepository: injection(),
       ));
-  injection
-      .registerFactory(() => LaBuildingRatesCubit(appSharedData: injection()));
+  injection.registerFactory(() => LaBuildingRatesCubit(
+        appSharedData: injection(),
+        sendLaBuildingRatesUseCase: injection(),
+      ));
   injection.registerFactory(() => MrAssetsListCubit(
         appSharedData: injection(),
         getAssetsUseCase: injection(),
@@ -437,8 +484,11 @@ Future<void> init() async {
       .registerFactory(() => I2RentalEvidenceCubit(appSharedData: injection()));
   injection
       .registerFactory(() => SettingsScreenCubit(appSharedData: injection()));
-  injection
-      .registerFactory(() => LaSalesEvidenceCubit(appSharedData: injection()));
+  injection.registerFactory(() => LaSalesEvidenceCubit(
+        appSharedData: injection(),
+        sendLaSalesEvidenceUseCase: injection(),
+        logger: injection(),
+      ));
 
   injection.registerFactory(() => ConditionReportCubit(
         appSharedData: injection(),

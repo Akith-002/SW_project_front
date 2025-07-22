@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
@@ -103,7 +104,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
 
   Future<String?> _submitFormData() async {
     try {
-      final uri = Uri.parse('http://10.0.2.2:5221/api/LMRentalEvidence');
+      final uri = Uri.parse('${AppConfig.apiBaseUrl}LMRentalEvidence');
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -140,7 +141,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     print('DEBUG: _uploadImages called with reportId: $reportId');
     print('DEBUG: Number of images to upload: ${uploadedImages.length}');
     if (uploadedImages.isEmpty) return;
-    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
+    var uri = Uri.parse('${AppConfig.apiBaseUrl}ImageData/upload');
     var request = http.MultipartRequest('POST', uri)
       ..fields['reportId'] = reportId;
     for (var image in uploadedImages) {
