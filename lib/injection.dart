@@ -195,6 +195,21 @@ import 'package:land_asset_valuation/domain/repositories/la_lot_repository.dart'
 import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/get_la_lots_usecase.dart';
 
+// Marker Coordinate Feature
+import 'package:land_asset_valuation/data/datasource/remote/marker_coordinate_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/marker_coordinate_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/marker_coordinate_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/save_building_rates_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_past_valuations_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_rental_evidence_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_sales_evidence_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_building_rates_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_past_valuations_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_rental_evidence_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_sales_evidence_coordinates_usecase.dart';
+// Services
+import 'package:land_asset_valuation/data/services/rental_evidence_service.dart';
+
 final injection = GetIt.I;
 
 Future<void> init() async {
@@ -769,4 +784,56 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => GetLALotsUseCase(injection()),
   );
+
+  // ------------------------------
+  // Marker Coordinate Feature
+  // ------------------------------
+
+  // Data sources
+  injection.registerLazySingleton<MarkerCoordinateRemoteDataSource>(
+    () => MarkerCoordinateRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  // Repository
+  injection.registerLazySingleton<MarkerCoordinateRepository>(
+    () => MarkerCoordinateRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  // Use cases
+  injection.registerLazySingleton(
+    () => SaveBuildingRatesCoordinateUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SavePastValuationsCoordinateUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SaveRentalEvidenceCoordinateUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SaveSalesEvidenceCoordinateUseCase(injection()),
+  );
+
+  // GET use cases for marker coordinates
+  injection.registerLazySingleton(
+    () => GetBuildingRatesCoordinatesUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetPastValuationsCoordinatesUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetRentalEvidenceCoordinatesUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetSalesEvidenceCoordinatesUseCase(injection()),
+  );
+  
+  // Services
+  // ------------------------------
+  injection.registerLazySingleton(() => RentalEvidenceService());
 }

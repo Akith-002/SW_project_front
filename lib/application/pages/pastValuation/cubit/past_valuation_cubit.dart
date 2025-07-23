@@ -15,6 +15,7 @@ class PastValuationCubit extends BaseCubit<BaseState<PastValuationState>> {
   }) : super(PastValuationInitial());
 
   Future<void> sendPastValuation({
+    required String masterFileId,
     required String masterFileRef,
     required String fileNoGnDivision,
     required String situation,
@@ -32,6 +33,7 @@ class PastValuationCubit extends BaseCubit<BaseState<PastValuationState>> {
 
     // Create the past valuation model
     final reportModel = PastValuationModel(
+      masterFileId: masterFileId,
       masterFileRef: masterFileRef,
       fileNoGnDivision: fileNoGnDivision,
       situation: situation,
