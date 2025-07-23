@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
@@ -51,6 +52,41 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
 
   // Stores uploaded image files and paths
   List<dynamic> uploadedImages = [];
+
+  // Master file data from query parameters
+  String? _masterFileId;
+  String? _masterFileRefNo;
+  double? _initialLatitude;
+  double? _initialLongitude;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _extractMasterFileData();
+  }
+
+  void _extractMasterFileData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+
+    _masterFileId = queryParams['masterFileId'];
+    _masterFileRefNo = queryParams['masterFileRefNo'];
+
+    // Set initial coordinates if provided
+    final latitudeStr = queryParams['latitude'];
+    final longitudeStr = queryParams['longitude'];
+    if (latitudeStr != null && longitudeStr != null) {
+      _initialLatitude = double.tryParse(latitudeStr);
+      _initialLongitude = double.tryParse(longitudeStr);
+      if (_initialLatitude != null && _initialLongitude != null) {
+        _locationLatitudeController.text = latitudeStr;
+        _locationLongitudeController.text = longitudeStr;
+      }
+    }
+
+    debugPrint(
+        "BuildingRates: Master File Data extracted - ID: $_masterFileId, Ref: $_masterFileRefNo, Coords: ($_initialLatitude, $_initialLongitude)");
+  }
 
   @override
   void dispose() {

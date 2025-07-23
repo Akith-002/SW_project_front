@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
@@ -18,7 +19,6 @@ import 'package:land_asset_valuation/application/core/validators/la_sales_eviden
 import 'package:land_asset_valuation/application/core/widgets/data_send_successfully_dialogbox.dart';
 import 'package:land_asset_valuation/data/models/la_sales_evidence_model.dart';
 import 'package:land_asset_valuation/injection.dart';
-import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 /// Sales Evidence form screen for Land Acquisition module
 /// Allows users to input and manage land sales evidence data
@@ -63,6 +63,86 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
   // Stores both File objects (newly picked images) and String paths (previously saved images)
   List<dynamic> uploadedImages = [];
+
+  // Master file data from query parameters
+  String? _masterFileId;
+  String? _masterFileRefNo;
+  double? _initialLatitude;
+  double? _initialLongitude;
+
+  @override
+  void initState() {
+    super.initState();
+    // Schedule the data extraction for the next frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _extractMasterFileData();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _extractMasterFileData();
+  }
+
+  void _extractMasterFileData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+
+    // Debug: Print all available query parameters
+    debugPrint("SalesEvidence: All query parameters: $queryParams");
+
+    // Try multiple possible parameter names for master file ID
+    _masterFileId = queryParams['masterFileId'] ??
+        queryParams['id'] ??
+        queryParams['masterfile_id'];
+
+    // Try multiple possible parameter names for master file reference
+    _masterFileRefNo = queryParams['masterFileRefNo'] ??
+        queryParams['masterFileNo'] ??
+        queryParams['master_file_ref_no'] ??
+        queryParams['masterfile_ref_no'];
+
+    // Debug: Print extracted values
+    debugPrint("SalesEvidence: Extracted masterFileId: $_masterFileId");
+    debugPrint("SalesEvidence: Extracted masterFileRefNo: $_masterFileRefNo");
+
+    // Pre-fill form fields with data from query parameters
+    if (_masterFileRefNo != null && _masterFileRefNo!.isNotEmpty) {
+      _masterFileRefController.text = _masterFileRefNo!;
+      debugPrint(
+          "SalesEvidence: Set controller text to: ${_masterFileRefController.text}");
+    } else {
+      debugPrint("SalesEvidence: Master file ref no is null or empty");
+      // Try fallback - use masterFileNo if masterFileRefNo is not available
+      final fallbackRefNo = queryParams['masterFileNo'];
+      if (fallbackRefNo != null && fallbackRefNo.isNotEmpty) {
+        _masterFileRefController.text = fallbackRefNo;
+        _masterFileRefNo = fallbackRefNo;
+        debugPrint("SalesEvidence: Used fallback masterFileNo: $fallbackRefNo");
+      }
+    }
+
+    // Set initial coordinates if provided
+    final latitudeStr = queryParams['latitude'];
+    final longitudeStr = queryParams['longitude'];
+    if (latitudeStr != null && longitudeStr != null) {
+      _initialLatitude = double.tryParse(latitudeStr);
+      _initialLongitude = double.tryParse(longitudeStr);
+      if (_initialLatitude != null && _initialLongitude != null) {
+        _locationLatitudeController.text = latitudeStr;
+        _locationLongitudeController.text = longitudeStr;
+      }
+    }
+
+    // Always trigger rebuild after extracting data
+    if (mounted) {
+      setState(() {});
+    }
+
+    debugPrint(
+        "SalesEvidence: Final extracted data - ID: $_masterFileId, Ref: $_masterFileRefNo, Coords: ($_initialLatitude, $_initialLongitude)");
+  }
 
   @override
   void dispose() {
@@ -169,17 +249,66 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
                                             .requiredAlphaNum(
                                                 value, 50, "Asset Number"),
                                   ),
-                                  LabeledTextField(
-                                    label: AppString.masterFilerefno
-                                        .localize(context)!,
-                                    placeholder: AppString.masterFilerefno
-                                        .localize(context)!,
+                                  // Master File Reference - Read-only field
+                                  SizedBox(
                                     width: fieldWidth,
-                                    controller: _masterFileRefController,
-                                    validator: (value) =>
-                                        LaSalesEvidenceValidator
-                                            .requiredAlphaNum(value, 50,
-                                                "Master File Reference"),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          AppString.masterFilerefno
+                                              .localize(context)!,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.black87,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        ValueListenableBuilder<
+                                            TextEditingValue>(
+                                          valueListenable:
+                                              _masterFileRefController,
+                                          builder: (context, value, child) {
+                                            return Container(
+                                              width: double.infinity,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 16),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: colors(context)
+                                                        .colorGrey3!),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                color: colors(context)
+                                                    .colorGrey1!
+                                                    .withOpacity(0.3),
+                                              ),
+                                              child: Text(
+                                                value.text.isEmpty
+                                                    ? AppString.masterFilerefno
+                                                        .localize(context)!
+                                                    : value.text,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      color: value.text.isEmpty
+                                                          ? colors(context)
+                                                              .colorGrey4
+                                                          : Colors.black87,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   LabeledTextField(
                                     label:
@@ -550,6 +679,13 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
           _assetNumberController.text, 'Asset Number', validationErrors);
       _validateRequiredField(_masterFileRefController.text,
           'Master File Reference', validationErrors);
+
+      // Additional validation for master file reference (since it's read-only, it should always be filled from query params)
+      if (_masterFileRefController.text.trim().isEmpty) {
+        validationErrors['Master File Reference'] =
+            'Master file reference is required but not provided from navigation';
+      }
+
       _validateRequiredField(
           _vendorController.text, 'Vendor', validationErrors);
       _validateRequiredField(
@@ -616,6 +752,7 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
       // Create the model from form data
       final salesEvidenceModel = LaSalesEvidenceModel(
+        masterFileId: _masterFileId ?? '',
         assetNumber: _assetNumberController.text.trim(),
         masterFileRef: _masterFileRefController.text.trim(),
         roadName: _roadNameController.text.trim(),

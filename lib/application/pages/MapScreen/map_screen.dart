@@ -659,45 +659,94 @@ class _MapScreenState extends State<MapScreen> {
     final String source =
         GoRouterState.of(context).uri.queryParameters['source'] ?? '';
 
+    // Prepare common query parameters to pass to all forms
+    final commonQueryParams = <String, String>{};
+
+    // Add master file data if available
+    if (_id != null) commonQueryParams['masterFileId'] = _id!;
+    if (_masterFileNo != null)
+      commonQueryParams['masterFileNo'] = _masterFileNo!;
+    if (_masterFileRefNo != null)
+      commonQueryParams['masterFileRefNo'] = _masterFileRefNo!;
+    if (_planType != null) commonQueryParams['planType'] = _planType!;
+    if (_planNo != null) commonQueryParams['planNo'] = _planNo!;
+    if (_authorityRefNo != null)
+      commonQueryParams['authorityRefNo'] = _authorityRefNo!;
+    if (_status != null) commonQueryParams['status'] = _status!;
+
+    // Add coordinates from the selected marker if available
+    if (_selectedMarkerForSketching != null) {
+      final coords = _selectedMarkerForSketching!.geometry.coordinates;
+      commonQueryParams['latitude'] = coords.lat.toString();
+      commonQueryParams['longitude'] = coords.lng.toString();
+      debugPrint(
+          "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+    }
+
     switch (type) {
       case MapMarkerLoader.markerTypeRental:
-        targetPath = Pages.routeRentalEvidence.toPath();
+        final targetUri = Uri(
+          path: Pages.routeRentalEvidence.toPath(),
+          queryParameters:
+              commonQueryParams.isNotEmpty ? commonQueryParams : null,
+        );
+        targetPath = targetUri.toString();
+        debugPrint(
+            "MapScreen: Navigating to Rental Evidence with masterFileId: $_id");
         break;
       case MapMarkerLoader.markerTypeSales:
-        targetPath = Pages.routeLaSalesEvidence.toPath();
+        final targetUri = Uri(
+          path: Pages.routeLaSalesEvidence.toPath(),
+          queryParameters:
+              commonQueryParams.isNotEmpty ? commonQueryParams : null,
+        );
+        targetPath = targetUri.toString();
+        debugPrint(
+            "MapScreen: Navigating to Sales Evidence with masterFileId: $_id");
         break;
       case MapMarkerLoader.markerTypeValuations:
-        targetPath = Pages.routePastValuation.toPath();
+        final targetUri = Uri(
+          path: Pages.routePastValuation.toPath(),
+          queryParameters:
+              commonQueryParams.isNotEmpty ? commonQueryParams : null,
+        );
+        targetPath = targetUri.toString();
+        debugPrint(
+            "MapScreen: Navigating to Past Valuation with masterFileId: $_id");
         break;
       case MapMarkerLoader.markerTypeBuildingRates:
         // Context-aware navigation for Building Rates
         if (source == 'landMiscellaneous') {
-          // Pass masterFileNo and coordinates as query parameters for LM Building Rates
-          final queryParams = <String, String>{};
+          // For LM Building Rates, use only masterFileNo and coordinates
+          final lmQueryParams = <String, String>{};
           if (_masterFileNo != null) {
-            queryParams['masterFileNo'] = _masterFileNo!;
+            lmQueryParams['masterFileNo'] = _masterFileNo!;
           }
 
           // Add coordinates from the selected marker
           if (_selectedMarkerForSketching != null) {
             final coords = _selectedMarkerForSketching!.geometry.coordinates;
-            queryParams['latitude'] = coords.lat.toString();
-            queryParams['longitude'] = coords.lng.toString();
-            debugPrint(
-                "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+            lmQueryParams['latitude'] = coords.lat.toString();
+            lmQueryParams['longitude'] = coords.lng.toString();
           }
 
           final targetUri = Uri(
             path: Pages.routeLmBuildingRates.toPath(),
-            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+            queryParameters: lmQueryParams.isNotEmpty ? lmQueryParams : null,
           );
           targetPath = targetUri.toString();
           debugPrint(
-              "MapScreen: Navigating to LM Building Rates (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
+              "MapScreen: Navigating to LM Building Rates (source: $source, masterFileNo: $_masterFileNo)");
         } else {
-          targetPath = Pages.routeLaBuildingRates.toPath();
+          // For LA Building Rates, use common query parameters
+          final targetUri = Uri(
+            path: Pages.routeLaBuildingRates.toPath(),
+            queryParameters:
+                commonQueryParams.isNotEmpty ? commonQueryParams : null,
+          );
+          targetPath = targetUri.toString();
           debugPrint(
-              "MapScreen: Navigating to LA Building Rates (source: $source)");
+              "MapScreen: Navigating to LA Building Rates with masterFileId: $_id");
         }
         break;
       default:

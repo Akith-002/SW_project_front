@@ -58,6 +58,48 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
   List<dynamic> uploadedImages = []; // Track submission state
   bool _isSubmitting = false;
 
+  // Master file data from query parameters
+  String? _masterFileId;
+  String? _masterFileNo;
+  String? _masterFileRefNo;
+  double? _initialLatitude;
+  double? _initialLongitude;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _extractMasterFileData();
+  }
+
+  void _extractMasterFileData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+
+    _masterFileId = queryParams['masterFileId'];
+    _masterFileNo = queryParams['masterFileNo'];
+    _masterFileRefNo = queryParams['masterFileRefNo'];
+
+    // Pre-fill form fields with data from query parameters
+    if (_masterFileRefNo != null && _masterFileRefNo!.isNotEmpty) {
+      _masterFileRefNoController.text = _masterFileRefNo!;
+    }
+
+    // Set initial coordinates if provided
+    final latitudeStr = queryParams['latitude'];
+    final longitudeStr = queryParams['longitude'];
+    if (latitudeStr != null && longitudeStr != null) {
+      _initialLatitude = double.tryParse(latitudeStr);
+      _initialLongitude = double.tryParse(longitudeStr);
+      if (_initialLatitude != null && _initialLongitude != null) {
+        _latitudeController.text = latitudeStr;
+        _longitudeController.text = longitudeStr;
+      }
+    }
+
+    debugPrint(
+        "RentalEvidence: Master File Data extracted - ID: $_masterFileId, Ref: $_masterFileRefNo, Coords: ($_initialLatitude, $_initialLongitude)");
+  }
+
   @override
   void dispose() {
     // Dispose all controllers
@@ -150,7 +192,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
 
         // Send data to the backend
         _cubit.sendRentalEvidence(
-          masterFileId: "56249", // You can get this dynamically
+          masterFileId: _masterFileId ?? "0", // Use extracted master file ID
           masterFileRefNo: _masterFileRefNoController.text,
           assessmentNo: _assessmentNoController.text,
           owner: _ownerController.text,
