@@ -19,6 +19,7 @@ import 'package:land_asset_valuation/application/core/widgets/save_lot.dart';
 import 'package:land_asset_valuation/application/core/widgets/lot_area_widget.dart';
 import 'package:land_asset_valuation/application/pages/mapbox/mapbox.dart';
 import 'package:land_asset_valuation/data/models/building.dart';
+import 'package:land_asset_valuation/data/models/marker_coordinate_model.dart';
 import 'package:land_asset_valuation/data/services/building_service.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -29,6 +30,10 @@ import 'package:land_asset_valuation/domain/usecases/save_building_rates_coordin
 import 'package:land_asset_valuation/domain/usecases/save_past_valuations_coordinate_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/save_rental_evidence_coordinate_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/save_sales_evidence_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_building_rates_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_past_valuations_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_rental_evidence_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_sales_evidence_coordinates_usecase.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 // Import for calculations if needed here (likely not)
@@ -130,6 +135,9 @@ class _MapScreenState extends State<MapScreen> {
 
     // Load existing lots after extracting master file data
     _loadExistingLots();
+
+    // Load existing markers after extracting master file data
+    _loadExistingMarkers();
   }
 
   /// Loads existing lots for the current master file and displays them on the map
@@ -184,6 +192,132 @@ class _MapScreenState extends State<MapScreen> {
     } catch (e) {
       debugPrint("MapScreen: Error loading existing lots: $e");
       // Don't show error to user as this is not critical
+    }
+  }
+
+  /// Loads existing markers for the current master file and displays them on the map
+  void _loadExistingMarkers() async {
+    if (_id == null) {
+      debugPrint("MapScreen: No master file ID available to load markers");
+      return;
+    }
+
+    final masterFileId = int.tryParse(_id!);
+    if (masterFileId == null) {
+      debugPrint("MapScreen: Invalid master file ID: $_id");
+      return;
+    }
+
+    try {
+      debugPrint(
+          "MapScreen: Loading existing markers for master file ID: $masterFileId");
+
+      // Load all marker types concurrently
+      final futures = [
+        injection<GetBuildingRatesCoordinatesUseCase>()(
+            masterfileId: masterFileId),
+        injection<GetPastValuationsCoordinatesUseCase>()(
+            masterfileId: masterFileId),
+        injection<GetRentalEvidenceCoordinatesUseCase>()(
+            masterfileId: masterFileId),
+        injection<GetSalesEvidenceCoordinatesUseCase>()(
+            masterfileId: masterFileId),
+      ];
+
+      final results = await Future.wait(futures);
+      int totalMarkersLoaded = 0;
+
+      // Process Building Rates markers
+      results[0].fold(
+        (failure) => debugPrint(
+            "MapScreen: Failed to load Building Rates markers: ${failure.message}"),
+        (markers) {
+          debugPrint(
+              "MapScreen: Loaded ${markers.length} Building Rates markers");
+          for (final marker in markers) {
+            _addExistingMarkerToMap(
+                marker, MapMarkerLoader.markerTypeBuildingRates);
+            totalMarkersLoaded++;
+          }
+        },
+      );
+
+      // Process Past Valuations markers
+      results[1].fold(
+        (failure) => debugPrint(
+            "MapScreen: Failed to load Past Valuations markers: ${failure.message}"),
+        (markers) {
+          debugPrint(
+              "MapScreen: Loaded ${markers.length} Past Valuations markers");
+          for (final marker in markers) {
+            _addExistingMarkerToMap(
+                marker, MapMarkerLoader.markerTypeValuations);
+            totalMarkersLoaded++;
+          }
+        },
+      );
+
+      // Process Rental Evidence markers
+      results[2].fold(
+        (failure) => debugPrint(
+            "MapScreen: Failed to load Rental Evidence markers: ${failure.message}"),
+        (markers) {
+          debugPrint(
+              "MapScreen: Loaded ${markers.length} Rental Evidence markers");
+          for (final marker in markers) {
+            _addExistingMarkerToMap(marker, MapMarkerLoader.markerTypeRental);
+            totalMarkersLoaded++;
+          }
+        },
+      );
+
+      // Process Sales Evidence markers
+      results[3].fold(
+        (failure) => debugPrint(
+            "MapScreen: Failed to load Sales Evidence markers: ${failure.message}"),
+        (markers) {
+          debugPrint(
+              "MapScreen: Loaded ${markers.length} Sales Evidence markers");
+          for (final marker in markers) {
+            _addExistingMarkerToMap(marker, MapMarkerLoader.markerTypeSales);
+            totalMarkersLoaded++;
+          }
+        },
+      );
+
+      if (totalMarkersLoaded > 0) {
+        _showSnackbar("Loaded $totalMarkersLoaded existing marker(s)");
+      } else {
+        debugPrint("MapScreen: No existing markers found for this master file");
+      }
+    } catch (e) {
+      debugPrint("MapScreen: Error loading existing markers: $e");
+      // Don't show error to user as this is not critical
+    }
+  }
+
+  /// Adds an existing marker to the map
+  void _addExistingMarkerToMap(ExistingMarkerModel marker, String markerType) {
+    try {
+      // Parse coordinates from JSON string
+      final coordinatesJson = jsonDecode(marker.coordinates);
+      final lng = coordinatesJson['lng'] as double;
+      final lat = coordinatesJson['lat'] as double;
+
+      final point = Point(coordinates: Position(lng, lat));
+
+      // Get marker image
+      final img = _markerLoader.getImage(markerType);
+      if (img.isNotEmpty) {
+        mapboxKey.currentState?.addMarkerAtPoint(point, img, markerType);
+        debugPrint(
+            "MapScreen: Added existing $markerType marker at ($lat, $lng)");
+      } else {
+        debugPrint(
+            "MapScreen: Failed to load icon for existing '$markerType' marker");
+      }
+    } catch (e) {
+      debugPrint("MapScreen: Error adding existing marker to map: $e");
     }
   }
 

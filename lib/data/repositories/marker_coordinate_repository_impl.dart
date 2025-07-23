@@ -42,6 +42,34 @@ class MarkerCoordinateRepositoryImpl implements MarkerCoordinateRepository {
         () => remoteDataSource.saveSalesEvidenceCoordinate(marker));
   }
 
+  @override
+  Future<Either<Failure, List<ExistingMarkerModel>>>
+      getBuildingRatesCoordinates(int masterfileId) async {
+    return _getMarkerCoordinates(masterfileId, 'Building Rates',
+        () => remoteDataSource.getBuildingRatesCoordinates(masterfileId));
+  }
+
+  @override
+  Future<Either<Failure, List<ExistingMarkerModel>>>
+      getPastValuationsCoordinates(int masterfileId) async {
+    return _getMarkerCoordinates(masterfileId, 'Past Valuations',
+        () => remoteDataSource.getPastValuationsCoordinates(masterfileId));
+  }
+
+  @override
+  Future<Either<Failure, List<ExistingMarkerModel>>>
+      getRentalEvidenceCoordinates(int masterfileId) async {
+    return _getMarkerCoordinates(masterfileId, 'Rental Evidence',
+        () => remoteDataSource.getRentalEvidenceCoordinates(masterfileId));
+  }
+
+  @override
+  Future<Either<Failure, List<ExistingMarkerModel>>>
+      getSalesEvidenceCoordinates(int masterfileId) async {
+    return _getMarkerCoordinates(masterfileId, 'Sales Evidence',
+        () => remoteDataSource.getSalesEvidenceCoordinates(masterfileId));
+  }
+
   Future<Either<Failure, MarkerCoordinateResponse>> _saveMarkerCoordinate(
     MarkerCoordinateModel marker,
     String markerType,
@@ -72,6 +100,43 @@ class MarkerCoordinateRepositoryImpl implements MarkerCoordinateRepository {
     } catch (e) {
       _logger
           .e('======= MARKER COORDINATE REPOSITORY: UNEXPECTED ERROR =======');
+      _logger.e('Error: $e');
+      _logger.e('===========================================');
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  Future<Either<Failure, List<ExistingMarkerModel>>> _getMarkerCoordinates(
+    int masterfileId,
+    String markerType,
+    Future<List<ExistingMarkerModel>> Function() remoteCall,
+  ) async {
+    try {
+      _logger.d(
+          '======= MARKER COORDINATE REPOSITORY: GETTING $markerType COORDINATES =======');
+      _logger.d('Master File ID: $masterfileId');
+      _logger.d('===========================================');
+
+      final markers = await remoteCall();
+
+      _logger.d('======= MARKER COORDINATE REPOSITORY: GET SUCCESS =======');
+      _logger.d('Found ${markers.length} $markerType markers');
+      _logger.d('===========================================');
+
+      return Right(markers);
+    } on ServerException {
+      _logger
+          .e('======= MARKER COORDINATE REPOSITORY: GET SERVER ERROR =======');
+      return Left(ServerFailure(
+          'Server error occurred while fetching $markerType coordinates'));
+    } on DioErrorException {
+      _logger
+          .e('======= MARKER COORDINATE REPOSITORY: GET NETWORK ERROR =======');
+      return Left(NetworkFailure(
+          'Network error occurred while fetching $markerType coordinates'));
+    } catch (e) {
+      _logger.e(
+          '======= MARKER COORDINATE REPOSITORY: GET UNEXPECTED ERROR =======');
       _logger.e('Error: $e');
       _logger.e('===========================================');
       return Left(ServerFailure(e.toString()));

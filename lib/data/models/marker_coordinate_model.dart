@@ -22,6 +22,38 @@ class MarkerCoordinateModel {
   }
 }
 
+class ExistingMarkerModel {
+  final int id;
+  final int masterfileId;
+  final String coordinates;
+  final String? type;
+
+  ExistingMarkerModel({
+    required this.id,
+    required this.masterfileId,
+    required this.coordinates,
+    this.type,
+  });
+
+  factory ExistingMarkerModel.fromJson(Map<String, dynamic> json) {
+    return ExistingMarkerModel(
+      id: json['id'],
+      masterfileId: json['masterfileId'],
+      coordinates: json['coordinates'],
+      type: json['type'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'masterfileId': masterfileId,
+      'coordinates': coordinates,
+      if (type != null) 'type': type,
+    };
+  }
+}
+
 class MarkerCoordinateResponse {
   final bool success;
   final String? message;

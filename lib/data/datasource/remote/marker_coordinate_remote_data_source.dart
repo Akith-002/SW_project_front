@@ -13,6 +13,16 @@ abstract class MarkerCoordinateRemoteDataSource {
       MarkerCoordinateModel marker);
   Future<MarkerCoordinateResponse> saveSalesEvidenceCoordinate(
       MarkerCoordinateModel marker);
+
+  // GET methods for existing markers
+  Future<List<ExistingMarkerModel>> getBuildingRatesCoordinates(
+      int masterfileId);
+  Future<List<ExistingMarkerModel>> getPastValuationsCoordinates(
+      int masterfileId);
+  Future<List<ExistingMarkerModel>> getRentalEvidenceCoordinates(
+      int masterfileId);
+  Future<List<ExistingMarkerModel>> getSalesEvidenceCoordinates(
+      int masterfileId);
 }
 
 class MarkerCoordinateRemoteDataSourceImpl
@@ -48,6 +58,34 @@ class MarkerCoordinateRemoteDataSourceImpl
       MarkerCoordinateModel marker) async {
     return _saveMarkerCoordinate(
         marker, '/SalesEvidenceLACoordinate', 'Sales Evidence');
+  }
+
+  @override
+  Future<List<ExistingMarkerModel>> getBuildingRatesCoordinates(
+      int masterfileId) async {
+    return _getMarkerCoordinates(masterfileId,
+        '/BuildingRatesLACoordinate/masterfile', 'Building Rates');
+  }
+
+  @override
+  Future<List<ExistingMarkerModel>> getPastValuationsCoordinates(
+      int masterfileId) async {
+    return _getMarkerCoordinates(masterfileId,
+        '/PastValuationsLACoordinate/masterfile', 'Past Valuations');
+  }
+
+  @override
+  Future<List<ExistingMarkerModel>> getRentalEvidenceCoordinates(
+      int masterfileId) async {
+    return _getMarkerCoordinates(masterfileId,
+        '/RentalEvidenceLACoordinate/masterfile', 'Rental Evidence');
+  }
+
+  @override
+  Future<List<ExistingMarkerModel>> getSalesEvidenceCoordinates(
+      int masterfileId) async {
+    return _getMarkerCoordinates(masterfileId,
+        '/SalesEvidenceLACoordinate/masterfile', 'Sales Evidence');
   }
 
   Future<MarkerCoordinateResponse> _saveMarkerCoordinate(
@@ -105,6 +143,60 @@ class MarkerCoordinateRemoteDataSourceImpl
     } catch (e) {
       _logger.e(
           '======= MARKER COORDINATE REMOTE DATA SOURCE: UNEXPECTED EXCEPTION =======');
+      _logger.e('Error: $e');
+      _logger.e('===========================================');
+      throw ServerException();
+    }
+  }
+
+  Future<List<ExistingMarkerModel>> _getMarkerCoordinates(
+    int masterfileId,
+    String endpointBase,
+    String markerType,
+  ) async {
+    try {
+      final endpoint = '$endpointBase/$masterfileId';
+
+      // Debug: Log API call details
+      _logger.d(
+          '======= MARKER COORDINATE REMOTE DATA SOURCE: FETCHING EXISTING MARKERS =======');
+      _logger.d('Endpoint: $endpoint');
+      _logger.d('Marker Type: $markerType');
+      _logger.d('Master File ID: $masterfileId');
+      _logger.d('===========================================');
+
+      final response = await dioClient.get(endpoint);
+
+      // Debug: Log API response details
+      _logger.d(
+          '======= MARKER COORDINATE REMOTE DATA SOURCE: GET API RESPONSE =======');
+      _logger.d('Status Code: ${response.statusCode}');
+      _logger.d('Response Data: ${response.data}');
+      _logger.d('===========================================');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data ?? [];
+        return data.map((json) => ExistingMarkerModel.fromJson(json)).toList();
+      } else {
+        _logger.e(
+            '======= MARKER COORDINATE REMOTE DATA SOURCE: GET API ERROR - UNEXPECTED STATUS CODE =======');
+        _logger.e('Status Code: ${response.statusCode}');
+        _logger.e('===========================================');
+        throw ServerException();
+      }
+    } on DioException catch (e) {
+      _logger.e(
+          '======= MARKER COORDINATE REMOTE DATA SOURCE: GET DIO EXCEPTION =======');
+      _logger.e('Error type: ${e.type}');
+      _logger.e('Error message: ${e.message}');
+      _logger.e('Request URL: ${e.requestOptions.uri}');
+      _logger.e('Response: ${e.response?.statusCode}');
+      _logger.e('Response data: ${e.response?.data}');
+      _logger.e('===========================================');
+      throw DioErrorException();
+    } catch (e) {
+      _logger.e(
+          '======= MARKER COORDINATE REMOTE DATA SOURCE: GET UNEXPECTED EXCEPTION =======');
       _logger.e('Error: $e');
       _logger.e('===========================================');
       throw ServerException();

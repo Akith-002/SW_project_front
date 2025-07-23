@@ -188,6 +188,10 @@ import 'package:land_asset_valuation/domain/usecases/save_building_rates_coordin
 import 'package:land_asset_valuation/domain/usecases/save_past_valuations_coordinate_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/save_rental_evidence_coordinate_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/save_sales_evidence_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_building_rates_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_past_valuations_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_rental_evidence_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_sales_evidence_coordinates_usecase.dart';
 
 final injection = GetIt.I;
 
@@ -759,5 +763,22 @@ Future<void> init() async {
 
   injection.registerLazySingleton(
     () => SaveSalesEvidenceCoordinateUseCase(injection()),
+  );
+
+  // GET use cases for marker coordinates
+  injection.registerLazySingleton(
+    () => GetBuildingRatesCoordinatesUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetPastValuationsCoordinatesUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetRentalEvidenceCoordinatesUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetSalesEvidenceCoordinatesUseCase(injection()),
   );
 }

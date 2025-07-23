@@ -11,4 +11,14 @@ abstract class MarkerCoordinateRepository {
       saveRentalEvidenceCoordinate(MarkerCoordinateModel marker);
   Future<Either<Failure, MarkerCoordinateResponse>> saveSalesEvidenceCoordinate(
       MarkerCoordinateModel marker);
+
+  // GET methods for existing markers
+  Future<Either<Failure, List<ExistingMarkerModel>>>
+      getBuildingRatesCoordinates(int masterfileId);
+  Future<Either<Failure, List<ExistingMarkerModel>>>
+      getPastValuationsCoordinates(int masterfileId);
+  Future<Either<Failure, List<ExistingMarkerModel>>>
+      getRentalEvidenceCoordinates(int masterfileId);
+  Future<Either<Failure, List<ExistingMarkerModel>>>
+      getSalesEvidenceCoordinates(int masterfileId);
 }
