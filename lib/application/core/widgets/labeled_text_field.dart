@@ -16,6 +16,7 @@ class LabeledTextField extends StatefulWidget {
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final AutovalidateMode? autovalidateMode;
+  final bool readOnly;
 
   const LabeledTextField({
     super.key,
@@ -31,6 +32,7 @@ class LabeledTextField extends StatefulWidget {
     this.keyboardType,
     this.inputFormatters,
     this.autovalidateMode,
+    this.readOnly = false,
   });
 
   @override
@@ -108,8 +110,8 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
               Expanded(
                 child: TextFormField(
                   controller: _controller,
-                  enabled: true,
-                  readOnly: false,
+                  enabled: !widget.readOnly,
+                  readOnly: widget.readOnly,
                   keyboardType: widget.keyboardType,
                   inputFormatters: widget.inputFormatters,
                   autovalidateMode: widget.autovalidateMode ?? AutovalidateMode.disabled,

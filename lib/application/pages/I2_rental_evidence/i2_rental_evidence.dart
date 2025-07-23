@@ -22,7 +22,15 @@ import 'package:land_asset_valuation/application/core/configurations/app_config.
 /// Main page widget for displaying rental evidence.
 class I2RentalEvidence extends BasePage {
   final MasterDataResponse masterData;
-  const I2RentalEvidence({super.key, required this.masterData});
+  final double? longitude;
+  final double? latitude;
+  
+  const I2RentalEvidence({
+    super.key, 
+    required this.masterData,
+    this.longitude,
+    this.latitude,
+  });
 
   @override
   State<I2RentalEvidence> createState() => _I2RentalEvidenceState();
@@ -41,6 +49,8 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
   final _ownerNameController = TextEditingController();
   final _occupierNameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _longitudeController = TextEditingController();
+  final _latitudeController = TextEditingController();
 
   // Selected values for dropdowns
   String? _selectedBuilding;
@@ -53,12 +63,38 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
   List<dynamic> uploadedImages = [];
 
   @override
+  void initState() {
+    super.initState();
+    // Log received coordinates
+    print('I2RentalEvidence: initState called');
+    print('I2RentalEvidence: Received longitude: ${widget.longitude}');
+    print('I2RentalEvidence: Received latitude: ${widget.latitude}');
+    
+    // Initialize coordinate controllers with passed values
+    if (widget.longitude != null) {
+      _longitudeController.text = widget.longitude.toString();
+      print('I2RentalEvidence: Set longitude controller text: ${_longitudeController.text}');
+    } else {
+      print('I2RentalEvidence: Longitude is null - no value to set');
+    }
+    
+    if (widget.latitude != null) {
+      _latitudeController.text = widget.latitude.toString();
+      print('I2RentalEvidence: Set latitude controller text: ${_latitudeController.text}');
+    } else {
+      print('I2RentalEvidence: Latitude is null - no value to set');
+    }
+  }
+
+  @override
   void dispose() {
     // Dispose all controllers
     _assessmentNoController.dispose();
     _ownerNameController.dispose();
     _occupierNameController.dispose();
     _descriptionController.dispose();
+    _longitudeController.dispose();
+    _latitudeController.dispose();
     super.dispose();
   }
 
@@ -134,7 +170,9 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
       "assessmentNo": "${_assessmentNoController.text}",
       "ownerName": "${_ownerNameController.text}",
       "occupierName": "${_occupierNameController.text}",
-      "description": "${_descriptionController.text}"
+      "description": "${_descriptionController.text}",
+      "longitude": "${_longitudeController.text}",
+      "latitude": "${_latitudeController.text}"
     }''';
   }
 
@@ -221,6 +259,22 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                         spacing: 16,
                         runSpacing: 16,
                         children: [
+                          // Longitude field - disabled/read-only (moved to top)
+                          LabeledTextField(
+                            label: 'Longitude',
+                            placeholder: 'Longitude',
+                            width: fieldWidth,
+                            controller: _longitudeController,
+                            readOnly: true, // Make field read-only
+                          ),
+                          // Latitude field - disabled/read-only (moved to top)
+                          LabeledTextField(
+                            label: 'Latitude',
+                            placeholder: 'Latitude',
+                            width: fieldWidth,
+                            controller: _latitudeController,
+                            readOnly: true, // Make field read-only
+                          ),
                           // Intentionally static: No backend mapping for building list
                           CustomDropdownField(
                             label: AppString.selectBuilding.localize(context)!,
