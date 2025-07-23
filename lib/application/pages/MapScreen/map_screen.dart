@@ -366,6 +366,10 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint("MapScreen: Navigating to form for type: $type");
     String? targetPath;
 
+    // Get the source context from route parameters
+    final String source =
+        GoRouterState.of(context).uri.queryParameters['source'] ?? '';
+
     switch (type) {
       case MapMarkerLoader.markerTypeRental:
         targetPath = Pages.routeRentalEvidence.toPath();
@@ -377,7 +381,16 @@ class _MapScreenState extends State<MapScreen> {
         targetPath = Pages.routePastValuation.toPath();
         break;
       case MapMarkerLoader.markerTypeBuildingRates:
-        targetPath = Pages.routeLaBuildingRates.toPath();
+        // Context-aware navigation for Building Rates
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmBuildingRates.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Building Rates (source: $source)");
+        } else {
+          targetPath = Pages.routeLaBuildingRates.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Building Rates (source: $source)");
+        }
         break;
       default:
         debugPrint("MapScreen: Cannot navigate: Unknown data type '$type'.");

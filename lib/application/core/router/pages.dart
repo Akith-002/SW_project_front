@@ -8,6 +8,7 @@ class Pages {
   static const routeRatingCardReport = "rating-card-report";
   static const routeLaSalesEvidence = "la-sales-evidence";
   static const routeLaBuildingRates = "la-building-rates";
+  static const routeLmBuildingRates = "lm-building-rates";
   static const routeMrAssetsList = "mr-assets-list";
   static const routeRaAssetsList = "ra-assets-list";
   static const routeRbAssetsList = "rb-assets-list";

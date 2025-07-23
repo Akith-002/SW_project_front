@@ -6,6 +6,7 @@ import 'package:land_asset_valuation/application/core/router/services/router_ser
 import 'package:land_asset_valuation/application/core/widgets/sidebarlibrary/sidebar_scaffold.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/i3_master_file_list.dart';
 import 'package:land_asset_valuation/application/pages/LA_Building_Rates/la_building_rates.dart';
+import 'package:land_asset_valuation/application/pages/LM_Building_Rates/lm_building_rates.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/la_Sales_Evidence.dart';
 import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/lm_masterfile_list.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/mr_assets_list.dart';
@@ -313,6 +314,16 @@ class AppRouter {
               return NoTransitionPage(
                 key: state.pageKey,
                 child: const LaBuildingRates(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeLmBuildingRates.toPath(),
+            name: Pages.routeLmBuildingRates.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const LmBuildingRates(),
               );
             },
           ),
@@ -694,6 +705,8 @@ class AppRouter {
     } else if (path.startsWith(Pages.routeLaSalesEvidence.toPath()) ||
         path.startsWith(Pages.routeLaBuildingRates.toPath())) {
       return 1; // Land Acquisition
+    } else if (path.startsWith(Pages.routeLmBuildingRates.toPath())) {
+      return 7; // Land Miscellaneous
     } else if (path.startsWith(Pages.routeConditionReport.toPath())) {
       return 1; // Land Acquisition - Condition Report belongs to Land Acquisition
     } else if (path.startsWith(Pages.routePastValuation.toPath())) {
