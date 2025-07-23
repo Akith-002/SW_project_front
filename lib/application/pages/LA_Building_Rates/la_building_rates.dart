@@ -18,7 +18,6 @@ import 'package:land_asset_valuation/application/core/validators/la_building_rat
 import 'package:land_asset_valuation/application/core/widgets/data_send_successfully_dialogbox.dart';
 import 'package:land_asset_valuation/data/models/la_building_rates_model.dart';
 import 'package:land_asset_valuation/injection.dart';
-import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 /// LA Building Rates form page for collecting building valuation data
 class LaBuildingRates extends BasePage {
@@ -497,6 +496,7 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
 
       // Create the model from form data
       final buildingRatesModel = LaBuildingRatesModel(
+        masterFileId: _masterFileId ?? '',
         assessmentNumber: _assessmentNumberController.text.trim(),
         owner: _ownerController.text.trim(),
         constructedBy: _constructedByController.text.trim(),

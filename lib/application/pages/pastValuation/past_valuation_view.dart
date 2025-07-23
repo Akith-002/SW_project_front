@@ -245,6 +245,7 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
 
       // Send data to the backend via cubit
       await _cubit.sendPastValuation(
+        masterFileId: _masterFileId ?? '',
         masterFileRef: _masterFileRefController.text,
         fileNoGnDivision: _fileNoGnDivisionController.text,
         situation: _situationController.text,
