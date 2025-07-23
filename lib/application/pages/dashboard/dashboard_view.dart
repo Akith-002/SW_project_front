@@ -62,7 +62,7 @@ class _DashboardViewState extends BasePageState<DashboardView> {
     'Status': 'status',
   };
 
-  late Future<Map<String, dynamic>> _dashboardFuture;
+  Future<Map<String, dynamic>>? _dashboardFuture;
 
   void _updateTotalFiles(int count) {
     if (_totalFiles != count) {
@@ -76,16 +76,10 @@ class _DashboardViewState extends BasePageState<DashboardView> {
   void initState() {
     super.initState();
     searchController.addListener(_onSearchChanged);
-    // Initialize the dashboard future once
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final username =
-          Provider.of<AuthProvider>(context, listen: false).username;
-      if (username != null) {
-        setState(() {
-          _dashboardFuture = fetchTaskOverviewAndSummary(username);
-        });
-      }
-    });
+    final username = Provider.of<AuthProvider>(context, listen: false).username;
+    if (username != null) {
+      _dashboardFuture = fetchTaskOverviewAndSummary(username);
+    }
   }
 
   @override

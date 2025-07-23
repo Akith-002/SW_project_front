@@ -23,12 +23,13 @@ class LandMiscellaneousMasterFile {
     return LandMiscellaneousMasterFile(
       id: json['id'],
       masterFileNo: json['masterFileNo'],
-      masterFileRefNo: json['masterFileRefNo'],
-      planType: json['planType'],
-      planNo: json['planNo'],
-      requestingAuthorityReferenceNo: json['requestingAuthorityReferenceNo'],
-      status: json['status'],
-      lots: json['lots'],
+      masterFileRefNo: json['masterFileRefNo'] ?? '',
+      planType: json['planType'] ?? '',
+      planNo: json['planNo'] ?? '',
+      requestingAuthorityReferenceNo:
+          json['requestingAuthorityReferenceNo'] ?? '',
+      status: json['status'] ?? '',
+      lots: json['lots'] ?? 0,
     );
   }
 
