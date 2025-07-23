@@ -19,6 +19,8 @@ import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.
 import 'package:land_asset_valuation/application/pages/inspectionReport/inspection_report_view.dart';
 import 'package:land_asset_valuation/application/pages/rental_evidence/rental_evidence_view.dart';
 import 'package:land_asset_valuation/application/pages/LMRentalEvidences/lm_rental_evidences_view.dart';
+import 'package:land_asset_valuation/application/pages/LMSalesEvidences/lm_sales_evidences_view.dart';
+import 'package:land_asset_valuation/application/pages/LMPastValuations/lm_past_valuations_view.dart';
 import 'package:land_asset_valuation/application/pages/pastValuation/past_valuation_view.dart';
 import 'package:land_asset_valuation/application/pages/settingsScreen/settings_screen.dart';
 import 'package:land_asset_valuation/application/pages/signIn/signin_view.dart';
@@ -305,6 +307,37 @@ class AppRouter {
               return NoTransitionPage(
                 key: state.pageKey,
                 child: LmRentalEvidencesView(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeLmSalesEvidences.toPath(),
+            name: Pages.routeLmSalesEvidences.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const LmSalesEvidencesView(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeLmPastValuations.toPath(),
+            name: Pages.routeLmPastValuations.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return LmPastValuationsView(masterData: snapshot.data!);
+                    }
+                  },
+                ),
               );
             },
           ),

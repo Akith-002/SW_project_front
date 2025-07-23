@@ -180,6 +180,9 @@ import 'package:land_asset_valuation/domain/repositories/la_lot_repository.dart'
 import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/get_la_lots_usecase.dart';
 
+// Services
+import 'package:land_asset_valuation/data/services/rental_evidence_service.dart';
+
 final injection = GetIt.I;
 
 Future<void> init() async {
@@ -720,4 +723,9 @@ Future<void> init() async {
   injection.registerLazySingleton(
     () => GetLALotsUseCase(injection()),
   );
+
+  // ------------------------------
+  // Services
+  // ------------------------------
+  injection.registerLazySingleton(() => RentalEvidenceService());
 }

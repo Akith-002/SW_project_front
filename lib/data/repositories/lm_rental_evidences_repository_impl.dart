@@ -20,7 +20,8 @@ class LmRentalEvidencesRepositoryImpl implements LmRentalEvidencesRepository {
       _logger.d(
           '======= LM RENTAL EVIDENCES REPOSITORY: SENDING TO REMOTE DATA SOURCE =======');
       _logger.d('Report ID: ${report.id}');
-      _logger.d('Master File ID: ${report.masterFileId}');
+      _logger.d(
+          'Land Miscellaneous Master File ID: ${report.landMiscellaneousMasterFileId}');
       _logger.d('Assessment No: ${report.assessmentNo}');
       _logger.d('Owner: ${report.owner}');
       _logger.d('Data being sent to API...');
