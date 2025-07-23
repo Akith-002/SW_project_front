@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:land_asset_valuation/data/models/mr_request_model.dart';
+import 'package:land_asset_valuation/data/models/ra_request_model.dart';
 
 class DownloadService {
   static Future<void> downloadRequestAsJson(MrRequest request) async {
@@ -31,6 +32,33 @@ class DownloadService {
       );
     } catch (e) {
       print('Error downloading request: $e');
+      rethrow;
+    }
+  }
+
+  static Future<void> downloadRaRequestAsJson(RaRequestModel request) async {
+    try {
+      final data = {
+        'requestInformation': {
+          'id': request.id,
+          'requestTypeId': request.requestTypeId,
+          'ratingReferenceNo': request.ratingReferenceNo,
+          'localAuthority': request.localAuthority,
+          'yearOfRevision': request.yearOfRevision,
+          'status': request.status ? 'Active' : 'Inactive',
+          'createdAt': request.createdAt.toIso8601String(),
+          'updatedAt': request.updatedAt.toIso8601String(),
+        },
+        'downloadedAt': DateTime.now().toIso8601String(),
+      };
+
+      final jsonString = const JsonEncoder.withIndent('  ').convert(data);
+      await _saveAndShareFile(
+        jsonString,
+        'request_${request.ratingReferenceNo}.json',
+      );
+    } catch (e) {
+      print('Error downloading RA request: $e');
       rethrow;
     }
   }

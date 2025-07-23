@@ -166,6 +166,21 @@ import 'package:land_asset_valuation/domain/repositories/offices_rating_card_rep
 import 'package:land_asset_valuation/domain/usecases/save_offices_rating_card.dart';
 import 'package:land_asset_valuation/domain/usecases/get_offices_rating_card_autofill.dart';
 import 'package:land_asset_valuation/application/pages/RatingCardForms/offices/cubit/offices_rating_card_cubit.dart';
+import 'package:land_asset_valuation/data/datasource/remote/ra_requests_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/ra_request_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/ra_request_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/get_ra_requests_usecase.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRA/cubit/ra_requests_cubit.dart';
+import 'package:land_asset_valuation/data/datasource/remote/rb_requests_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/rb_request_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/rb_request_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/get_rb_requests_usecase.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRB/cubit/rb_requests_cubit.dart';
+import 'package:land_asset_valuation/data/datasource/remote/ro_requests_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/ro_request_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/ro_request_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/get_ro_requests_usecase.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRO/cubit/ro_requests_cubit.dart';
 
 // Master Data Feature
 import 'package:land_asset_valuation/data/datasource/remote/master_data_remote_data_source.dart';
@@ -599,8 +614,12 @@ Future<void> init() async {
         getAssetsPaginatedUseCase: injection(),
         searchAssetsUseCase: injection(),
       ));
-  injection
-      .registerFactory(() => RaAssetsListCubit(appSharedData: injection()));
+  injection.registerFactory(() => RaAssetsListCubit(
+        appSharedData: injection(),
+        getAssetsUseCase: injection(),
+        getAssetsPaginatedUseCase: injection(),
+        searchAssetsUseCase: injection(),
+      ));
   injection
       .registerFactory(() => RbAssetsListCubit(appSharedData: injection()));
   injection
@@ -650,6 +669,36 @@ Future<void> init() async {
         getOfficesRatingCardAutofill: injection(),
       ));
 
+
+  // RA Requests
+  injection.registerLazySingleton<RaRequestsRemoteDataSource>(
+    () => RaRequestsRemoteDataSourceImpl(dioClient: injection()),
+  );
+  injection.registerLazySingleton<RaRequestRepository>(
+    () => RaRequestRepositoryImpl(remoteDataSource: injection()),
+  );
+  injection.registerLazySingleton(() => GetRaRequestsUseCase(repository: injection()));
+  injection.registerFactory(() => RaRequestsCubit(getRaRequestsUseCase: injection()));
+
+  // RB Requests
+  injection.registerLazySingleton<RbRequestsRemoteDataSource>(
+    () => RbRequestsRemoteDataSourceImpl(dioClient: injection()),
+  );
+  injection.registerLazySingleton<RbRequestRepository>(
+    () => RbRequestRepositoryImpl(remoteDataSource: injection()),
+  );
+  injection.registerLazySingleton(() => GetRbRequestsUseCase(repository: injection()));
+  injection.registerFactory(() => RbRequestsCubit(getRbRequestsUseCase: injection()));
+
+  // RO Requests
+  injection.registerLazySingleton<RoRequestsRemoteDataSource>(
+    () => RoRequestsRemoteDataSourceImpl(dioClient: injection()),
+  );
+  injection.registerLazySingleton<RoRequestRepository>(
+    () => RoRequestRepositoryImpl(remoteDataSource: injection()),
+  );
+  injection.registerLazySingleton(() => GetRoRequestsUseCase(repository: injection()));
+  injection.registerFactory(() => RoRequestsCubit(getRoRequestsUseCase: injection()));
   injection.registerFactory(() => PastValuationCubit(
         appSharedData: injection(),
         sendPastValuationUseCase: injection(),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/assetListTable/asset_list_table.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
@@ -48,6 +50,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
         if (mounted) {
           setState(() {
             _requestReferenceNo = request.ratingReferenceNo;
+            debugPrint('MrAssetsList - Loaded ratingReferenceNo: $_requestReferenceNo');
           });
         }
       } catch (e) {
@@ -80,11 +83,33 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
       return;
     }
 
-    _cubit.searchAssets(
-      requestId: requestIdToUse,
-      requestType: 'MR',
-      query: query,
-    );
+    // Check if it's an advanced search (contains ':')
+    if (query.contains(':')) {
+      // Parse advanced search criteria
+      Map<String, String> criteria = {};
+      query.split(' ').forEach((part) {
+        if (part.contains(':')) {
+          var keyValue = part.split(':');
+          if (keyValue.length == 2) {
+            criteria[keyValue[0]] = keyValue[1];
+          }
+        }
+      });
+      
+      // For now, just search with the combined text
+      _cubit.searchAssets(
+        requestId: requestIdToUse,
+        requestType: 'MR',
+        query: criteria.values.join(' '),
+      );
+    } else {
+      // Simple search
+      _cubit.searchAssets(
+        requestId: requestIdToUse,
+        requestType: 'MR',
+        query: query,
+      );
+    }
   }
 
   void _loadMoreAssets(String? nextPageToken) {
@@ -132,6 +157,64 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
     Future.delayed(const Duration(milliseconds: 100), () {
       _loadAssets();
     });
+  }
+
+  List<BreadcrumbItem> _buildBreadcrumbItems(List<String> breadcrumbItems) {
+    final items = <BreadcrumbItem>[];
+    
+    for (int i = 0; i < breadcrumbItems.length; i++) {
+      final label = breadcrumbItems[i];
+      final isLast = i == breadcrumbItems.length - 1;
+      
+      // Don't make the last item clickable (current page)
+      if (isLast) {
+        items.add(BreadcrumbItem(label: label));
+      } else {
+        items.add(BreadcrumbItem(
+          label: label,
+          onTap: () => _navigateToBreadcrumb(i, label),
+        ));
+      }
+    }
+    
+    return items;
+  }
+
+  void _navigateToBreadcrumb(int index, String label) {
+    // First breadcrumb is always "Mass Rating" main section
+    if (index == 0) {
+      // Navigate to Mass Rating main page
+      context.goNamed(
+        Pages.routeI3MasterFileList.toPathName(),
+        queryParameters: {'selectedIndex': '2'},
+      );
+    } 
+    // Second breadcrumb is the sub-section (Mass Rating, Rating Assessment, etc.)
+    else if (index == 1) {
+      String selectedIndex = '2'; // Default to Mass Rating
+      
+      switch (widget.source) {
+        case 'ratingAssessment':
+          selectedIndex = '3';
+          break;
+        case 'ratingBuilding':
+          selectedIndex = '4';
+          break;
+        case 'ratingObject':
+          selectedIndex = '5';
+          break;
+        case 'massRating':
+        default:
+          selectedIndex = '2';
+          break;
+      }
+      
+      // Navigate to the appropriate sub-section
+      context.goNamed(
+        Pages.routeI3MasterFileList.toPathName(),
+        queryParameters: {'selectedIndex': selectedIndex},
+      );
+    }
   }
 
   @override
@@ -183,9 +266,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Breadcrumb(items: [
-              for (var item in breadcrumbItems) BreadcrumbItem(label: item),
-            ]),
+            Breadcrumb(items: _buildBreadcrumbItems(breadcrumbItems)),
             // Refresh button section
             Padding(
               padding:
@@ -237,6 +318,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
                     onRefresh: _refreshAssets,
                     searchController: _searchController,
                     onSearch: _searchAssets,
+                    ratingReferenceNo: _requestReferenceNo,
                   );
                 } else if (state is MrAssetsListSearchLoaded) {
                   return AssetListTable(
@@ -247,6 +329,7 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
                     onRefresh: _refreshAssets,
                     searchController: _searchController,
                     onSearch: _searchAssets,
+                    ratingReferenceNo: _requestReferenceNo,
                   );
                 } else {
                   // Initial state - show empty state or loading
