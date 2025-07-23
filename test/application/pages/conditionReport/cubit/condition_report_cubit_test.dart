@@ -10,25 +10,44 @@ import 'package:land_asset_valuation/domain/usecases/send_condition_report_useca
 import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:land_asset_valuation/domain/repositories/condition_report_repository.dart';
+import 'package:land_asset_valuation/data/services/connectivity_service.dart';
+import 'package:land_asset_valuation/data/services/condition_report_sync_service.dart';
+// NOTE: If you see errors about missing mocks, run `flutter pub run build_runner build` to regenerate the mocks.
 
 import 'condition_report_cubit_test.mocks.dart';
 
-@GenerateMocks(
-    [SendConditionReportUseCase, AppSharedData, GetMasterDataUseCase])
+@GenerateMocks([
+  SendConditionReportUseCase,
+  AppSharedData,
+  GetMasterDataUseCase,
+  ConditionReportRepository,
+  ConnectivityService,
+  ConditionReportSyncService,
+])
 void main() {
   late ConditionReportCubit conditionReportCubit;
   late MockSendConditionReportUseCase mockSendConditionReportUseCase;
   late MockAppSharedData mockAppSharedData;
   late MockGetMasterDataUseCase mockGetMasterDataUseCase;
+  late MockConditionReportRepository mockRepository;
+  late MockConnectivityService mockConnectivityService;
+  late MockConditionReportSyncService mockSyncService;
 
   setUp(() {
     mockSendConditionReportUseCase = MockSendConditionReportUseCase();
     mockAppSharedData = MockAppSharedData();
     mockGetMasterDataUseCase = MockGetMasterDataUseCase();
+    mockRepository = MockConditionReportRepository();
+    mockConnectivityService = MockConnectivityService();
+    mockSyncService = MockConditionReportSyncService();
     conditionReportCubit = ConditionReportCubit(
       sendConditionReportUseCase: mockSendConditionReportUseCase,
       appSharedData: mockAppSharedData,
       getMasterDataUseCase: mockGetMasterDataUseCase,
+      repository: mockRepository,
+      connectivityService: mockConnectivityService,
+      syncService: mockSyncService,
     );
   });
 
