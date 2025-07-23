@@ -19,7 +19,7 @@ import 'package:land_asset_valuation/data/models/asset_division.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 class EditRatingCardDialog {
-  static void showEditRatingCardDialog(BuildContext context, {Asset? asset}) {
+  static void showEditRatingCardDialog(BuildContext context, {Asset? asset, String? ratingReferenceNo}) {
     // Capture router state before showing dialog
     String? requestId;
     try {
@@ -412,7 +412,7 @@ class EditRatingCardDialog {
   }
 
   static void showAddRatingCardDialog(BuildContext context,
-      {String? sourceContext, Asset? asset}) {
+      {String? sourceContext, Asset? asset, String? ratingReferenceNo}) {
     // Capture router state before showing dialog
     String? requestId;
     try {
@@ -612,6 +612,33 @@ class EditRatingCardDialog {
                             }
                             if (asset != null) {
                               queryParams['assetId'] = asset.id.toString();
+                              // Include asset number for breadcrumb
+                              queryParams['assetNo'] = asset.assetNo;
+                            }
+                            
+                            // Determine request type from source context
+                            String requestType = 'MR'; // Default
+                            if (sourceContext != null) {
+                              switch (sourceContext) {
+                                case 'massRating':
+                                  requestType = 'MR';
+                                  break;
+                                case 'ratingAssessment':
+                                  requestType = 'RA';
+                                  break;
+                                case 'ratingBuilding':
+                                  requestType = 'RB';
+                                  break;
+                                case 'ratingObject':
+                                  requestType = 'RO';
+                                  break;
+                              }
+                            }
+                            queryParams['requestType'] = requestType;
+                            
+                            // Include rating reference number if provided
+                            if (ratingReferenceNo != null) {
+                              queryParams['ratingReferenceNo'] = ratingReferenceNo;
                             }
                             
                             // Use the captured requestId
@@ -816,7 +843,7 @@ class EditRatingCardDialog {
   }
 
   static void showEditRatingCardTypeDialog(BuildContext context,
-      {required Asset asset, String? sourceContext}) {
+      {required Asset asset, String? sourceContext, String? ratingReferenceNo}) {
     // Capture router state before showing dialog
     String? requestId;
     try {
@@ -1018,6 +1045,32 @@ class EditRatingCardDialog {
                             }
                             // Include the asset ID for existing rating cards
                             queryParams['assetId'] = asset.id.toString();
+                            
+                            // Include asset number and request type for breadcrumb
+                            queryParams['assetNo'] = asset.assetNo;
+                            
+                            // Determine request type from source context
+                            String requestType = 'MR'; // Default
+                            switch (sourceContext) {
+                              case 'massRating':
+                                requestType = 'MR';
+                                break;
+                              case 'ratingAssessment':
+                                requestType = 'RA';
+                                break;
+                              case 'ratingBuilding':
+                                requestType = 'RB';
+                                break;
+                              case 'ratingObject':
+                                requestType = 'RO';
+                                break;
+                            }
+                            queryParams['requestType'] = requestType;
+                            
+                            // Include rating reference number if provided
+                            if (ratingReferenceNo != null) {
+                              queryParams['ratingReferenceNo'] = ratingReferenceNo;
+                            }
                             
                             // Use the captured requestId
                             if (capturedRequestId != null) {
