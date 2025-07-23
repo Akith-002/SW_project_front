@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert';
 import 'package:land_asset_valuation/application/core/widgets/draw_polygon/drawPolygonDialog.dart';
 import 'package:land_asset_valuation/application/core/widgets/sketch_mode.dart';
 import 'package:land_asset_valuation/application/core/widgets/sketch_polygon_action_menu.dart';
@@ -1095,6 +1096,56 @@ class MapboxState extends State<Mapbox>
   Future<void> changeActiveFloor(String floorName) async {
     debugPrint("Mapbox: Changing active floor to: $floorName");
     return super.changeActiveFloor(floorName);
+  }
+
+  /// Loads and draws existing lots from coordinate data
+  Future<void> loadExistingLots(List<Map<String, dynamic>> lotsData) async {
+    if (polygonAnnotationManager == null) {
+      debugPrint("Mapbox: Cannot load lots - polygon manager not initialized");
+      return;
+    }
+
+    try {
+      debugPrint("Mapbox: Loading ${lotsData.length} existing lots");
+
+      for (var lotData in lotsData) {
+        final coordinates = lotData['coordinates'] as String?;
+        if (coordinates != null && coordinates.isNotEmpty) {
+          // Parse the coordinates string (should be JSON array)
+          final coordinatesList = jsonDecode(coordinates) as List;
+
+          // Convert to Position objects
+          final positions = coordinatesList.map((coord) {
+            final lng = coord['lng'] as double;
+            final lat = coord['lat'] as double;
+            return Position(lng, lat);
+          }).toList();
+
+          if (positions.length >= 3) {
+            // Close the polygon by adding the first point at the end
+            final closedPositions = List<Position>.from(positions)
+              ..add(positions.first);
+
+            // Create polygon annotation
+            final polygonOptions = PolygonAnnotationOptions(
+              geometry: Polygon(coordinates: [closedPositions]),
+              fillColor: Colors.blue.withOpacity(0.3).value,
+              fillOutlineColor: Colors.blue.value,
+            );
+
+            final polygon =
+                await polygonAnnotationManager!.create(polygonOptions);
+            debugPrint(
+                "Mapbox: Created existing lot polygon with ID: ${polygon.id}");
+          }
+        }
+      }
+
+      widget.onFeedbackMessage?.call("Loaded ${lotsData.length} existing lots");
+    } catch (e) {
+      debugPrint("Mapbox: Error loading existing lots: $e");
+      widget.onFeedbackMessage?.call("Error loading existing lots: $e");
+    }
   }
 
   @override

@@ -411,6 +411,14 @@ class TableScaffoldState extends State<TableScaffold> {
                                             queryParameters: {
                                               'source': widget.pageSource,
                                               'selectedIndex': '1',
+                                              'id': plan.id.toString(),
+                                              'masterFileNo':
+                                                  plan.masterFileNo.toString(),
+                                              'planType': plan.planType,
+                                              'planNo': plan.planNo,
+                                              'authorityRefNo': plan
+                                                  .requestingAuthorityReferenceNo,
+                                              'status': plan.status,
                                             },
                                           );
                                         },
