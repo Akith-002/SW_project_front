@@ -25,7 +25,7 @@ class _SplashViewState extends BasePageState<SplashView> {
     super.initState();
 
     Future.delayed(Duration(seconds: 3), () {
-      context.go(Pages.routeSignIn.toPath());
+      context.go(Pages.routeDashboard.toPath());
     });
   }
 

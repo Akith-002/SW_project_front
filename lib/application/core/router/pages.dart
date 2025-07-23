@@ -15,6 +15,8 @@ class Pages {
   static const routeRoAssetsList = "ro-assets-list";
   static const routeRentalEvidence = "rentalevidence";
   static const routeLmRentalEvidences = "lm-rental-evidences";
+  static const routeLmSalesEvidences = "lm-sales-evidences";
+  static const routeLmPastValuations = "lm-past-valuations";
   static const routeI2RentalEvidence = "i2rentalevidence";
   static const routeMapScreen = "routemap";
   static const routeAssetMapScreen = "asset-map-screen";

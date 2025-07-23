@@ -31,16 +31,24 @@ class Breadcrumb extends StatelessWidget {
             return [
               GestureDetector(
                 onTap: item.onTap,
-                child: Text(
-                  item.label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Roboto',
-                    color: isLast
-                        ? colors(context).colorPrimary6 ?? Color(0xFF007BCE)
-                        : colors(context).colorGrey2 ?? Color(0xFF394050),
-                    fontWeight: FontWeight.normal,
-                    decoration: TextDecoration.none,
+                child: MouseRegion(
+                  cursor: item.onTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+                  child: Text(
+                    item.label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Roboto',
+                      color: isLast
+                          ? colors(context).colorPrimary6 ?? Color(0xFF007BCE)
+                          : item.onTap != null 
+                              ? Color(0xFF1F2937) // Much darker grey for better visibility
+                              : Color(0xFF6B7280), // Medium grey for non-clickable items
+                      fontWeight: isLast ? FontWeight.w500 : FontWeight.normal,
+                      decoration: item.onTap != null && !isLast 
+                          ? TextDecoration.underline 
+                          : TextDecoration.none,
+                      decorationColor: Color(0xFF1F2937), // Match the text color
+                    ),
                   ),
                 ),
               ),
@@ -48,7 +56,7 @@ class Breadcrumb extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6.0),
                   child:
-                      Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                      Icon(Icons.chevron_right, size: 16, color: Color(0xFF9CA3AF)),
                 ),
             ];
           })

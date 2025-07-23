@@ -32,6 +32,50 @@ class _LmPastValuationsViewState extends BasePageState<LmPastValuationsView> {
   final _formKey = GlobalKey<FormState>();
   List<dynamic> uploadedImages = [];
 
+  // Controllers for coordinate fields
+  final _longitudeController = TextEditingController();
+  final _latitudeController = TextEditingController();
+  final _masterFileController = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _extractNavigationData();
+  }
+
+  void _extractNavigationData() {
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    if (args != null) {
+      // Extract coordinates from navigation arguments
+      final lat = args['lat']?.toString();
+      final lng = args['lng']?.toString();
+
+      if (lat != null && lat.isNotEmpty) {
+        _latitudeController.text = lat;
+      }
+
+      if (lng != null && lng.isNotEmpty) {
+        _longitudeController.text = lng;
+      }
+
+      // Extract master file data if available
+      final masterFileRefNo = args['masterFileRefNo']?.toString();
+      if (masterFileRefNo != null && masterFileRefNo.isNotEmpty) {
+        _masterFileController.text = masterFileRefNo;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _longitudeController.dispose();
+    _latitudeController.dispose();
+    _masterFileController.dispose();
+    super.dispose();
+  }
+
   void _onImagePicked(File? file) {
     if (file != null) {
       setState(() {
@@ -183,6 +227,7 @@ class _LmPastValuationsViewState extends BasePageState<LmPastValuationsView> {
                     LabeledTextField(
                       label: AppString.masterFilerefno.localize(context)!,
                       placeholder: "Metro/2/LM/123",
+                      controller: _masterFileController,
                     ),
                     LabeledTextField(
                       label: AppString.fileNoGnDivision.localize(context)!,
@@ -262,6 +307,7 @@ class _LmPastValuationsViewState extends BasePageState<LmPastValuationsView> {
                     LabeledTextField(
                       label: AppString.locationLongitude.localize(context)!,
                       placeholder: "6.123456789",
+                      controller: _longitudeController,
                       validator: (value) =>
                           LmPastValuationsValidator.optionalNumeric(
                               value, 255, "Longitude"),
@@ -269,6 +315,7 @@ class _LmPastValuationsViewState extends BasePageState<LmPastValuationsView> {
                     LabeledTextField(
                       label: AppString.locationLatitude.localize(context)!,
                       placeholder: "6.123456789",
+                      controller: _latitudeController,
                       validator: (value) =>
                           LmPastValuationsValidator.optionalNumeric(
                               value, 255, "Latitude"),

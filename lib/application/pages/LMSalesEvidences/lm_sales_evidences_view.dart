@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
@@ -63,6 +64,37 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
   @override
   LmSalesEvidencesCubit getCubit() {
     return _cubit;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _extractNavigationData();
+  }
+
+  /// Extracts data passed from map navigation
+  void _extractNavigationData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+
+    // Extract coordinates from query parameters (if coming from map marker)
+    final latStr = queryParams['latitude'];
+    final lngStr = queryParams['longitude'];
+
+    if (latStr != null && lngStr != null) {
+      _locationLatitudeController.text = latStr;
+      _locationLongitudeController.text = lngStr;
+      debugPrint(
+          "LmSalesEvidences: Auto-filled coordinates - Lat: $latStr, Lng: $lngStr");
+    }
+
+    // Extract master file number if available
+    final masterFileNo = queryParams['masterFileNo'];
+    if (masterFileNo != null) {
+      _masterFileRefController.text = masterFileNo;
+      debugPrint(
+          "LmSalesEvidences: Auto-filled master file ref: $masterFileNo");
+    }
   }
 
   /// Adds a newly picked image to the collection

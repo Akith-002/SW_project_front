@@ -36,13 +36,29 @@ class _FileListState extends State<FileList> {
   String? _selectedSortColumn;
 
   // Define the table headers with their API parameter names
-  final Map<String, String> _sortOptions = {
-    'Master File No': 'masterfileno',
-    'Plan Type': 'plantype',
-    'Plan No': 'planno',
-    'Authority Reference No': 'requestingauthorityreferenceno',
-    'Status': 'status',
-  };
+  Map<String, String> get _sortOptions {
+    // Different sort options based on page source
+    if (widget.pageSource == 'massRating' || 
+        widget.pageSource == 'ratingAssessment' || 
+        widget.pageSource == 'ratingBuilding' || 
+        widget.pageSource == 'ratingObject') {
+      return {
+        'Rating Reference No': 'ratingReferenceNo',
+        'Local Authority': 'localAuthority',
+        'Year of Revision': 'yearOfRevision',
+        'Status': 'status',
+      };
+    } else {
+      // Default for land acquisition
+      return {
+        'Master File No': 'masterfileno',
+        'Plan Type': 'plantype',
+        'Plan No': 'planno',
+        'Authority Reference No': 'requestingauthorityreferenceno',
+        'Status': 'status',
+      };
+    }
+  }
 
   @override
   void initState() {
@@ -92,7 +108,7 @@ class _FileListState extends State<FileList> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "${AppString.all_files.localize(context)!}${widget.totalCount}",
+                      "${AppString.all_files.localize(context)!} (${widget.totalCount})",
                       style: AppStyling.semiBoldTextSize16
                           .copyWith(color: colors(context).colorBlack),
                     ),
