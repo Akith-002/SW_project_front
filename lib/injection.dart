@@ -48,6 +48,12 @@ import 'package:land_asset_valuation/data/repositories/rental_evidence_repositor
 import 'package:land_asset_valuation/domain/repositories/rental_evidence_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_rental_evidence_usecase.dart';
 
+// Past Valuation Feature
+import 'package:land_asset_valuation/data/datasource/remote/past_valuation_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/past_valuation_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/past_valuation_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_past_valuation_usecase.dart';
+
 // LM Rental Evidences Feature
 import 'package:land_asset_valuation/data/datasource/remote/lm_rental_evidences_remote_data_source.dart';
 import 'package:land_asset_valuation/data/repositories/lm_rental_evidences_repository_impl.dart';
@@ -166,6 +172,13 @@ import 'package:land_asset_valuation/data/datasource/remote/master_data_remote_d
 import 'package:land_asset_valuation/data/repositories/master_data_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/master_data_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
+
+// LA Lot Feature
+import 'package:land_asset_valuation/data/datasource/remote/la_lot_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/la_lot_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/la_lot_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_la_lots_usecase.dart';
 
 final injection = GetIt.I;
 
@@ -460,6 +473,21 @@ Future<void> init() async {
   );
 
   // ------------------------------
+  // Past Valuation Feature
+  // ------------------------------
+  injection.registerLazySingleton<PastValuationRemoteDataSource>(
+    () => PastValuationRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<PastValuationRepository>(
+    () => PastValuationRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SendPastValuationUseCase(injection()),
+  );
+
+  // ------------------------------
   // LM Rental Evidences Feature
   // ------------------------------
   injection.registerLazySingleton<LmRentalEvidencesRemoteDataSource>(
@@ -622,8 +650,10 @@ Future<void> init() async {
         getOfficesRatingCardAutofill: injection(),
       ));
 
-  injection
-      .registerFactory(() => PastValuationCubit(appSharedData: injection()));
+  injection.registerFactory(() => PastValuationCubit(
+        appSharedData: injection(),
+        sendPastValuationUseCase: injection(),
+      ));
 
   injection
       .registerFactory(() => LmPastValuationsCubit(appSharedData: injection()));
@@ -667,4 +697,27 @@ Future<void> init() async {
         getPaginatedUseCase: injection(),
         searchUseCase: injection(),
       ));
+
+  // ------------------------------
+  // LA Lot Feature
+  // ------------------------------
+
+  // Data sources
+  injection.registerLazySingleton<LALotRemoteDataSource>(
+    () => LALotRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  // Repository
+  injection.registerLazySingleton<LALotRepository>(
+    () => LALotRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  // Use case
+  injection.registerLazySingleton(
+    () => SaveLALotUseCase(injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => GetLALotsUseCase(injection()),
+  );
 }
