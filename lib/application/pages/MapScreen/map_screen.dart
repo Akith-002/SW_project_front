@@ -182,7 +182,7 @@ class _MapScreenState extends State<MapScreen> {
             // Load the lots into the mapbox widget
             mapboxKey.currentState?.loadExistingLots(lotsData);
 
-            _showSnackbar("Loaded ${lots.length} existing lot(s)");
+            debugPrint("MapScreen: Loaded ${lots.length} existing lot(s)");
           } else {
             debugPrint(
                 "MapScreen: No existing lots found for this master file");
@@ -286,7 +286,7 @@ class _MapScreenState extends State<MapScreen> {
       );
 
       if (totalMarkersLoaded > 0) {
-        _showSnackbar("Loaded $totalMarkersLoaded existing marker(s)");
+        debugPrint("MapScreen: Loaded $totalMarkersLoaded existing marker(s)");
       } else {
         debugPrint("MapScreen: No existing markers found for this master file");
       }
