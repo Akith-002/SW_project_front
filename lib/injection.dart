@@ -54,6 +54,12 @@ import 'package:land_asset_valuation/data/repositories/past_valuation_repository
 import 'package:land_asset_valuation/domain/repositories/past_valuation_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_past_valuation_usecase.dart';
 
+// LM Rental Evidences Feature
+import 'package:land_asset_valuation/data/datasource/remote/lm_rental_evidences_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/lm_rental_evidences_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/lm_rental_evidences_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_lm_rental_evidences_usecase.dart';
+
 // Land Acquisition Feature (Clean Architecture)
 import 'package:land_asset_valuation/data/datasource/remote/land_acquisition_remote_datasource.dart';
 import 'package:land_asset_valuation/data/repositories/land_acquisition_repository_impl.dart';
@@ -94,17 +100,31 @@ import 'package:land_asset_valuation/data/repositories/la_building_rates_reposit
 import 'package:land_asset_valuation/domain/repositories/la_building_rates_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_la_building_rates_usecase.dart';
 
+// LM Building Rates Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/lm_building_rates_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/lm_building_rates_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/lm_building_rates_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_lm_building_rates_usecase.dart';
+
 // LA Sales Evidence Feature (Clean Architecture)
 import 'package:land_asset_valuation/data/datasource/remote/la_sales_evidence_remote_data_source.dart';
 import 'package:land_asset_valuation/data/repositories/la_sales_evidence_repository_impl.dart';
 import 'package:land_asset_valuation/domain/repositories/la_sales_evidence_repository.dart';
 import 'package:land_asset_valuation/domain/usecases/send_la_sales_evidence_usecase.dart';
 
+// LM Sales Evidence Feature (Clean Architecture)
+import 'package:land_asset_valuation/data/datasource/remote/lm_sales_evidences_remote_data_source.dart';
+import 'package:land_asset_valuation/data/repositories/lm_sales_evidences_repository_impl.dart';
+import 'package:land_asset_valuation/domain/repositories/lm_sales_evidences_repository.dart';
+import 'package:land_asset_valuation/domain/usecases/send_lm_sales_evidences_usecase.dart';
+
 // Cubits
 import 'package:land_asset_valuation/application/pages/I2_rental_evidence/cubit/i2_rental_evidence_cubit.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/LA_Building_Rates/cubit/la_building_rates_cubit.dart';
+import 'package:land_asset_valuation/application/pages/LM_Building_Rates/cubit/lm_building_rates_cubit.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/cubit/la_sales_evidence_cubit.dart';
+import 'package:land_asset_valuation/application/pages/LMSalesEvidences/cubit/lm_sales_evidences_cubit.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/cubit/mr_assets_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/mr_requests/cubit/mr_requests_cubit.dart';
 import 'package:land_asset_valuation/application/pages/RA_Assets_list/cubit/ra_assets_list_cubit.dart';
@@ -113,7 +133,9 @@ import 'package:land_asset_valuation/application/pages/RO_Assets_list/cubit/ro_a
 import 'package:land_asset_valuation/application/pages/dashboard/cubit/dashboard_cubit.dart';
 import 'package:land_asset_valuation/application/pages/inspectionReport/cubit/inspection_report_cubit.dart';
 import 'package:land_asset_valuation/application/pages/pastValuation/cubit/past_valuation_cubit.dart';
+import 'package:land_asset_valuation/application/pages/LMPastValuations/cubit/lm_past_valuations_cubit.dart';
 import 'package:land_asset_valuation/application/pages/rental_evidence/cubit/rental_evidence_cubit.dart';
+import 'package:land_asset_valuation/application/pages/LMRentalEvidences/cubit/lm_rental_evidences_cubit.dart';
 import 'package:land_asset_valuation/application/pages/settingsScreen/cubit/settings_screen_cubit.dart';
 import 'package:land_asset_valuation/application/pages/signIn/cubit/signin_cubit.dart';
 import 'package:land_asset_valuation/application/pages/splash/cubit/splash_cubit.dart';
@@ -356,6 +378,21 @@ Future<void> init() async {
   );
 
   // ------------------------------
+  // LM Building Rates Feature
+  // ------------------------------
+  injection.registerLazySingleton<LmBuildingRatesRemoteDataSource>(
+    () => LmBuildingRatesRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<LmBuildingRatesRepository>(
+    () => LmBuildingRatesRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SendLmBuildingRatesUseCase(injection()),
+  );
+
+  // ------------------------------
   // LA Sales Evidence Feature
   // ------------------------------
   injection.registerLazySingleton<LaSalesEvidenceRemoteDataSource>(
@@ -371,6 +408,23 @@ Future<void> init() async {
 
   injection.registerLazySingleton(
     () => SendLaSalesEvidenceUseCase(repository: injection()),
+  );
+
+  // ------------------------------
+  // LM Sales Evidence Feature
+  // ------------------------------
+  injection.registerLazySingleton<LmSalesEvidencesRemoteDataSource>(
+    () => LmSalesEvidencesRemoteDataSourceImpl(
+      dioClient: injection(),
+    ),
+  );
+
+  injection.registerLazySingleton<LmSalesEvidencesRepository>(
+    () => LmSalesEvidencesRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SendLmSalesEvidencesUseCase(injection()),
   );
 
   // ------------------------------
@@ -431,6 +485,21 @@ Future<void> init() async {
 
   injection.registerLazySingleton(
     () => SendPastValuationUseCase(injection()),
+  );
+
+  // ------------------------------
+  // LM Rental Evidences Feature
+  // ------------------------------
+  injection.registerLazySingleton<LmRentalEvidencesRemoteDataSource>(
+    () => LmRentalEvidencesRemoteDataSourceImpl(dioClient: injection()),
+  );
+
+  injection.registerLazySingleton<LmRentalEvidencesRepository>(
+    () => LmRentalEvidencesRepositoryImpl(remoteDataSource: injection()),
+  );
+
+  injection.registerLazySingleton(
+    () => SendLmRentalEvidencesUseCase(injection()),
   );
 
   // ------------------------------
@@ -520,6 +589,10 @@ Future<void> init() async {
         appSharedData: injection(),
         sendLaBuildingRatesUseCase: injection(),
       ));
+  injection.registerFactory(() => LmBuildingRatesCubit(
+        appSharedData: injection(),
+        sendLmBuildingRatesUseCase: injection(),
+      ));
   injection.registerFactory(() => MrAssetsListCubit(
         appSharedData: injection(),
         getAssetsUseCase: injection(),
@@ -538,6 +611,11 @@ Future<void> init() async {
         sendRentalEvidenceUseCase: injection(),
       ));
 
+  injection.registerFactory(() => LmRentalEvidencesCubit(
+        appSharedData: injection(),
+        sendLmRentalEvidencesUseCase: injection(),
+      ));
+
   injection
       .registerFactory(() => I2RentalEvidenceCubit(appSharedData: injection()));
   injection
@@ -546,6 +624,11 @@ Future<void> init() async {
         appSharedData: injection(),
         sendLaSalesEvidenceUseCase: injection(),
         logger: injection(),
+      ));
+
+  injection.registerFactory(() => LmSalesEvidencesCubit(
+        appSharedData: injection(),
+        sendLmSalesEvidencesUseCase: injection(),
       ));
 
   injection.registerFactory(() => ConditionReportCubit(
@@ -571,6 +654,9 @@ Future<void> init() async {
         appSharedData: injection(),
         sendPastValuationUseCase: injection(),
       ));
+
+  injection
+      .registerFactory(() => LmPastValuationsCubit(appSharedData: injection()));
 
   injection.registerFactory(() => InspectionReportCubit(
         appSharedData: injection(),

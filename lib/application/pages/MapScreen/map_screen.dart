@@ -428,6 +428,10 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint("MapScreen: Navigating to form for type: $type");
     String? targetPath;
 
+    // Get the source context from route parameters
+    final String source =
+        GoRouterState.of(context).uri.queryParameters['source'] ?? '';
+
     switch (type) {
       case MapMarkerLoader.markerTypeRental:
         targetPath = Pages.routeRentalEvidence.toPath();
@@ -439,7 +443,35 @@ class _MapScreenState extends State<MapScreen> {
         targetPath = Pages.routePastValuation.toPath();
         break;
       case MapMarkerLoader.markerTypeBuildingRates:
-        targetPath = Pages.routeLaBuildingRates.toPath();
+        // Context-aware navigation for Building Rates
+        if (source == 'landMiscellaneous') {
+          // Pass masterFileNo and coordinates as query parameters for LM Building Rates
+          final queryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            queryParams['masterFileNo'] = _masterFileNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            queryParams['latitude'] = coords.lat.toString();
+            queryParams['longitude'] = coords.lng.toString();
+            debugPrint(
+                "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmBuildingRates.toPath(),
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+          targetPath = targetUri.toString();
+          debugPrint(
+              "MapScreen: Navigating to LM Building Rates (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
+        } else {
+          targetPath = Pages.routeLaBuildingRates.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Building Rates (source: $source)");
+        }
         break;
       default:
         debugPrint("MapScreen: Cannot navigate: Unknown data type '$type'.");
