@@ -383,9 +383,28 @@ class _MapScreenState extends State<MapScreen> {
       case MapMarkerLoader.markerTypeBuildingRates:
         // Context-aware navigation for Building Rates
         if (source == 'landMiscellaneous') {
-          targetPath = Pages.routeLmBuildingRates.toPath();
+          // Pass masterFileNo and coordinates as query parameters for LM Building Rates
+          final queryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            queryParams['masterFileNo'] = _masterFileNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            queryParams['latitude'] = coords.lat.toString();
+            queryParams['longitude'] = coords.lng.toString();
+            debugPrint(
+                "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmBuildingRates.toPath(),
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+          targetPath = targetUri.toString();
           debugPrint(
-              "MapScreen: Navigating to LM Building Rates (source: $source)");
+              "MapScreen: Navigating to LM Building Rates (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
         } else {
           targetPath = Pages.routeLaBuildingRates.toPath();
           debugPrint(

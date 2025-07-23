@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
@@ -14,7 +17,6 @@ import 'package:land_asset_valuation/application/core/widgets/labeled_text_field
 import 'package:land_asset_valuation/application/pages/LM_Building_Rates/cubit/lm_building_rates_cubit.dart';
 import 'package:land_asset_valuation/application/pages/LM_Building_Rates/cubit/lm_building_rates_state.dart';
 import 'package:land_asset_valuation/application/core/validators/lm_building_rates_validator.dart';
-import 'package:land_asset_valuation/data/models/lm_building_rates_model.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 /// LM Building Rates form page for collecting building valuation data
@@ -34,6 +36,9 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
   // Auto-validation mode
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
+  // Master file data from navigation
+  String? _masterFileNo;
+
   // Text controllers for all form fields
   final _assessmentNumberController = TextEditingController();
   final _ownerController = TextEditingController();
@@ -49,6 +54,77 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
 
   // Stores uploaded image files and paths
   List<dynamic> uploadedImages = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _extractMasterFileData();
+    _loadSavedDataIfExists(); // Try to load previously saved data
+  }
+
+  void _extractMasterFileData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+    _masterFileNo = queryParams['masterFileNo'];
+
+    // Extract coordinates if available
+    final latStr = queryParams['latitude'];
+    final lngStr = queryParams['longitude'];
+
+    if (latStr != null && lngStr != null) {
+      _locationLatitudeController.text = latStr;
+      _locationLongitudeController.text = lngStr;
+      debugPrint(
+          "LmBuildingRates: Auto-filled coordinates - Lat: $latStr, Lng: $lngStr");
+    }
+
+    debugPrint("LmBuildingRates: Extracted Master File No: $_masterFileNo");
+  }
+
+  /// Attempts to load previously saved data for this master file
+  Future<void> _loadSavedDataIfExists() async {
+    if (_masterFileNo == null) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String key = 'lm_building_rates_$_masterFileNo';
+      final String? savedDataJson = prefs.getString(key);
+
+      if (savedDataJson != null) {
+        final Map<String, dynamic> savedData = jsonDecode(savedDataJson);
+
+        // Only load if controllers are empty (don't overwrite coordinates from URL)
+        if (_assessmentNumberController.text.isEmpty) {
+          _assessmentNumberController.text =
+              savedData['assessmentNumber'] ?? '';
+          _ownerController.text = savedData['owner'] ?? '';
+          _constructedByController.text = savedData['constructedBy'] ?? '';
+          _yearOfConstructionController.text =
+              savedData['yearOfConstruction'] ?? '';
+          _descriptionOfPropertyController.text =
+              savedData['descriptionOfProperty'] ?? '';
+          _floorAreaSQFTController.text = savedData['floorAreaSQFT'] ?? '';
+          _ratePerSQFTController.text = savedData['ratePerSQFT'] ?? '';
+          _costController.text = savedData['cost'] ?? '';
+          _remarksController.text = savedData['remarks'] ?? '';
+
+          // Only load coordinates if not already set from URL parameters
+          if (_locationLatitudeController.text.isEmpty) {
+            _locationLatitudeController.text =
+                savedData['locationLatitude'] ?? '';
+          }
+          if (_locationLongitudeController.text.isEmpty) {
+            _locationLongitudeController.text =
+                savedData['locationLongitude'] ?? '';
+          }
+
+          debugPrint('LM Building Rates: Loaded previously saved data');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading saved data: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -74,21 +150,24 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
     });
   }
 
+  /// Removes image from uploaded images list
+  void _deleteImage(int index) {
+    setState(() {
+      uploadedImages.removeAt(index);
+    });
+  }
+
   @override
   Widget buildView(BuildContext context) {
     return BlocProvider<LmBuildingRatesCubit>.value(
       value: _cubit,
       child: BlocConsumer<LmBuildingRatesCubit, dynamic>(
         listener: (context, state) {
-          if (state is LmBuildingRatesSubmitSuccess) {
-            _showSuccessDialog();
-          } else if (state is LmBuildingRatesSubmitFailure) {
-            _showErrorMessage(state.errorMessage);
-          }
+          // Handle state changes if needed in the future
         },
         builder: (context, state) {
           return Scaffold(
-            appBar: CustomAppBar(title: 'LM Building Rates Form'),
+            appBar: CustomAppBar(title: 'Building Rates'),
             body: LayoutBuilder(
               builder: (context, constraints) {
                 // Calculate responsive field width (47% of screen width)
@@ -105,8 +184,10 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
                           items: [
                             BreadcrumbItem(label: 'Land Miscellaneous'),
                             BreadcrumbItem(
-                                label: AppString.masterFile.localize(context) ??
-                                    'Master File'),
+                                label: _masterFileNo != null
+                                    ? '${AppString.masterFile.localize(context) ?? 'Master File'} - #$_masterFileNo'
+                                    : AppString.masterFile.localize(context) ??
+                                        'Master File'),
                             BreadcrumbItem(label: 'LM Building Rates'),
                           ],
                         ),
@@ -193,10 +274,10 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
                                   LabeledTextField(
                                     label: AppString.floorAreaSQFT
                                             .localize(context) ??
-                                        'Floor Area (SQFT)',
+                                        'Floor Area SQFT',
                                     placeholder: AppString.floorAreaSQFT
                                             .localize(context) ??
-                                        'Floor Area (SQFT)',
+                                        'Floor Area SQFT',
                                     width: fieldWidth,
                                     controller: _floorAreaSQFTController,
                                     validator: (value) =>
@@ -244,42 +325,13 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
                                             .optionalRemarks(
                                                 value, 500, "Remarks"),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-
-                              // Location section
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.location_on,
-                                    color: colors(context).colorPrimary6,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Location',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: colors(context).colorBlack,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              Wrap(
-                                spacing: 16,
-                                runSpacing: 16,
-                                children: [
                                   LabeledTextField(
                                     label: AppString.locationLatitude
                                             .localize(context) ??
-                                        'Latitude',
+                                        'Location Latitude',
                                     placeholder: AppString.locationLatitude
                                             .localize(context) ??
-                                        'Latitude',
+                                        'Location Latitude',
                                     width: fieldWidth,
                                     controller: _locationLatitudeController,
                                     validator: (value) =>
@@ -290,10 +342,10 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
                                   LabeledTextField(
                                     label: AppString.locationLongitude
                                             .localize(context) ??
-                                        'Longitude',
+                                        'Location Longitude',
                                     placeholder: AppString.locationLongitude
                                             .localize(context) ??
-                                        'Longitude',
+                                        'Location Longitude',
                                     width: fieldWidth,
                                     controller: _locationLongitudeController,
                                     validator: (value) =>
@@ -304,71 +356,75 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
                                 ],
                               ),
                               const SizedBox(height: 24),
-
                               // Image upload section
-                              Row(
+                              Text(
+                                AppString.imageCapturing.localize(context) ??
+                                    'Image Capturing and Upload',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 16),
+                              // Image gallery with upload functionality
+                              Wrap(
+                                spacing: 16,
+                                runSpacing: 16,
                                 children: [
-                                  Icon(
-                                    Icons.camera_alt,
-                                    color: colors(context).colorPrimary6,
-                                    size: 20,
+                                  // Display uploaded images with delete option
+                                  ...List.generate(
+                                    uploadedImages.length,
+                                    (index) {
+                                      final image = uploadedImages[index];
+                                      return ImageUpload(
+                                        imageFile: image is File ? image : null,
+                                        imagePath:
+                                            image is String ? image : null,
+                                        onDelete: () => _deleteImage(index),
+                                        size: 128,
+                                      );
+                                    },
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Upload Images',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: colors(context).colorBlack,
-                                    ),
+                                  // Upload new image button
+                                  ImageUpload(
+                                    isUploadButton: true,
+                                    onImagePicked: _onImagePicked,
+                                    onDelete: () {},
+                                    size: 128,
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
-
-                              ImageUpload(
-                                onImagePicked: _onImagePicked,
-                                onDelete: () {},
-                                isUploadButton: true,
+                              // Divider line
+                              Container(
+                                height: 1,
+                                margin: EdgeInsets.all(16),
+                                width: double.infinity,
+                                color: Colors.grey,
                               ),
-                              const SizedBox(height: 32),
-
                               // Action buttons
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Expanded(
-                                    child: CustomButton(
-                                      text:
-                                          AppString.cancel.localize(context) ??
-                                              'Cancel',
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      backgroundColor: Colors.grey.shade300,
-                                    ),
+                                  CustomButton(
+                                    text: AppString.cancel.localize(context) ??
+                                        'Cancel',
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    backgroundColor:
+                                        colors(context).colorGrey1 ??
+                                            Colors.grey.shade300,
                                   ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: CustomButton(
-                                      text: AppString.save.localize(context) ??
-                                          'Save',
-                                      onPressed: state is LmBuildingRatesLoading
-                                          ? null
-                                          : _handleSubmit,
-                                      backgroundColor:
-                                          colors(context).colorPrimary6 ??
-                                              Colors.blue,
-                                      isLoading:
-                                          state is LmBuildingRatesLoading,
-                                    ),
+                                  Spacer(),
+                                  CustomButton(
+                                    text: AppString.save.localize(context) ??
+                                        'Save',
+                                    onPressed: _validateAndSave,
+                                    backgroundColor:
+                                        colors(context).colorPrimary1 ??
+                                            Colors.blue,
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                        ),
+                        )
                       ],
                     ),
                   ),
@@ -381,29 +437,79 @@ class _LmBuildingRatesState extends BasePageState<LmBuildingRates> {
     );
   }
 
-  /// Handles form submission with validation
-  void _handleSubmit() {
+  /// Validates form and saves data locally
+  void _validateAndSave() async {
+    // Enable auto-validation mode to show validation errors
     setState(() {
-      _autovalidateMode = AutovalidateMode.always;
+      _autovalidateMode = AutovalidateMode.onUserInteraction;
     });
 
-    if (_formKey.currentState?.validate() ?? false) {
-      final formData = LmBuildingRatesModel(
-        assessmentNumber: _assessmentNumberController.text.trim(),
-        owner: _ownerController.text.trim(),
-        constructedBy: _constructedByController.text.trim(),
-        yearOfConstruction: _yearOfConstructionController.text.trim(),
-        descriptionOfProperty: _descriptionOfPropertyController.text.trim(),
-        floorAreaSQFT: _floorAreaSQFTController.text.trim(),
-        ratePerSQFT: _ratePerSQFTController.text.trim(),
-        cost: _costController.text.trim(),
-        remarks: _remarksController.text.trim(),
-        locationLatitude: _locationLatitudeController.text.trim(),
-        locationLongitude: _locationLongitudeController.text.trim(),
-      );
+    // Validate the form
+    bool isFormValid = _formKey.currentState?.validate() ?? false;
 
-      _cubit.sendLmBuildingRates(formData);
+    if (isFormValid) {
+      try {
+        // Create data map for local storage
+        final formData = {
+          'assessmentNumber': _assessmentNumberController.text.trim(),
+          'owner': _ownerController.text.trim(),
+          'constructedBy': _constructedByController.text.trim(),
+          'yearOfConstruction': _yearOfConstructionController.text.trim(),
+          'descriptionOfProperty': _descriptionOfPropertyController.text.trim(),
+          'floorAreaSQFT': _floorAreaSQFTController.text.trim(),
+          'ratePerSQFT': _ratePerSQFTController.text.trim(),
+          'cost': _costController.text.trim(),
+          'remarks': _remarksController.text.trim(),
+          'locationLatitude': _locationLatitudeController.text.trim(),
+          'locationLongitude': _locationLongitudeController.text.trim(),
+        };
+
+        // Save data locally
+        await _saveDataLocally(formData);
+        _showSuccessMessage('Building rates data saved locally successfully');
+      } catch (e) {
+        debugPrint('Error saving data locally: $e');
+        _showErrorMessage('Failed to save data locally. Please try again.');
+      }
+    } else {
+      _showErrorMessage('Please fix the validation errors in the form');
     }
+  }
+
+  /// Saves the form data to local storage
+  Future<void> _saveDataLocally(Map<String, String> data) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Create a map with form data and metadata
+    final localData = {
+      'masterFileNo': _masterFileNo,
+      ...data, // Spread the form data
+      'savedAt': DateTime.now().toIso8601String(),
+      'imageCount': uploadedImages.length,
+    };
+
+    // Convert to JSON string
+    final jsonString = jsonEncode(localData);
+
+    // Generate a unique key for this entry
+    final String key =
+        'lm_building_rates_${_masterFileNo ?? DateTime.now().millisecondsSinceEpoch}';
+
+    // Save to SharedPreferences
+    await prefs.setString(key, jsonString);
+
+    debugPrint('LM Building Rates data saved locally with key: $key');
+  }
+
+  /// Displays success message using SnackBar
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   /// Shows success dialog when form is submitted successfully

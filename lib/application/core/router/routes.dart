@@ -18,6 +18,7 @@ import 'package:land_asset_valuation/application/pages/conditionReport/condition
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
 import 'package:land_asset_valuation/application/pages/inspectionReport/inspection_report_view.dart';
 import 'package:land_asset_valuation/application/pages/rental_evidence/rental_evidence_view.dart';
+import 'package:land_asset_valuation/application/pages/LMRentalEvidences/lm_rental_evidences_view.dart';
 import 'package:land_asset_valuation/application/pages/pastValuation/past_valuation_view.dart';
 import 'package:land_asset_valuation/application/pages/settingsScreen/settings_screen.dart';
 import 'package:land_asset_valuation/application/pages/signIn/signin_view.dart';
@@ -294,6 +295,16 @@ class AppRouter {
               return NoTransitionPage(
                 key: state.pageKey,
                 child: RentalEvidenceView(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeLmRentalEvidences.toPath(),
+            name: Pages.routeLmRentalEvidences.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: LmRentalEvidencesView(),
               );
             },
           ),
@@ -598,6 +609,12 @@ class AppRouter {
         "DEBUG: Does path start with I3MasterFileList? ${path.startsWith(Pages.routeI3MasterFileList.toPath())}");
     print("DEBUG: All query parameters: ${state.uri.queryParameters}");
 
+    // Special handling for LM Building Rates - always return index 7 regardless of query parameters
+    if (path.startsWith(Pages.routeLmBuildingRates.toPath())) {
+      print("DEBUG: LM Building Rates route detected - returning index 7");
+      return 7; // Land Miscellaneous
+    }
+
     // Check for selectedIndex in query parameters first
     if (state.uri.queryParameters.containsKey('selectedIndex')) {
       return int.tryParse(state.uri.queryParameters['selectedIndex']!) ?? 0;
@@ -705,8 +722,6 @@ class AppRouter {
     } else if (path.startsWith(Pages.routeLaSalesEvidence.toPath()) ||
         path.startsWith(Pages.routeLaBuildingRates.toPath())) {
       return 1; // Land Acquisition
-    } else if (path.startsWith(Pages.routeLmBuildingRates.toPath())) {
-      return 7; // Land Miscellaneous
     } else if (path.startsWith(Pages.routeConditionReport.toPath())) {
       return 1; // Land Acquisition - Condition Report belongs to Land Acquisition
     } else if (path.startsWith(Pages.routePastValuation.toPath())) {
