@@ -25,6 +25,10 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'dart:convert';
 import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
 import 'package:land_asset_valuation/domain/usecases/get_la_lots_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_building_rates_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_past_valuations_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_rental_evidence_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_sales_evidence_coordinate_usecase.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 // Import for calculations if needed here (likely not)
@@ -183,6 +187,92 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  /// Saves marker coordinates to the backend based on marker type
+  void _saveMarkerCoordinate(Point point, String markerType) async {
+    if (_id == null) {
+      debugPrint(
+          "MapScreen: No master file ID available to save marker coordinate");
+      return;
+    }
+
+    final masterfileId = int.tryParse(_id!);
+    if (masterfileId == null) {
+      debugPrint("MapScreen: Invalid master file ID: $_id");
+      return;
+    }
+
+    // Convert point to coordinate string format
+    final coordinates = _convertPointToCoordinateString(point);
+
+    try {
+      debugPrint(
+          "MapScreen: Saving $markerType coordinate - Coordinates: $coordinates, MasterFileId: $masterfileId");
+
+      switch (markerType) {
+        case MapMarkerLoader.markerTypeRental:
+          final useCase = injection<SaveRentalEvidenceCoordinateUseCase>();
+          final result = await useCase(
+            masterfileId: masterfileId,
+            coordinates: coordinates,
+          );
+          _handleMarkerCoordinateResult(result, markerType);
+          break;
+
+        case MapMarkerLoader.markerTypeSales:
+          final useCase = injection<SaveSalesEvidenceCoordinateUseCase>();
+          final result = await useCase(
+            masterfileId: masterfileId,
+            coordinates: coordinates,
+          );
+          _handleMarkerCoordinateResult(result, markerType);
+          break;
+
+        case MapMarkerLoader.markerTypeValuations:
+          final useCase = injection<SavePastValuationsCoordinateUseCase>();
+          final result = await useCase(
+            masterfileId: masterfileId,
+            coordinates: coordinates,
+          );
+          _handleMarkerCoordinateResult(result, markerType);
+          break;
+
+        case MapMarkerLoader.markerTypeBuildingRates:
+          final useCase = injection<SaveBuildingRatesCoordinateUseCase>();
+          final result = await useCase(
+            masterfileId: masterfileId,
+            coordinates: coordinates,
+          );
+          _handleMarkerCoordinateResult(result, markerType);
+          break;
+
+        default:
+          debugPrint(
+              "MapScreen: Unknown marker type for coordinate saving: $markerType");
+          break;
+      }
+    } catch (e) {
+      debugPrint("MapScreen: Error saving $markerType marker coordinate: $e");
+      _showSnackbar("Failed to save $markerType marker coordinate",
+          isError: true);
+    }
+  }
+
+  /// Handles the result of saving marker coordinates
+  void _handleMarkerCoordinateResult(dynamic result, String markerType) {
+    result.fold(
+      (failure) {
+        debugPrint(
+            "MapScreen: Failed to save $markerType coordinate: ${failure.message}");
+        _showSnackbar("Failed to save $markerType coordinate", isError: true);
+      },
+      (response) {
+        debugPrint("MapScreen: Successfully saved $markerType coordinate");
+        // Don't show success message to avoid overwhelming the user
+        // The "marker added" message is already shown
+      },
+    );
+  }
+
   void _onSketchMetricsUpdated(double area, double distance) {
     if (!mounted) return;
     // Use debugPrint for detailed logging during development
@@ -250,6 +340,9 @@ class _MapScreenState extends State<MapScreen> {
         if (img.isNotEmpty) {
           mapboxKey.currentState?.addMarkerAtPoint(point, img, selectedOption);
           _showSnackbar("$selectedOption marker added.");
+
+          // Save marker coordinates to backend
+          _saveMarkerCoordinate(point, selectedOption);
         } else {
           _showSnackbar("Failed to load icon for '$selectedOption'.",
               isError: true);
@@ -1193,6 +1286,14 @@ class _MapScreenState extends State<MapScreen> {
         .toList();
 
     return jsonEncode(coordinates);
+  }
+
+  String _convertPointToCoordinateString(Point point) {
+    final coordinate = {
+      'lng': point.coordinates.lng,
+      'lat': point.coordinates.lat,
+    };
+    return jsonEncode(coordinate);
   }
 
   // Add the build method at the class level
