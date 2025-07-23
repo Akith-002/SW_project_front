@@ -309,18 +309,58 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
     debugPrint("MapScreen: Navigating to form for type: $type");
     String? targetPath;
 
+    // Get the source context from route parameters
+    final String source =
+        GoRouterState.of(context).uri.queryParameters['source'] ?? '';
+
     switch (type) {
       case MapMarkerLoader.markerTypeRental:
-        targetPath = Pages.routeRentalEvidence.toPath();
+        // Context-aware navigation for Rental Evidence
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmRentalEvidences.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Rental Evidence (source: $source)");
+        } else {
+          targetPath = Pages.routeRentalEvidence.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Rental Evidence (source: $source)");
+        }
         break;
       case MapMarkerLoader.markerTypeSales:
-        targetPath = Pages.routeLaSalesEvidence.toPath();
+        // Context-aware navigation for Sales Evidence
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmSalesEvidences.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Sales Evidence (source: $source)");
+        } else {
+          targetPath = Pages.routeLaSalesEvidence.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Sales Evidence (source: $source)");
+        }
         break;
       case MapMarkerLoader.markerTypeValuations:
-        targetPath = Pages.routePastValuation.toPath();
+        // Context-aware navigation for Past Valuations
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmPastValuations.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Past Valuations (source: $source)");
+        } else {
+          targetPath = Pages.routePastValuation.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Past Valuations (source: $source)");
+        }
         break;
       case MapMarkerLoader.markerTypeBuildingRates:
-        targetPath = Pages.routeLaBuildingRates.toPath();
+        // Context-aware navigation for Building Rates
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmBuildingRates.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Building Rates (source: $source)");
+        } else {
+          targetPath = Pages.routeLaBuildingRates.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Building Rates (source: $source)");
+        }
         break;
       default:
         debugPrint("MapScreen: Cannot navigate: Unknown data type '$type'.");

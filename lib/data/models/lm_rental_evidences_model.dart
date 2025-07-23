@@ -2,14 +2,14 @@ import 'dart:convert';
 
 class LmRentalEvidencesModel {
   final int? id;
-  final String masterFileId;
+  final int landMiscellaneousMasterFileId;
   final String masterFileRefNo;
   final String assessmentNo;
   final String owner;
   final String occupier;
   final String description;
-  final String floorRateSQFT;
-  final String ratePerSqft;
+  final String floorRate;
+  final String ratePer;
   final String ratePerMonth;
   final String locationLongitude;
   final String locationLatitude;
@@ -20,14 +20,14 @@ class LmRentalEvidencesModel {
 
   LmRentalEvidencesModel({
     this.id,
-    required this.masterFileId,
+    required this.landMiscellaneousMasterFileId,
     required this.masterFileRefNo,
     required this.assessmentNo,
     required this.owner,
     required this.occupier,
     required this.description,
-    required this.floorRateSQFT,
-    required this.ratePerSqft,
+    required this.floorRate,
+    required this.ratePer,
     required this.ratePerMonth,
     required this.locationLongitude,
     required this.locationLatitude,
@@ -39,36 +39,34 @@ class LmRentalEvidencesModel {
 
   Map<String, dynamic> toJson() {
     return {
-      if (id != null) 'id': id,
-      'masterFileId': masterFileId,
       'masterFileRefNo': masterFileRefNo,
+      'landMiscellaneousMasterFileId': landMiscellaneousMasterFileId,
       'assessmentNo': assessmentNo,
       'owner': owner,
       'occupier': occupier,
       'description': description,
-      'floorRateSQFT': floorRateSQFT,
-      'ratePerSqft': ratePerSqft,
+      'floorRate': floorRate,
+      'ratePer': ratePer,
       'ratePerMonth': ratePerMonth,
       'locationLongitude': locationLongitude,
       'locationLatitude': locationLatitude,
       'headOfTerms': headOfTerms,
       'situation': situation,
       'remarks': remarks,
-      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
     };
   }
 
   factory LmRentalEvidencesModel.fromJson(Map<String, dynamic> json) {
     return LmRentalEvidencesModel(
       id: json['id'],
-      masterFileId: json['masterFileId'] ?? '',
+      landMiscellaneousMasterFileId: json['landMiscellaneousMasterFileId'] ?? 0,
       masterFileRefNo: json['masterFileRefNo'] ?? '',
       assessmentNo: json['assessmentNo'] ?? '',
       owner: json['owner'] ?? '',
       occupier: json['occupier'] ?? '',
       description: json['description'] ?? '',
-      floorRateSQFT: json['floorRateSQFT'] ?? '',
-      ratePerSqft: json['ratePerSqft'] ?? '',
+      floorRate: json['floorRate'] ?? '',
+      ratePer: json['ratePer'] ?? '',
       ratePerMonth: json['ratePerMonth'] ?? '',
       locationLongitude: json['locationLongitude'] ?? '',
       locationLatitude: json['locationLatitude'] ?? '',

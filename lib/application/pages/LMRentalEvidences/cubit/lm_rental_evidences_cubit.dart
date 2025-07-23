@@ -16,14 +16,14 @@ class LmRentalEvidencesCubit
   }) : super(LmRentalEvidencesInitial());
 
   Future<void> sendLmRentalEvidence({
-    required String masterFileId,
+    required int landMiscellaneousMasterFileId,
     required String masterFileRefNo,
     required String assessmentNo,
     required String owner,
     required String occupier,
     required String description,
-    required String floorRateSQFT,
-    required String ratePerSqft,
+    required String floorRate,
+    required String ratePer,
     required String ratePerMonth,
     required String locationLongitude,
     required String locationLatitude,
@@ -35,14 +35,14 @@ class LmRentalEvidencesCubit
 
     // Create the LM rental evidence model
     final reportModel = LmRentalEvidencesModel(
-      masterFileId: masterFileId,
+      landMiscellaneousMasterFileId: landMiscellaneousMasterFileId,
       masterFileRefNo: masterFileRefNo,
       assessmentNo: assessmentNo,
       owner: owner,
       occupier: occupier,
       description: description,
-      floorRateSQFT: floorRateSQFT,
-      ratePerSqft: ratePerSqft,
+      floorRate: floorRate,
+      ratePer: ratePer,
       ratePerMonth: ratePerMonth,
       locationLongitude: locationLongitude,
       locationLatitude: locationLatitude,
@@ -53,7 +53,8 @@ class LmRentalEvidencesCubit
 
     // Debug: Print in the cubit
     print('======= LM RENTAL EVIDENCES CUBIT: CREATING MODEL =======');
-    print('Master File ID: ${reportModel.masterFileId}');
+    print(
+        'Land Miscellaneous Master File ID: ${reportModel.landMiscellaneousMasterFileId}');
     print('Assessment No: ${reportModel.assessmentNo}');
     print('Owner: ${reportModel.owner}');
     print('Data being prepared for API call...');
