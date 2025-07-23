@@ -353,4 +353,24 @@ class AppString {
   static const String floorName = "floor_name";
   static const String above = "above";
   static const String below = "below";
+
+  static const String resetPassword = 'resetPassword';
+  static const String resetPasswordDescription = 'resetPasswordDescription';
+  static const String emailAddress = 'emailAddress';
+  static const String continueText = 'continueText';
+  static const String verifyOtp = 'verifyOtp';
+  static const String verifyOtpDescription = 'verifyOtpDescription';
+  static const String otpPlaceholder = 'otpPlaceholder';
+  static const String verify = 'verify';
+  static const String resendCode = 'resendCode';
+  static const String createPassword = 'createPassword';
+  static const String createPasswordDescription = 'createPasswordDescription';
+  static const String enterNewPassword = 'enterNewPassword';
+  static const String reenterNewPassword = 'reenterNewPassword';
+  static const String passwordMustInclude = 'passwordMustInclude';
+  static const String atLeast8Characters = 'atLeast8Characters';
+  static const String atLeastOneUppercase = 'atLeastOneUppercase';
+  static const String atLeastOneLowercase = 'atLeastOneLowercase';
+  static const String atLeastOneNumber = 'atLeastOneNumber';
+  static const String setNewPassword = 'setNewPassword';
 }

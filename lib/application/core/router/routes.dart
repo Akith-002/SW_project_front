@@ -6,6 +6,7 @@ import 'package:land_asset_valuation/application/core/router/services/router_ser
 import 'package:land_asset_valuation/application/core/widgets/sidebarlibrary/sidebar_scaffold.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/i3_master_file_list.dart';
 import 'package:land_asset_valuation/application/pages/LA_Building_Rates/la_building_rates.dart';
+import 'package:land_asset_valuation/application/pages/LM_Building_Rates/lm_building_rates.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/la_Sales_Evidence.dart';
 import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/lm_masterfile_list.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/mr_assets_list.dart';
@@ -17,6 +18,7 @@ import 'package:land_asset_valuation/application/pages/conditionReport/condition
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
 import 'package:land_asset_valuation/application/pages/inspectionReport/inspection_report_view.dart';
 import 'package:land_asset_valuation/application/pages/rental_evidence/rental_evidence_view.dart';
+import 'package:land_asset_valuation/application/pages/LMRentalEvidences/lm_rental_evidences_view.dart';
 import 'package:land_asset_valuation/application/pages/pastValuation/past_valuation_view.dart';
 import 'package:land_asset_valuation/application/pages/settingsScreen/settings_screen.dart';
 import 'package:land_asset_valuation/application/pages/signIn/signin_view.dart';
@@ -25,6 +27,11 @@ import 'package:land_asset_valuation/application/pages/RatingCard/rating_card_vi
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
 import 'package:land_asset_valuation/application/pages/AssetMapScreen/asset_map_screen.dart';
 import 'package:land_asset_valuation/application/pages/test.dart';
+import 'package:land_asset_valuation/application/pages/resetPassword/reset_password_view.dart';
+import 'package:land_asset_valuation/application/pages/verifyOtp/verify_otp_view.dart';
+import 'package:land_asset_valuation/application/pages/createPassword/create_password_view.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:land_asset_valuation/application/pages/resetPassword/cubit/reset_password_cubit.dart';
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
@@ -77,6 +84,45 @@ class AppRouter {
         pageBuilder: (context, state) {
           return NoTransitionPage(
               key: state.pageKey, child: const SignInView());
+        },
+      ),
+
+      GoRoute(
+        path: Pages.routeResetPassword.toPath(),
+        name: Pages.routeResetPassword.toPathName(),
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          return NoTransitionPage(
+            key: state.pageKey,
+            child: const ResetPasswordView(),
+          );
+        },
+      ),
+      GoRoute(
+        path: Pages.routeVerifyOtp.toPath(),
+        name: Pages.routeVerifyOtp.toPathName(),
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final email = extra != null ? extra['email'] as String : '';
+          return NoTransitionPage(
+            key: state.pageKey,
+            child: VerifyOtpView(email: email),
+          );
+        },
+      ),
+      GoRoute(
+        path: Pages.routeCreatePassword.toPath(),
+        name: Pages.routeCreatePassword.toPathName(),
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final email = extra != null ? extra['email'] as String : '';
+          final otp = extra != null ? extra['otp'] as String : '';
+          return NoTransitionPage(
+            key: state.pageKey,
+            child: CreatePasswordView(email: email, otp: otp),
+          );
         },
       ),
 
@@ -253,6 +299,16 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: Pages.routeLmRentalEvidences.toPath(),
+            name: Pages.routeLmRentalEvidences.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: LmRentalEvidencesView(),
+              );
+            },
+          ),
+          GoRoute(
             path: Pages.routeLaSalesEvidence.toPath(),
             name: Pages.routeLaSalesEvidence.toPathName(),
             pageBuilder: (context, state) {
@@ -269,6 +325,16 @@ class AppRouter {
               return NoTransitionPage(
                 key: state.pageKey,
                 child: const LaBuildingRates(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeLmBuildingRates.toPath(),
+            name: Pages.routeLmBuildingRates.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const LmBuildingRates(),
               );
             },
           ),
@@ -611,6 +677,12 @@ class AppRouter {
     print(
         "DEBUG: Does path start with I3MasterFileList? ${path.startsWith(Pages.routeI3MasterFileList.toPath())}");
     print("DEBUG: All query parameters: ${state.uri.queryParameters}");
+
+    // Special handling for LM Building Rates - always return index 7 regardless of query parameters
+    if (path.startsWith(Pages.routeLmBuildingRates.toPath())) {
+      print("DEBUG: LM Building Rates route detected - returning index 7");
+      return 7; // Land Miscellaneous
+    }
 
     // Check for selectedIndex in query parameters first
     if (state.uri.queryParameters.containsKey('selectedIndex')) {

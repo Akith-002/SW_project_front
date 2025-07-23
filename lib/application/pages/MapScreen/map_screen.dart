@@ -22,6 +22,10 @@ import 'package:land_asset_valuation/data/models/building.dart';
 import 'package:land_asset_valuation/data/services/building_service.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'dart:convert';
+import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_la_lots_usecase.dart';
+import 'package:land_asset_valuation/injection.dart';
 
 // Import for calculations if needed here (likely not)
 
@@ -119,6 +123,64 @@ class _MapScreenState extends State<MapScreen> {
 
     debugPrint(
         "MapScreen: Master File Data extracted - ID: $_id, Master File No: $_masterFileNo, Master File Ref No: $_masterFileRefNo, Plan Type: $_planType, Plan No: $_planNo, Authority Ref: $_authorityRefNo, Status: $_status, Lots: $_lots");
+
+    // Load existing lots after extracting master file data
+    _loadExistingLots();
+  }
+
+  /// Loads existing lots for the current master file and displays them on the map
+  void _loadExistingLots() async {
+    if (_id == null) {
+      debugPrint("MapScreen: No master file ID available to load lots");
+      return;
+    }
+
+    final masterFileId = int.tryParse(_id!);
+    if (masterFileId == null) {
+      debugPrint("MapScreen: Invalid master file ID: $_id");
+      return;
+    }
+
+    try {
+      debugPrint(
+          "MapScreen: Loading existing lots for master file ID: $masterFileId");
+
+      final getLALotsUseCase = injection<GetLALotsUseCase>();
+      final result = await getLALotsUseCase(masterFileId: masterFileId);
+
+      result.fold(
+        (failure) {
+          debugPrint(
+              "MapScreen: Failed to load existing lots: ${failure.message}");
+          // Don't show error to user as this is not critical - might be no existing lots
+        },
+        (lots) {
+          debugPrint(
+              "MapScreen: Successfully loaded ${lots.length} existing lots");
+
+          if (lots.isNotEmpty) {
+            // Convert LALotModel to Map format expected by mapbox
+            final lotsData = lots
+                .map((lot) => {
+                      'masterFileId': lot.masterFileId,
+                      'coordinates': lot.coordinates,
+                    })
+                .toList();
+
+            // Load the lots into the mapbox widget
+            mapboxKey.currentState?.loadExistingLots(lotsData);
+
+            _showSnackbar("Loaded ${lots.length} existing lot(s)");
+          } else {
+            debugPrint(
+                "MapScreen: No existing lots found for this master file");
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint("MapScreen: Error loading existing lots: $e");
+      // Don't show error to user as this is not critical
+    }
   }
 
   void _onSketchMetricsUpdated(double area, double distance) {
@@ -366,6 +428,10 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint("MapScreen: Navigating to form for type: $type");
     String? targetPath;
 
+    // Get the source context from route parameters
+    final String source =
+        GoRouterState.of(context).uri.queryParameters['source'] ?? '';
+
     switch (type) {
       case MapMarkerLoader.markerTypeRental:
         targetPath = Pages.routeRentalEvidence.toPath();
@@ -377,7 +443,35 @@ class _MapScreenState extends State<MapScreen> {
         targetPath = Pages.routePastValuation.toPath();
         break;
       case MapMarkerLoader.markerTypeBuildingRates:
-        targetPath = Pages.routeLaBuildingRates.toPath();
+        // Context-aware navigation for Building Rates
+        if (source == 'landMiscellaneous') {
+          // Pass masterFileNo and coordinates as query parameters for LM Building Rates
+          final queryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            queryParams['masterFileNo'] = _masterFileNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            queryParams['latitude'] = coords.lat.toString();
+            queryParams['longitude'] = coords.lng.toString();
+            debugPrint(
+                "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmBuildingRates.toPath(),
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+          targetPath = targetUri.toString();
+          debugPrint(
+              "MapScreen: Navigating to LM Building Rates (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
+        } else {
+          targetPath = Pages.routeLaBuildingRates.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Building Rates (source: $source)");
+        }
         break;
       default:
         debugPrint("MapScreen: Cannot navigate: Unknown data type '$type'.");
@@ -722,15 +816,63 @@ class _MapScreenState extends State<MapScreen> {
                 _savedLotId = selectedLotId;
 
                 debugPrint('Selected Lot ID from Dialog: $selectedLotId');
-                // TODO: Associate selectedLotId with the drawn polygon geometry in MapboxState
-                // For now, just toggle drawing mode off. Replace finalizeLotDrawing.
-                mapboxKey.currentState?.toggleDrawingMode(false);
 
-                if (mounted) {
-                  setState(() {
-                    isDrawingMode = false;
-                  });
-                  _showSnackbar("Lot drawing saved (ID: $selectedLotId).");
+                // Get the coordinates from the drawn polygon
+                try {
+                  final drawnPoints = mapboxKey.currentState?.drawnPoints;
+
+                  if (drawnPoints == null || drawnPoints.isEmpty) {
+                    _showSnackbar("No coordinates found to save.",
+                        isError: true);
+                    return;
+                  }
+
+                  // Convert coordinates to string format
+                  final coordinatesString =
+                      _convertCoordinatesToString(drawnPoints);
+
+                  // Get master file ID from the URL parameters
+                  final masterFileIdString = _id;
+                  if (masterFileIdString == null) {
+                    _showSnackbar("Master file ID not found.", isError: true);
+                    return;
+                  }
+
+                  final masterFileId = int.tryParse(masterFileIdString);
+                  if (masterFileId == null) {
+                    _showSnackbar("Invalid master file ID.", isError: true);
+                    return;
+                  }
+
+                  // Save lot to backend
+                  final saveLALotUseCase = injection<SaveLALotUseCase>();
+                  final result = await saveLALotUseCase(
+                    masterFileId: masterFileId,
+                    coordinates: coordinatesString,
+                  );
+
+                  result.fold(
+                    (failure) {
+                      _showSnackbar("Failed to save lot: ${failure.message}",
+                          isError: true);
+                    },
+                    (response) {
+                      _showSnackbar(
+                          "Lot saved successfully! ${response.message ?? ''}");
+
+                      // Finalize the drawing mode
+                      mapboxKey.currentState?.toggleDrawingMode(false);
+
+                      if (mounted) {
+                        setState(() {
+                          isDrawingMode = false;
+                        });
+                      }
+                    },
+                  );
+                } catch (e) {
+                  debugPrint('Error saving lot: $e');
+                  _showSnackbar("Error saving lot: $e", isError: true);
                 }
               },
             ),
@@ -1039,6 +1181,18 @@ class _MapScreenState extends State<MapScreen> {
     } else {
       _showSnackbar("Nothing to save. Draw a lot or sketch first.");
     }
+  }
+
+  /// Converts list of Points to JSON string format for API
+  String _convertCoordinatesToString(List<Point> points) {
+    final coordinates = points
+        .map((point) => {
+              'lng': point.coordinates.lng,
+              'lat': point.coordinates.lat,
+            })
+        .toList();
+
+    return jsonEncode(coordinates);
   }
 
   // Add the build method at the class level
