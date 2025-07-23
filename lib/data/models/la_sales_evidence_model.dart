@@ -1,6 +1,7 @@
 /// Model class for LA Sales Evidence data
 /// Used to serialize and deserialize sales evidence form data
 class LaSalesEvidenceModel {
+  final String masterFileId;
   final String assetNumber;
   final String masterFileRef;
   final String roadName;
@@ -24,6 +25,7 @@ class LaSalesEvidenceModel {
   final String descriptionOfLand;
 
   const LaSalesEvidenceModel({
+    required this.masterFileId,
     required this.assetNumber,
     required this.masterFileRef,
     required this.roadName,
@@ -50,6 +52,7 @@ class LaSalesEvidenceModel {
   /// Creates a model from JSON data
   factory LaSalesEvidenceModel.fromJson(Map<String, dynamic> json) {
     return LaSalesEvidenceModel(
+      masterFileId: json['masterFileId'] ?? '',
       assetNumber: json['assetNumber'] ?? '',
       masterFileRef: json['masterFileRef'] ?? '',
       roadName: json['roadName'] ?? '',
@@ -77,6 +80,7 @@ class LaSalesEvidenceModel {
   /// Converts model to JSON for API submission
   Map<String, dynamic> toJson() {
     return {
+      'masterFileId': masterFileId,
       'assetNumber': assetNumber,
       'masterFileRef': masterFileRef,
       'roadName': roadName,
@@ -103,6 +107,7 @@ class LaSalesEvidenceModel {
 
   /// Creates a copy of the model with optional field updates
   LaSalesEvidenceModel copyWith({
+    String? masterFileId,
     String? assetNumber,
     String? masterFileRef,
     String? roadName,
@@ -126,6 +131,7 @@ class LaSalesEvidenceModel {
     String? descriptionOfLand,
   }) {
     return LaSalesEvidenceModel(
+      masterFileId: masterFileId ?? this.masterFileId,
       assetNumber: assetNumber ?? this.assetNumber,
       masterFileRef: masterFileRef ?? this.masterFileRef,
       roadName: roadName ?? this.roadName,

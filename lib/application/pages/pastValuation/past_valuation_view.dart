@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
@@ -52,6 +53,46 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
   List<dynamic> uploadedImages = [];
   bool _isSubmitting = false;
   String _selectedRateType = '';
+
+  // Master file data from query parameters
+  String? _masterFileId;
+  String? _masterFileRefNo;
+  double? _initialLatitude;
+  double? _initialLongitude;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _extractMasterFileData();
+  }
+
+  void _extractMasterFileData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+
+    _masterFileId = queryParams['masterFileId'];
+    _masterFileRefNo = queryParams['masterFileRefNo'];
+
+    // Pre-fill form fields with data from query parameters
+    if (_masterFileRefNo != null && _masterFileRefNo!.isNotEmpty) {
+      _masterFileRefController.text = _masterFileRefNo!;
+    }
+
+    // Set initial coordinates if provided
+    final latitudeStr = queryParams['latitude'];
+    final longitudeStr = queryParams['longitude'];
+    if (latitudeStr != null && longitudeStr != null) {
+      _initialLatitude = double.tryParse(latitudeStr);
+      _initialLongitude = double.tryParse(longitudeStr);
+      if (_initialLatitude != null && _initialLongitude != null) {
+        _latitudeController.text = latitudeStr;
+        _longitudeController.text = longitudeStr;
+      }
+    }
+
+    debugPrint(
+        "PastValuation: Master File Data extracted - ID: $_masterFileId, Ref: $_masterFileRefNo, Coords: ($_initialLatitude, $_initialLongitude)");
+  }
 
   @override
   void dispose() {
@@ -204,6 +245,7 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
 
       // Send data to the backend via cubit
       await _cubit.sendPastValuation(
+        masterFileId: _masterFileId ?? '',
         masterFileRef: _masterFileRefController.text,
         fileNoGnDivision: _fileNoGnDivisionController.text,
         situation: _situationController.text,

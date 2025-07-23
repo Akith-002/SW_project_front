@@ -2,6 +2,7 @@ import 'dart:convert';
 
 class PastValuationModel {
   final int? id;
+  final String masterFileId;
   final String masterFileRef;
   final String fileNoGnDivision;
   final String situation;
@@ -18,6 +19,7 @@ class PastValuationModel {
 
   PastValuationModel({
     this.id,
+    required this.masterFileId,
     required this.masterFileRef,
     required this.fileNoGnDivision,
     required this.situation,
@@ -36,6 +38,7 @@ class PastValuationModel {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
+      'masterFileId': masterFileId,
       'masterFileRef': masterFileRef,
       'fileNoGnDivision': fileNoGnDivision,
       'situation': situation,
@@ -55,6 +58,7 @@ class PastValuationModel {
   factory PastValuationModel.fromJson(Map<String, dynamic> json) {
     return PastValuationModel(
       id: json['id'],
+      masterFileId: json['masterFileId'] ?? '',
       masterFileRef: json['masterFileRef'] ?? '',
       fileNoGnDivision: json['fileNoGnDivision'] ?? '',
       situation: json['situation'] ?? '',

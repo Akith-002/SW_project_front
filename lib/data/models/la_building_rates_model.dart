@@ -2,6 +2,7 @@ import 'dart:convert';
 
 class LaBuildingRatesModel {
   final int? id;
+  final String masterFileId;
   final String assessmentNumber;
   final String owner;
   final String constructedBy;
@@ -17,6 +18,7 @@ class LaBuildingRatesModel {
 
   LaBuildingRatesModel({
     this.id,
+    required this.masterFileId,
     required this.assessmentNumber,
     required this.owner,
     required this.constructedBy,
@@ -34,6 +36,7 @@ class LaBuildingRatesModel {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
+      'masterFileId': masterFileId,
       'assessmentNumber': assessmentNumber,
       'owner': owner,
       'constructedBy': constructedBy,
@@ -52,6 +55,7 @@ class LaBuildingRatesModel {
   factory LaBuildingRatesModel.fromJson(Map<String, dynamic> json) {
     return LaBuildingRatesModel(
       id: json['id'],
+      masterFileId: json['masterFileId'] ?? '',
       assessmentNumber: json['assessmentNumber'] ?? '',
       owner: json['owner'] ?? '',
       constructedBy: json['constructedBy'] ?? '',
@@ -76,6 +80,7 @@ class LaBuildingRatesModel {
 
   LaBuildingRatesModel copyWith({
     int? id,
+    String? masterFileId,
     String? assessmentNumber,
     String? owner,
     String? constructedBy,
@@ -91,6 +96,7 @@ class LaBuildingRatesModel {
   }) {
     return LaBuildingRatesModel(
       id: id ?? this.id,
+      masterFileId: masterFileId ?? this.masterFileId,
       assessmentNumber: assessmentNumber ?? this.assessmentNumber,
       owner: owner ?? this.owner,
       constructedBy: constructedBy ?? this.constructedBy,
@@ -109,7 +115,7 @@ class LaBuildingRatesModel {
 
   @override
   String toString() {
-    return 'LaBuildingRatesModel(id: $id, assessmentNumber: $assessmentNumber, owner: $owner, constructedBy: $constructedBy, yearOfConstruction: $yearOfConstruction, descriptionOfProperty: $descriptionOfProperty, floorAreaSQFT: $floorAreaSQFT, ratePerSQFT: $ratePerSQFT, cost: $cost, remarks: $remarks, locationLatitude: $locationLatitude, locationLongitude: $locationLongitude, createdAt: $createdAt)';
+    return 'LaBuildingRatesModel(id: $id, masterFileId: $masterFileId, assessmentNumber: $assessmentNumber, owner: $owner, constructedBy: $constructedBy, yearOfConstruction: $yearOfConstruction, descriptionOfProperty: $descriptionOfProperty, floorAreaSQFT: $floorAreaSQFT, ratePerSQFT: $ratePerSQFT, cost: $cost, remarks: $remarks, locationLatitude: $locationLatitude, locationLongitude: $locationLongitude, createdAt: $createdAt)';
   }
 
   @override
@@ -118,6 +124,7 @@ class LaBuildingRatesModel {
 
     return other is LaBuildingRatesModel &&
         other.id == id &&
+        other.masterFileId == masterFileId &&
         other.assessmentNumber == assessmentNumber &&
         other.owner == owner &&
         other.constructedBy == constructedBy &&
@@ -135,6 +142,7 @@ class LaBuildingRatesModel {
   @override
   int get hashCode {
     return id.hashCode ^
+        masterFileId.hashCode ^
         assessmentNumber.hashCode ^
         owner.hashCode ^
         constructedBy.hashCode ^
