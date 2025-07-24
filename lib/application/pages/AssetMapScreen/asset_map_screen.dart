@@ -329,13 +329,32 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
       case MapMarkerLoader.markerTypeSales:
         // Context-aware navigation for Sales Evidence
         if (source == 'landMiscellaneous') {
-          targetPath = Pages.routeLmSalesEvidences.toPath();
+          // Pass masterFileNo and coordinates as query parameters for LM Sales Evidence
+          final queryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            queryParams['masterFileNo'] = _masterFileNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            queryParams['latitude'] = coords.lat.toString();
+            queryParams['longitude'] = coords.lng.toString();
+            debugPrint(
+                "AssetMapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmSalesEvidences.toPath(),
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+          targetPath = targetUri.toString();
           debugPrint(
-              "MapScreen: Navigating to LM Sales Evidence (source: $source)");
+              "AssetMapScreen: Navigating to LM Sales Evidence (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
         } else {
           targetPath = Pages.routeLaSalesEvidence.toPath();
           debugPrint(
-              "MapScreen: Navigating to LA Sales Evidence (source: $source)");
+              "AssetMapScreen: Navigating to LA Sales Evidence (source: $source)");
         }
         break;
       case MapMarkerLoader.markerTypeValuations:

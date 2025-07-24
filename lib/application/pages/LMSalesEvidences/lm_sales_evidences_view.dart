@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
@@ -61,6 +63,15 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
   // Stores both File objects (newly picked images) and String paths (previously saved images)
   List<dynamic> uploadedImages = [];
 
+  // Track submission state
+  bool _isSubmitting = false;
+
+  // Master file data for breadcrumb and tracking
+  String? _masterFileNo;
+
+  // Unique identifier for this specific sales evidence marker
+  String? _markerId;
+
   @override
   LmSalesEvidencesCubit getCubit() {
     return _cubit;
@@ -70,6 +81,10 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _extractNavigationData();
+    // Use a post-frame callback to ensure data loading happens after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSavedDataIfExists();
+    });
   }
 
   /// Extracts data passed from map navigation
@@ -77,23 +92,328 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
     final GoRouterState state = GoRouterState.of(context);
     final queryParams = state.uri.queryParameters;
 
+    // Extract master file data
+    _masterFileNo = queryParams['masterFileNo'];
+    final masterFileRefNo = queryParams['masterFileRefNo'];
+
     // Extract coordinates from query parameters (if coming from map marker)
-    final latStr = queryParams['latitude'];
-    final lngStr = queryParams['longitude'];
+    final latStr = queryParams['latitude'] ?? queryParams['lat'];
+    final lngStr = queryParams['longitude'] ?? queryParams['lng'];
 
     if (latStr != null && lngStr != null) {
-      _locationLatitudeController.text = latStr;
-      _locationLongitudeController.text = lngStr;
-      debugPrint(
-          "LmSalesEvidences: Auto-filled coordinates - Lat: $latStr, Lng: $lngStr");
+      // Validate coordinates before setting
+      final lat = double.tryParse(latStr);
+      final lng = double.tryParse(lngStr);
+
+      if (lat != null &&
+          lng != null &&
+          lat >= -90 &&
+          lat <= 90 &&
+          lng >= -180 &&
+          lng <= 180) {
+        _locationLatitudeController.text = latStr;
+        _locationLongitudeController.text = lngStr;
+        debugPrint(
+            "LmSalesEvidences: Auto-filled coordinates - Lat: $latStr, Lng: $lngStr");
+      } else {
+        debugPrint(
+            "LmSalesEvidences: Invalid coordinates provided - Lat: $latStr, Lng: $lngStr");
+      }
     }
 
-    // Extract master file number if available
-    final masterFileNo = queryParams['masterFileNo'];
-    if (masterFileNo != null) {
-      _masterFileRefController.text = masterFileNo;
+    // Generate unique marker ID based on coordinates
+    if (latStr != null &&
+        lngStr != null &&
+        latStr.isNotEmpty &&
+        lngStr.isNotEmpty) {
+      // Create a unique identifier using coordinates (rounded to avoid floating point precision issues)
+      final roundedLat = double.parse(latStr).toStringAsFixed(6);
+      final roundedLng = double.parse(lngStr).toStringAsFixed(6);
+      _markerId = '${roundedLat}_${roundedLng}';
+      debugPrint('Generated marker ID: $_markerId');
+    } else {
+      // Fallback to timestamp if coordinates are not available
+      _markerId = DateTime.now().millisecondsSinceEpoch.toString();
+      debugPrint('Generated fallback marker ID: $_markerId');
+    }
+
+    // Extract master file number if available (support multiple parameter names)
+    final masterFileNo = queryParams['masterFileNo'] ??
+        queryParams['masterFileRef'] ??
+        queryParams['masterfile'];
+    if (masterFileNo != null && masterFileNo.trim().isNotEmpty) {
+      _masterFileRefController.text = masterFileNo.trim();
       debugPrint(
           "LmSalesEvidences: Auto-filled master file ref: $masterFileNo");
+    }
+
+    // Pre-fill master file reference number if available
+    if (masterFileRefNo != null && masterFileRefNo.isNotEmpty) {
+      _masterFileRefController.text = masterFileRefNo;
+      debugPrint('Pre-filled masterFileRefNo from URL: $masterFileRefNo');
+    }
+
+    debugPrint(
+        "LmSalesEvidences: Extracted data - MasterFileNo: $_masterFileNo, MasterFileRefNo: $masterFileRefNo, Coordinates: ($latStr, $lngStr), MarkerID: $_markerId");
+  }
+
+  /// Programmatically sets master file reference and coordinates
+  /// This can be called when navigating to this form from code
+  void setMasterFileAndLocation({
+    String? masterFileRef,
+    double? latitude,
+    double? longitude,
+  }) {
+    if (masterFileRef != null && masterFileRef.trim().isNotEmpty) {
+      _masterFileRefController.text = masterFileRef.trim();
+      debugPrint(
+          "LmSalesEvidences: Programmatically set master file ref: $masterFileRef");
+    }
+
+    if (latitude != null &&
+        longitude != null &&
+        latitude >= -90 &&
+        latitude <= 90 &&
+        longitude >= -180 &&
+        longitude <= 180) {
+      _locationLatitudeController.text = latitude.toString();
+      _locationLongitudeController.text = longitude.toString();
+      debugPrint(
+          "LmSalesEvidences: Programmatically set coordinates - Lat: $latitude, Lng: $longitude");
+    }
+  }
+
+  /// Attempts to load previously saved data for this specific marker
+  Future<void> _loadSavedDataIfExists() async {
+    if (_masterFileNo == null || _markerId == null) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Use both master file number and marker ID to create unique storage key
+      final String key = 'lm_sales_evidence_${_masterFileNo}_$_markerId';
+      final String? savedDataJson = prefs.getString(key);
+
+      if (savedDataJson != null) {
+        final Map<String, dynamic> savedData = jsonDecode(savedDataJson);
+
+        debugPrint(
+            'LM Sales Evidence: Found saved data for masterFileNo: $_masterFileNo, markerID: $_markerId');
+        debugPrint('Saved masterFileRefNo: ${savedData['masterFileRef']}');
+        debugPrint(
+            'Current masterFileRefController: ${_masterFileRefController.text}');
+
+        // Load all saved data (we can overwrite since this is the same marker)
+        _assetNumberController.text = savedData['assetNumber'] ?? '';
+        _roadNameController.text = savedData['roadName'] ?? '';
+        _villageController.text = savedData['village'] ?? '';
+        _vendorController.text = savedData['vendor'] ?? '';
+        _deedNumberController.text = savedData['deedNumber'] ?? '';
+        _deedAttestedNumberController.text =
+            savedData['deedAttestedNumber'] ?? '';
+        _notaryNameController.text = savedData['notaryName'] ?? '';
+        _lotNumberController.text = savedData['lotNumber'] ?? '';
+        _planNumberController.text = savedData['planNumber'] ?? '';
+        _planDateController.text = savedData['planDate'] ?? '';
+        _extentController.text = savedData['extent'] ?? '';
+        _considerationController.text = savedData['consideration'] ?? '';
+        _remarksController.text = savedData['remarks'] ?? '';
+        _rateController.text = savedData['rate'] ?? '';
+        _rateTypeController.text = savedData['rateType'] ?? '';
+        _landRegistryReferencesController.text =
+            savedData['landRegistryReferences'] ?? '';
+        _situationController.text = savedData['situation'] ?? '';
+        _descriptionOfLandController.text =
+            savedData['descriptionOfLand'] ?? '';
+
+        // Load coordinates (these should match the current coordinates from URL)
+        final savedLng = savedData['locationLongitude'] ?? '';
+        final savedLat = savedData['locationLatitude'] ?? '';
+        if (savedLng.isNotEmpty) {
+          _locationLongitudeController.text = savedLng;
+        }
+        if (savedLat.isNotEmpty) {
+          _locationLatitudeController.text = savedLat;
+        }
+
+        // Load master file ref no if available
+        final savedMasterFileRef = savedData['masterFileRef'] ?? '';
+        if (savedMasterFileRef.isNotEmpty) {
+          _masterFileRefController.text = savedMasterFileRef;
+          debugPrint(
+              'Loaded masterFileRef from saved data: ${_masterFileRefController.text}');
+        }
+
+        debugPrint(
+            'LM Sales Evidence: Loaded previously saved data for this specific marker');
+
+        // Force a rebuild to update the UI with loaded data
+        if (mounted) {
+          setState(() {});
+        }
+      } else {
+        debugPrint(
+            'LM Sales Evidence: No saved data found for masterFileNo: $_masterFileNo, markerID: $_markerId');
+      }
+    } catch (e) {
+      debugPrint('Error loading saved data: $e');
+    }
+  }
+
+  // Local save method - validates and saves locally without backend submission
+  void _saveLocally() {
+    debugPrint('=== Save button pressed ===');
+    debugPrint('Master File No: $_masterFileNo');
+    debugPrint('Marker ID: $_markerId');
+    debugPrint(
+        'Master File Ref No Controller text: "${_masterFileRefController.text}"');
+    debugPrint(
+        'Master File Ref No Controller text length: ${_masterFileRefController.text.length}');
+    debugPrint(
+        'Is Master File Ref No empty: ${_masterFileRefController.text.isEmpty}');
+
+    if (_formKey.currentState!.validate()) {
+      debugPrint('Form validation PASSED');
+      // All form validation passed, now perform additional data type validation
+      try {
+        // Create a map to track all validation issues
+        Map<String, String> validationErrors = {};
+
+        // Validate required fields are not empty
+        _validateRequiredField(
+            _assetNumberController.text, 'Asset Number', validationErrors);
+        _validateRequiredField(_masterFileRefController.text,
+            'Master File Reference', validationErrors);
+        _validateRequiredField(
+            _vendorController.text, 'Vendor', validationErrors);
+        _validateRequiredField(
+            _deedNumberController.text, 'Deed Number', validationErrors);
+        _validateRequiredField(
+            _notaryNameController.text, 'Notary Name', validationErrors);
+        _validateRequiredField(
+            _considerationController.text, 'Consideration', validationErrors);
+        _validateRequiredField(_rateController.text, 'Rate', validationErrors);
+
+        // Validate numeric fields
+        _validateNumericField(
+            _considerationController.text, 'Consideration', validationErrors);
+        _validateNumericField(_rateController.text, 'Rate', validationErrors);
+
+        // Validate optional numeric fields if provided
+        if (_extentController.text.trim().isNotEmpty) {
+          _validateNumericField(
+              _extentController.text, 'Extent', validationErrors);
+        }
+
+        // Validate coordinate fields (optional)
+        if (_locationLatitudeController.text.trim().isNotEmpty) {
+          _validateCoordinateField(
+              _locationLatitudeController.text, 'Latitude', validationErrors);
+        }
+        if (_locationLongitudeController.text.trim().isNotEmpty) {
+          _validateCoordinateField(
+              _locationLongitudeController.text, 'Longitude', validationErrors);
+        }
+
+        // If there are validation errors, show them and stop
+        if (validationErrors.isNotEmpty) {
+          String errorMessage = 'Validation errors:\n';
+          validationErrors.forEach((field, error) {
+            errorMessage += '• $field: $error\n';
+          });
+          _showErrorMessage(errorMessage);
+          return;
+        }
+
+        // Double-check numeric conversions
+        try {
+          // Ensure required numeric fields are valid
+          double.parse(_considerationController.text);
+          double.parse(_rateController.text);
+
+          // Parse optional numeric fields if provided
+          if (_extentController.text.trim().isNotEmpty) {
+            double.parse(_extentController.text);
+          }
+
+          // Parse optional coordinates if provided
+          if (_locationLatitudeController.text.trim().isNotEmpty) {
+            double.parse(_locationLatitudeController.text);
+          }
+          if (_locationLongitudeController.text.trim().isNotEmpty) {
+            double.parse(_locationLongitudeController.text);
+          }
+        } catch (e) {
+          _showErrorMessage('Error converting numeric values: ${e.toString()}');
+          return;
+        }
+
+        // Create form data map for local storage
+        final formData = {
+          'assetNumber': _assetNumberController.text.trim(),
+          'masterFileRef': _masterFileRefController.text.trim(),
+          'roadName': _roadNameController.text.trim(),
+          'village': _villageController.text.trim(),
+          'vendor': _vendorController.text.trim(),
+          'deedNumber': _deedNumberController.text.trim(),
+          'deedAttestedNumber': _deedAttestedNumberController.text.trim(),
+          'notaryName': _notaryNameController.text.trim(),
+          'lotNumber': _lotNumberController.text.trim(),
+          'planNumber': _planNumberController.text.trim(),
+          'planDate': _planDateController.text.trim(),
+          'extent': _extentController.text.trim(),
+          'consideration': _considerationController.text.trim(),
+          'remarks': _remarksController.text.trim(),
+          'rate': _rateController.text.trim(),
+          'rateType': _rateTypeController.text.trim(),
+          'locationLongitude': _locationLongitudeController.text.trim(),
+          'locationLatitude': _locationLatitudeController.text.trim(),
+          'landRegistryReferences':
+              _landRegistryReferencesController.text.trim(),
+          'situation': _situationController.text.trim(),
+          'descriptionOfLand': _descriptionOfLandController.text.trim(),
+        };
+
+        // Save data locally for this specific marker
+        _saveDataLocally(formData);
+      } catch (e) {
+        _showErrorMessage('Error saving form data locally: $e');
+      }
+    } else {
+      debugPrint('Form validation FAILED');
+      _showErrorMessage('Please fix the errors in the form');
+    }
+  }
+
+  /// Saves the form data to local storage for this specific marker
+  Future<void> _saveDataLocally(Map<String, String> data) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Create a map with form data and metadata
+      final localData = {
+        'masterFileNo': _masterFileNo,
+        'markerId': _markerId,
+        ...data, // Spread the form data
+        'savedAt': DateTime.now().toIso8601String(),
+        'imageCount': uploadedImages.length,
+      };
+
+      // Convert to JSON string
+      final jsonString = jsonEncode(localData);
+
+      // Generate a unique key for this specific marker
+      final String key = 'lm_sales_evidence_${_masterFileNo}_$_markerId';
+
+      // Save to SharedPreferences
+      await prefs.setString(key, jsonString);
+
+      debugPrint('LM Sales Evidence data saved locally with key: $key');
+
+      // Show success message for local save
+      _showSuccessMessage('Sales evidence saved locally for this location!');
+    } catch (e) {
+      debugPrint('Error saving data locally: $e');
+      _showErrorMessage('Failed to save data locally. Please try again.');
     }
   }
 
@@ -145,15 +465,21 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
       child: BlocConsumer<LmSalesEvidencesCubit, dynamic>(
         listener: (context, state) {
           if (state is LmSalesEvidencesSubmitSuccess) {
+            setState(() {
+              _isSubmitting = false;
+            });
             _showSuccessDialog();
           } else if (state is LmSalesEvidencesSubmitFailure) {
+            setState(() {
+              _isSubmitting = false;
+            });
             _showErrorMessage(state.errorMessage);
           }
         },
         builder: (context, state) {
           return Scaffold(
             appBar: CustomAppBar(
-              title: AppString.salesEvidencesForm.localize(context)!,
+              title: "Sales Evidence",
             ),
             body: LayoutBuilder(
               builder: (context, constraints) {
@@ -171,7 +497,7 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
                         Breadcrumb(
                           items: [
                             BreadcrumbItem(
-                                label: AppString.landAcquisition
+                                label: AppString.landMiscellaneous
                                     .localize(context)!),
                             BreadcrumbItem(
                                 label: AppString.masterFile.localize(context)!),
@@ -515,7 +841,8 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
                                   const SizedBox(width: 40),
                                   CustomButton(
                                     text: AppString.sendData.localize(context)!,
-                                    onPressed: state is LmSalesEvidencesLoading
+                                    onPressed: (_isSubmitting ||
+                                            state is LmSalesEvidencesLoading)
                                         ? null
                                         : _validateAndSubmit,
                                     backgroundColor:
@@ -524,7 +851,8 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
                                 ],
                               ),
                               // Show loading indicator when submitting
-                              if (state is LmSalesEvidencesLoading)
+                              if (_isSubmitting ||
+                                  state is LmSalesEvidencesLoading)
                                 Container(
                                   margin: EdgeInsets.only(top: 16),
                                   child: const Row(
@@ -551,30 +879,15 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
     );
   }
 
-  /// Validates and saves the form
+  /// Validates and saves the form locally
   void _validateAndSave() {
-    // Enable auto-validation mode to show validation errors
-    setState(() {
-      _autovalidateMode = AutovalidateMode.onUserInteraction;
-    });
-
-    // Validate the form
-    bool isFormValid = _formKey.currentState?.validate() ?? false;
-
-    if (isFormValid) {
-      // Form is valid, save the data
-      _showSuccessMessage('Sales evidence data saved successfully');
-      // TODO: Implement actual save logic
-    } else {
-      _showErrorMessage('Please fix the validation errors in the form');
-    }
+    _saveLocally();
   }
 
   /// Validates form and submits data to server
   void _validateAndSubmit() async {
-    // Enable auto-validation mode to show validation errors
     setState(() {
-      _autovalidateMode = AutovalidateMode.onUserInteraction;
+      _isSubmitting = true;
     });
 
     // Validate the form using the validators
@@ -582,6 +895,9 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
 
     if (!isFormValid) {
       _showErrorMessage('Please fix the validation errors in the form');
+      setState(() {
+        _isSubmitting = false;
+      });
       return;
     }
 
@@ -633,6 +949,9 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
           errorMessage += '• $field: $error\n';
         });
         _showErrorMessage(errorMessage);
+        setState(() {
+          _isSubmitting = false;
+        });
         return;
       }
 
@@ -656,6 +975,9 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
         }
       } catch (e) {
         _showErrorMessage('Error converting numeric values: ${e.toString()}');
+        setState(() {
+          _isSubmitting = false;
+        });
         return;
       }
 
@@ -694,12 +1016,18 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
 
       print('======= LM SALES EVIDENCES VIEW: DATA SENT =======');
 
+      // Display a temporary success message for form validation
+      _showSuccessMessage('Form validated successfully. Submitting data...');
+
       // TODO: Handle image upload separately after successful form submission
       // if (success && uploadedImages.isNotEmpty) {
       //   await _uploadImages(reportId);
       // }
     } catch (e) {
       _showErrorMessage('Error preparing form data: ${e.toString()}');
+      setState(() {
+        _isSubmitting = false;
+      });
     }
   }
 

@@ -170,7 +170,7 @@ class _MapScreenState extends State<MapScreen> {
             // Load the lots into the mapbox widget
             mapboxKey.currentState?.loadExistingLots(lotsData);
 
-            _showSnackbar("Loaded ${lots.length} existing lot(s)");
+            // _showSnackbar("Loaded ${lots.length} existing lot(s)");
           } else {
             debugPrint(
                 "MapScreen: No existing lots found for this master file");
@@ -212,8 +212,8 @@ class _MapScreenState extends State<MapScreen> {
       debugPrint("MapScreen: FATAL Error loading marker images via loader: $e");
       if (mounted) {
         setState(() => _imagesLoaded = false);
-        _showSnackbar('Error loading critical map icons. Cannot proceed.',
-            isError: true, durationSeconds: 10);
+        // _showSnackbar('Error loading critical map icons. Cannot proceed.',
+        //     isError: true, durationSeconds: 10);
       }
     }
   }
@@ -249,13 +249,13 @@ class _MapScreenState extends State<MapScreen> {
         final img = _markerLoader.getImage(selectedOption);
         if (img.isNotEmpty) {
           mapboxKey.currentState?.addMarkerAtPoint(point, img, selectedOption);
-          _showSnackbar("$selectedOption marker added.");
+          // _showSnackbar("$selectedOption marker added.");
         } else {
-          _showSnackbar("Failed to load icon for '$selectedOption'.",
-              isError: true);
+          // _showSnackbar("Failed to load icon for '$selectedOption'.",
+          // isError: true);
         }
       } else {
-        _showSnackbar("Marker placement cancelled.");
+        // _showSnackbar("Marker placement cancelled.");
       }
       return;
     }
@@ -273,7 +273,7 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint("MapScreen: Marker Clicked - ID: ${annotation.id}, Type: $type");
     if (isDrawingMode || isSketchingMode) {
       debugPrint("Ignoring marker click - active drawing/sketching mode.");
-      _showSnackbar("Exit current mode to interact with markers.");
+      // _showSnackbar("Exit current mode to interact with markers.");
       return;
     }
 
@@ -301,7 +301,7 @@ class _MapScreenState extends State<MapScreen> {
         onDelete: () {
           Navigator.pop(dialogContext);
           mapboxKey.currentState?.deleteAnnotation(annotation);
-          _showSnackbar("Marker deleted.");
+          // _showSnackbar("Marker deleted.");
         },
         onSketchTool: () {
           // Navigator.pop(dialogContext); // Dialog pops itself now
@@ -317,7 +317,7 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint("MapScreen: Polygon Clicked - ID: ${polygon.id}");
     if (isDrawingMode || isMarkerPlacementMode || isSketchingMode) {
       debugPrint("Ignoring polygon click - active mode.");
-      _showSnackbar("Exit current mode to interact with the lot.");
+      // _showSnackbar("Exit current mode to interact with the lot.");
       return;
     }
 
@@ -342,9 +342,9 @@ class _MapScreenState extends State<MapScreen> {
             _selectedSketchSubMode = SketchToolMode.marker;
             // _buildingGeometryIdPendingSave = null; // Removed
           });
-          _showSnackbar(
-              "Sketch Mode active. Draw building inside the selected lot.",
-              durationSeconds: 3);
+          // _showSnackbar(
+          //     "Sketch Mode active. Draw building inside the selected lot.",
+          //     durationSeconds: 3);
           debugPrint(
               "MapScreen: ENTERING Sketch Mode for Lot ID: ${_selectedLotForSketching!.id}. Tool set to polygon.");
         },
@@ -416,7 +416,7 @@ class _MapScreenState extends State<MapScreen> {
       message = "Sketch Mode active. Polygon tool selected.";
     }
 
-    _showSnackbar(message, durationSeconds: 3);
+    // _showSnackbar(message, durationSeconds: 3);
 
     debugPrint(
         "MapScreen: ENTERING Sketch Mode. Tool: polygon. Context: ${fromMarker ? 'Marker' : (polygonContext != null ? 'Polygon' : 'None')}");
@@ -470,9 +470,31 @@ class _MapScreenState extends State<MapScreen> {
       case MapMarkerLoader.markerTypeSales:
         // Context-aware navigation for Sales Evidence
         if (source == 'landMiscellaneous') {
-          targetPath = Pages.routeLmSalesEvidences.toPath();
+          // Pass masterFileNo and coordinates as query parameters for LM Sales Evidence
+          final queryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            queryParams['masterFileNo'] = _masterFileNo!;
+          }
+          if (_masterFileRefNo != null) {
+            queryParams['masterFileRefNo'] = _masterFileRefNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            queryParams['latitude'] = coords.lat.toString();
+            queryParams['longitude'] = coords.lng.toString();
+            debugPrint(
+                "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmSalesEvidences.toPath(),
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+          targetPath = targetUri.toString();
           debugPrint(
-              "MapScreen: Navigating to LM Sales Evidence (source: $source)");
+              "MapScreen: Navigating to LM Sales Evidence (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
         } else {
           targetPath = Pages.routeLaSalesEvidence.toPath();
           debugPrint(
@@ -524,7 +546,7 @@ class _MapScreenState extends State<MapScreen> {
         break;
       default:
         debugPrint("MapScreen: Cannot navigate: Unknown data type '$type'.");
-        _showSnackbar("Cannot navigate: Unknown data type.", isError: true);
+        // _showSnackbar("Cannot navigate: Unknown data type.", isError: true);
         break;
     }
     if (targetPath != null) {
@@ -533,7 +555,7 @@ class _MapScreenState extends State<MapScreen> {
       } catch (e, stacktrace) {
         log("Navigation error",
             error: e, stackTrace: stacktrace); // Use log for errors
-        _showSnackbar("Error navigating to form.", isError: true);
+        // _showSnackbar("Error navigating to form.", isError: true);
       }
     }
   }
@@ -571,7 +593,7 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint(
         "MapScreen: Request update for marker ${annotation.id} to $newType");
     if (!_imagesLoaded) {
-      _showSnackbar("Cannot update: Marker images not ready.", isError: true);
+      // _showSnackbar("Cannot update: Marker images not ready.", isError: true);
       return;
     }
 
@@ -579,12 +601,12 @@ class _MapScreenState extends State<MapScreen> {
 
     if (newImageData.isEmpty) {
       debugPrint("MapScreen: Failed to get valid image data for type $newType");
-      _showSnackbar("Cannot update: Failed to load icon for '$newType'.",
-          isError: true);
+      // _showSnackbar("Cannot update: Failed to load icon for '$newType'.",
+      //     isError: true);
       return;
     }
     mapboxKey.currentState?.updateAnnotation(annotation, newType, newImageData);
-    _showSnackbar("Marker type updated to $newType.");
+    // _showSnackbar("Marker type updated to $newType.");
   }
 
   /// Handles sketch tool selection (line, rectangle, etc.)
@@ -603,8 +625,8 @@ class _MapScreenState extends State<MapScreen> {
       });
 
       mapboxKey.currentState?.startTextPlacementMode();
-      _showSnackbar("Text tool active. Tap on any annotation to add a label.",
-          durationSeconds: 3);
+      // _showSnackbar("Text tool active. Tap on any annotation to add a label.",
+      //     durationSeconds: 3);
       return;
     }
 
@@ -616,8 +638,8 @@ class _MapScreenState extends State<MapScreen> {
       isMarkerPlacementMode = false;
       // _buildingGeometryIdPendingSave = null;
     });
-    _showSnackbar("Selected: $toolId. Draw mode active. Tap map.",
-        durationSeconds: 3);
+    // _showSnackbar("Selected: $toolId. Draw mode active. Tap map.",
+    //     durationSeconds: 3);
   }
 
   /// Handles changes to the sketching sub-mode (marker, edit, move, etc.)
@@ -671,18 +693,18 @@ class _MapScreenState extends State<MapScreen> {
           if (mapboxKey.currentState != null) {
             await mapboxKey.currentState!
                 .drawPolygonFromMeasurements(measurementsMap);
-            _showSnackbar("Polygon created successfully", durationSeconds: 2);
+            // _showSnackbar("Polygon created successfully", durationSeconds: 2);
           } else {
-            _showSnackbar("Error: Map state not available.", isError: true);
+            // _showSnackbar("Error: Map state not available.", isError: true);
           }
         } catch (e) {
           debugPrint("Error creating polygon: $e");
-          _showSnackbar("Error creating polygon: $e", isError: true);
+          // _showSnackbar("Error creating polygon: $e", isError: true);
         }
       } else {
         debugPrint(
             "DrawPolygonDialog was canceled or returned invalid result in MapScreen.");
-        _showSnackbar("Polygon creation canceled", durationSeconds: 2);
+        // _showSnackbar("Polygon creation canceled", durationSeconds: 2);
       }
       proceedWithModeChange = false;
       if (mounted) {
@@ -696,7 +718,7 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _selectedSketchSubMode = finalMode;
       });
-      _showSnackbar("Switched to ${finalMode.name} mode.");
+      // _showSnackbar("Switched to ${finalMode.name} mode.");
       debugPrint(
           "MapScreen: Sketch Sub-Mode successfully changed to: $finalMode");
     } else if (!proceedWithModeChange) {
@@ -720,7 +742,7 @@ class _MapScreenState extends State<MapScreen> {
   void _handleMapFeedback(String message) {
     if (!mounted) return;
     debugPrint("MapScreen: Feedback from Mapbox: $message");
-    _showSnackbar(message, durationSeconds: 3);
+    // _showSnackbar(message, durationSeconds: 3);
   }
 
   /// Called when text placement (add/cancel) finishes in Mapbox widget
@@ -753,7 +775,7 @@ class _MapScreenState extends State<MapScreen> {
       _selectedMarkerForSketching = null;
     });
 
-    _showSnackbar("Exited sketching mode");
+    // _showSnackbar("Exited sketching mode");
   }
 
   /// Shows a confirmation dialog when user tries to cancel lot saving
@@ -819,7 +841,7 @@ class _MapScreenState extends State<MapScreen> {
         setState(() {
           isDrawingMode = false;
         });
-        _showSnackbar("Lot drawing cancelled and removed.");
+        // _showSnackbar("Lot drawing cancelled and removed.");
       }
     }
     // If shouldRemove is false or null, do nothing (stay in SaveLot dialog)
@@ -857,7 +879,7 @@ class _MapScreenState extends State<MapScreen> {
                 Navigator.of(dialogContext).pop();
 
                 if (selectedLotId == null) {
-                  _showSnackbar("Save cancelled or failed.", isError: true);
+                  // _showSnackbar("Save cancelled or failed.", isError: true);
                   return;
                 }
 
@@ -871,8 +893,8 @@ class _MapScreenState extends State<MapScreen> {
                   final drawnPoints = mapboxKey.currentState?.drawnPoints;
 
                   if (drawnPoints == null || drawnPoints.isEmpty) {
-                    _showSnackbar("No coordinates found to save.",
-                        isError: true);
+                    // _showSnackbar("No coordinates found to save.",
+                    //     isError: true);
                     return;
                   }
 
@@ -883,13 +905,13 @@ class _MapScreenState extends State<MapScreen> {
                   // Get master file ID from the URL parameters
                   final masterFileIdString = _id;
                   if (masterFileIdString == null) {
-                    _showSnackbar("Master file ID not found.", isError: true);
+                    // _showSnackbar("Master file ID not found.", isError: true);
                     return;
                   }
 
                   final masterFileId = int.tryParse(masterFileIdString);
                   if (masterFileId == null) {
-                    _showSnackbar("Invalid master file ID.", isError: true);
+                    // _showSnackbar("Invalid master file ID.", isError: true);
                     return;
                   }
 
@@ -902,12 +924,12 @@ class _MapScreenState extends State<MapScreen> {
 
                   result.fold(
                     (failure) {
-                      _showSnackbar("Failed to save lot: ${failure.message}",
-                          isError: true);
+                      // _showSnackbar("Failed to save lot: ${failure.message}",
+                      //     isError: true);
                     },
                     (response) {
-                      _showSnackbar(
-                          "Lot saved successfully! ${response.message ?? ''}");
+                      // _showSnackbar(
+                      //     "Lot saved successfully! ${response.message ?? ''}");
 
                       // Finalize the drawing mode
                       mapboxKey.currentState?.toggleDrawingMode(false);
@@ -921,7 +943,7 @@ class _MapScreenState extends State<MapScreen> {
                   );
                 } catch (e) {
                   debugPrint('Error saving lot: $e');
-                  _showSnackbar("Error saving lot: $e", isError: true);
+                  // _showSnackbar("Error saving lot: $e", isError: true);
                 }
               },
             ),
@@ -955,7 +977,7 @@ class _MapScreenState extends State<MapScreen> {
     mapboxKey.currentState
         ?.clearCurrentSketchGuideAndPoints(); // Clear any leftover guides
 
-    _showSnackbar("Exited View Inside mode");
+    // _showSnackbar("Exited View Inside mode");
   }
 
   void _onViewInsideModeChanged(
@@ -1010,10 +1032,10 @@ class _MapScreenState extends State<MapScreen> {
 
     // Show feedback
     if (isInViewInsideMode) {
-      _showSnackbar("View Inside mode: Polygon tool active. Tap to draw.",
-          durationSeconds: 4);
+      // _showSnackbar("View Inside mode: Polygon tool active. Tap to draw.",
+      //     durationSeconds: 4);
     } else {
-      _showSnackbar("Exited View Inside mode");
+      // _showSnackbar("Exited View Inside mode");
     }
   }
 
@@ -1036,7 +1058,7 @@ class _MapScreenState extends State<MapScreen> {
     if (_selectedLotForSketching == null && source != 'MRrentalEvidence') {
       // Allow null lot for MR Rental
       debugPrint("❌ Error: No parent lot selected");
-      _showSnackbar("Error: No parent lot selected.", isError: true);
+      // _showSnackbar("Error: No parent lot selected.", isError: true);
       _exitSketchingMode();
       return;
     }
@@ -1066,7 +1088,7 @@ class _MapScreenState extends State<MapScreen> {
                 setState(() {
                   // _buildingGeometryIdPendingSave = null;
                 });
-                _showSnackbar("Building save cancelled.");
+                // _showSnackbar("Building save cancelled.");
               },
               onSave: (String buildingName, String constructionType) async {
                 Navigator.of(dialogContext).pop();
@@ -1114,8 +1136,8 @@ class _MapScreenState extends State<MapScreen> {
                   if (success) {
                     debugPrint("✅ Building saved successfully to storage");
                     if (mounted) {
-                      _showSnackbar(
-                          "Building '$buildingName' saved successfully!");
+                      // _showSnackbar(
+                      //     "Building '$buildingName' saved successfully!");
                       setState(() {
                         selectedSketchTool = null; // Deselect tool
                         _selectedSketchSubMode = SketchToolMode.marker;
@@ -1128,15 +1150,15 @@ class _MapScreenState extends State<MapScreen> {
                   } else {
                     debugPrint("❌ Failed to save building to storage");
                     if (mounted) {
-                      _showSnackbar("Failed to save building '$buildingName'",
-                          isError: true);
+                      // _showSnackbar("Failed to save building '$buildingName'",
+                      //     isError: true);
                     }
                   }
                 } else {
                   debugPrint("❌ No building polygon found to save");
                   if (mounted) {
-                    _showSnackbar("No building polygon found to save",
-                        isError: true);
+                    // _showSnackbar("No building polygon found to save",
+                    //     isError: true);
                   }
                 }
               },
@@ -1165,7 +1187,7 @@ class _MapScreenState extends State<MapScreen> {
         mapboxKey.currentState?.toggleDrawingMode(false); // Stop drawing first
         _showSaveLotDialog(); // Show dialog to save the lot
       } else {
-        _showSnackbar("Lot requires at least 3 points to save.", isError: true);
+        // _showSnackbar("Lot requires at least 3 points to save.", isError: true);
       }
     } else if (isSketchingMode) {
       try {
@@ -1178,8 +1200,8 @@ class _MapScreenState extends State<MapScreen> {
           // Check if we have enough points to form a polygon
           if (sketchPoints == null || sketchPoints.length < 3) {
             debugPrint("❌ Not enough points: ${sketchPoints?.length ?? 0}");
-            _showSnackbar("Need at least 3 points to save a building.",
-                isError: true);
+            // _showSnackbar("Need at least 3 points to save a building.",
+            //     isError: true);
             return;
           }
 
@@ -1199,7 +1221,7 @@ class _MapScreenState extends State<MapScreen> {
           mapboxKey.currentState?.finalizeCurrentSketch();
 
           // Show success feedback
-          _showSnackbar("${selectedSketchTool ?? 'Sketch'} saved.");
+          // _showSnackbar("${selectedSketchTool ?? 'Sketch'} saved.");
 
           // Clear the tool selection after saving
           setState(() {
@@ -1210,11 +1232,11 @@ class _MapScreenState extends State<MapScreen> {
         // If no sketch tool is selected or using another tool
         else {
           if (selectedSketchTool == null) {
-            _showSnackbar("Select a sketch tool first.", isError: true);
+            // _showSnackbar("Select a sketch tool first.", isError: true);
           } else {
             // Attempt to finalize whatever other sketch is active
             await mapboxKey.currentState?.finalizeCurrentSketch();
-            _showSnackbar("Sketch saved.");
+            // _showSnackbar("Sketch saved.");
 
             // Clear the tool selection
             setState(() {
@@ -1225,10 +1247,10 @@ class _MapScreenState extends State<MapScreen> {
         }
       } catch (e) {
         debugPrint("MapScreen: Error during sketch save: $e");
-        _showSnackbar("Error saving sketch.", isError: true);
+        // _showSnackbar("Error saving sketch.", isError: true);
       }
     } else {
-      _showSnackbar("Nothing to save. Draw a lot or sketch first.");
+      // _showSnackbar("Nothing to save. Draw a lot or sketch first.");
     }
   }
 
@@ -1342,7 +1364,7 @@ class _MapScreenState extends State<MapScreen> {
                     _selectedLotForSketching = null;
                     // _buildingGeometryIdPendingSave = null; // Removed
                   });
-                  _showSnackbar("Tap map to place a marker");
+                  // _showSnackbar("Tap map to place a marker");
                 },
                 onAddDrawer: () {
                   if (!mounted) return;
@@ -1352,7 +1374,7 @@ class _MapScreenState extends State<MapScreen> {
                   }
                   mapboxKey.currentState?.clearCurrentSketchGuideAndPoints();
                   mapboxKey.currentState?.toggleDrawingMode(true);
-                  _showSnackbar("Start drawing initial lot boundaries.");
+                  // _showSnackbar("Start drawing initial lot boundaries.");
                 },
                 onClearSelection: () {
                   if (!mounted) return;
@@ -1364,7 +1386,7 @@ class _MapScreenState extends State<MapScreen> {
                     isDrawingMode = false;
                     isMarkerPlacementMode = false;
                   });
-                  _showSnackbar("Selection and modes cleared");
+                  // _showSnackbar("Selection and modes cleared");
                 },
               ),
             ),
@@ -1496,10 +1518,10 @@ class _MapScreenState extends State<MapScreen> {
       await mapboxKey.currentState?.changeActiveFloor(floorName);
 
       // Show feedback to the user
-      _showSnackbar("Switched to floor: $floorName.");
+      // _showSnackbar("Switched to floor: $floorName.");
     } catch (e) {
       debugPrint("Error changing active floor: $e");
-      _showSnackbar("Error changing to floor: $floorName", isError: true);
+      // _showSnackbar("Error changing to floor: $floorName", isError: true);
     }
   }
 }
