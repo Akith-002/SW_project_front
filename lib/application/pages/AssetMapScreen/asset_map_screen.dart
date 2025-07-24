@@ -145,12 +145,18 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
       // Exit placement mode immediately to prevent multiple dialogs
       setState(() => isMarkerPlacementMode = false);
 
-      // Show dialog to navigate to rental evidence view
+      // Log the coordinates
+      debugPrint("AssetMapScreen: Map tapped at - Longitude: ${point.coordinates.lng}, Latitude: ${point.coordinates.lat}");
+      
+      // Show dialog to navigate to rental evidence view with coordinates
       showDialog(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
-          return AssetPopupMenuWidget();
+          return AssetPopupMenuWidget(
+            longitude: point.coordinates.lng.toDouble(),
+            latitude: point.coordinates.lat.toDouble(),
+          );
         },
       );
       return;
@@ -956,6 +962,7 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
                 showOnlyAddMarker: showOnlyAddMarker,
                 onAddMarker: () {
                   if (!mounted) return;
+                  debugPrint("AssetMapScreen: Add Marker button clicked");
                   // Add curly braces
                   if (isDrawingMode || isSketchingMode) {
                     _exitSketchingMode();
@@ -971,6 +978,7 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
                     _selectedLotForSketching = null;
                     // _buildingGeometryIdPendingSave = null; // Removed
                   });
+                  debugPrint("AssetMapScreen: Marker placement mode activated");
                   _showSnackbar("Tap map to place a marker");
                 },
                 onAddDrawer: () {

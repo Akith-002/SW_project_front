@@ -401,32 +401,7 @@ class _OfficesRatingCardState extends State<OfficesRatingCard> {
                           },
                         ),
                         BreadcrumbItem(
-                          label: widget.requestType ?? "Request type",
-                          onTap: widget.requestType != null ? () {
-                            // Navigate back to the appropriate request type page
-                            String selectedIndex = '2';
-                            switch (widget.requestType) {
-                              case 'MR':
-                                selectedIndex = '2';
-                                break;
-                              case 'RA':
-                                selectedIndex = '3';
-                                break;
-                              case 'RB':
-                                selectedIndex = '4';
-                                break;
-                              case 'RO':
-                                selectedIndex = '5';
-                                break;
-                            }
-                            context.goNamed(
-                              Pages.routeI3MasterFileList.toPathName(),
-                              queryParameters: {'selectedIndex': selectedIndex},
-                            );
-                          } : null,
-                        ),
-                        BreadcrumbItem(
-                          label: widget.ratingReferenceNo ?? "Rating reference no",
+                          label: "${widget.ratingReferenceNo ?? 'MR-2022-003'} - ${widget.assetNo ?? 'AST_030-2022'}",
                           onTap: widget.ratingReferenceNo != null && widget.requestType != null ? () {
                             // Navigate back to assets list
                             String route;
@@ -471,13 +446,7 @@ class _OfficesRatingCardState extends State<OfficesRatingCard> {
                             );
                           } : null,
                         ),
-                        BreadcrumbItem(
-                          label: widget.assetNo ?? "Asset no",
-                          onTap: () {
-                            // This is the current asset, no navigation needed
-                          },
-                        ),
-                        BreadcrumbItem(label: "Offices - Rating card"),
+                        BreadcrumbItem(label: "Offices - Rating Card"),
                       ],
                     ),
                   ),

@@ -474,9 +474,28 @@ class _MapScreenState extends State<MapScreen> {
         if (img.isNotEmpty) {
           mapboxKey.currentState?.addMarkerAtPoint(point, img, selectedOption);
           _showSnackbar("$selectedOption marker added.");
+                    _saveMarkerCoordinate(point, selectedOption);
+
+          // Get the current source from route parameters
+          final GoRouterState state = GoRouterState.of(context);
+          final String source = state.uri.queryParameters['source'] ?? '';
+          
+          debugPrint("MapScreen: Marker placed - Type: $selectedOption, Source: $source");
+          debugPrint("MapScreen: Marker coordinates - Longitude: ${point.coordinates.lng}, Latitude: ${point.coordinates.lat}");
+          
+          // If source is MRrentalEvidence and it's a rental marker, navigate to I2RentalEvidence immediately
+          if (source == 'MRrentalEvidence' && selectedOption == MapMarkerLoader.markerTypeRental) {
+            final queryParams = {
+              'longitude': point.coordinates.lng.toString(),
+              'latitude': point.coordinates.lat.toString(),
+            };
+            final uri = Uri(path: Pages.routeI2RentalEvidence.toPath(), queryParameters: queryParams);
+            debugPrint("MapScreen: Auto-navigating to I2RentalEvidence with URL: ${uri.toString()}");
+            context.push(uri.toString());
+          }
+
 
           // Save marker coordinates to backend
-          _saveMarkerCoordinate(point, selectedOption);
         } else {
           _showSnackbar("Failed to load icon for '$selectedOption'.",
               isError: true);
@@ -498,6 +517,8 @@ class _MapScreenState extends State<MapScreen> {
   /// Handles when a marker on the map is clicked
   void _handlePointAnnotationClick(PointAnnotation annotation, String? type) {
     debugPrint("MapScreen: Marker Clicked - ID: ${annotation.id}, Type: $type");
+    debugPrint("MapScreen: Marker Coordinates - Longitude: ${annotation.geometry.coordinates.lng}, Latitude: ${annotation.geometry.coordinates.lat}");
+    
     if (isDrawingMode || isSketchingMode) {
       debugPrint("Ignoring marker click - active drawing/sketching mode.");
       _showSnackbar("Exit current mode to interact with markers.");
@@ -508,6 +529,7 @@ class _MapScreenState extends State<MapScreen> {
     final String currentSource =
         GoRouterState.of(context).uri.queryParameters['source'] ?? '';
     _selectedMarkerForSketching = annotation; // Store the clicked marker
+    debugPrint("MapScreen: Current source: $currentSource");
 
     showDialog(
       context: context,
@@ -653,7 +675,16 @@ class _MapScreenState extends State<MapScreen> {
   void _loadSurroundingDataForm(String? type) {
     if (!mounted) return;
     debugPrint("MapScreen: Navigating to form for type: $type");
+    
+    // Get the coordinates from the selected marker if available
+    Point? markerCoordinates;
+    if (_selectedMarkerForSketching != null) {
+      markerCoordinates = _selectedMarkerForSketching!.geometry;
+      debugPrint("MapScreen: Marker coordinates - Longitude: ${markerCoordinates.coordinates.lng}, Latitude: ${markerCoordinates.coordinates.lat}");
+    }
+    
     String? targetPath;
+    Map<String, String>? queryParams;
 
     // Get the source context from route parameters
     final String source =
@@ -685,11 +716,29 @@ class _MapScreenState extends State<MapScreen> {
 
     switch (type) {
       case MapMarkerLoader.markerTypeRental:
-        final targetUri = Uri(
+        // Get the current source from route parameters
+        final GoRouterState state = GoRouterState.of(context);
+        final String source = state.uri.queryParameters['source'] ?? '';
+        
+        debugPrint("MapScreen: Rental evidence navigation - Source: $source");
+        
+        // If source is MRrentalEvidence, navigate to I2RentalEvidence with coordinates
+        if (source == 'MRrentalEvidence' && markerCoordinates != null) {
+          targetPath = Pages.routeI2RentalEvidence.toPath();
+          queryParams = {
+            'longitude': markerCoordinates.coordinates.lng.toString(),
+            'latitude': markerCoordinates.coordinates.lat.toString(),
+          };
+          debugPrint("MapScreen: Navigating to I2RentalEvidence with coordinates - Longitude: ${queryParams['longitude']}, Latitude: ${queryParams['latitude']}");
+        } else {
+          
+          final targetUri = Uri(
           path: Pages.routeRentalEvidence.toPath(),
           queryParameters:
               commonQueryParams.isNotEmpty ? commonQueryParams : null,
         );
+    
+        
         targetPath = targetUri.toString();
         debugPrint(
             "MapScreen: Navigating to Rental Evidence with masterFileId: $_id");
@@ -812,7 +861,14 @@ class _MapScreenState extends State<MapScreen> {
     }
     if (targetPath != null) {
       try {
-        context.push(targetPath);
+        if (queryParams != null && queryParams.isNotEmpty) {
+          final uri = Uri(path: targetPath, queryParameters: queryParams);
+          debugPrint("MapScreen: Navigating to URL: ${uri.toString()}");
+          context.push(uri.toString());
+        } else {
+          debugPrint("MapScreen: Navigating to path: $targetPath");
+          context.push(targetPath);
+        }
       } catch (e, stacktrace) {
         log("Navigation error",
             error: e, stackTrace: stacktrace); // Use log for errors

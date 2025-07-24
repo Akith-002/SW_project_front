@@ -375,6 +375,20 @@ class AppRouter {
             path: Pages.routeI2RentalEvidence.toPath(),
             name: Pages.routeI2RentalEvidence.toPathName(),
             pageBuilder: (context, state) {
+              // Log all query parameters
+              print('Routes: I2RentalEvidence - All query parameters: ${state.uri.queryParameters}');
+              
+              // Extract longitude and latitude from query parameters
+              final double? longitude = state.uri.queryParameters['longitude'] != null 
+                  ? double.tryParse(state.uri.queryParameters['longitude']!) 
+                  : null;
+              final double? latitude = state.uri.queryParameters['latitude'] != null 
+                  ? double.tryParse(state.uri.queryParameters['latitude']!) 
+                  : null;
+              
+              print('Routes: I2RentalEvidence - Parsed longitude: $longitude');
+              print('Routes: I2RentalEvidence - Parsed latitude: $latitude');
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -383,9 +397,42 @@ class AppRouter {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Failed to load master data'));
+                      // For testing: Show form with empty master data when database is down
+                      print('Routes: Master data failed to load, showing form anyway for testing');
+                      return I2RentalEvidence(
+                        masterData: MasterDataResponse(
+                          buildingCategory: [],
+                          buildingClass: [],
+                          conviences: [],
+                          natureOfConstruction: [],
+                          roofMaterial: [],
+                          roofFrame: [],
+                          roofFinisher: [],
+                          celing: [],
+                          foundationStructure: [],
+                          wallStructure: [],
+                          floorStructure: [],
+                          door: [],
+                          window: [],
+                          windowProtection: [],
+                          doorsBathroomAndToiletFittings: [],
+                          doorsHandRail: [],
+                          doorsPantryCupboard: [],
+                          doorsOther: [],
+                          wallFinisher: [],
+                          floorFinisher: [],
+                          bathroomAndToilet: [],
+                          services: [],
+                        ),
+                        longitude: longitude,
+                        latitude: latitude,
+                      );
                     } else {
-                      return I2RentalEvidence(masterData: snapshot.data!);
+                      return I2RentalEvidence(
+                        masterData: snapshot.data!,
+                        longitude: longitude,
+                        latitude: latitude,
+                      );
                     }
                   },
                 ),
