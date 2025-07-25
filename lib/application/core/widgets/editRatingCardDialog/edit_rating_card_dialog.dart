@@ -160,13 +160,13 @@ class EditRatingCardDialog {
                                 if (asset != null) {
                                   _handleDivision(context, asset);
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Asset information not available for division'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
+                                  // ScaffoldMessenger.of(context).showSnackBar(
+                                  //   const SnackBar(
+                                  //     content: Text(
+                                  //         'Asset information not available for division'),
+                                  //     backgroundColor: Colors.red,
+                                  //   ),
+                                  // );
                                 }
                                 break;
                               case 2:
@@ -178,13 +178,13 @@ class EditRatingCardDialog {
                                 if (asset != null) {
                                   _handleChangeNumber(context, asset);
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Asset information not available for changing number'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
+                                  // ScaffoldMessenger.of(context).showSnackBar(
+                                  //   const SnackBar(
+                                  //     content: Text(
+                                  //         'Asset information not available for changing number'),
+                                  //     backgroundColor: Colors.red,
+                                  //   ),
+                                  // );
                                 }
                                 break;
                               case 4:
@@ -693,13 +693,13 @@ class EditRatingCardDialog {
 
         // Optionally refresh the asset list or update UI
         // This would typically trigger a refresh of the parent widget
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'Asset divided successfully! Created ${result.newAssetIds?.length ?? 0} new assets.'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //         'Asset divided successfully! Created ${result.newAssetIds?.length ?? 0} new assets.'),
+        //     backgroundColor: Colors.green,
+        //   ),
+        // );
       }
     });
   }
@@ -727,6 +727,7 @@ class EditRatingCardDialog {
       ),
     );
   }
+
   // Implement change number functionality for single asset
   static void _handleChangeNumber(BuildContext context, Asset asset) {
     debugPrint("Change number option selected for asset: ${asset.assetNo}");

@@ -54,7 +54,6 @@ class AssetMapbox extends StatefulWidget {
   State<AssetMapbox> createState() => AssetMapboxState();
 }
 
-
 class AssetMapboxState extends State<AssetMapbox>
     with AnnotationManagers, DrawingManager, SketchManager, TextLabelManager {
   @override
@@ -81,6 +80,7 @@ class AssetMapboxState extends State<AssetMapbox>
     super.initState();
     // Any initial setup for MapboxState can go here
   }
+
   @override
   void didUpdateWidget(covariant AssetMapbox oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -90,7 +90,7 @@ class AssetMapboxState extends State<AssetMapbox>
     debugPrint(
         "AssetMapbox didUpdateWidget: selectedSketchTool changed: ${oldWidget.selectedSketchTool} -> ${widget.selectedSketchTool}");
     debugPrint(
-        "AssetMapbox didUpdateWidget: selectedSketchSubMode changed: ${oldWidget.selectedSketchSubMode} -> ${widget.selectedSketchSubMode}");    // If tool changed to line, ensure lines are on top
+        "AssetMapbox didUpdateWidget: selectedSketchSubMode changed: ${oldWidget.selectedSketchSubMode} -> ${widget.selectedSketchSubMode}"); // If tool changed to line, ensure lines are on top
     if (widget.isSketchingMode &&
         widget.selectedSketchTool == 'line' &&
         oldWidget.selectedSketchTool != 'line') {
@@ -695,12 +695,13 @@ class AssetMapboxState extends State<AssetMapbox>
   Future<void> finalizeCurrentSketch() async {
     // Show coordinates for the sketch before finalizing
     if (currentSketchPoints.length >= 3 &&
-        widget.selectedSketchTool == 'polygon') {    showPolygonInfo();
+        widget.selectedSketchTool == 'polygon') {
+      showPolygonInfo();
     }
-    
+
     // Ensure lines are on top
     await ensureLinesOnTop();
-    
+
     return handleFinalizeCurrentSketch(widget);
   }
 
@@ -1004,11 +1005,11 @@ class AssetMapboxState extends State<AssetMapbox>
   }
 
   _onStyleLoaded(StyleLoadedEventData data) async {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("Style loaded :), time: ${data.timeInterval}"),
-      backgroundColor: Theme.of(context).primaryColor,
-      duration: Duration(seconds: 1),
-    ));
+    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    //   content: Text("Style loaded :), time: ${data.timeInterval}"),
+    //   backgroundColor: Theme.of(context).primaryColor,
+    //   duration: Duration(seconds: 1),
+    // ));
 
     // 1. Load your grid PNG image from assets
     final ByteData bytes =

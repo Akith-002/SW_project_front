@@ -92,9 +92,9 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
             setState(() {
               _isSearching = false;
             });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Search failed: ${failure.message}")),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text("Search failed: ${failure.message}")),
+            // );
           },
           (paginatedResponse) {
             setState(() {
@@ -108,9 +108,9 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
         setState(() {
           _isSearching = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Search failed: $e")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Search failed: $e")),
+        // );
       }
     }
   }
@@ -132,9 +132,9 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
             setState(() {
               _isSearching = false;
             });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Search failed: ${failure.message}")),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text("Search failed: ${failure.message}")),
+            // );
           },
           (paginatedResponse) {
             setState(() {
@@ -148,9 +148,9 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
         setState(() {
           _isSearching = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Search failed: $e")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Search failed: $e")),
+        // );
       }
     }
   }

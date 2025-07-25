@@ -411,13 +411,13 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
 
   /// Displays success message using SnackBar
   void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(message),
+    //     backgroundColor: Colors.green,
+    //     duration: const Duration(seconds: 3),
+    //   ),
+    // );
   }
 
   /// Shows success dialog when data is sent successfully
@@ -437,13 +437,13 @@ class _LaBuildingRatesState extends BasePageState<LaBuildingRates> {
 
   /// Displays error message using SnackBar
   void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(message),
+    //     backgroundColor: Colors.red,
+    //     duration: const Duration(seconds: 3),
+    //   ),
+    // );
   }
 
   @override

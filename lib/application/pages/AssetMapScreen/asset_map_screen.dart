@@ -132,6 +132,7 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
       debugPrint("MapScreen: FATAL Error loading marker images via loader: $e");
       if (mounted) {
         setState(() => _imagesLoaded = false);
+        // ScaffoldMessenger.of(context).showSnackBar(
         _showSnackbar('Error loading critical map icons. Cannot proceed.',
             isError: true, durationSeconds: 10);
       }

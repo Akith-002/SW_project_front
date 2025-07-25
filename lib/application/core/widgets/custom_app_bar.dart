@@ -80,12 +80,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
         result.fold(
           (error) {
             // Show error message
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Logout failed: ${error.toString()}'),
-                backgroundColor: Colors.red,
-              ),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //     content: Text('Logout failed: ${error.toString()}'),
+            //     backgroundColor: Colors.red,
+            //   ),
+            // );
           },
           (success) {
             // Clear overlay and navigate to sign in
@@ -101,12 +101,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
         context.go(Pages.routeSignIn.toPath());
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Logout failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('Logout failed: ${e.toString()}'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
     }
   }
 

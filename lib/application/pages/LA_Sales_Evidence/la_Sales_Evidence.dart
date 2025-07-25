@@ -562,13 +562,13 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
   /// Shows success message to user
   void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(message),
+    //     backgroundColor: Colors.green,
+    //     duration: const Duration(seconds: 3),
+    //   ),
+    // );
   }
 
   /// Shows success dialog when data is sent successfully
@@ -588,12 +588,12 @@ class _LaSalesEvidenceState extends BasePageState<LaSalesEvidence> {
 
   /// Shows error message to user
   void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(message),
+    //     backgroundColor: Colors.red,
+    //     duration: const Duration(seconds: 3),
+    //   ),
+    // );
   }
 }

@@ -128,13 +128,13 @@ class _LandInfoFormState extends State<LandInfoForm> {
     });
 
     if (_formKey.currentState == null || !_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields correctly'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Please fill all required fields correctly'),
+      //     backgroundColor: Colors.red,
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
       return;
     }
 
@@ -169,13 +169,13 @@ class _LandInfoFormState extends State<LandInfoForm> {
     // Check if any controller has empty value
     for (final controller in controllers) {
       if (controller.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please fill all required fields'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('Please fill all required fields'),
+        //     backgroundColor: Colors.red,
+        //     duration: Duration(seconds: 2),
+        //   ),
+        // );
         return;
       }
     }
@@ -216,13 +216,13 @@ class _LandInfoFormState extends State<LandInfoForm> {
     );
 
     // Show save confirmation
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Land information saved successfully'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('Land information saved successfully'),
+    //     backgroundColor: Colors.green,
+    //     duration: Duration(seconds: 2),
+    //   ),
+    // );
   }
 
   @override

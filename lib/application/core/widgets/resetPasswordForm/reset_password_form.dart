@@ -30,9 +30,9 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
             extra: {'email': emailController.text},
           );
         } else if (state is ResetPasswordError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          // );
         }
       },
       builder: (context, state) {

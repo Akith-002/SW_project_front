@@ -1266,16 +1266,16 @@ class _MapScreenState extends State<MapScreen> {
       {bool isError = false, int durationSeconds = 3}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.redAccent[700] : Colors.black87,
-        duration: Duration(seconds: durationSeconds),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(message),
+    //     backgroundColor: isError ? Colors.redAccent[700] : Colors.black87,
+    //     duration: Duration(seconds: durationSeconds),
+    //     behavior: SnackBarBehavior.floating,
+    //     margin: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
+    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+    //   ),
+    // );
   }
 
   void _onFloorSelected(String floorName) async {

@@ -65,12 +65,12 @@ class _RaAssetsListState extends BasePageState<RaAssetsList> {
     debugPrint('Refreshing RA assets...');
 
     // Show a brief loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Refreshing assets...'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('Refreshing assets...'),
+    //     duration: Duration(seconds: 1),
+    //   ),
+    // );
 
     // In a real app, this would reload data from the cubit
     setState(() {

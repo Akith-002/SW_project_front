@@ -286,12 +286,12 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
           setState(() {
             _isSubmitting = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${state.errorMessage}'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: Text('Error: ${state.errorMessage}'),
+          //     backgroundColor: Colors.red,
+          //   ),
+          // );
         } else if (state is RentalEvidenceLoading) {
           setState(() {
             _isSubmitting = true;
@@ -647,12 +647,12 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
     setState(() {
       _isSubmitting = false;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Rental evidence submitted successfully!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('Rental evidence submitted successfully!'),
+    //     backgroundColor: Colors.green,
+    //   ),
+    // );
     await uploadImages(reportId);
     if (!mounted) return;
     context.go(Pages.routeMapScreen.toPath());

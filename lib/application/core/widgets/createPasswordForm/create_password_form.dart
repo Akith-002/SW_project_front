@@ -54,9 +54,9 @@ class _CreatePasswordFormState extends State<CreatePasswordForm> {
         if (state is CreatePasswordSuccess) {
           context.go(Pages.routeSignIn.toPath());
         } else if (state is CreatePasswordError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          // );
         }
       },
       builder: (context, state) {

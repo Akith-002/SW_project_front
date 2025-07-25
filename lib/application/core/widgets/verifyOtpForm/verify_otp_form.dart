@@ -31,9 +31,9 @@ class _VerifyOtpFormState extends State<VerifyOtpForm> {
             extra: {'email': widget.email, 'otp': otpController.text},
           );
         } else if (state is VerifyOtpError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          // );
         }
       },
       builder: (context, state) {

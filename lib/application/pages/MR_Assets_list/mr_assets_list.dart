@@ -113,12 +113,12 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
     debugPrint('Refreshing assets...');
 
     // Show a brief loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Refreshing assets...'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('Refreshing assets...'),
+    //     duration: Duration(seconds: 1),
+    //   ),
+    // );
 
     _loadAssets();
   }
@@ -130,7 +130,8 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
     List<String> breadcrumbItems;
 
     // Use request reference number if available, otherwise use 'Request'
-    final String requestLabel = _requestReferenceNo ?? AppString.request.localize(context)!;
+    final String requestLabel =
+        _requestReferenceNo ?? AppString.request.localize(context)!;
 
     switch (widget.source) {
       case 'ratingAssessment':
@@ -179,7 +180,6 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            
             ),
             BlocBuilder<MrAssetsListCubit, BaseState<MrAssetsListState>>(
               bloc: _cubit,

@@ -66,12 +66,12 @@ class _RoAssetsListState extends BasePageState<RoAssetsList> {
     debugPrint('Refreshing RO assets...');
 
     // Show a brief loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Refreshing assets...'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('Refreshing assets...'),
+    //     duration: Duration(seconds: 1),
+    //   ),
+    // );
 
     // In a real app, this would reload data from the cubit
     setState(() {

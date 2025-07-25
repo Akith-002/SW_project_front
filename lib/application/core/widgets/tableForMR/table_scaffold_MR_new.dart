@@ -35,19 +35,19 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
     super.initState();
     _pageSize = widget.initialPageSize;
     _pageSizeOptions = widget.pageSizeOptions;
-    
+
     // Load data when widget initializes
     context.read<MrRequestsCubit>().loadMassRatingRequests(
-      pageSize: _pageSize,
-      pageToken: _nextPageToken,
-    );
+          pageSize: _pageSize,
+          pageToken: _nextPageToken,
+        );
   }
 
   void _fetchPlans() {
     context.read<MrRequestsCubit>().loadMassRatingRequests(
-      pageSize: _pageSize,
-      pageToken: _nextPageToken,
-    );
+          pageSize: _pageSize,
+          pageToken: _nextPageToken,
+        );
   }
 
   @override
@@ -75,7 +75,7 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
             );
           } else if (state is MrRequestsLoaded) {
             final requests = state.paginatedResponse.items;
-            
+
             if (requests.isEmpty) {
               return const Center(child: Text("No records found"));
             }
@@ -117,8 +117,8 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: colors(context).colorGrey3 ??
-                      colors(context).colorGrey9!,
+                  color:
+                      colors(context).colorGrey3 ?? colors(context).colorGrey9!,
                   width: 0.5,
                 ),
                 borderRadius: BorderRadius.circular(4),
@@ -143,8 +143,8 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: request.status 
-                            ? Colors.green.withOpacity(0.2) 
+                        color: request.status
+                            ? Colors.green.withOpacity(0.2)
                             : Colors.red.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -290,31 +290,31 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
             requestNumber: request.ratingReferenceNo,
             onConfirm: () async {
               Navigator.of(dialogContext).pop();
-              
+
               try {
                 // Download the request data as JSON
                 await DownloadService.downloadRequestAsJson(request);
-                
+
                 // Show success message
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Request ${request.ratingReferenceNo} shared successfully'),
-                      backgroundColor: Colors.green,
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(
+                  //     content: Text('Request ${request.ratingReferenceNo} shared successfully'),
+                  //     backgroundColor: Colors.green,
+                  //     duration: const Duration(seconds: 3),
+                  //   ),
+                  // );
                 }
               } catch (e) {
                 // Show error message
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error sharing request: ${e.toString()}'),
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(
+                  //     content: Text('Error sharing request: ${e.toString()}'),
+                  //     backgroundColor: Colors.red,
+                  //     duration: const Duration(seconds: 3),
+                  //   ),
+                  // );
                 }
               }
             },

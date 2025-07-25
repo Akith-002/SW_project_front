@@ -108,20 +108,20 @@ class _AssetDivisionDialogState extends State<AssetDivisionDialog> {
           });
         } else if (state is AssetDivisionSuccess) {
           Navigator.of(context).pop(state.response);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'Asset divided successfully! Created ${state.response.newAssetIds?.length ?? 0} new assets.'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: Text(
+          //         'Asset divided successfully! Created ${state.response.newAssetIds?.length ?? 0} new assets.'),
+          //     backgroundColor: Colors.green,
+          //   ),
+          // );
         } else if (state is AssetDivisionError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: Text(state.message),
+          //     backgroundColor: Colors.red,
+          //   ),
+          // );
         }
       },
       child: Dialog(

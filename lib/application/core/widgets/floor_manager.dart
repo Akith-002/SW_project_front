@@ -86,9 +86,9 @@ class _FloorManagerState extends State<FloorManager> {
   void _deleteFloor(String floorName) {
     // Prevent deleting the last floor (e.g., 'Ground') - Optional rule
     if (floors.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cannot delete the base floor.")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text("Cannot delete the base floor.")),
+      // );
       return;
     }
 
@@ -154,15 +154,12 @@ class _FloorManagerState extends State<FloorManager> {
             ),
             const SizedBox(height: 8),
             // Floors
-            ...floors
-                .map((floor) => FloorItem(
-                      floorName: floor,
-                      isSelected: _selectedFloor == floor,
-                      onTap: () => _selectFloor(floor),
-                      onDelete: () =>
-                          _deleteFloor(floor), // Pass delete handler
-                    ))
-                ,
+            ...floors.map((floor) => FloorItem(
+                  floorName: floor,
+                  isSelected: _selectedFloor == floor,
+                  onTap: () => _selectFloor(floor),
+                  onDelete: () => _deleteFloor(floor), // Pass delete handler
+                )),
           ],
         ),
       ),
@@ -176,7 +173,8 @@ class FloorItem extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete; // Add callback for delete button
 
-  const FloorItem({super.key, 
+  const FloorItem({
+    super.key,
     required this.floorName,
     required this.onTap,
     required this.onDelete, // Require delete callback

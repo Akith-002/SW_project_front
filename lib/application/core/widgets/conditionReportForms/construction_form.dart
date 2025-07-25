@@ -64,25 +64,25 @@ class _ConstructionFormState extends State<ConstructionForm> {
 
     // Check if form is valid
     if (!(_formKey.currentState?.validate() ?? false)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields correctly'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Please fill all required fields correctly'),
+      //     backgroundColor: Colors.red,
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
       return;
     }
 
     // Check if description is empty
     if (_buildingDescriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a description'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Please enter a description'),
+      //     backgroundColor: Colors.red,
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
       return;
     }
 
@@ -100,13 +100,13 @@ class _ConstructionFormState extends State<ConstructionForm> {
       );
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Information saved successfully'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('Information saved successfully'),
+    //     backgroundColor: Colors.green,
+    //     duration: Duration(seconds: 2),
+    //   ),
+    // );
 
     // Move to next tab after successful save
     if (widget.tabController.index < widget.tabController.length - 1) {

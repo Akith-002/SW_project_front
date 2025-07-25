@@ -62,28 +62,28 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
 
   // Helper method to show error messages
   void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.red,
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(
+    //       message,
+    //       style: const TextStyle(color: Colors.white),
+    //     ),
+    //     backgroundColor: Colors.red,
+    //   ),
+    // );
   }
 
   // Helper method to show success messages
   void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.green,
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(
+    //       message,
+    //       style: const TextStyle(color: Colors.white),
+    //     ),
+    //     backgroundColor: Colors.green,
+    //   ),
+    // );
   }
 
   // Add this function to handle validation, submission, and image upload

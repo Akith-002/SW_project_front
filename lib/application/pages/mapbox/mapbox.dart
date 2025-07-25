@@ -1014,11 +1014,11 @@ class MapboxState extends State<Mapbox>
   }
 
   _onStyleLoaded(StyleLoadedEventData data) async {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("Style loaded :), time: ${data.timeInterval}"),
-      backgroundColor: Theme.of(context).primaryColor,
-      duration: Duration(seconds: 1),
-    ));
+    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    //   content: Text("Style loaded :), time: ${data.timeInterval}"),
+    //   backgroundColor: Theme.of(context).primaryColor,
+    //   duration: Duration(seconds: 1),
+    // ));
 
     // 1. Load your grid PNG image from assets
     final ByteData bytes =

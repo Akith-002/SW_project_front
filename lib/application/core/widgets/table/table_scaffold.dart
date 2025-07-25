@@ -129,9 +129,9 @@ class TableScaffoldState extends State<TableScaffold> {
         setState(() {
           _isSearching = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Search failed: $e")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Search failed: $e")),
+        // );
       }
     }
   }
@@ -158,9 +158,9 @@ class TableScaffoldState extends State<TableScaffold> {
         setState(() {
           _isSearching = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Search failed: $e")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Search failed: $e")),
+        // );
       }
     }
   }

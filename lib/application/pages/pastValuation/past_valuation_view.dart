@@ -51,24 +51,24 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
       final reportId = await _submitFormData();
       if (reportId != null) {
         await _uploadImages(reportId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Past valuation submitted successfully!'),
-              backgroundColor: Colors.green),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Past valuation submitted successfully!'),
+        //       backgroundColor: Colors.green),
+        // );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Failed to submit past valuation.'),
-              backgroundColor: Colors.red),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Failed to submit past valuation.'),
+        //       backgroundColor: Colors.red),
+        // );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please fix the validation errors in the form'),
-            backgroundColor: Colors.red),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //       content: Text('Please fix the validation errors in the form'),
+      //       backgroundColor: Colors.red),
+      // );
     }
   }
 
@@ -137,25 +137,25 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
       final respStr = await response.stream.bytesToString();
       print('DEBUG: Image upload response body: $respStr');
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Images uploaded successfully.'),
-              backgroundColor: Colors.green),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Images uploaded successfully.'),
+        //       backgroundColor: Colors.green),
+        // );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Failed to upload images.'),
-              backgroundColor: Colors.red),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Failed to upload images.'),
+        //       backgroundColor: Colors.red),
+        // );
       }
     } catch (e) {
       print('DEBUG: Exception during image upload: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error uploading images: $e'),
-            backgroundColor: Colors.red),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //       content: Text('Error uploading images: $e'),
+      //       backgroundColor: Colors.red),
+      // );
     }
   }
 
@@ -316,17 +316,17 @@ class _PastValuationViewState extends BasePageState<PastValuationView> {
                             text: AppString.save.localize(context)!,
                             onPressed: () {
                               if (_formKey.currentState?.validate() ?? false) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text("Form valid. Saving..."),
-                                      backgroundColor: Colors.green),
-                                );
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   const SnackBar(
+                                //       content: Text("Form valid. Saving..."),
+                                //       backgroundColor: Colors.green),
+                                // );
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text("Please fix the errors"),
-                                      backgroundColor: Colors.red),
-                                );
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   const SnackBar(
+                                //       content: Text("Please fix the errors"),
+                                //       backgroundColor: Colors.red),
+                                // );
                               }
                             },
                             backgroundColor: colors(context).colorPrimary5!,

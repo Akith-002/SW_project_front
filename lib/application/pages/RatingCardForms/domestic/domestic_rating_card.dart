@@ -268,9 +268,9 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
           } else if (state is DomesticRatingCardSaved) {
             _showSuccessDialog();
           } else if (state is DomesticRatingCardError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text('Error: ${state.message}')),
+            // );
           }
         },
         child: Scaffold(

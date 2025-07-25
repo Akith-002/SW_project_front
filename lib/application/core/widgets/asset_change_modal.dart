@@ -45,12 +45,12 @@ class _AssetChangeModalState extends State<AssetChangeModal> {
 
     if (newAssetNo.isEmpty || reason.isEmpty) {
       // Show validation error
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all required fields'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Please fill in all required fields'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
       return;
     }
 
@@ -72,16 +72,16 @@ class _AssetChangeModalState extends State<AssetChangeModal> {
 
       if (mounted) {
         // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response.isSuccess
-                  ? 'Asset number changed successfully to $newAssetNo'
-                  : response.message ?? 'Asset number change completed',
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //       response.isSuccess
+        //           ? 'Asset number changed successfully to $newAssetNo'
+        //           : response.message ?? 'Asset number change completed',
+        //     ),
+        //     backgroundColor: Colors.green,
+        //   ),
+        // );
 
         widget.onSave();
         Navigator.of(context).pop();
@@ -89,12 +89,12 @@ class _AssetChangeModalState extends State<AssetChangeModal> {
     } catch (e) {
       if (mounted) {
         // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to change asset number: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text('Failed to change asset number: ${e.toString()}'),
+        //     backgroundColor: Colors.red,
+        //   ),
+        // );
       }
     } finally {
       if (mounted) {

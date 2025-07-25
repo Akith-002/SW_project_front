@@ -279,38 +279,38 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   void _validateAndSaveLocally() async {
     // Check if we have required building information
     if (_selectedBuilding == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a building first'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Please select a building first'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
       return;
     }
 
     // Check if the building form is completely empty (newly drawn building)
     if (_isBuildingFormEmpty()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill the building information before saving'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 4),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Please fill the building information before saving'),
+      //     backgroundColor: Colors.red,
+      //     duration: Duration(seconds: 4),
+      //   ),
+      // );
       return;
     }
 
     // Check if the form is partially filled but incomplete
     if (_isBuildingFormPartiallyFilled()) {
       // Show a more specific message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Please complete all required building fields before saving'),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 4),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text(
+      //         'Please complete all required building fields before saving'),
+      //     backgroundColor: Colors.orange,
+      //     duration: Duration(seconds: 4),
+      //   ),
+      // );
       return; // Add return statement to prevent further execution
     }
 
@@ -320,14 +320,14 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
       final validationErrors = _validateRequiredFields();
 
       if (validationErrors.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'Please fill required fields: ${validationErrors.join(', ')}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //         'Please fill required fields: ${validationErrors.join(', ')}'),
+        //     backgroundColor: Colors.red,
+        //     duration: const Duration(seconds: 4),
+        //   ),
+        // );
         return;
       }
 
@@ -351,13 +351,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
             _savedBuildingForms[_selectedBuilding!.id] = formData;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Building inspection data saved successfully!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   const SnackBar(
+          //     content: Text('Building inspection data saved successfully!'),
+          //     backgroundColor: Colors.green,
+          //     duration: Duration(seconds: 3),
+          //   ),
+          // );
 
           // Optionally clear the form or navigate back
           setState(() {
@@ -367,22 +367,22 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content:
-                  Text('Failed to save inspection data. Please try again.'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   const SnackBar(
+          //     content:
+          //         Text('Failed to save inspection data. Please try again.'),
+          //     backgroundColor: Colors.red,
+          //   ),
+          // );
         }
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fix the validation errors in the form'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Please fix the validation errors in the form'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
     }
   }
 
@@ -553,24 +553,24 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
     if (success) {
       if (mounted) {
         // Show success and navigate away
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Complete inspection report saved successfully!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('Complete inspection report saved successfully!'),
+        //     backgroundColor: Colors.green,
+        //     duration: Duration(seconds: 3),
+        //   ),
+        // );
         Navigator.pop(context);
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Failed to save complete inspection report. Please try again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text(
+        //         'Failed to save complete inspection report. Please try again.'),
+        //     backgroundColor: Colors.red,
+        //   ),
+        // );
       }
     }
   }
@@ -589,13 +589,13 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
       message = 'Please complete the Other Constructions tab';
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.orange,
-        duration: const Duration(seconds: 4),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(message),
+    //     backgroundColor: Colors.orange,
+    //     duration: const Duration(seconds: 4),
+    //   ),
+    // );
   }
 
   // Method to validate required fields manually

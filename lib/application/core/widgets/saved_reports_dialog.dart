@@ -33,12 +33,12 @@ class _SavedReportsDialogState extends State<SavedReportsDialog> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading saved reports: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text('Error loading saved reports: $e'),
+        //     backgroundColor: Colors.red,
+        //   ),
+        // );
       }
     }
   }
@@ -50,21 +50,21 @@ class _SavedReportsDialogState extends State<SavedReportsDialog> {
         _savedReports.removeWhere((report) => report['id'] == reportId);
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Report deleted successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('Report deleted successfully'),
+        //     backgroundColor: Colors.green,
+        //   ),
+        // );
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to delete report'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('Failed to delete report'),
+        //     backgroundColor: Colors.red,
+        //   ),
+        // );
       }
     }
   }
