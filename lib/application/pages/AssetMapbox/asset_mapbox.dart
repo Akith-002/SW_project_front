@@ -390,8 +390,8 @@ class AssetMapboxState extends State<AssetMapbox>
         }
       } else {
         // Not in move mode
-        widget.onFeedbackMessage
-            ?.call("Switch to Move mode to select sketch items.");
+        // widget.onFeedbackMessage
+        //     ?.call("Switch to Move mode to select sketch items.");
       }
     }
     // 3. Initial Lot Drawing Mode: Ignore clicks on polygons
@@ -502,8 +502,8 @@ class AssetMapboxState extends State<AssetMapbox>
         widget.onSketchMetricsUpdated?.call(area, distance);
 
         // Show coordinates of tapped point
-        widget.onFeedbackMessage?.call(
-            "Point added: (${tappedPoint.coordinates.lng.toStringAsFixed(6)}, ${tappedPoint.coordinates.lat.toStringAsFixed(6)})");
+        // widget.onFeedbackMessage?.call(
+        //     "Point added: (${tappedPoint.coordinates.lng.toStringAsFixed(6)}, ${tappedPoint.coordinates.lat.toStringAsFixed(6)})");
       }
       return; // Tap handled (or ignored) within Sketch Mode
     }
@@ -520,8 +520,8 @@ class AssetMapboxState extends State<AssetMapbox>
       await addVertexDot(tappedPoint);
 
       // Show coordinates of tapped point
-      widget.onFeedbackMessage?.call(
-          "Lot point added: (${tappedPoint.coordinates.lng.toStringAsFixed(6)}, ${tappedPoint.coordinates.lat.toStringAsFixed(6)})");
+      // widget.onFeedbackMessage?.call(
+      //     "Lot point added: (${tappedPoint.coordinates.lng.toStringAsFixed(6)}, ${tappedPoint.coordinates.lat.toStringAsFixed(6)})");
 
       await drawOrUpdateInitialLotPolygon(); // Update visual lot boundary including connecting lines
       return; // Tap handled

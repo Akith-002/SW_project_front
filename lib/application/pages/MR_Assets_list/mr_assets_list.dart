@@ -68,6 +68,11 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
   void _loadAssets() {
     // Use the provided requestId or default to 1
     final requestIdToUse = widget.requestId ?? 1;
+    
+    debugPrint('Loading assets with:');
+    debugPrint('- Request ID: $requestIdToUse');
+    debugPrint('- Request Type: MR');
+    debugPrint('- Widget Request ID: ${widget.requestId}');
 
     _cubit.loadAssets(
       requestId: requestIdToUse,
@@ -136,15 +141,18 @@ class _MrAssetsListState extends BasePageState<MrAssetsList> {
   }
 
   void _refreshAssets() {
+    final requestIdToUse = widget.requestId ?? 1;
     debugPrint('Refreshing assets...');
+    debugPrint('Request ID: $requestIdToUse');
+    debugPrint('Request Type: MR');
 
     // Clear any existing search
     _searchController.clear();
     
     // Show a brief loading indicator
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Refreshing assets...'),
+      SnackBar(
+        content: Text('Refreshing assets for request $requestIdToUse...'),
         duration: Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
       ),

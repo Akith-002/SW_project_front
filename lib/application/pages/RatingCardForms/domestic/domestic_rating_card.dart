@@ -253,14 +253,72 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return Dialog(
           backgroundColor: Colors.transparent,
           child: SavedMessageCard(
             onClose: () {
-              Navigator.of(context).pop(); // Close dialog
-              // Navigate back to the MR assets list using go_router
-              context.go(Pages.routeMrAssetsList.toPath());
+              debugPrint('Success dialog onClose called');
+              debugPrint('Widget requestType: ${widget.requestType}');
+              
+              Navigator.of(dialogContext).pop(); // Close dialog
+              
+              // Navigate back to the assets list with proper parameters
+              if (widget.requestType != null && widget.requestType!.isNotEmpty) {
+                String route;
+                String source = 'massRating';
+                
+                switch (widget.requestType) {
+                  case 'MR':
+                    route = Pages.routeMrAssetsList.toPathName();
+                    source = 'massRating';
+                    break;
+                  case 'RA':
+                    route = Pages.routeRaAssetsList.toPathName();
+                    source = 'ratingAssessment';
+                    break;
+                  case 'RB':
+                    route = Pages.routeRbAssetsList.toPathName();
+                    source = 'ratingBuilding';
+                    break;
+                  case 'RO':
+                    route = Pages.routeRoAssetsList.toPathName();
+                    source = 'ratingObject';
+                    break;
+                  default:
+                    route = Pages.routeMrAssetsList.toPathName();
+                    source = 'massRating';
+                }
+                
+                // Get the requestId from the current route
+                final currentRequestId = GoRouterState.of(context).uri.queryParameters['requestId'];
+                
+                debugPrint('Navigating to route: $route');
+                debugPrint('With source: $source');
+                debugPrint('With requestId: $currentRequestId');
+                
+                context.goNamed(
+                  route,
+                  queryParameters: {
+                    'source': source,
+                    if (currentRequestId != null) 'requestId': currentRequestId,
+                  },
+                );
+              } else {
+                // If no request type, navigate to MR assets list
+                debugPrint('No request type, navigating to default MR assets list');
+                
+                // Get the requestId from the current route
+                final currentRequestId = GoRouterState.of(context).uri.queryParameters['requestId'];
+                
+                context.goNamed(
+                  Pages.routeMrAssetsList.toPathName(),
+                  queryParameters: {
+                    'source': 'massRating',
+                    if (currentRequestId != null) 'requestId': currentRequestId,
+                  },
+                );
+              }
             },
           ),
         );
@@ -564,10 +622,8 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                             label: AppString.propertyType.localize(context)!,
                             items: [
                               "Select Property Type",
-                              "Luxury",
-                              "Standard",
-                              "Commercial",
-                              "Budget"
+                              "Single Family Home",
+                              "Apartment/Condominium"
                             ],
                             initialValue:
                                 _selectedPropertyType ?? "Select Property Type",
@@ -779,7 +835,7 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
-            '$label (Auto-filled)',
+            '$label ',
             style: TextStyle(
               color: colors(context).labelTextColor,
               fontWeight: FontWeight.bold,

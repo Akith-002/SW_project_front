@@ -18,18 +18,22 @@ import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
+import 'package:land_asset_valuation/data/datasource/secure_storage.dart';
+import 'dart:convert';
 
 /// Main page widget for displaying rental evidence.
 class I2RentalEvidence extends BasePage {
   final MasterDataResponse masterData;
   final double? longitude;
   final double? latitude;
+  final int? assetId;
   
   const I2RentalEvidence({
     super.key, 
     required this.masterData,
     this.longitude,
     this.latitude,
+    this.assetId,
   });
 
   @override
@@ -51,6 +55,12 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
   final _descriptionController = TextEditingController();
   final _longitudeController = TextEditingController();
   final _latitudeController = TextEditingController();
+  final _floorRateController = TextEditingController();
+  final _ratePerController = TextEditingController();
+  final _ratePerMonthController = TextEditingController();
+  final _headOfTermsController = TextEditingController();
+  final _situationController = TextEditingController();
+  final _remarksController = TextEditingController();
 
   // Selected values for dropdowns
   String? _selectedBuilding;
@@ -95,6 +105,12 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     _descriptionController.dispose();
     _longitudeController.dispose();
     _latitudeController.dispose();
+    _floorRateController.dispose();
+    _ratePerController.dispose();
+    _ratePerMonthController.dispose();
+    _headOfTermsController.dispose();
+    _situationController.dispose();
+    _remarksController.dispose();
     super.dispose();
   }
 
@@ -124,15 +140,71 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     );
   }
 
+  // Clear form after successful submission
+  void _clearForm() {
+    setState(() {
+      _assessmentNoController.clear();
+      _ownerNameController.clear();
+      _occupierNameController.clear();
+      _descriptionController.clear();
+      _floorRateController.clear();
+      _ratePerController.clear();
+      _ratePerMonthController.clear();
+      _headOfTermsController.clear();
+      _situationController.clear();
+      _remarksController.clear();
+      
+      _selectedBuilding = null;
+      _selectedPropertyCategory = null;
+      _selectedPropertySubcategory = null;
+      _selectedPropertyType1 = null;
+      _selectedPropertyType2 = null;
+      
+      uploadedImages.clear();
+    });
+  }
+
   // Add this function to handle validation, submission, and image upload
   void _validateAndSubmit() async {
     if (_formKey.currentState!.validate()) {
-      final reportId = await _submitFormData();
-      if (reportId != null) {
-        await _uploadImages(reportId);
-        _showSuccessMessage('Rental evidence submitted successfully!');
-      } else {
-        _showErrorMessage('Failed to submit rental evidence.');
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+      
+      try {
+        final reportId = await _submitFormData();
+        
+        // Always hide loading indicator
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+        
+        if (reportId != null) {
+          // Upload images if available
+          if (uploadedImages.isNotEmpty) {
+            await _uploadImages(reportId);
+          }
+          
+          _showSuccessMessage('Rental evidence saved successfully!');
+          
+          // Clear the form after successful save
+          _clearForm();
+        } else {
+          _showErrorMessage('Failed to save rental evidence. Please check if all required data is correct.');
+        }
+      } catch (e) {
+        // Always hide loading indicator on error
+        if (mounted && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+        _showErrorMessage('An error occurred: ${e.toString()}');
       }
     } else {
       _showErrorMessage('Please fix the validation errors in the form');
@@ -141,38 +213,80 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
 
   Future<String?> _submitFormData() async {
     try {
-      final uri = Uri.parse('${AppConfig.apiBaseUrl}LMRentalEvidence');
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: _buildFormJson(),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.body;
-        final reportId =
-            RegExp(r'"reportId"\s*:\s*(\d+)').firstMatch(data)?.group(1);
-        print('DEBUG: LMRentalEvidence reportId: $reportId');
-        return reportId;
-      } else {
-        print(
-            'DEBUG: LMRentalEvidence submission failed: ${response.statusCode} ${response.body}');
+      // Get the auth token from secure storage
+      final secureStorage = injection<SecureStorage>();
+      final token = await secureStorage.read('token');
+      
+      if (token == null) {
+        _showErrorMessage('Authentication required. Please login again.');
         return null;
       }
+      
+      final uri = Uri.parse('${AppConfig.apiBaseUrl}I2RentalEvidence');
+      
+      // Use asset ID 7838 which exists in the database
+      final assetId = widget.assetId ?? 7838;
+      
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: _buildFormJson(assetId),
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.body;
+        final id = RegExp(r'"id"\s*:\s*(\d+)').firstMatch(data)?.group(1);
+        print('DEBUG: I2RentalEvidence created with ID: $id');
+        return id;
+      } else {
+        print(
+            'DEBUG: I2RentalEvidence submission failed: ${response.statusCode} ${response.body}');
+        
+        // Parse error message for specific issues
+        if (response.statusCode == 400) {
+          throw Exception('Invalid data submitted. Please check all fields.');
+        } else if (response.statusCode == 401) {
+          throw Exception('Authentication failed. Please login again.');
+        } else if (response.statusCode == 500) {
+          // Check for foreign key constraint error
+          if (response.body.contains('foreign key constraint') || 
+              response.body.contains('FK_I2RentalEvidences_Assets_AssetId')) {
+            throw Exception('Invalid asset reference. Please ensure the property is properly selected.');
+          }
+          throw Exception('Server error occurred. Please try again later.');
+        } else {
+          throw Exception('Failed to save rental evidence (Error: ${response.statusCode})');
+        }
+      }
     } catch (e) {
-      print('DEBUG: Exception during LMRentalEvidence submission: $e');
-      return null;
+      print('DEBUG: Exception during I2RentalEvidence submission: $e');
+      rethrow; // Re-throw to be caught by the calling function
     }
   }
 
-  String _buildFormJson() {
-    // Build JSON string for the form data (add more fields as needed)
+  String _buildFormJson(int assetId) {
+    // Build JSON string for the form data with all fields matching the backend model
     return '''{
-      "assessmentNo": "${_assessmentNoController.text}",
+      "assetId": $assetId,
+      "assessmentNumber": "${_assessmentNoController.text}",
       "ownerName": "${_ownerNameController.text}",
       "occupierName": "${_occupierNameController.text}",
-      "description": "${_descriptionController.text}",
-      "longitude": "${_longitudeController.text}",
-      "latitude": "${_latitudeController.text}"
+      "descriptionOfProperty": "${_descriptionController.text}",
+      "longitude": ${_longitudeController.text.isNotEmpty ? _longitudeController.text : '0'},
+      "latitude": ${_latitudeController.text.isNotEmpty ? _latitudeController.text : '0'},
+      "building": "${_selectedBuilding ?? ''}",
+      "propertyCategory": "${_selectedPropertyCategory ?? ''}",
+      "propertySubcategory": "${_selectedPropertySubcategory ?? ''}",
+      "propertyType": "${_selectedPropertyType1 ?? ''}",
+      "floorRate": ${_floorRateController.text.isNotEmpty ? _floorRateController.text : 'null'},
+      "ratePer": "${_ratePerController.text}",
+      "ratePerMonth": ${_ratePerMonthController.text.isNotEmpty ? _ratePerMonthController.text : 'null'},
+      "headOfTerms": "${_headOfTermsController.text}",
+      "situation": "${_situationController.text}",
+      "remarks": "${_remarksController.text}"
     }''';
   }
 
@@ -180,9 +294,21 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     print('DEBUG: _uploadImages called with reportId: $reportId');
     print('DEBUG: Number of images to upload: ${uploadedImages.length}');
     if (uploadedImages.isEmpty) return;
+    
+    // Get the auth token from secure storage
+    final secureStorage = injection<SecureStorage>();
+    final token = await secureStorage.read('token');
+    
+    if (token == null) {
+      _showErrorMessage('Authentication required for image upload.');
+      return;
+    }
+    
     var uri = Uri.parse('${AppConfig.apiBaseUrl}ImageData/upload');
     var request = http.MultipartRequest('POST', uri)
-      ..fields['reportId'] = reportId;
+      ..fields['reportId'] = reportId
+      ..headers['Authorization'] = 'Bearer $token';
+      
     for (var image in uploadedImages) {
       if (image is File) {
         print('DEBUG: Adding image file: ${image.path}');
@@ -198,7 +324,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
       final respStr = await response.stream.bytesToString();
       print('DEBUG: Image upload response body: $respStr');
       if (response.statusCode == 200) {
-        _showSuccessMessage('Images uploaded successfully.');
+        print('Images uploaded successfully.');
       } else {
         _showErrorMessage('Failed to upload images.');
       }
@@ -492,29 +618,22 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                       const SizedBox(height: 24),
                       // Row widget containing the action buttons.
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          // Save and Cancel buttons grouped together.
-                          Row(
-                            children: [
-                              CustomButton(
-                                text: AppString.save.localize(context)!,
-                                onPressed: _validateAndSubmit,
-                                backgroundColor: colors(context).colorPrimary5!,
-                              ),
-                              const SizedBox(width: 16),
-                              CustomButton(
-                                text: AppString.cancel,
-                                onPressed: () {},
-                                backgroundColor: colors(context).colorGrey1!,
-                              ),
-                            ],
-                          ),
-                          // Button for sending data.
+                          // Save button
                           CustomButton(
-                            text: AppString.sendData.localize(context)!,
+                            text: AppString.save.localize(context)!,
                             onPressed: _validateAndSubmit,
                             backgroundColor: colors(context).colorPrimary5!,
+                          ),
+                          const SizedBox(width: 16),
+                          // Cancel button
+                          CustomButton(
+                            text: AppString.cancel.localize(context)!,
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            backgroundColor: colors(context).colorGrey1!,
                           ),
                         ],
                       ),

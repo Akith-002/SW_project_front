@@ -504,8 +504,9 @@ class MapboxState extends State<Mapbox>
         widget.onSketchMetricsUpdated?.call(area, distance);
 
         // Show coordinates of tapped point
-        widget.onFeedbackMessage?.call(
-            "Point added: (${tappedPoint.coordinates.lng.toStringAsFixed(6)}, ${tappedPoint.coordinates.lat.toStringAsFixed(6)})");
+        // widget.onFeedbackMessage?.call(
+            // "Point added: (${tappedPoint.coordinates.lng.toStringAsFixed(6)}, ${tappedPoint.coordinates.lat.toStringAsFixed(6)})");
+     
       }
       return; // Tap handled (or ignored) within Sketch Mode
     }

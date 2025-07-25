@@ -44,10 +44,7 @@ class Breadcrumb extends StatelessWidget {
                               ? Color(0xFF1F2937) // Much darker grey for better visibility
                               : Color(0xFF6B7280), // Medium grey for non-clickable items
                       fontWeight: isLast ? FontWeight.w500 : FontWeight.normal,
-                      decoration: item.onTap != null && !isLast 
-                          ? TextDecoration.underline 
-                          : TextDecoration.none,
-                      decorationColor: Color(0xFF1F2937), // Match the text color
+                      decoration: TextDecoration.none,
                     ),
                   ),
                 ),
