@@ -4,8 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
 
 class AssetPopupMenuWidget extends StatelessWidget {
+  final double? longitude;
+  final double? latitude;
+  
   const AssetPopupMenuWidget({
     super.key,
+    this.longitude,
+    this.latitude,
   });
 
   @override
@@ -40,10 +45,30 @@ class AssetPopupMenuWidget extends StatelessWidget {
                       context,
                       "Rental Evidences",
                       Color(0xFF45A249),
-                      () => context.pushNamed(
-                        Pages.routeI2RentalEvidence.toPathName(),
-                        queryParameters: {'selectedIndex': '6'},
-                      ),
+                      () {
+                        final queryParams = <String, String>{
+                          'selectedIndex': '6',
+                        };
+                        
+                        // Add coordinates if available
+                        if (longitude != null) {
+                          queryParams['longitude'] = longitude.toString();
+                        }
+                        if (latitude != null) {
+                          queryParams['latitude'] = latitude.toString();
+                        }
+                        
+                        debugPrint("AssetPopupMenuWidget: Navigating to I2RentalEvidence with params: $queryParams");
+                        
+                        // Use go instead of push to ensure proper navigation with query params
+                        final uri = Uri(
+                          path: Pages.routeI2RentalEvidence.toPath(),
+                          queryParameters: queryParams,
+                        );
+                        debugPrint("AssetPopupMenuWidget: Full navigation URI: ${uri.toString()}");
+                        
+                        context.go(uri.toString());
+                      },
                     ),
                   ],
                 ),
