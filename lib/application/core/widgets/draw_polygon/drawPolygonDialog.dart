@@ -104,83 +104,87 @@ class _DrawPolygonDialogState extends State<DrawPolygonDialog> {
       contentPadding: const EdgeInsets.all(24),
       content: SizedBox(
         width: 510,
-        height: 180,
-        child: Column(
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Input section: side selector and measurement fields
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Dropdown to select which side to measure
-                      CustomDropdownField(
-                        label: 'Select Side',
-                        items: _sideOptions,
-                        initialValue: _sideToString(selectedSide),
-                        onChanged: (value) {
-                          _saveSideValues(); // Preserve current input
-                          setState(() {
-                            selectedSide = _stringToSide(value!);
-                            // Load saved values for the newly selected side
-                            feetController.text =
-                                measurements[selectedSide]!['feet']!.toString();
-                            inchesController.text =
-                                measurements[selectedSide]!['inches']!
-                                    .toString();
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      // Feet and inches input fields side by side
-                      Row(
-                        children: [
-                          Expanded(
-                            child: LabeledTextField(
-                              label: AppString.feet.localize(context)!,
-                              placeholder: AppString.feet.localize(context)!,
-                              controller: feetController,
-                              width: 149,
+        height: 200,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Input section: side selector and measurement fields
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Dropdown to select which side to measure
+                        CustomDropdownField(
+                          label: 'Select Side',
+                          items: _sideOptions,
+                          initialValue: _sideToString(selectedSide),
+                          onChanged: (value) {
+                            _saveSideValues(); // Preserve current input
+                            setState(() {
+                              selectedSide = _stringToSide(value!);
+                              // Load saved values for the newly selected side
+                              feetController.text =
+                                  measurements[selectedSide]!['feet']!
+                                      .toString();
+                              inchesController.text =
+                                  measurements[selectedSide]!['inches']!
+                                      .toString();
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        // Feet and inches input fields side by side
+                        Row(
+                          children: [
+                            Expanded(
+                              child: LabeledTextField(
+                                label: AppString.feet.localize(context)!,
+                                placeholder: AppString.feet.localize(context)!,
+                                controller: feetController,
+                                width: 149,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: LabeledTextField(
-                              placeholder: AppString.inches.localize(context)!,
-                              label: AppString.inches.localize(context)!,
-                              controller: inchesController,
-                              width: 149,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: LabeledTextField(
+                                placeholder:
+                                    AppString.inches.localize(context)!,
+                                label: AppString.inches.localize(context)!,
+                                controller: inchesController,
+                                width: 149,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 24),
-                // Visual preview: rectangle with highlighted selected side
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-                  child: CustomPaint(
-                    size: const Size(120, 120),
-                    painter: RectanglePainter(selectedSide),
+                  const SizedBox(width: 24),
+                  // Visual preview: rectangle with highlighted selected side
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8),
+                    child: CustomPaint(
+                      size: const Size(120, 120),
+                      painter: RectanglePainter(selectedSide),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            // Show validation error message if present
-            if (errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  errorMessage!,
-                  style: TextStyle(color: Colors.red, fontSize: 12),
-                ),
+                ],
               ),
-          ],
+              // Show validation error message if present
+              if (errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    errorMessage!,
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
       actions: [
