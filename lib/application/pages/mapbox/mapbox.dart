@@ -1129,7 +1129,7 @@ class MapboxState extends State<Mapbox>
             // Create polygon annotation
             final polygonOptions = PolygonAnnotationOptions(
               geometry: Polygon(coordinates: [closedPositions]),
-              fillColor: Colors.blue.withOpacity(0.3).value,
+              fillColor: Colors.transparent.value,
               fillOutlineColor: Colors.blue.value,
             );
 

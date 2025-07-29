@@ -89,20 +89,20 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                         // Dashboard
                         _buildMenuItem(
                           index: 0,
-                          title: 'Dashboard',
+                          title: AppString.dashboard.localize(context)!,
                           icon: PhosphorIconsBold.squaresFour,
                         ),
 
                         // Land Acquisition
                         _buildMenuItem(
                           index: 1,
-                          title: 'Land Acquisition',
+                          title: AppString.landAcquisition.localize(context)!,
                           icon: PhosphorIconsBold.mapTrifold,
                         ),
 
                         // Mass Rating with subcategories
                         _buildExpandableSection(
-                          title: 'Mass Rating',
+                          title: AppString.massRating.localize(context)!,
                           icon: PhosphorIconsBold.pencilRuler,
                           isExpanded: _isMassRatingExpanded,
                           onTap: () {
@@ -117,23 +117,26 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                           children: [
                             _buildSubMenuItem(
                               index: 2,
-                              title: 'Mass Rating',
+                              title: AppString.massRating.localize(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 3,
-                              title: 'Rating Assessment',
+                              title:
+                                  AppString.ratingAssessment.localize(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 4,
-                              title: 'Rating Building',
+                              title:
+                                  AppString.ratingBuilding.localize(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 5,
-                              title: 'Rating Object',
+                              title: AppString.ratingObject.localize(context)!,
                             ),
                             _buildSubMenuItem(
                               index: 6,
-                              title: 'MR Rental Evidence',
+                              title:
+                                  AppString.mrRentalEvidence.localize(context)!,
                             ),
                           ],
                         ),
@@ -141,7 +144,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
                         // Land Miscellaneous
                         _buildMenuItem(
                           index: 7,
-                          title: 'Land Miscellaneous',
+                          title: AppString.landMiscellaneous.localize(context)!,
                           icon: PhosphorIconsBold.ticket,
                         ),
                       ],
