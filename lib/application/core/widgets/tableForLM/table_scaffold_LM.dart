@@ -10,6 +10,8 @@ import 'package:land_asset_valuation/data/models/paginated_response.dart';
 import 'package:land_asset_valuation/data/models/land_miscellaneous_master_file_model.dart';
 import 'package:land_asset_valuation/domain/repositories/land_miscellaneous_repository.dart';
 import 'package:land_asset_valuation/data/services/building_service.dart';
+import 'package:land_asset_valuation/data/services/rental_evidence_service.dart';
+import 'package:land_asset_valuation/injection.dart';
 
 class TableScaffoldLM extends StatefulWidget {
   final int initialPageSize;
@@ -44,6 +46,8 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
   int?
       _previousTotalCount; // Cache previous count to prevent unnecessary callbacks
   final BuildingService _buildingService = BuildingService();
+  final RentalEvidenceService _rentalEvidenceService =
+      injection<RentalEvidenceService>();
 
   @override
   void initState() {
@@ -391,22 +395,31 @@ class TableScaffoldLMState extends State<TableScaffoldLM> {
                                         color: colors(context).colorGrey8!,
                                         iconName: PhosphorIconsRegular.eye,
                                         onPressed: () async {
-                                          // Clear buildings for this master file when View button is tapped
+                                          // Clear both buildings and rental evidences for this master file when View button is tapped
                                           debugPrint(
                                               "🗑️ LM Table: View button tapped for master file ${plan.masterFileNo}");
                                           debugPrint(
-                                              "   Clearing existing buildings for this master file...");
+                                              "   Clearing existing buildings and rental evidences for this master file...");
 
                                           try {
+                                            // Clear buildings
                                             await _buildingService
                                                 .clearBuildingsForMasterFile(
                                                     plan.masterFileNo
                                                         .toString());
                                             debugPrint(
                                                 "✅ LM Table: Successfully cleared buildings for master file ${plan.masterFileNo}");
+
+                                            // Clear rental evidences
+                                            await _rentalEvidenceService
+                                                .clearRentalEvidencesForMasterFile(
+                                                    plan.masterFileNo
+                                                        .toString());
+                                            debugPrint(
+                                                "✅ LM Table: Successfully cleared rental evidences for master file ${plan.masterFileNo}");
                                           } catch (e) {
                                             debugPrint(
-                                                "❌ LM Table: Error clearing buildings: $e");
+                                                "❌ LM Table: Error clearing data: $e");
                                           }
 
                                           // Navigate to map screen

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
@@ -16,11 +17,20 @@ import 'package:land_asset_valuation/application/core/validators/i2_rental_evide
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 /// Main page widget for displaying rental evidence.
 class I2RentalEvidence extends BasePage {
   final MasterDataResponse masterData;
-  const I2RentalEvidence({super.key, required this.masterData});
+  final double? longitude;
+  final double? latitude;
+  
+  const I2RentalEvidence({
+    super.key, 
+    required this.masterData,
+    this.longitude,
+    this.latitude,
+  });
 
   @override
   State<I2RentalEvidence> createState() => _I2RentalEvidenceState();
@@ -39,6 +49,8 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
   final _ownerNameController = TextEditingController();
   final _occupierNameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _longitudeController = TextEditingController();
+  final _latitudeController = TextEditingController();
 
   // Selected values for dropdowns
   String? _selectedBuilding;
@@ -51,12 +63,38 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
   List<dynamic> uploadedImages = [];
 
   @override
+  void initState() {
+    super.initState();
+    // Log received coordinates
+    print('I2RentalEvidence: initState called');
+    print('I2RentalEvidence: Received longitude: ${widget.longitude}');
+    print('I2RentalEvidence: Received latitude: ${widget.latitude}');
+    
+    // Initialize coordinate controllers with passed values
+    if (widget.longitude != null) {
+      _longitudeController.text = widget.longitude.toString();
+      print('I2RentalEvidence: Set longitude controller text: ${_longitudeController.text}');
+    } else {
+      print('I2RentalEvidence: Longitude is null - no value to set');
+    }
+    
+    if (widget.latitude != null) {
+      _latitudeController.text = widget.latitude.toString();
+      print('I2RentalEvidence: Set latitude controller text: ${_latitudeController.text}');
+    } else {
+      print('I2RentalEvidence: Latitude is null - no value to set');
+    }
+  }
+
+  @override
   void dispose() {
     // Dispose all controllers
     _assessmentNoController.dispose();
     _ownerNameController.dispose();
     _occupierNameController.dispose();
     _descriptionController.dispose();
+    _longitudeController.dispose();
+    _latitudeController.dispose();
     super.dispose();
   }
 
@@ -103,7 +141,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
 
   Future<String?> _submitFormData() async {
     try {
-      final uri = Uri.parse('http://10.0.2.2:5221/api/LMRentalEvidence');
+      final uri = Uri.parse('${AppConfig.apiBaseUrl}LMRentalEvidence');
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -132,7 +170,9 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
       "assessmentNo": "${_assessmentNoController.text}",
       "ownerName": "${_ownerNameController.text}",
       "occupierName": "${_occupierNameController.text}",
-      "description": "${_descriptionController.text}"
+      "description": "${_descriptionController.text}",
+      "longitude": "${_longitudeController.text}",
+      "latitude": "${_latitudeController.text}"
     }''';
   }
 
@@ -140,7 +180,7 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     print('DEBUG: _uploadImages called with reportId: $reportId');
     print('DEBUG: Number of images to upload: ${uploadedImages.length}');
     if (uploadedImages.isEmpty) return;
-    var uri = Uri.parse('http://10.0.2.2:5221/api/ImageData/upload');
+    var uri = Uri.parse('${AppConfig.apiBaseUrl}ImageData/upload');
     var request = http.MultipartRequest('POST', uri)
       ..fields['reportId'] = reportId;
     for (var image in uploadedImages) {
@@ -219,6 +259,22 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
                         spacing: 16,
                         runSpacing: 16,
                         children: [
+                          // Longitude field - disabled/read-only (moved to top)
+                          LabeledTextField(
+                            label: 'Longitude',
+                            placeholder: 'Longitude',
+                            width: fieldWidth,
+                            controller: _longitudeController,
+                            readOnly: true, // Make field read-only
+                          ),
+                          // Latitude field - disabled/read-only (moved to top)
+                          LabeledTextField(
+                            label: 'Latitude',
+                            placeholder: 'Latitude',
+                            width: fieldWidth,
+                            controller: _latitudeController,
+                            readOnly: true, // Make field read-only
+                          ),
                           // Intentionally static: No backend mapping for building list
                           CustomDropdownField(
                             label: AppString.selectBuilding.localize(context)!,

@@ -19,9 +19,22 @@ import 'package:land_asset_valuation/application/core/widgets/save_lot.dart';
 import 'package:land_asset_valuation/application/core/widgets/lot_area_widget.dart';
 import 'package:land_asset_valuation/application/pages/mapbox/mapbox.dart';
 import 'package:land_asset_valuation/data/models/building.dart';
+import 'package:land_asset_valuation/data/models/marker_coordinate_model.dart';
 import 'package:land_asset_valuation/data/services/building_service.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'dart:convert';
+import 'package:land_asset_valuation/domain/usecases/save_la_lot_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_la_lots_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_building_rates_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_past_valuations_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_rental_evidence_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/save_sales_evidence_coordinate_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_building_rates_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_past_valuations_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_rental_evidence_coordinates_usecase.dart';
+import 'package:land_asset_valuation/domain/usecases/get_sales_evidence_coordinates_usecase.dart';
+import 'package:land_asset_valuation/injection.dart';
 
 // Import for calculations if needed here (likely not)
 
@@ -119,6 +132,279 @@ class _MapScreenState extends State<MapScreen> {
 
     debugPrint(
         "MapScreen: Master File Data extracted - ID: $_id, Master File No: $_masterFileNo, Master File Ref No: $_masterFileRefNo, Plan Type: $_planType, Plan No: $_planNo, Authority Ref: $_authorityRefNo, Status: $_status, Lots: $_lots");
+
+    // Load existing lots after extracting master file data
+    _loadExistingLots();
+
+    // Load existing markers after extracting master file data
+    _loadExistingMarkers();
+  }
+
+  /// Loads existing lots for the current master file and displays them on the map
+  void _loadExistingLots() async {
+    if (_id == null) {
+      debugPrint("MapScreen: No master file ID available to load lots");
+      return;
+    }
+
+    final masterFileId = int.tryParse(_id!);
+    if (masterFileId == null) {
+      debugPrint("MapScreen: Invalid master file ID: $_id");
+      return;
+    }
+
+    try {
+      debugPrint(
+          "MapScreen: Loading existing lots for master file ID: $masterFileId");
+
+      final getLALotsUseCase = injection<GetLALotsUseCase>();
+      final result = await getLALotsUseCase(masterFileId: masterFileId);
+
+      result.fold(
+        (failure) {
+          debugPrint(
+              "MapScreen: Failed to load existing lots: ${failure.message}");
+          // Don't show error to user as this is not critical - might be no existing lots
+        },
+        (lots) {
+          debugPrint(
+              "MapScreen: Successfully loaded ${lots.length} existing lots");
+
+          if (lots.isNotEmpty) {
+            // Convert LALotModel to Map format expected by mapbox
+            final lotsData = lots
+                .map((lot) => {
+                      'masterFileId': lot.masterFileId,
+                      'coordinates': lot.coordinates,
+                    })
+                .toList();
+
+            // Load the lots into the mapbox widget
+            mapboxKey.currentState?.loadExistingLots(lotsData);
+
+            debugPrint("MapScreen: Loaded ${lots.length} existing lot(s)");
+          } else {
+            debugPrint(
+                "MapScreen: No existing lots found for this master file");
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint("MapScreen: Error loading existing lots: $e");
+      // Don't show error to user as this is not critical
+    }
+  }
+
+  /// Loads existing markers for the current master file and displays them on the map
+  void _loadExistingMarkers() async {
+    if (_id == null) {
+      debugPrint("MapScreen: No master file ID available to load markers");
+      return;
+    }
+
+    final masterFileId = int.tryParse(_id!);
+    if (masterFileId == null) {
+      debugPrint("MapScreen: Invalid master file ID: $_id");
+      return;
+    }
+
+    try {
+      debugPrint(
+          "MapScreen: Loading existing markers for master file ID: $masterFileId");
+
+      // Load all marker types concurrently
+      final futures = [
+        injection<GetBuildingRatesCoordinatesUseCase>()(
+            masterfileId: masterFileId),
+        injection<GetPastValuationsCoordinatesUseCase>()(
+            masterfileId: masterFileId),
+        injection<GetRentalEvidenceCoordinatesUseCase>()(
+            masterfileId: masterFileId),
+        injection<GetSalesEvidenceCoordinatesUseCase>()(
+            masterfileId: masterFileId),
+      ];
+
+      final results = await Future.wait(futures);
+      int totalMarkersLoaded = 0;
+
+      // Process Building Rates markers
+      results[0].fold(
+        (failure) => debugPrint(
+            "MapScreen: Failed to load Building Rates markers: ${failure.message}"),
+        (markers) {
+          debugPrint(
+              "MapScreen: Loaded ${markers.length} Building Rates markers");
+          for (final marker in markers) {
+            _addExistingMarkerToMap(
+                marker, MapMarkerLoader.markerTypeBuildingRates);
+            totalMarkersLoaded++;
+          }
+        },
+      );
+
+      // Process Past Valuations markers
+      results[1].fold(
+        (failure) => debugPrint(
+            "MapScreen: Failed to load Past Valuations markers: ${failure.message}"),
+        (markers) {
+          debugPrint(
+              "MapScreen: Loaded ${markers.length} Past Valuations markers");
+          for (final marker in markers) {
+            _addExistingMarkerToMap(
+                marker, MapMarkerLoader.markerTypeValuations);
+            totalMarkersLoaded++;
+          }
+        },
+      );
+
+      // Process Rental Evidence markers
+      results[2].fold(
+        (failure) => debugPrint(
+            "MapScreen: Failed to load Rental Evidence markers: ${failure.message}"),
+        (markers) {
+          debugPrint(
+              "MapScreen: Loaded ${markers.length} Rental Evidence markers");
+          for (final marker in markers) {
+            _addExistingMarkerToMap(marker, MapMarkerLoader.markerTypeRental);
+            totalMarkersLoaded++;
+          }
+        },
+      );
+
+      // Process Sales Evidence markers
+      results[3].fold(
+        (failure) => debugPrint(
+            "MapScreen: Failed to load Sales Evidence markers: ${failure.message}"),
+        (markers) {
+          debugPrint(
+              "MapScreen: Loaded ${markers.length} Sales Evidence markers");
+          for (final marker in markers) {
+            _addExistingMarkerToMap(marker, MapMarkerLoader.markerTypeSales);
+            totalMarkersLoaded++;
+          }
+        },
+      );
+
+      if (totalMarkersLoaded > 0) {
+        debugPrint("MapScreen: Loaded $totalMarkersLoaded existing marker(s)");
+      } else {
+        debugPrint("MapScreen: No existing markers found for this master file");
+      }
+    } catch (e) {
+      debugPrint("MapScreen: Error loading existing markers: $e");
+      // Don't show error to user as this is not critical
+    }
+  }
+
+  /// Adds an existing marker to the map
+  void _addExistingMarkerToMap(ExistingMarkerModel marker, String markerType) {
+    try {
+      // Parse coordinates from JSON string
+      final coordinatesJson = jsonDecode(marker.coordinates);
+      final lng = coordinatesJson['lng'] as double;
+      final lat = coordinatesJson['lat'] as double;
+
+      final point = Point(coordinates: Position(lng, lat));
+
+      // Get marker image
+      final img = _markerLoader.getImage(markerType);
+      if (img.isNotEmpty) {
+        mapboxKey.currentState?.addMarkerAtPoint(point, img, markerType);
+        debugPrint(
+            "MapScreen: Added existing $markerType marker at ($lat, $lng)");
+      } else {
+        debugPrint(
+            "MapScreen: Failed to load icon for existing '$markerType' marker");
+      }
+    } catch (e) {
+      debugPrint("MapScreen: Error adding existing marker to map: $e");
+    }
+  }
+
+  /// Saves marker coordinates to the backend based on marker type
+  void _saveMarkerCoordinate(Point point, String markerType) async {
+    if (_id == null) {
+      debugPrint(
+          "MapScreen: No master file ID available to save marker coordinate");
+      return;
+    }
+
+    final masterfileId = int.tryParse(_id!);
+    if (masterfileId == null) {
+      debugPrint("MapScreen: Invalid master file ID: $_id");
+      return;
+    }
+
+    // Convert point to coordinate string format
+    final coordinates = _convertPointToCoordinateString(point);
+
+    try {
+      debugPrint(
+          "MapScreen: Saving $markerType coordinate - Coordinates: $coordinates, MasterFileId: $masterfileId");
+
+      switch (markerType) {
+        case MapMarkerLoader.markerTypeRental:
+          final useCase = injection<SaveRentalEvidenceCoordinateUseCase>();
+          final result = await useCase(
+            masterfileId: masterfileId,
+            coordinates: coordinates,
+          );
+          _handleMarkerCoordinateResult(result, markerType);
+          break;
+
+        case MapMarkerLoader.markerTypeSales:
+          final useCase = injection<SaveSalesEvidenceCoordinateUseCase>();
+          final result = await useCase(
+            masterfileId: masterfileId,
+            coordinates: coordinates,
+          );
+          _handleMarkerCoordinateResult(result, markerType);
+          break;
+
+        case MapMarkerLoader.markerTypeValuations:
+          final useCase = injection<SavePastValuationsCoordinateUseCase>();
+          final result = await useCase(
+            masterfileId: masterfileId,
+            coordinates: coordinates,
+          );
+          _handleMarkerCoordinateResult(result, markerType);
+          break;
+
+        case MapMarkerLoader.markerTypeBuildingRates:
+          final useCase = injection<SaveBuildingRatesCoordinateUseCase>();
+          final result = await useCase(
+            masterfileId: masterfileId,
+            coordinates: coordinates,
+          );
+          _handleMarkerCoordinateResult(result, markerType);
+          break;
+
+        default:
+          debugPrint(
+              "MapScreen: Unknown marker type for coordinate saving: $markerType");
+          break;
+      }
+    } catch (e) {
+      debugPrint("MapScreen: Error saving $markerType marker coordinate: $e");
+      _showSnackbar("Failed to save $markerType marker coordinate",
+          isError: true);
+    }
+  }
+
+  /// Handles the result of saving marker coordinates
+  void _handleMarkerCoordinateResult(dynamic result, String markerType) {
+    result.fold(
+      (failure) {
+        debugPrint(
+            "MapScreen: Failed to save $markerType coordinate: ${failure.message}");
+        _showSnackbar("Failed to save $markerType coordinate", isError: true);
+      },
+      (response) {
+        debugPrint("MapScreen: Successfully saved $markerType coordinate");
+        // Don't show success message to avoid overwhelming the user
+        // The "marker added" message is already shown
+      },
+    );
   }
 
   void _onSketchMetricsUpdated(double area, double distance) {
@@ -150,8 +436,8 @@ class _MapScreenState extends State<MapScreen> {
       debugPrint("MapScreen: FATAL Error loading marker images via loader: $e");
       if (mounted) {
         setState(() => _imagesLoaded = false);
-        _showSnackbar('Error loading critical map icons. Cannot proceed.',
-            isError: true, durationSeconds: 10);
+        // _showSnackbar('Error loading critical map icons. Cannot proceed.',
+        //     isError: true, durationSeconds: 10);
       }
     }
   }
@@ -187,13 +473,34 @@ class _MapScreenState extends State<MapScreen> {
         final img = _markerLoader.getImage(selectedOption);
         if (img.isNotEmpty) {
           mapboxKey.currentState?.addMarkerAtPoint(point, img, selectedOption);
-          _showSnackbar("$selectedOption marker added.");
+          
+          // _showSnackbar("$selectedOption marker added.");
+                    _saveMarkerCoordinate(point, selectedOption);
+
+          // Get the current source from route parameters
+          final GoRouterState state = GoRouterState.of(context);
+          final String source = state.uri.queryParameters['source'] ?? '';
+          
+          debugPrint("MapScreen: Marker placed - Type: $selectedOption, Source: $source");
+          debugPrint("MapScreen: Marker coordinates - Longitude: ${point.coordinates.lng}, Latitude: ${point.coordinates.lat}");
+          
+          // If source is MRrentalEvidence and it's a rental marker, navigate to I2RentalEvidence immediately
+          if (source == 'MRrentalEvidence' && selectedOption == MapMarkerLoader.markerTypeRental) {
+            final queryParams = {
+              'longitude': point.coordinates.lng.toString(),
+              'latitude': point.coordinates.lat.toString(),
+            };
+            final uri = Uri(path: Pages.routeI2RentalEvidence.toPath(), queryParameters: queryParams);
+            debugPrint("MapScreen: Auto-navigating to I2RentalEvidence with URL: ${uri.toString()}");
+            context.push(uri.toString());
+          }
+
         } else {
-          _showSnackbar("Failed to load icon for '$selectedOption'.",
-              isError: true);
+          // _showSnackbar("Failed to load icon for '$selectedOption'.",
+          // isError: true);
         }
       } else {
-        _showSnackbar("Marker placement cancelled.");
+        // _showSnackbar("Marker placement cancelled.");
       }
       return;
     }
@@ -209,9 +516,11 @@ class _MapScreenState extends State<MapScreen> {
   /// Handles when a marker on the map is clicked
   void _handlePointAnnotationClick(PointAnnotation annotation, String? type) {
     debugPrint("MapScreen: Marker Clicked - ID: ${annotation.id}, Type: $type");
+    debugPrint("MapScreen: Marker Coordinates - Longitude: ${annotation.geometry.coordinates.lng}, Latitude: ${annotation.geometry.coordinates.lat}");
+    
     if (isDrawingMode || isSketchingMode) {
       debugPrint("Ignoring marker click - active drawing/sketching mode.");
-      _showSnackbar("Exit current mode to interact with markers.");
+      // _showSnackbar("Exit current mode to interact with markers.");
       return;
     }
 
@@ -219,6 +528,7 @@ class _MapScreenState extends State<MapScreen> {
     final String currentSource =
         GoRouterState.of(context).uri.queryParameters['source'] ?? '';
     _selectedMarkerForSketching = annotation; // Store the clicked marker
+    debugPrint("MapScreen: Current source: $currentSource");
 
     showDialog(
       context: context,
@@ -239,7 +549,7 @@ class _MapScreenState extends State<MapScreen> {
         onDelete: () {
           Navigator.pop(dialogContext);
           mapboxKey.currentState?.deleteAnnotation(annotation);
-          _showSnackbar("Marker deleted.");
+          // _showSnackbar("Marker deleted.");
         },
         onSketchTool: () {
           // Navigator.pop(dialogContext); // Dialog pops itself now
@@ -255,7 +565,7 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint("MapScreen: Polygon Clicked - ID: ${polygon.id}");
     if (isDrawingMode || isMarkerPlacementMode || isSketchingMode) {
       debugPrint("Ignoring polygon click - active mode.");
-      _showSnackbar("Exit current mode to interact with the lot.");
+      // _showSnackbar("Exit current mode to interact with the lot.");
       return;
     }
 
@@ -280,9 +590,9 @@ class _MapScreenState extends State<MapScreen> {
             _selectedSketchSubMode = SketchToolMode.marker;
             // _buildingGeometryIdPendingSave = null; // Removed
           });
-          _showSnackbar(
-              "Sketch Mode active. Draw building inside the selected lot.",
-              durationSeconds: 3);
+          // _showSnackbar(
+          //     "Sketch Mode active. Draw building inside the selected lot.",
+          //     durationSeconds: 3);
           debugPrint(
               "MapScreen: ENTERING Sketch Mode for Lot ID: ${_selectedLotForSketching!.id}. Tool set to polygon.");
         },
@@ -354,7 +664,7 @@ class _MapScreenState extends State<MapScreen> {
       message = "Sketch Mode active. Polygon tool selected.";
     }
 
-    _showSnackbar(message, durationSeconds: 3);
+    // _showSnackbar(message, durationSeconds: 3);
 
     debugPrint(
         "MapScreen: ENTERING Sketch Mode. Tool: polygon. Context: ${fromMarker ? 'Marker' : (polygonContext != null ? 'Polygon' : 'None')}");
@@ -364,33 +674,226 @@ class _MapScreenState extends State<MapScreen> {
   void _loadSurroundingDataForm(String? type) {
     if (!mounted) return;
     debugPrint("MapScreen: Navigating to form for type: $type");
+    
+    // Get the coordinates from the selected marker if available
+    Point? markerCoordinates;
+    if (_selectedMarkerForSketching != null) {
+      markerCoordinates = _selectedMarkerForSketching!.geometry;
+      debugPrint("MapScreen: Marker coordinates - Longitude: ${markerCoordinates.coordinates.lng}, Latitude: ${markerCoordinates.coordinates.lat}");
+    }
+    
     String? targetPath;
+    Map<String, String>? queryParams;
+
+    // Get the source context from route parameters
+    final String source =
+        GoRouterState.of(context).uri.queryParameters['source'] ?? '';
+
+    // Prepare common query parameters to pass to all forms
+    final commonQueryParams = <String, String>{};
+
+    // Add master file data if available
+    if (_id != null) commonQueryParams['masterFileId'] = _id!;
+    if (_masterFileNo != null)
+      commonQueryParams['masterFileNo'] = _masterFileNo!;
+    if (_masterFileRefNo != null)
+      commonQueryParams['masterFileRefNo'] = _masterFileRefNo!;
+    if (_planType != null) commonQueryParams['planType'] = _planType!;
+    if (_planNo != null) commonQueryParams['planNo'] = _planNo!;
+    if (_authorityRefNo != null)
+      commonQueryParams['authorityRefNo'] = _authorityRefNo!;
+    if (_status != null) commonQueryParams['status'] = _status!;
+
+    // Add coordinates from the selected marker if available
+    if (_selectedMarkerForSketching != null) {
+      final coords = _selectedMarkerForSketching!.geometry.coordinates;
+      commonQueryParams['latitude'] = coords.lat.toString();
+      commonQueryParams['longitude'] = coords.lng.toString();
+      debugPrint(
+          "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+    }
 
     switch (type) {
       case MapMarkerLoader.markerTypeRental:
-        targetPath = Pages.routeRentalEvidence.toPath();
+        // Get the current source from route parameters
+        final GoRouterState state = GoRouterState.of(context);
+        final String source = state.uri.queryParameters['source'] ?? '';
+        
+        debugPrint("MapScreen: Rental evidence navigation - Source: $source");
+        
+        // If source is MRrentalEvidence, navigate to I2RentalEvidence with coordinates
+        if (source == 'MRrentalEvidence' && markerCoordinates != null) {
+          targetPath = Pages.routeI2RentalEvidence.toPath();
+          queryParams = {
+            'longitude': markerCoordinates.coordinates.lng.toString(),
+            'latitude': markerCoordinates.coordinates.lat.toString(),
+          };
+          debugPrint("MapScreen: Navigating to I2RentalEvidence with coordinates - Longitude: ${queryParams['longitude']}, Latitude: ${queryParams['latitude']}");
+        } else {
+          
+          final targetUri = Uri(
+          path: Pages.routeRentalEvidence.toPath(),
+          queryParameters:
+              commonQueryParams.isNotEmpty ? commonQueryParams : null,
+        );
+    
+        
+        targetPath = targetUri.toString();
+        debugPrint(
+            "MapScreen: Navigating to Rental Evidence with masterFileId: $_id");
         break;
       case MapMarkerLoader.markerTypeSales:
-        targetPath = Pages.routeLaSalesEvidence.toPath();
+        final targetUri = Uri(
+          path: Pages.routeLaSalesEvidence.toPath(),
+          queryParameters:
+              commonQueryParams.isNotEmpty ? commonQueryParams : null,
+        );
+        targetPath = targetUri.toString();
+        debugPrint(
+            "MapScreen: Navigating to Sales Evidence with masterFileId: $_id");
         break;
       case MapMarkerLoader.markerTypeValuations:
-        targetPath = Pages.routePastValuation.toPath();
+        final targetUri = Uri(
+          path: Pages.routePastValuation.toPath(),
+          queryParameters:
+              commonQueryParams.isNotEmpty ? commonQueryParams : null,
+        );
+        targetPath = targetUri.toString();
+        debugPrint(
+            "MapScreen: Navigating to Past Valuation with masterFileId: $_id");
+        // Context-aware navigation for Rental Evidence
+        if (source == 'landMiscellaneous') {
+          // Pass masterFileNo and coordinates as query parameters for LM Rental Evidence
+          final queryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            queryParams['masterFileNo'] = _masterFileNo!;
+          }
+          if (_masterFileRefNo != null) {
+            queryParams['masterFileRefNo'] = _masterFileRefNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            queryParams['latitude'] = coords.lat.toString();
+            queryParams['longitude'] = coords.lng.toString();
+            debugPrint(
+                "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmRentalEvidences.toPath(),
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+          targetPath = targetUri.toString();
+          debugPrint(
+              "MapScreen: Navigating to LM Rental Evidence (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
+        } else {
+          targetPath = Pages.routeRentalEvidence.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Rental Evidence (source: $source)");
+        }
+        break;
+      case MapMarkerLoader.markerTypeSales:
+        // Context-aware navigation for Sales Evidence
+        if (source == 'landMiscellaneous') {
+          // Pass masterFileNo and coordinates as query parameters for LM Sales Evidence
+          final queryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            queryParams['masterFileNo'] = _masterFileNo!;
+          }
+          if (_masterFileRefNo != null) {
+            queryParams['masterFileRefNo'] = _masterFileRefNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            queryParams['latitude'] = coords.lat.toString();
+            queryParams['longitude'] = coords.lng.toString();
+            debugPrint(
+                "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmSalesEvidences.toPath(),
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+          targetPath = targetUri.toString();
+          debugPrint(
+              "MapScreen: Navigating to LM Sales Evidence (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
+        } else {
+          targetPath = Pages.routeLaSalesEvidence.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Sales Evidence (source: $source)");
+        }
+        break;
+      case MapMarkerLoader.markerTypeValuations:
+        // Context-aware navigation for Past Valuations
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmPastValuations.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Past Valuations (source: $source)");
+        } else {
+          targetPath = Pages.routePastValuation.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Past Valuations (source: $source)");
+        }
         break;
       case MapMarkerLoader.markerTypeBuildingRates:
-        targetPath = Pages.routeLaBuildingRates.toPath();
+        // Context-aware navigation for Building Rates
+        if (source == 'landMiscellaneous') {
+          // For LM Building Rates, use only masterFileNo and coordinates
+          final lmQueryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            lmQueryParams['masterFileNo'] = _masterFileNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            lmQueryParams['latitude'] = coords.lat.toString();
+            lmQueryParams['longitude'] = coords.lng.toString();
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmBuildingRates.toPath(),
+            queryParameters: lmQueryParams.isNotEmpty ? lmQueryParams : null,
+          );
+          targetPath = targetUri.toString();
+          debugPrint(
+              "MapScreen: Navigating to LM Building Rates (source: $source, masterFileNo: $_masterFileNo)");
+        } else {
+          // For LA Building Rates, use common query parameters
+          final targetUri = Uri(
+            path: Pages.routeLaBuildingRates.toPath(),
+            queryParameters:
+                commonQueryParams.isNotEmpty ? commonQueryParams : null,
+          );
+          targetPath = targetUri.toString();
+          debugPrint(
+              "MapScreen: Navigating to LA Building Rates with masterFileId: $_id");
+        }
         break;
       default:
         debugPrint("MapScreen: Cannot navigate: Unknown data type '$type'.");
-        _showSnackbar("Cannot navigate: Unknown data type.", isError: true);
+        // _showSnackbar("Cannot navigate: Unknown data type.", isError: true);
         break;
     }
     if (targetPath != null) {
       try {
-        context.push(targetPath);
+        if (queryParams != null && queryParams.isNotEmpty) {
+          final uri = Uri(path: targetPath, queryParameters: queryParams);
+          debugPrint("MapScreen: Navigating to URL: ${uri.toString()}");
+          context.push(uri.toString());
+        } else {
+          debugPrint("MapScreen: Navigating to path: $targetPath");
+          context.push(targetPath);
+        }
       } catch (e, stacktrace) {
         log("Navigation error",
             error: e, stackTrace: stacktrace); // Use log for errors
-        _showSnackbar("Error navigating to form.", isError: true);
+        // _showSnackbar("Error navigating to form.", isError: true);
       }
     }
   }
@@ -428,7 +931,7 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint(
         "MapScreen: Request update for marker ${annotation.id} to $newType");
     if (!_imagesLoaded) {
-      _showSnackbar("Cannot update: Marker images not ready.", isError: true);
+      // _showSnackbar("Cannot update: Marker images not ready.", isError: true);
       return;
     }
 
@@ -436,12 +939,12 @@ class _MapScreenState extends State<MapScreen> {
 
     if (newImageData.isEmpty) {
       debugPrint("MapScreen: Failed to get valid image data for type $newType");
-      _showSnackbar("Cannot update: Failed to load icon for '$newType'.",
-          isError: true);
+      // _showSnackbar("Cannot update: Failed to load icon for '$newType'.",
+      //     isError: true);
       return;
     }
     mapboxKey.currentState?.updateAnnotation(annotation, newType, newImageData);
-    _showSnackbar("Marker type updated to $newType.");
+    // _showSnackbar("Marker type updated to $newType.");
   }
 
   /// Handles sketch tool selection (line, rectangle, etc.)
@@ -460,8 +963,8 @@ class _MapScreenState extends State<MapScreen> {
       });
 
       mapboxKey.currentState?.startTextPlacementMode();
-      _showSnackbar("Text tool active. Tap on any annotation to add a label.",
-          durationSeconds: 3);
+      // _showSnackbar("Text tool active. Tap on any annotation to add a label.",
+      //     durationSeconds: 3);
       return;
     }
 
@@ -473,8 +976,8 @@ class _MapScreenState extends State<MapScreen> {
       isMarkerPlacementMode = false;
       // _buildingGeometryIdPendingSave = null;
     });
-    _showSnackbar("Selected: $toolId. Draw mode active. Tap map.",
-        durationSeconds: 3);
+    // _showSnackbar("Selected: $toolId. Draw mode active. Tap map.",
+    //     durationSeconds: 3);
   }
 
   /// Handles changes to the sketching sub-mode (marker, edit, move, etc.)
@@ -528,18 +1031,18 @@ class _MapScreenState extends State<MapScreen> {
           if (mapboxKey.currentState != null) {
             await mapboxKey.currentState!
                 .drawPolygonFromMeasurements(measurementsMap);
-            _showSnackbar("Polygon created successfully", durationSeconds: 2);
+            // _showSnackbar("Polygon created successfully", durationSeconds: 2);
           } else {
-            _showSnackbar("Error: Map state not available.", isError: true);
+            // _showSnackbar("Error: Map state not available.", isError: true);
           }
         } catch (e) {
           debugPrint("Error creating polygon: $e");
-          _showSnackbar("Error creating polygon: $e", isError: true);
+          // _showSnackbar("Error creating polygon: $e", isError: true);
         }
       } else {
         debugPrint(
             "DrawPolygonDialog was canceled or returned invalid result in MapScreen.");
-        _showSnackbar("Polygon creation canceled", durationSeconds: 2);
+        // _showSnackbar("Polygon creation canceled", durationSeconds: 2);
       }
       proceedWithModeChange = false;
       if (mounted) {
@@ -553,7 +1056,7 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _selectedSketchSubMode = finalMode;
       });
-      _showSnackbar("Switched to ${finalMode.name} mode.");
+      // _showSnackbar("Switched to ${finalMode.name} mode.");
       debugPrint(
           "MapScreen: Sketch Sub-Mode successfully changed to: $finalMode");
     } else if (!proceedWithModeChange) {
@@ -577,7 +1080,7 @@ class _MapScreenState extends State<MapScreen> {
   void _handleMapFeedback(String message) {
     if (!mounted) return;
     debugPrint("MapScreen: Feedback from Mapbox: $message");
-    _showSnackbar(message, durationSeconds: 3);
+    // _showSnackbar(message, durationSeconds: 3);
   }
 
   /// Called when text placement (add/cancel) finishes in Mapbox widget
@@ -610,7 +1113,7 @@ class _MapScreenState extends State<MapScreen> {
       _selectedMarkerForSketching = null;
     });
 
-    _showSnackbar("Exited sketching mode");
+    // _showSnackbar("Exited sketching mode");
   }
 
   /// Shows a confirmation dialog when user tries to cancel lot saving
@@ -676,7 +1179,7 @@ class _MapScreenState extends State<MapScreen> {
         setState(() {
           isDrawingMode = false;
         });
-        _showSnackbar("Lot drawing cancelled and removed.");
+        // _showSnackbar("Lot drawing cancelled and removed.");
       }
     }
     // If shouldRemove is false or null, do nothing (stay in SaveLot dialog)
@@ -714,7 +1217,7 @@ class _MapScreenState extends State<MapScreen> {
                 Navigator.of(dialogContext).pop();
 
                 if (selectedLotId == null) {
-                  _showSnackbar("Save cancelled or failed.", isError: true);
+                  // _showSnackbar("Save cancelled or failed.", isError: true);
                   return;
                 }
 
@@ -722,15 +1225,63 @@ class _MapScreenState extends State<MapScreen> {
                 _savedLotId = selectedLotId;
 
                 debugPrint('Selected Lot ID from Dialog: $selectedLotId');
-                // TODO: Associate selectedLotId with the drawn polygon geometry in MapboxState
-                // For now, just toggle drawing mode off. Replace finalizeLotDrawing.
-                mapboxKey.currentState?.toggleDrawingMode(false);
 
-                if (mounted) {
-                  setState(() {
-                    isDrawingMode = false;
-                  });
-                  _showSnackbar("Lot drawing saved (ID: $selectedLotId).");
+                // Get the coordinates from the drawn polygon
+                try {
+                  final drawnPoints = mapboxKey.currentState?.drawnPoints;
+
+                  if (drawnPoints == null || drawnPoints.isEmpty) {
+                    // _showSnackbar("No coordinates found to save.",
+                    //     isError: true);
+                    return;
+                  }
+
+                  // Convert coordinates to string format
+                  final coordinatesString =
+                      _convertCoordinatesToString(drawnPoints);
+
+                  // Get master file ID from the URL parameters
+                  final masterFileIdString = _id;
+                  if (masterFileIdString == null) {
+                    // _showSnackbar("Master file ID not found.", isError: true);
+                    return;
+                  }
+
+                  final masterFileId = int.tryParse(masterFileIdString);
+                  if (masterFileId == null) {
+                    // _showSnackbar("Invalid master file ID.", isError: true);
+                    return;
+                  }
+
+                  // Save lot to backend
+                  final saveLALotUseCase = injection<SaveLALotUseCase>();
+                  final result = await saveLALotUseCase(
+                    masterFileId: masterFileId,
+                    coordinates: coordinatesString,
+                  );
+
+                  result.fold(
+                    (failure) {
+                      // _showSnackbar("Failed to save lot: ${failure.message}",
+                      //     isError: true);
+                    },
+                    (response) {
+                      // _showSnackbar(
+                      //     "Lot saved successfully! ${response.message ?? ''}");
+
+                      // Finalize the drawing mode
+                      mapboxKey.currentState?.toggleDrawingMode(false);
+
+                      if (mounted) {
+                        setState(() {
+                          isDrawingMode = false;
+                        });
+                      }
+                    },
+                  );
+                } catch (e) {
+                  debugPrint('Error saving lot: $e');
+                  // _showSnackbar("Error saving lot: $e", isError: true);
                 }
               },
             ),
@@ -764,7 +1315,7 @@ class _MapScreenState extends State<MapScreen> {
     mapboxKey.currentState
         ?.clearCurrentSketchGuideAndPoints(); // Clear any leftover guides
 
-    _showSnackbar("Exited View Inside mode");
+    // _showSnackbar("Exited View Inside mode");
   }
 
   void _onViewInsideModeChanged(
@@ -819,10 +1370,10 @@ class _MapScreenState extends State<MapScreen> {
 
     // Show feedback
     if (isInViewInsideMode) {
-      _showSnackbar("View Inside mode: Polygon tool active. Tap to draw.",
-          durationSeconds: 4);
+      // _showSnackbar("View Inside mode: Polygon tool active. Tap to draw.",
+      //     durationSeconds: 4);
     } else {
-      _showSnackbar("Exited View Inside mode");
+      // _showSnackbar("Exited View Inside mode");
     }
   }
 
@@ -845,7 +1396,7 @@ class _MapScreenState extends State<MapScreen> {
     if (_selectedLotForSketching == null && source != 'MRrentalEvidence') {
       // Allow null lot for MR Rental
       debugPrint("❌ Error: No parent lot selected");
-      _showSnackbar("Error: No parent lot selected.", isError: true);
+      // _showSnackbar("Error: No parent lot selected.", isError: true);
       _exitSketchingMode();
       return;
     }
@@ -875,7 +1426,7 @@ class _MapScreenState extends State<MapScreen> {
                 setState(() {
                   // _buildingGeometryIdPendingSave = null;
                 });
-                _showSnackbar("Building save cancelled.");
+                // _showSnackbar("Building save cancelled.");
               },
               onSave: (String buildingName, String constructionType) async {
                 Navigator.of(dialogContext).pop();
@@ -923,8 +1474,8 @@ class _MapScreenState extends State<MapScreen> {
                   if (success) {
                     debugPrint("✅ Building saved successfully to storage");
                     if (mounted) {
-                      _showSnackbar(
-                          "Building '$buildingName' saved successfully!");
+                      // _showSnackbar(
+                      //     "Building '$buildingName' saved successfully!");
                       setState(() {
                         selectedSketchTool = null; // Deselect tool
                         _selectedSketchSubMode = SketchToolMode.marker;
@@ -937,15 +1488,15 @@ class _MapScreenState extends State<MapScreen> {
                   } else {
                     debugPrint("❌ Failed to save building to storage");
                     if (mounted) {
-                      _showSnackbar("Failed to save building '$buildingName'",
-                          isError: true);
+                      // _showSnackbar("Failed to save building '$buildingName'",
+                      //     isError: true);
                     }
                   }
                 } else {
                   debugPrint("❌ No building polygon found to save");
                   if (mounted) {
-                    _showSnackbar("No building polygon found to save",
-                        isError: true);
+                    // _showSnackbar("No building polygon found to save",
+                    //     isError: true);
                   }
                 }
               },
@@ -974,7 +1525,7 @@ class _MapScreenState extends State<MapScreen> {
         mapboxKey.currentState?.toggleDrawingMode(false); // Stop drawing first
         _showSaveLotDialog(); // Show dialog to save the lot
       } else {
-        _showSnackbar("Lot requires at least 3 points to save.", isError: true);
+        // _showSnackbar("Lot requires at least 3 points to save.", isError: true);
       }
     } else if (isSketchingMode) {
       try {
@@ -987,8 +1538,8 @@ class _MapScreenState extends State<MapScreen> {
           // Check if we have enough points to form a polygon
           if (sketchPoints == null || sketchPoints.length < 3) {
             debugPrint("❌ Not enough points: ${sketchPoints?.length ?? 0}");
-            _showSnackbar("Need at least 3 points to save a building.",
-                isError: true);
+            // _showSnackbar("Need at least 3 points to save a building.",
+            //     isError: true);
             return;
           }
 
@@ -1008,7 +1559,7 @@ class _MapScreenState extends State<MapScreen> {
           mapboxKey.currentState?.finalizeCurrentSketch();
 
           // Show success feedback
-          _showSnackbar("${selectedSketchTool ?? 'Sketch'} saved.");
+          // _showSnackbar("${selectedSketchTool ?? 'Sketch'} saved.");
 
           // Clear the tool selection after saving
           setState(() {
@@ -1019,11 +1570,11 @@ class _MapScreenState extends State<MapScreen> {
         // If no sketch tool is selected or using another tool
         else {
           if (selectedSketchTool == null) {
-            _showSnackbar("Select a sketch tool first.", isError: true);
+            // _showSnackbar("Select a sketch tool first.", isError: true);
           } else {
             // Attempt to finalize whatever other sketch is active
             await mapboxKey.currentState?.finalizeCurrentSketch();
-            _showSnackbar("Sketch saved.");
+            // _showSnackbar("Sketch saved.");
 
             // Clear the tool selection
             setState(() {
@@ -1034,11 +1585,31 @@ class _MapScreenState extends State<MapScreen> {
         }
       } catch (e) {
         debugPrint("MapScreen: Error during sketch save: $e");
-        _showSnackbar("Error saving sketch.", isError: true);
+        // _showSnackbar("Error saving sketch.", isError: true);
       }
     } else {
-      _showSnackbar("Nothing to save. Draw a lot or sketch first.");
+      // _showSnackbar("Nothing to save. Draw a lot or sketch first.");
     }
+  }
+
+  /// Converts list of Points to JSON string format for API
+  String _convertCoordinatesToString(List<Point> points) {
+    final coordinates = points
+        .map((point) => {
+              'lng': point.coordinates.lng,
+              'lat': point.coordinates.lat,
+            })
+        .toList();
+
+    return jsonEncode(coordinates);
+  }
+
+  String _convertPointToCoordinateString(Point point) {
+    final coordinate = {
+      'lng': point.coordinates.lng,
+      'lat': point.coordinates.lat,
+    };
+    return jsonEncode(coordinate);
   }
 
   // Add the build method at the class level
@@ -1139,7 +1710,7 @@ class _MapScreenState extends State<MapScreen> {
                     _selectedLotForSketching = null;
                     // _buildingGeometryIdPendingSave = null; // Removed
                   });
-                  _showSnackbar("Tap map to place a marker");
+                  // _showSnackbar("Tap map to place a marker");
                 },
                 onAddDrawer: () {
                   if (!mounted) return;
@@ -1149,7 +1720,7 @@ class _MapScreenState extends State<MapScreen> {
                   }
                   mapboxKey.currentState?.clearCurrentSketchGuideAndPoints();
                   mapboxKey.currentState?.toggleDrawingMode(true);
-                  _showSnackbar("Start drawing initial lot boundaries.");
+                  // _showSnackbar("Start drawing initial lot boundaries.");
                 },
                 onClearSelection: () {
                   if (!mounted) return;
@@ -1161,7 +1732,7 @@ class _MapScreenState extends State<MapScreen> {
                     isDrawingMode = false;
                     isMarkerPlacementMode = false;
                   });
-                  _showSnackbar("Selection and modes cleared");
+                  // _showSnackbar("Selection and modes cleared");
                 },
               ),
             ),
@@ -1293,10 +1864,10 @@ class _MapScreenState extends State<MapScreen> {
       await mapboxKey.currentState?.changeActiveFloor(floorName);
 
       // Show feedback to the user
-      _showSnackbar("Switched to floor: $floorName.");
+      // _showSnackbar("Switched to floor: $floorName.");
     } catch (e) {
       debugPrint("Error changing active floor: $e");
-      _showSnackbar("Error changing to floor: $floorName", isError: true);
+      // _showSnackbar("Error changing to floor: $floorName", isError: true);
     }
   }
 }

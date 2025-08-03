@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'plan.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 class PaginatedResponse<T> {
   final List<T> items;
@@ -20,7 +22,7 @@ class PlanRepository {
   }) async {
     if (source == 'landAcquisition') {
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:5221/api/LAMasterfile"),
+        Uri.parse("${AppConfig.apiBaseUrl}LAMasterfile"),
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body)['masterFiles'];
@@ -47,9 +49,11 @@ class PlanRepository {
 
     // Apply search filter
     if (searchQuery != null && searchQuery.isNotEmpty) {
-      plans = plans.where((plan) =>
-          plan.planType.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          plan.planNo.toLowerCase().contains(searchQuery.toLowerCase())).toList();
+      plans = plans
+          .where((plan) =>
+              plan.planType.toLowerCase().contains(searchQuery.toLowerCase()) ||
+              plan.planNo.toLowerCase().contains(searchQuery.toLowerCase()))
+          .toList();
     }
 
     // Apply sorting
@@ -67,7 +71,8 @@ class PlanRepository {
             comparison = a.planNo.compareTo(b.planNo);
             break;
           case "requestingAuthorityRefNo":
-            comparison = a.authorityReferenceNo.compareTo(b.authorityReferenceNo);
+            comparison =
+                a.authorityReferenceNo.compareTo(b.authorityReferenceNo);
             break;
           case "status":
             comparison = a.status.compareTo(b.status);
@@ -83,15 +88,17 @@ class PlanRepository {
     int startIndex = pageToken == null ? 0 : int.tryParse(pageToken) ?? 0;
     int endIndex = (startIndex + pageSize).clamp(0, plans.length);
     List<Plan> paginatedPlans = plans.sublist(startIndex, endIndex);
-    String? nextPageToken = endIndex < plans.length ? endIndex.toString() : null;
+    String? nextPageToken =
+        endIndex < plans.length ? endIndex.toString() : null;
 
-    return PaginatedResponse(items: paginatedPlans, nextPageToken: nextPageToken);
+    return PaginatedResponse(
+        items: paginatedPlans, nextPageToken: nextPageToken);
   }
 
   /// 🔍 Search endpoint via POST /api/LAMasterfile/search
   static Future<List<Plan>> searchPlans(String query) async {
     final response = await http.post(
-      Uri.parse("http://10.0.2.2:5221/api/LAMasterfile/search"),
+      Uri.parse("${AppConfig.apiBaseUrl}LAMasterfile/search"),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'query': query}),
     );

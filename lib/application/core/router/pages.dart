@@ -8,11 +8,15 @@ class Pages {
   static const routeRatingCardReport = "rating-card-report";
   static const routeLaSalesEvidence = "la-sales-evidence";
   static const routeLaBuildingRates = "la-building-rates";
+  static const routeLmBuildingRates = "lm-building-rates";
   static const routeMrAssetsList = "mr-assets-list";
   static const routeRaAssetsList = "ra-assets-list";
   static const routeRbAssetsList = "rb-assets-list";
   static const routeRoAssetsList = "ro-assets-list";
   static const routeRentalEvidence = "rentalevidence";
+  static const routeLmRentalEvidences = "lm-rental-evidences";
+  static const routeLmSalesEvidences = "lm-sales-evidences";
+  static const routeLmPastValuations = "lm-past-valuations";
   static const routeI2RentalEvidence = "i2rentalevidence";
   static const routeMapScreen = "routemap";
   static const routeAssetMapScreen = "asset-map-screen";

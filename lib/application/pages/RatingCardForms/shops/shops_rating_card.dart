@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/application/core/widgets/breadcrumb.dart';
+import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/labeled_text_field.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_dropdown_field.dart';
@@ -9,10 +11,129 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
+import 'package:land_asset_valuation/application/core/validators/shops_rating_card_validator.dart';
 
-class ShopsRatingCard extends StatelessWidget {
+class ShopsRatingCard extends StatefulWidget {
+  final int assetId;
   final MasterDataResponse masterData;
-  const ShopsRatingCard({super.key, required this.masterData});
+  final String? assetNo;
+  final String? requestType;
+  final String? ratingReferenceNo;
+  
+  const ShopsRatingCard({
+    super.key, 
+    required this.assetId,
+    required this.masterData,
+    this.assetNo,
+    this.requestType,
+    this.ratingReferenceNo,
+  });
+
+  @override
+  State<ShopsRatingCard> createState() => _ShopsRatingCardState();
+}
+
+class _ShopsRatingCardState extends State<ShopsRatingCard> {
+  final _formKey = GlobalKey<FormState>();
+
+  // Text controllers
+  final _localAuthorityController = TextEditingController();
+  final _localAuthorityCodeController = TextEditingController();
+  final _assessmentNumberController = TextEditingController();
+  final _newNumberController = TextEditingController();
+  final _obsoleteNumberController = TextEditingController();
+  final _ownerController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _tsBopController = TextEditingController();
+  final _shopFrontController = TextEditingController();
+  final _occupierController = TextEditingController();
+  final _rentPMController = TextEditingController();
+  final _termsController = TextEditingController();
+  final _floorWiseAreaController = TextEditingController();
+  final _totalFloorAreaController = TextEditingController();
+  final _approvedRateFromController = TextEditingController();
+  final _approvedRateToController = TextEditingController();
+  final _suggestedRateController = TextEditingController();
+  final _notesController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _parkingSpaceController = TextEditingController();
+  final _wardNumberController = TextEditingController();
+  final _roadNameController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _shopUnitController = TextEditingController();
+  final _shopFloorAreaController = TextEditingController();
+  final _storageAreaController = TextEditingController();
+  final _monthlyTurnoverController = TextEditingController();
+  final _shopNotesController = TextEditingController();
+
+  // Dropdown values
+  String? _buildingSelection;
+  String? _propertySubCategory;
+  String? _propertyType;
+  String? _wallType;
+  String? _floorType;
+  String? _conveniences;
+  String? _condition;
+  String? _accessType;
+
+  @override
+  void dispose() {
+    _localAuthorityController.dispose();
+    _localAuthorityCodeController.dispose();
+    _assessmentNumberController.dispose();
+    _newNumberController.dispose();
+    _obsoleteNumberController.dispose();
+    _ownerController.dispose();
+    _descriptionController.dispose();
+    _tsBopController.dispose();
+    _shopFrontController.dispose();
+    _occupierController.dispose();
+    _rentPMController.dispose();
+    _termsController.dispose();
+    _floorWiseAreaController.dispose();
+    _totalFloorAreaController.dispose();
+    _approvedRateFromController.dispose();
+    _approvedRateToController.dispose();
+    _suggestedRateController.dispose();
+    _notesController.dispose();
+    _ageController.dispose();
+    _parkingSpaceController.dispose();
+    _wardNumberController.dispose();
+    _roadNameController.dispose();
+    _dateController.dispose();
+    _shopUnitController.dispose();
+    _shopFloorAreaController.dispose();
+    _storageAreaController.dispose();
+    _monthlyTurnoverController.dispose();
+    _shopNotesController.dispose();
+    super.dispose();
+  }
+
+  void _showValidationError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: colors(context).colorNegative1,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _saveForm() {
+    if (_formKey.currentState!.validate()) {
+      // TODO: Implement actual save logic
+      debugPrint("Shops Rating Card validated and saved");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Shops Rating Card saved successfully'),
+          backgroundColor: colors(context).colorPositive1,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      _showValidationError('Please fill in all required fields correctly');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +150,9 @@ class ShopsRatingCard extends StatelessWidget {
       body: LayoutBuilder(builder: (context, constraints) {
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
+          child: Form(
+            key: _formKey,
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
@@ -39,8 +162,62 @@ class ShopsRatingCard extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
                 child: Breadcrumb(
                   items: [
-                    BreadcrumbItem(label: "Mass Rating"),
-                    BreadcrumbItem(label: "Rating Card - Shops"),
+                    BreadcrumbItem(
+                      label: "Mass rating",
+                      onTap: () {
+                        context.goNamed(
+                          Pages.routeI3MasterFileList.toPathName(),
+                          queryParameters: {'selectedIndex': '2'},
+                        );
+                      },
+                    ),
+                    BreadcrumbItem(
+                      label: "${widget.ratingReferenceNo ?? 'MR-2022-003'} - ${widget.assetNo ?? 'AST_030-2022'}",
+                      onTap: widget.ratingReferenceNo != null && widget.requestType != null ? () {
+                        // Navigate back to assets list
+                        String route;
+                        switch (widget.requestType) {
+                          case 'MR':
+                            route = Pages.routeMrAssetsList.toPathName();
+                            break;
+                          case 'RA':
+                            route = Pages.routeRaAssetsList.toPathName();
+                            break;
+                          case 'RB':
+                            route = Pages.routeRbAssetsList.toPathName();
+                            break;
+                          case 'RO':
+                            route = Pages.routeRoAssetsList.toPathName();
+                            break;
+                          default:
+                            route = Pages.routeMrAssetsList.toPathName();
+                        }
+                        
+                        // Determine source based on request type
+                        String source = 'massRating';
+                        switch (widget.requestType) {
+                          case 'RA':
+                            source = 'ratingAssessment';
+                            break;
+                          case 'RB':
+                            source = 'ratingBuilding';
+                            break;
+                          case 'RO':
+                            source = 'ratingObject';
+                            break;
+                        }
+                        
+                        context.goNamed(
+                          route,
+                          queryParameters: {
+                            'source': source,
+                            if (GoRouterState.of(context).uri.queryParameters['requestId'] != null)
+                              'requestId': GoRouterState.of(context).uri.queryParameters['requestId']!,
+                          },
+                        );
+                      } : null,
+                    ),
+                    BreadcrumbItem(label: "Shops - Rating card"),
                   ],
                 ),
               ),
@@ -54,50 +231,78 @@ class ShopsRatingCard extends StatelessWidget {
                     "Building B",
                     "Building C"
                   ],
-                  initialValue: "Select Building",
+                  initialValue: _buildingSelection ?? "Select Building",
+                  validator: (value) => ShopsRatingCardValidator.validateDropdown(
+                      value, 'building'),
                   onChanged: (value) {
-                    debugPrint(value);
+                    setState(() {
+                      _buildingSelection = value;
+                    });
                   },
                 ),
                 LabeledTextField(
                   label: AppString.localAuthority.localize(context)!,
                   placeholder: AppString.localAuthority.localize(context)!,
+                  controller: _localAuthorityController,
+                  validator: (value) => ShopsRatingCardValidator.validateRequired(
+                      value, 'Local Authority'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.localAuthorityCode.localize(context)!,
                   placeholder: "123456789",
+                  controller: _localAuthorityCodeController,
+                  validator: (value) => ShopsRatingCardValidator.validateAlphaNumeric(
+                      value, 'Local Authority Code'),
                 ),
                 LabeledTextField(
                   label: AppString.assessmentNumber.localize(context)!,
                   placeholder: AppString.assessmentNumber.localize(context)!,
+                  controller: _assessmentNumberController,
+                  validator: (value) => ShopsRatingCardValidator.validateAlphaNumeric(
+                      value, 'Assessment Number'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.newNumber.localize(context)!,
                   placeholder: "500",
+                  controller: _newNumberController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalText(
+                      value, 'New Number'),
                 ),
                 LabeledTextField(
                   label: AppString.obsoleteNumber.localize(context)!,
                   placeholder: AppString.obsoleteNumber.localize(context)!,
+                  controller: _obsoleteNumberController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalText(
+                      value, 'Obsolete Number'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.owner.localize(context)!,
                   placeholder: "John Doe",
+                  controller: _ownerController,
+                  validator: (value) => ShopsRatingCardValidator.validateRequired(
+                      value, 'Owner'),
                 ),
                 LabeledTextField(
                   label: AppString.description.localize(context)!,
                   placeholder: "Two-story residential house",
+                  controller: _descriptionController,
+                  validator: (value) => ShopsRatingCardValidator.validateRequiredTextWithLength(
+                      value, 500, 'Description'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.tsBop.localize(context)!,
                   placeholder: "Available",
+                  controller: _tsBopController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalText(
+                      value, 'TS BOP'),
                 ),
                 CustomDropdownField(
                   label: AppString.propertySubCategory.localize(context)!,
@@ -108,9 +313,13 @@ class ShopsRatingCard extends StatelessWidget {
                     "Townhouse",
                     "Commercial Shop"
                   ],
-                  initialValue: "Select Property Sub Category",
+                  initialValue: _propertySubCategory ?? "Select Property Sub Category",
+                  validator: (value) => ShopsRatingCardValidator.validateDropdown(
+                      value, 'property sub category'),
                   onChanged: (value) {
-                    debugPrint(value);
+                    setState(() {
+                      _propertySubCategory = value;
+                    });
                   },
                 ),
               ]),
@@ -124,93 +333,139 @@ class ShopsRatingCard extends StatelessWidget {
                     "Commercial",
                     "Mixed Use"
                   ],
-                  initialValue: "Select Property Type",
+                  initialValue: _propertyType ?? "Select Property Type",
+                  validator: (value) => ShopsRatingCardValidator.validateDropdown(
+                      value, 'property type'),
                   onChanged: (value) {
-                    debugPrint(value);
+                    setState(() {
+                      _propertyType = value;
+                    });
                   },
                 ),
                 LabeledTextField(
                   label: "Shop Front",
                   placeholder: "Enter shop front details (optional)",
+                  controller: _shopFrontController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalText(
+                      value, 'Shop Front'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.occupier.localize(context)!,
                   placeholder: "John Doe",
+                  controller: _occupierController,
+                  validator: (value) => ShopsRatingCardValidator.validateRequired(
+                      value, 'Occupier'),
                 ),
                 LabeledTextField(
                   label: AppString.rentPM.localize(context)!,
                   placeholder: "50000",
+                  controller: _rentPMController,
+                  validator: (value) => ShopsRatingCardValidator.validatePositiveDecimal(
+                      value, 'Rent per Month'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.terms.localize(context)!,
                   placeholder: "Yearly Renewal",
+                  controller: _termsController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalText(
+                      value, 'Terms'),
                 ),
                 LabeledTextField(
                   label: "Floor Wise Area",
                   placeholder: "100 sqm",
+                  controller: _floorWiseAreaController,
+                  validator: (value) => ShopsRatingCardValidator.validateFloorArea(
+                      value, 'Floor Wise Area'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.totalFloorArea.localize(context)!,
                   placeholder: "200 sqm",
+                  controller: _totalFloorAreaController,
+                  validator: (value) => ShopsRatingCardValidator.validateFloorArea(
+                      value, 'Total Floor Area'),
                 ),
                 LabeledTextField(
                   label: "Approved Rate From",
                   placeholder: "120",
+                  controller: _approvedRateFromController,
+                  validator: (value) => ShopsRatingCardValidator.validatePositiveDecimal(
+                      value, 'Approved Rate From'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: "Approved Rate To",
                   placeholder: "150",
+                  controller: _approvedRateToController,
+                  validator: (value) => ShopsRatingCardValidator.validatePositiveDecimal(
+                      value, 'Approved Rate To'),
                 ),
                 LabeledTextField(
                   label: AppString.suggestedRate.localize(context)!,
                   placeholder: "135",
+                  controller: _suggestedRateController,
+                  validator: (value) => ShopsRatingCardValidator.validatePositiveDecimal(
+                      value, 'Suggested Rate'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.notes.localize(context)!,
                   placeholder: "Additional notes or observations",
+                  controller: _notesController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalTextWithLength(
+                      value, 1000, 'Notes'),
                 ),
               ]),
               _buildRow([
                 CustomDropdownField(
                   label: AppString.selectWalls.localize(context)!,
-                  items: masterData.wallStructure,
-                  initialValue: masterData.wallStructure.isNotEmpty
-                      ? masterData.wallStructure.first
-                      : null,
+                  items: widget.masterData.wallStructure,
+                  initialValue: _wallType ?? (widget.masterData.wallStructure.isNotEmpty
+                      ? widget.masterData.wallStructure.first
+                      : null),
+                  validator: (value) => ShopsRatingCardValidator.validateDropdown(
+                      value, 'wall type'),
                   onChanged: (value) {
-                    debugPrint(value);
+                    setState(() {
+                      _wallType = value;
+                    });
                   },
                 ),
                 CustomDropdownField(
                   label: AppString.floor.localize(context)!,
-                  items: masterData.floorStructure,
-                  initialValue: masterData.floorStructure.isNotEmpty
-                      ? masterData.floorStructure.first
-                      : null,
+                  items: widget.masterData.floorStructure,
+                  initialValue: _floorType ?? (widget.masterData.floorStructure.isNotEmpty
+                      ? widget.masterData.floorStructure.first
+                      : null),
+                  validator: (value) => ShopsRatingCardValidator.validateDropdown(
+                      value, 'floor type'),
                   onChanged: (value) {
-                    debugPrint(value);
+                    setState(() {
+                      _floorType = value;
+                    });
                   },
                 ),
               ]),
               _buildRow([
                 CustomDropdownField(
                   label: AppString.conveniences.localize(context)!,
-                  items: masterData.conviences,
-                  initialValue: masterData.conviences.isNotEmpty
-                      ? masterData.conviences.first
-                      : null,
+                  items: widget.masterData.conviences,
+                  initialValue: _conveniences ?? (widget.masterData.conviences.isNotEmpty
+                      ? widget.masterData.conviences.first
+                      : null),
+                  validator: (value) => ShopsRatingCardValidator.validateDropdown(
+                      value, 'conveniences'),
                   onChanged: (value) {
-                    debugPrint(value);
+                    setState(() {
+                      _conveniences = value;
+                    });
                   },
                 ),
                 // Intentionally static: No backend mapping for condition
@@ -223,9 +478,13 @@ class ShopsRatingCard extends StatelessWidget {
                     "Fair",
                     "Poor"
                   ],
-                  initialValue: "Select Condition",
+                  initialValue: _condition ?? "Select Condition",
+                  validator: (value) => ShopsRatingCardValidator.validateDropdown(
+                      value, 'condition'),
                   onChanged: (value) {
-                    debugPrint(value);
+                    setState(() {
+                      _condition = value;
+                    });
                   },
                 ),
               ]),
@@ -233,14 +492,21 @@ class ShopsRatingCard extends StatelessWidget {
                 LabeledTextField(
                   label: AppString.age.localize(context)!,
                   placeholder: "Building age",
+                  controller: _ageController,
+                  validator: (value) => ShopsRatingCardValidator.validateAge(
+                      value, 'Age'),
                 ),
                 // Intentionally static: No backend mapping for access
                 CustomDropdownField(
                   label: AppString.access.localize(context)!,
                   items: ["Select Access", "Main Road", "Side Road", "Lane"],
-                  initialValue: "Select Access",
+                  initialValue: _accessType ?? "Select Access",
+                  validator: (value) => ShopsRatingCardValidator.validateDropdown(
+                      value, 'access'),
                   onChanged: (value) {
-                    debugPrint(value);
+                    setState(() {
+                      _accessType = value;
+                    });
                   },
                 ),
               ]),
@@ -248,20 +514,32 @@ class ShopsRatingCard extends StatelessWidget {
                 LabeledTextField(
                   label: AppString.parkingSpace.localize(context)!,
                   placeholder: "Available parking spaces",
+                  controller: _parkingSpaceController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalText(
+                      value, 'Parking Space'),
                 ),
                 LabeledTextField(
                   label: AppString.wardNumber.localize(context)!,
                   placeholder: AppString.wardNumber.localize(context)!,
+                  controller: _wardNumberController,
+                  validator: (value) => ShopsRatingCardValidator.validateAlphaNumeric(
+                      value, 'Ward Number'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.roadName.localize(context)!,
                   placeholder: AppString.roadName.localize(context)!,
+                  controller: _roadNameController,
+                  validator: (value) => ShopsRatingCardValidator.validateRequired(
+                      value, 'Road Name'),
                 ),
                 LabeledTextField(
                   label: AppString.date.localize(context)!,
                   placeholder: AppString.date.localize(context)!,
+                  controller: _dateController,
+                  validator: (value) => ShopsRatingCardValidator.validateDate(
+                      value, 'Date'),
                 ),
               ]),
               _buildRow([
@@ -284,6 +562,9 @@ class ShopsRatingCard extends StatelessWidget {
                         child: LabeledTextField(
                           label: "Shop Unit",
                           placeholder: "Enter shop unit details",
+                          controller: _shopUnitController,
+                          validator: (value) => ShopsRatingCardValidator.validateShopNumber(
+                              value, 'Shop Unit'),
                         ),
                       ),
                       SizedBox(width: 8),
@@ -308,24 +589,36 @@ class ShopsRatingCard extends StatelessWidget {
                 LabeledTextField(
                   label: "Shop Floor Area",
                   placeholder: "Total shop area",
+                  controller: _shopFloorAreaController,
+                  validator: (value) => ShopsRatingCardValidator.validateFloorArea(
+                      value, 'Shop Floor Area'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: "Storage Area",
                   placeholder: "Storage/back room area",
+                  controller: _storageAreaController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalText(
+                      value, 'Storage Area'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: "Monthly Turnover",
                   placeholder: "Average monthly sales",
+                  controller: _monthlyTurnoverController,
+                  validator: (value) => ShopsRatingCardValidator.validatePositiveDecimal(
+                      value, 'Monthly Turnover'),
                 ),
               ]),
               _buildRow([
                 LabeledTextField(
                   label: AppString.notes.localize(context)!,
                   placeholder: "Shop-specific notes and features",
+                  controller: _shopNotesController,
+                  validator: (value) => ShopsRatingCardValidator.validateOptionalTextWithLength(
+                      value, 1000, 'Shop Notes'),
                 ),
               ]),
               // Save & Cancel Buttons
@@ -353,10 +646,7 @@ class ShopsRatingCard extends StatelessWidget {
                           child: CustomButton(
                             text: AppString.save.localize(context)!,
                             backgroundColor: colors(context).colorPrimary1!,
-                            onPressed: () {
-                              // TODO: Implement save functionality
-                              debugPrint("Shops Rating Card saved");
-                            },
+                            onPressed: _saveForm,
                             width: 120,
                             height: 48,
                           ),
@@ -400,19 +690,20 @@ class ShopsRatingCard extends StatelessWidget {
               )
             ],
           ),
+          ),
         );
       }),
     );
   }
-}
 
-// Helper method to create rows of input fields
-Widget _buildRow(List<Widget> children) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: children.map((widget) => Expanded(child: widget)).toList(),
-    ),
-  );
+  // Helper method to create rows of input fields
+  Widget _buildRow(List<Widget> children) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: children.map((widget) => Expanded(child: widget)).toList(),
+      ),
+    );
+  }
 }

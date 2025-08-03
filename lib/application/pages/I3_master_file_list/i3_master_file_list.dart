@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_app_bar.dart';
 import 'package:land_asset_valuation/application/core/widgets/fileList/file_list.dart';
@@ -8,6 +9,12 @@ import 'package:land_asset_valuation/application/core/widgets/tableForMR/table_s
 import 'package:land_asset_valuation/application/core/widgets/tableForRA/table_scaffold_RA.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRB/table_scaffold_RB.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForRO/table_scaffold_RO.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRA/cubit/ra_requests_cubit.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRA/cubit/ra_requests_state.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRB/cubit/rb_requests_cubit.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRB/cubit/rb_requests_state.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRO/cubit/ro_requests_cubit.dart';
+import 'package:land_asset_valuation/application/core/widgets/tableForRO/cubit/ro_requests_state.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/cubit/i3_master_file_list_cubit.dart';
 import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/LM_Masterfile_list.dart';
 import 'package:land_asset_valuation/application/pages/MapScreen/map_screen.dart';
@@ -67,6 +74,12 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
         return 'landAcquisition';
       case 2:
         return 'massRating';
+      case 3:
+        return 'ratingAssessment';
+      case 4:
+        return 'ratingBuilding';
+      case 5:
+        return 'ratingObject';
       case 7:
         return 'landMiscellaneous';
       default:
@@ -113,17 +126,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             title: AppString.massRatingMR.localize(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
-          body: FileList(
-            breadcrumbItems: [
-              AppString.massRating.localize(context)!,
-              AppString.massRating.localize(context)!,
-            ],
-            totalCount: 0,
-            table: BlocProvider<MrRequestsCubit>(
-              create: (context) => injection<MrRequestsCubit>(),
-              child: TableScaffoldMr(pageSource: currentPageSource),
-            ),
-          ),
+          body: _MRTableWithCount(pageSource: currentPageSource),
         );
 
       case 3: // Rating Assessment RA
@@ -132,14 +135,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             title: AppString.ratingAssessmentRA.localize(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
-          body: FileList(
-            breadcrumbItems: [
-              AppString.massRating.localize(context)!,
-              AppString.ratingAssessment.localize(context)!,
-            ],
-            totalCount: 0,
-            table: TableScaffoldRA(pageSource: currentPageSource),
-          ),
+          body: _RATableWithCount(pageSource: currentPageSource),
         );
 
       case 4: // Rating Building RB
@@ -148,14 +144,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             title: AppString.ratingBuildingRB.localize(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
-          body: FileList(
-            breadcrumbItems: [
-              AppString.massRating.localize(context)!,
-              AppString.ratingBuilding.localize(context)!,
-            ],
-            totalCount: 0,
-            table: TableScaffoldRB(pageSource: currentPageSource),
-          ),
+          body: _RBTableWithCount(pageSource: currentPageSource),
         );
 
       case 5: // Rating Object RO
@@ -164,14 +153,7 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
             title: AppString.ratingObjectRO.localize(context)!,
             leftIcon: (p0) => PhosphorIcons.pencilRuler(p0),
           ),
-          body: FileList(
-            breadcrumbItems: [
-              AppString.massRating.localize(context)!,
-              AppString.ratingObject.localize(context)!,
-            ],
-            totalCount: 0,
-            table: TableScaffoldRO(pageSource: currentPageSource),
-          ),
+          body: _ROTableWithCount(pageSource: currentPageSource),
         );
 
       case 6:
@@ -186,5 +168,176 @@ class _I3MasterFileListState extends State<I3MasterFileList> {
         return const Center(
             child: Text("Content not available for this index."));
     }
+  }
+}
+
+// Stateful widget to manage MR table count
+class _MRTableWithCount extends StatefulWidget {
+  final String pageSource;
+
+  const _MRTableWithCount({required this.pageSource});
+
+  @override
+  State<_MRTableWithCount> createState() => _MRTableWithCountState();
+}
+
+class _MRTableWithCountState extends State<_MRTableWithCount> {
+  int _totalCount = 0;
+  final GlobalKey<TableScaffoldMrState> _tableKey = GlobalKey<TableScaffoldMrState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return FileList(
+      breadcrumbItems: [
+        AppString.massRating.localize(context)!,
+        AppString.massRating.localize(context)!,
+      ],
+      totalCount: _totalCount,
+      onSearch: (query) {
+        _tableKey.currentState?.search(query);
+      },
+      onSort: (sortBy) {
+        _tableKey.currentState?.sort(sortBy);
+      },
+      pageSource: widget.pageSource,
+      table: BlocProvider<MrRequestsCubit>(
+        create: (context) => injection<MrRequestsCubit>(),
+        child: TableScaffoldMr(
+          key: _tableKey,
+          pageSource: widget.pageSource,
+          onTotalCountChanged: (count) {
+            setState(() {
+              _totalCount = count;
+            });
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// Stateful widget to manage RA table count
+class _RATableWithCount extends StatefulWidget {
+  final String pageSource;
+
+  const _RATableWithCount({required this.pageSource});
+
+  @override
+  State<_RATableWithCount> createState() => _RATableWithCountState();
+}
+
+class _RATableWithCountState extends State<_RATableWithCount> {
+  int _totalCount = 0;
+  final GlobalKey<TableScaffoldRAState> _tableKey = GlobalKey<TableScaffoldRAState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return FileList(
+      breadcrumbItems: [
+        AppString.massRating.localize(context)!,
+        AppString.ratingAssessment.localize(context)!,
+      ],
+      totalCount: _totalCount,
+      onSearch: (query) {
+        _tableKey.currentState?.search(query);
+      },
+      onSort: (sortBy) {
+        _tableKey.currentState?.sort(sortBy);
+      },
+      pageSource: widget.pageSource,
+      table: TableScaffoldRA(
+        key: _tableKey,
+        pageSource: widget.pageSource,
+        onTotalCountChanged: (count) {
+          setState(() {
+            _totalCount = count;
+          });
+        },
+      ),
+    );
+  }
+}
+
+// Stateful widget to manage RB table count
+class _RBTableWithCount extends StatefulWidget {
+  final String pageSource;
+
+  const _RBTableWithCount({required this.pageSource});
+
+  @override
+  State<_RBTableWithCount> createState() => _RBTableWithCountState();
+}
+
+class _RBTableWithCountState extends State<_RBTableWithCount> {
+  int _totalCount = 0;
+  final GlobalKey<TableScaffoldRBState> _tableKey = GlobalKey<TableScaffoldRBState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return FileList(
+      breadcrumbItems: [
+        AppString.massRating.localize(context)!,
+        AppString.ratingBuilding.localize(context)!,
+      ],
+      totalCount: _totalCount,
+      onSearch: (query) {
+        _tableKey.currentState?.search(query);
+      },
+      onSort: (sortBy) {
+        _tableKey.currentState?.sort(sortBy);
+      },
+      pageSource: widget.pageSource,
+      table: TableScaffoldRB(
+        key: _tableKey,
+        pageSource: widget.pageSource,
+        onTotalCountChanged: (count) {
+          setState(() {
+            _totalCount = count;
+          });
+        },
+      ),
+    );
+  }
+}
+
+// Stateful widget to manage RO table count
+class _ROTableWithCount extends StatefulWidget {
+  final String pageSource;
+
+  const _ROTableWithCount({required this.pageSource});
+
+  @override
+  State<_ROTableWithCount> createState() => _ROTableWithCountState();
+}
+
+class _ROTableWithCountState extends State<_ROTableWithCount> {
+  int _totalCount = 0;
+  final GlobalKey<TableScaffoldROState> _tableKey = GlobalKey<TableScaffoldROState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return FileList(
+      breadcrumbItems: [
+        AppString.massRating.localize(context)!,
+        AppString.ratingObject.localize(context)!,
+      ],
+      totalCount: _totalCount,
+      onSearch: (query) {
+        _tableKey.currentState?.search(query);
+      },
+      onSort: (sortBy) {
+        _tableKey.currentState?.sort(sortBy);
+      },
+      pageSource: widget.pageSource,
+      table: TableScaffoldRO(
+        key: _tableKey,
+        pageSource: widget.pageSource,
+        onTotalCountChanged: (count) {
+          setState(() {
+            _totalCount = count;
+          });
+        },
+      ),
+    );
   }
 }

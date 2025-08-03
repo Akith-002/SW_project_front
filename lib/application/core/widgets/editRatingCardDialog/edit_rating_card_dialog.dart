@@ -19,11 +19,22 @@ import 'package:land_asset_valuation/data/models/asset_division.dart';
 import 'package:land_asset_valuation/injection.dart';
 
 class EditRatingCardDialog {
-  static void showEditRatingCardDialog(BuildContext context, {Asset? asset}) {
+  static void showEditRatingCardDialog(BuildContext context, {Asset? asset, String? ratingReferenceNo}) {
+    // Capture router state before showing dialog
+    String? requestId;
+    try {
+      final currentRoute = GoRouterState.of(context);
+      requestId = currentRoute.uri.queryParameters['requestId'];
+    } catch (e) {
+      // If we can't get the router state, that's okay
+      debugPrint('Could not get router state: $e');
+    }
+    
     showDialog(
       context: context,
       builder: (context) {
         int selectedValue = 1; // Default selected value
+        final capturedRequestId = requestId; // Capture requestId for use in dialog
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -219,11 +230,22 @@ class EditRatingCardDialog {
     bool hasSameOwner =
         selectedAssets.every((asset) => asset.owner == firstOwner);
 
+    // Capture router state before showing dialog
+    String? requestId;
+    try {
+      final currentRoute = GoRouterState.of(context);
+      requestId = currentRoute.uri.queryParameters['requestId'];
+    } catch (e) {
+      // If we can't get the router state, that's okay
+      debugPrint('Could not get router state: $e');
+    }
+
     // Proceed with normal multi-select dialog if owners match
     showDialog(
       context: context,
       builder: (context) {
         int selectedValue = 1; // Default selected value
+        final capturedRequestId = requestId; // Capture requestId for use in dialog
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -390,11 +412,22 @@ class EditRatingCardDialog {
   }
 
   static void showAddRatingCardDialog(BuildContext context,
-      {String? sourceContext, Asset? asset}) {
+      {String? sourceContext, Asset? asset, String? ratingReferenceNo}) {
+    // Capture router state before showing dialog
+    String? requestId;
+    try {
+      final currentRoute = GoRouterState.of(context);
+      requestId = currentRoute.uri.queryParameters['requestId'];
+    } catch (e) {
+      // If we can't get the router state, that's okay
+      debugPrint('Could not get router state: $e');
+    }
+    
     showDialog(
       context: context,
       builder: (context) {
         int selectedValue = 1; // Default selected value
+        final capturedRequestId = requestId; // Capture requestId for use in dialog
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -579,6 +612,38 @@ class EditRatingCardDialog {
                             }
                             if (asset != null) {
                               queryParams['assetId'] = asset.id.toString();
+                              // Include asset number for breadcrumb
+                              queryParams['assetNo'] = asset.assetNo;
+                            }
+                            
+                            // Determine request type from source context
+                            String requestType = 'MR'; // Default
+                            if (sourceContext != null) {
+                              switch (sourceContext) {
+                                case 'massRating':
+                                  requestType = 'MR';
+                                  break;
+                                case 'ratingAssessment':
+                                  requestType = 'RA';
+                                  break;
+                                case 'ratingBuilding':
+                                  requestType = 'RB';
+                                  break;
+                                case 'ratingObject':
+                                  requestType = 'RO';
+                                  break;
+                              }
+                            }
+                            queryParams['requestType'] = requestType;
+                            
+                            // Include rating reference number if provided
+                            if (ratingReferenceNo != null) {
+                              queryParams['ratingReferenceNo'] = ratingReferenceNo;
+                            }
+                            
+                            // Use the captured requestId
+                            if (capturedRequestId != null) {
+                              queryParams['requestId'] = capturedRequestId;
                             }
 
                             switch (selectedValue) {
@@ -779,11 +844,22 @@ class EditRatingCardDialog {
   }
 
   static void showEditRatingCardTypeDialog(BuildContext context,
-      {required Asset asset, String? sourceContext}) {
+      {required Asset asset, String? sourceContext, String? ratingReferenceNo}) {
+    // Capture router state before showing dialog
+    String? requestId;
+    try {
+      final currentRoute = GoRouterState.of(context);
+      requestId = currentRoute.uri.queryParameters['requestId'];
+    } catch (e) {
+      // If we can't get the router state, that's okay
+      debugPrint('Could not get router state: $e');
+    }
+    
     showDialog(
       context: context,
       builder: (context) {
         int selectedValue = 1; // Default selected value
+        final capturedRequestId = requestId; // Capture requestId for use in dialog
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -970,6 +1046,37 @@ class EditRatingCardDialog {
                             }
                             // Include the asset ID for existing rating cards
                             queryParams['assetId'] = asset.id.toString();
+                            
+                            // Include asset number and request type for breadcrumb
+                            queryParams['assetNo'] = asset.assetNo;
+                            
+                            // Determine request type from source context
+                            String requestType = 'MR'; // Default
+                            switch (sourceContext) {
+                              case 'massRating':
+                                requestType = 'MR';
+                                break;
+                              case 'ratingAssessment':
+                                requestType = 'RA';
+                                break;
+                              case 'ratingBuilding':
+                                requestType = 'RB';
+                                break;
+                              case 'ratingObject':
+                                requestType = 'RO';
+                                break;
+                            }
+                            queryParams['requestType'] = requestType;
+                            
+                            // Include rating reference number if provided
+                            if (ratingReferenceNo != null) {
+                              queryParams['ratingReferenceNo'] = ratingReferenceNo;
+                            }
+                            
+                            // Use the captured requestId
+                            if (capturedRequestId != null) {
+                              queryParams['requestId'] = capturedRequestId;
+                            }
 
                             switch (selectedValue) {
                               case 1:

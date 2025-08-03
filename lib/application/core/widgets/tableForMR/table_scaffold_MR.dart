@@ -13,41 +13,96 @@ class TableScaffoldMr extends StatefulWidget {
   final int initialPageSize;
   final List<int> pageSizeOptions;
   final String pageSource;
+  final Function(int)? onTotalCountChanged;
 
   const TableScaffoldMr({
     super.key,
     required this.pageSource,
-    this.initialPageSize = 9,
-    this.pageSizeOptions = const [9, 15, 30, 60],
+    this.initialPageSize = 10,
+    this.pageSizeOptions = const [10, 25, 50, 100],
+    this.onTotalCountChanged,
   });
 
   @override
-  State<TableScaffoldMr> createState() => _TableScaffoldMrState();
+  State<TableScaffoldMr> createState() => TableScaffoldMrState();
 }
 
-class _TableScaffoldMrState extends State<TableScaffoldMr> {
+class TableScaffoldMrState extends State<TableScaffoldMr> {
   String? _nextPageToken;
   late int _pageSize;
   late List<int> _pageSizeOptions;
+  int _currentPage = 1;
+  int _totalItems = 0;
+  String _searchQuery = '';
+  String? _sortBy;
+  List<MrRequest> _allRequests = [];
+  List<MrRequest> _filteredRequests = [];
+  int _totalUnfilteredCount = 0;
 
   @override
   void initState() {
     super.initState();
     _pageSize = widget.initialPageSize;
     _pageSizeOptions = widget.pageSizeOptions;
-
-    // Load data when widget initializes
+    
+    // Load all data to enable client-side search/filter
+    _currentPage = 1;
     context.read<MrRequestsCubit>().loadMassRatingRequests(
-          pageSize: _pageSize,
-          pageToken: _nextPageToken,
-        );
+      pageSize: 1000, // Load all records
+      pageToken: null,
+    );
   }
 
   void _fetchPlans() {
     context.read<MrRequestsCubit>().loadMassRatingRequests(
-          pageSize: _pageSize,
-          pageToken: _nextPageToken,
-        );
+      pageSize: 1000, // Load all records
+      pageToken: null,
+    );
+  }
+
+  void search(String query) {
+    setState(() {
+      _searchQuery = query.toLowerCase();
+      _currentPage = 1; // Reset to first page on search
+      _applySearchAndSort();
+    });
+  }
+
+  void sort(String sortBy) {
+    setState(() {
+      _sortBy = sortBy;
+      _applySearchAndSort();
+    });
+  }
+
+  void _applySearchAndSort() {
+    // Apply search filter
+    _filteredRequests = _allRequests.where((request) {
+      if (_searchQuery.isEmpty) return true;
+      
+      return request.ratingReferenceNo.toLowerCase().contains(_searchQuery) ||
+             request.localAuthority.toLowerCase().contains(_searchQuery) ||
+             request.yearOfRevision.toString().contains(_searchQuery) ||
+             (request.status ? 'active' : 'inactive').contains(_searchQuery);
+    }).toList();
+
+    // Apply sort
+    if (_sortBy != null) {
+      switch (_sortBy) {
+        case 'ratingReferenceNo':
+          _filteredRequests.sort((a, b) => a.ratingReferenceNo.compareTo(b.ratingReferenceNo));
+          break;
+        case 'localAuthority':
+          _filteredRequests.sort((a, b) => a.localAuthority.compareTo(b.localAuthority));
+          break;
+        case 'yearOfRevision':
+          _filteredRequests.sort((a, b) => a.yearOfRevision.compareTo(b.yearOfRevision));
+          break;
+        case 'status':
+          _filteredRequests.sort((a, b) => (a.status ? 1 : 0).compareTo(b.status ? 1 : 0));
+          break;
+      }
+    }
   }
 
   @override
@@ -74,13 +129,35 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
               ),
             );
           } else if (state is MrRequestsLoaded) {
-            final requests = state.paginatedResponse.items;
-
-            if (requests.isEmpty) {
+            _allRequests = state.paginatedResponse.items;
+            _totalUnfilteredCount = state.paginatedResponse.totalCount;
+            _applySearchAndSort();
+            
+            // Notify parent about total count (unfiltered)
+            if (widget.onTotalCountChanged != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                widget.onTotalCountChanged!(_totalUnfilteredCount);
+              });
+            }
+            
+            if (_filteredRequests.isEmpty && _searchQuery.isNotEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.search_off, size: 48, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    Text("No results found for \"$_searchQuery\""),
+                  ],
+                ),
+              );
+            }
+            
+            if (_filteredRequests.isEmpty) {
               return const Center(child: Text("No records found"));
             }
 
-            return _buildTable(requests, state.paginatedResponse.nextPageToken);
+            return _buildTable(_filteredRequests, state.paginatedResponse.nextPageToken, _filteredRequests.length);
           }
 
           return const Center(child: Text("No data available"));
@@ -89,52 +166,42 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
     );
   }
 
-  Widget _buildTable(List<MrRequest> requests, String? nextPageToken) {
+  Widget _buildTable(List<MrRequest> requests, String? nextPageToken, int totalCount) {
+    // Calculate the items to display based on current page
+    final startIndex = (_currentPage - 1) * _pageSize;
+    final endIndex = startIndex + _pageSize;
+    final displayedRequests = requests.skip(startIndex).take(_pageSize).toList();
+    
     return Column(
       children: [
-        // All files count
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'All files (${requests.length})',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: colors(context).colorGrey7,
-                ),
-              ),
-            ],
-          ),
-        ),
         // Table Section
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: 1000,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color:
-                      colors(context).colorGrey3 ?? colors(context).colorGrey9!,
-                  width: 0.5,
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: 1000,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: colors(context).colorGrey3 ??
+                        colors(context).colorGrey9!,
+                    width: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: DataTable(
-                headingRowColor: WidgetStateProperty.all(
-                  colors(context).colorGrey9!,
-                ),
-                columns: const [
-                  DataColumn(label: Text("Rating Reference No")),
-                  DataColumn(label: Text("Local Authority")),
-                  DataColumn(label: Text("Year of Revision")),
-                  DataColumn(label: Center(child: Text("Status"))),
-                  DataColumn(label: Center(child: Text("Action"))),
-                ],
-                rows: requests.map((request) {
+                child: SingleChildScrollView(
+                  child: DataTable(
+                    headingRowColor: WidgetStateProperty.all(
+                      colors(context).colorGrey9!,
+                    ),
+                    columns: const [
+                      DataColumn(label: Text("Rating Reference No")),
+                      DataColumn(label: Text("Local Authority")),
+                      DataColumn(label: Text("Year of Revision")),
+                      DataColumn(label: Center(child: Text("Status"))),
+                      DataColumn(label: Center(child: Text("Action"))),
+                    ],
+                    rows: displayedRequests.map((request) {
                   return DataRow(cells: [
                     DataCell(Text(request.ratingReferenceNo)),
                     DataCell(Text(request.localAuthority)),
@@ -208,67 +275,75 @@ class _TableScaffoldMrState extends State<TableScaffoldMr> {
                     ),
                   ]);
                 }).toList(),
+                  ),
+                ),
               ),
             ),
           ),
         ),
 
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Text("Show "),
-                  DropdownButton<int>(
-                    value: _pageSize,
-                    items: _pageSizeOptions.map((size) {
-                      return DropdownMenuItem<int>(
-                        value: size,
-                        child: Text("$size"),
-                      );
-                    }).toList(),
-                    onChanged: (newSize) {
-                      if (newSize != null) {
-                        setState(() {
-                          _pageSize = newSize;
-                          _nextPageToken = null;
-                        });
-                        _fetchPlans();
-                      }
-                    },
-                  ),
-                  const Text(" per page"),
-                ],
+        // Gmail-style pagination
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: colors(context).colorGrey3 ?? Colors.grey.shade300,
+                width: 1,
               ),
-              Text("${requests.length} Records"),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              // Page info
+              Text(
+                '${((_currentPage - 1) * _pageSize) + 1}–${((_currentPage - 1) * _pageSize) + displayedRequests.length} of $totalCount',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: colors(context).colorGrey7,
+                ),
+              ),
+              const SizedBox(width: 24),
+              // Navigation buttons
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.chevron_left),
-                    onPressed: _nextPageToken == null
-                        ? null
-                        : () {
+                    icon: Icon(
+                      Icons.chevron_left,
+                      size: 20,
+                      color: _currentPage > 1 
+                          ? colors(context).colorGrey7 
+                          : colors(context).colorGrey3,
+                    ),
+                    onPressed: _currentPage > 1
+                        ? () {
                             setState(() {
-                              _nextPageToken =
-                                  (int.parse(_nextPageToken!) - _pageSize)
-                                      .toString();
+                              _currentPage--;
                             });
-                            _fetchPlans();
-                          },
+                          }
+                        : null,
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(),
                   ),
+                  const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.chevron_right),
-                    onPressed: nextPageToken == null
-                        ? null
-                        : () {
+                    icon: Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: (_currentPage * _pageSize) < totalCount 
+                          ? colors(context).colorGrey7 
+                          : colors(context).colorGrey3,
+                    ),
+                    onPressed: (_currentPage * _pageSize) < totalCount
+                        ? () {
                             setState(() {
-                              _nextPageToken = nextPageToken;
+                              _currentPage++;
                             });
-                            _fetchPlans();
-                          },
+                          }
+                        : null,
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),

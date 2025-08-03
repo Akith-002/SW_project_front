@@ -33,7 +33,7 @@ class MrRepositoryImpl implements MrRequestRepository {
           await _remoteDataSource.getRequestsByType(requestTypeId);
 
       if (allRequests.isEmpty) {
-        return PaginatedResponse(items: [], nextPageToken: null);
+        return PaginatedResponse(items: [], nextPageToken: null, totalCount: 0);
       }
 
       // Apply pagination
@@ -47,6 +47,7 @@ class MrRepositoryImpl implements MrRequestRepository {
       return PaginatedResponse(
         items: paginatedRequests,
         nextPageToken: nextPageToken,
+        totalCount: allRequests.length,
       );
     } catch (e) {
       throw Exception('Failed to fetch MR requests: $e');

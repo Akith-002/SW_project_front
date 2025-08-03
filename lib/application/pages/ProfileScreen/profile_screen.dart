@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
@@ -15,7 +16,7 @@ import 'package:land_asset_valuation/application/core/providers/auth_provider.da
 Future<UserProfile> fetchUserProfile(String username) async {
   final dio = Dio();
   final response = await dio.post(
-    'http://10.0.2.2:5221/api/Profile', // Correct URL for Android emulator
+    '${AppConfig.apiBaseUrl}Profile', // Correct URL for Android emulator
     data: {'username': username},
   );
   return UserProfile.fromJson(response.data);
@@ -25,11 +26,11 @@ Future<Map<String, dynamic>> fetchTaskOverviewAndSummary(
     String username) async {
   final dio = Dio();
   final overviewFuture = dio.post(
-    'http://10.0.2.2:5221/api/UserTask/overview',
+    '${AppConfig.apiBaseUrl}UserTask/overview',
     data: {'username': username},
   );
   final summaryFuture = dio.post(
-    'http://10.0.2.2:5221/api/UserTask/work-summary',
+    '${AppConfig.apiBaseUrl}UserTask/work-summary',
     data: {'username': username},
   );
   final results = await Future.wait([overviewFuture, summaryFuture]);

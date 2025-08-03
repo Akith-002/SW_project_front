@@ -22,11 +22,17 @@ import 'package:land_asset_valuation/data/models/master_data_model.dart';
 class DomesticRatingCard extends StatefulWidget {
   final int assetId;
   final MasterDataResponse masterData;
+  final String? assetNo;
+  final String? requestType;
+  final String? ratingReferenceNo;
 
   const DomesticRatingCard({
     super.key,
     required this.assetId,
     required this.masterData,
+    this.assetNo,
+    this.requestType,
+    this.ratingReferenceNo,
   });
 
   @override
@@ -67,6 +73,11 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
   void initState() {
     super.initState();
     _cubit.loadAutofillData(widget.assetId);
+    
+    // Debug: Print the values being passed
+    debugPrint('DomesticRatingCard - requestType: ${widget.requestType}');
+    debugPrint('DomesticRatingCard - ratingReferenceNo: ${widget.ratingReferenceNo}');
+    debugPrint('DomesticRatingCard - assetNo: ${widget.assetNo}');
   }
 
   @override
@@ -304,8 +315,62 @@ class _DomesticRatingCardState extends State<DomesticRatingCard> {
                               horizontal: 8.0, vertical: 0),
                           child: Breadcrumb(
                             items: [
-                              BreadcrumbItem(label: "Mass Rating"),
-                              BreadcrumbItem(label: "Rating Card - Domestic"),
+                              BreadcrumbItem(
+                                label: "Mass rating",
+                                onTap: () {
+                                  context.goNamed(
+                                    Pages.routeI3MasterFileList.toPathName(),
+                                    queryParameters: {'selectedIndex': '2'},
+                                  );
+                                },
+                              ),
+                              BreadcrumbItem(
+                                label: "${widget.ratingReferenceNo ?? 'MR-2022-003'} - ${widget.assetNo ?? 'AST_030-2022'}",
+                                onTap: widget.ratingReferenceNo != null && widget.requestType != null ? () {
+                                  // Navigate back to assets list
+                                  String route;
+                                  switch (widget.requestType) {
+                                    case 'MR':
+                                      route = Pages.routeMrAssetsList.toPathName();
+                                      break;
+                                    case 'RA':
+                                      route = Pages.routeRaAssetsList.toPathName();
+                                      break;
+                                    case 'RB':
+                                      route = Pages.routeRbAssetsList.toPathName();
+                                      break;
+                                    case 'RO':
+                                      route = Pages.routeRoAssetsList.toPathName();
+                                      break;
+                                    default:
+                                      route = Pages.routeMrAssetsList.toPathName();
+                                  }
+                                  
+                                  // Determine source based on request type
+                                  String source = 'massRating';
+                                  switch (widget.requestType) {
+                                    case 'RA':
+                                      source = 'ratingAssessment';
+                                      break;
+                                    case 'RB':
+                                      source = 'ratingBuilding';
+                                      break;
+                                    case 'RO':
+                                      source = 'ratingObject';
+                                      break;
+                                  }
+                                  
+                                  context.goNamed(
+                                    route,
+                                    queryParameters: {
+                                      'source': source,
+                                      if (GoRouterState.of(context).uri.queryParameters['requestId'] != null)
+                                        'requestId': GoRouterState.of(context).uri.queryParameters['requestId']!,
+                                    },
+                                  );
+                                } : null,
+                              ),
+                              BreadcrumbItem(label: "Domestic - Rating Card"),
                             ],
                           ),
                         ),

@@ -146,12 +146,18 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
       // Exit placement mode immediately to prevent multiple dialogs
       setState(() => isMarkerPlacementMode = false);
 
-      // Show dialog to navigate to rental evidence view
+      // Log the coordinates
+      debugPrint("AssetMapScreen: Map tapped at - Longitude: ${point.coordinates.lng}, Latitude: ${point.coordinates.lat}");
+      
+      // Show dialog to navigate to rental evidence view with coordinates
       showDialog(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
-          return AssetPopupMenuWidget();
+          return AssetPopupMenuWidget(
+            longitude: point.coordinates.lng.toDouble(),
+            latitude: point.coordinates.lat.toDouble(),
+          );
         },
       );
       return;
@@ -310,18 +316,77 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
     debugPrint("MapScreen: Navigating to form for type: $type");
     String? targetPath;
 
+    // Get the source context from route parameters
+    final String source =
+        GoRouterState.of(context).uri.queryParameters['source'] ?? '';
+
     switch (type) {
       case MapMarkerLoader.markerTypeRental:
-        targetPath = Pages.routeRentalEvidence.toPath();
+        // Context-aware navigation for Rental Evidence
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmRentalEvidences.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Rental Evidence (source: $source)");
+        } else {
+          targetPath = Pages.routeRentalEvidence.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Rental Evidence (source: $source)");
+        }
         break;
       case MapMarkerLoader.markerTypeSales:
-        targetPath = Pages.routeLaSalesEvidence.toPath();
+        // Context-aware navigation for Sales Evidence
+        if (source == 'landMiscellaneous') {
+          // Pass masterFileNo and coordinates as query parameters for LM Sales Evidence
+          final queryParams = <String, String>{};
+          if (_masterFileNo != null) {
+            queryParams['masterFileNo'] = _masterFileNo!;
+          }
+
+          // Add coordinates from the selected marker
+          if (_selectedMarkerForSketching != null) {
+            final coords = _selectedMarkerForSketching!.geometry.coordinates;
+            queryParams['latitude'] = coords.lat.toString();
+            queryParams['longitude'] = coords.lng.toString();
+            debugPrint(
+                "AssetMapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
+          }
+
+          final targetUri = Uri(
+            path: Pages.routeLmSalesEvidences.toPath(),
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+          targetPath = targetUri.toString();
+          debugPrint(
+              "AssetMapScreen: Navigating to LM Sales Evidence (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
+        } else {
+          targetPath = Pages.routeLaSalesEvidence.toPath();
+          debugPrint(
+              "AssetMapScreen: Navigating to LA Sales Evidence (source: $source)");
+        }
         break;
       case MapMarkerLoader.markerTypeValuations:
-        targetPath = Pages.routePastValuation.toPath();
+        // Context-aware navigation for Past Valuations
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmPastValuations.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Past Valuations (source: $source)");
+        } else {
+          targetPath = Pages.routePastValuation.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Past Valuations (source: $source)");
+        }
         break;
       case MapMarkerLoader.markerTypeBuildingRates:
-        targetPath = Pages.routeLaBuildingRates.toPath();
+        // Context-aware navigation for Building Rates
+        if (source == 'landMiscellaneous') {
+          targetPath = Pages.routeLmBuildingRates.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LM Building Rates (source: $source)");
+        } else {
+          targetPath = Pages.routeLaBuildingRates.toPath();
+          debugPrint(
+              "MapScreen: Navigating to LA Building Rates (source: $source)");
+        }
         break;
       default:
         debugPrint("MapScreen: Cannot navigate: Unknown data type '$type'.");
@@ -917,6 +982,7 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
                 showOnlyAddMarker: showOnlyAddMarker,
                 onAddMarker: () {
                   if (!mounted) return;
+                  debugPrint("AssetMapScreen: Add Marker button clicked");
                   // Add curly braces
                   if (isDrawingMode || isSketchingMode) {
                     _exitSketchingMode();
@@ -932,6 +998,7 @@ class _AssetMapScreenState extends State<AssetMapScreen> {
                     _selectedLotForSketching = null;
                     // _buildingGeometryIdPendingSave = null; // Removed
                   });
+                  debugPrint("AssetMapScreen: Marker placement mode activated");
                   _showSnackbar("Tap map to place a marker");
                 },
                 onAddDrawer: () {

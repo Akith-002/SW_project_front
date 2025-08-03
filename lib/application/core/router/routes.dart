@@ -6,6 +6,7 @@ import 'package:land_asset_valuation/application/core/router/services/router_ser
 import 'package:land_asset_valuation/application/core/widgets/sidebarlibrary/sidebar_scaffold.dart';
 import 'package:land_asset_valuation/application/pages/I3_master_file_list/i3_master_file_list.dart';
 import 'package:land_asset_valuation/application/pages/LA_Building_Rates/la_building_rates.dart';
+import 'package:land_asset_valuation/application/pages/LM_Building_Rates/lm_building_rates.dart';
 import 'package:land_asset_valuation/application/pages/LA_Sales_Evidence/la_Sales_Evidence.dart';
 import 'package:land_asset_valuation/application/pages/LM_Masterfile_list/lm_masterfile_list.dart';
 import 'package:land_asset_valuation/application/pages/MR_Assets_list/mr_assets_list.dart';
@@ -17,6 +18,9 @@ import 'package:land_asset_valuation/application/pages/conditionReport/condition
 import 'package:land_asset_valuation/application/pages/dashboard/dashboard_view.dart';
 import 'package:land_asset_valuation/application/pages/inspectionReport/inspection_report_view.dart';
 import 'package:land_asset_valuation/application/pages/rental_evidence/rental_evidence_view.dart';
+import 'package:land_asset_valuation/application/pages/LMRentalEvidences/lm_rental_evidences_view.dart';
+import 'package:land_asset_valuation/application/pages/LMSalesEvidences/lm_sales_evidences_view.dart';
+import 'package:land_asset_valuation/application/pages/LMPastValuations/lm_past_valuations_view.dart';
 import 'package:land_asset_valuation/application/pages/pastValuation/past_valuation_view.dart';
 import 'package:land_asset_valuation/application/pages/settingsScreen/settings_screen.dart';
 import 'package:land_asset_valuation/application/pages/signIn/signin_view.dart';
@@ -297,6 +301,47 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: Pages.routeLmRentalEvidences.toPath(),
+            name: Pages.routeLmRentalEvidences.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: LmRentalEvidencesView(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeLmSalesEvidences.toPath(),
+            name: Pages.routeLmSalesEvidences.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const LmSalesEvidencesView(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Pages.routeLmPastValuations.toPath(),
+            name: Pages.routeLmPastValuations.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: FutureBuilder<MasterDataResponse>(
+                  future: GetIt.I<GetMasterDataUseCase>()(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load master data'));
+                    } else {
+                      return LmPastValuationsView(masterData: snapshot.data!);
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+          GoRoute(
             path: Pages.routeLaSalesEvidence.toPath(),
             name: Pages.routeLaSalesEvidence.toPathName(),
             pageBuilder: (context, state) {
@@ -317,9 +362,33 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: Pages.routeLmBuildingRates.toPath(),
+            name: Pages.routeLmBuildingRates.toPathName(),
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: const LmBuildingRates(),
+              );
+            },
+          ),
+          GoRoute(
             path: Pages.routeI2RentalEvidence.toPath(),
             name: Pages.routeI2RentalEvidence.toPathName(),
             pageBuilder: (context, state) {
+              // Log all query parameters
+              print('Routes: I2RentalEvidence - All query parameters: ${state.uri.queryParameters}');
+              
+              // Extract longitude and latitude from query parameters
+              final double? longitude = state.uri.queryParameters['longitude'] != null 
+                  ? double.tryParse(state.uri.queryParameters['longitude']!) 
+                  : null;
+              final double? latitude = state.uri.queryParameters['latitude'] != null 
+                  ? double.tryParse(state.uri.queryParameters['latitude']!) 
+                  : null;
+              
+              print('Routes: I2RentalEvidence - Parsed longitude: $longitude');
+              print('Routes: I2RentalEvidence - Parsed latitude: $latitude');
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -328,9 +397,42 @@ class AppRouter {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Failed to load master data'));
+                      // For testing: Show form with empty master data when database is down
+                      print('Routes: Master data failed to load, showing form anyway for testing');
+                      return I2RentalEvidence(
+                        masterData: MasterDataResponse(
+                          buildingCategory: [],
+                          buildingClass: [],
+                          conviences: [],
+                          natureOfConstruction: [],
+                          roofMaterial: [],
+                          roofFrame: [],
+                          roofFinisher: [],
+                          celing: [],
+                          foundationStructure: [],
+                          wallStructure: [],
+                          floorStructure: [],
+                          door: [],
+                          window: [],
+                          windowProtection: [],
+                          doorsBathroomAndToiletFittings: [],
+                          doorsHandRail: [],
+                          doorsPantryCupboard: [],
+                          doorsOther: [],
+                          wallFinisher: [],
+                          floorFinisher: [],
+                          bathroomAndToilet: [],
+                          services: [],
+                        ),
+                        longitude: longitude,
+                        latitude: latitude,
+                      );
                     } else {
-                      return I2RentalEvidence(masterData: snapshot.data!);
+                      return I2RentalEvidence(
+                        masterData: snapshot.data!,
+                        longitude: longitude,
+                        latitude: latitude,
+                      );
                     }
                   },
                 ),
@@ -429,6 +531,11 @@ class AppRouter {
                     state.uri.queryParameters['assetId'] ?? '0',
                   ) ??
                   0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
 
               return NoTransitionPage(
                 key: state.pageKey,
@@ -441,7 +548,12 @@ class AppRouter {
                       return Center(child: Text('Failed to load master data'));
                     } else {
                       return DomesticRatingCard(
-                          assetId: assetId, masterData: snapshot.data!);
+                        assetId: assetId, 
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -452,6 +564,16 @@ class AppRouter {
             path: Pages.routeOfficesRatingCard.toPath(),
             name: Pages.routeOfficesRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -462,7 +584,13 @@ class AppRouter {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Failed to load master data'));
                     } else {
-                      return OfficesRatingCard(masterData: snapshot.data!);
+                      return OfficesRatingCard(
+                        assetId: assetId, 
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -473,6 +601,16 @@ class AppRouter {
             path: Pages.routeAgricultureRatingCard.toPath(),
             name: Pages.routeAgricultureRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -483,7 +621,13 @@ class AppRouter {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Failed to load master data'));
                     } else {
-                      return AgricultureRatingCard(masterData: snapshot.data!);
+                      return AgricultureRatingCard(
+                        assetId: assetId,
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -494,6 +638,16 @@ class AppRouter {
             path: Pages.routeShopsRatingCard.toPath(),
             name: Pages.routeShopsRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -504,7 +658,13 @@ class AppRouter {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Failed to load master data'));
                     } else {
-                      return ShopsRatingCard(masterData: snapshot.data!);
+                      return ShopsRatingCard(
+                        assetId: assetId,
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -515,6 +675,16 @@ class AppRouter {
             path: Pages.routeSpecialRatingCard.toPath(),
             name: Pages.routeSpecialRatingCard.toPathName(),
             pageBuilder: (context, state) {
+              final int assetId = int.tryParse(
+                    state.uri.queryParameters['assetId'] ?? '0',
+                  ) ??
+                  0;
+              
+              // Extract additional parameters for breadcrumb
+              final String? assetNo = state.uri.queryParameters['assetNo'];
+              final String? requestType = state.uri.queryParameters['requestType'];
+              final String? ratingReferenceNo = state.uri.queryParameters['ratingReferenceNo'];
+              
               return NoTransitionPage(
                 key: state.pageKey,
                 child: FutureBuilder<MasterDataResponse>(
@@ -525,7 +695,13 @@ class AppRouter {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Failed to load master data'));
                     } else {
-                      return SpecialRatingCard(masterData: snapshot.data!);
+                      return SpecialRatingCard(
+                        assetId: assetId,
+                        masterData: snapshot.data!,
+                        assetNo: assetNo,
+                        requestType: requestType,
+                        ratingReferenceNo: ratingReferenceNo,
+                      );
                     }
                   },
                 ),
@@ -581,6 +757,12 @@ class AppRouter {
     print(
         "DEBUG: Does path start with I3MasterFileList? ${path.startsWith(Pages.routeI3MasterFileList.toPath())}");
     print("DEBUG: All query parameters: ${state.uri.queryParameters}");
+
+    // Special handling for LM Building Rates - always return index 7 regardless of query parameters
+    if (path.startsWith(Pages.routeLmBuildingRates.toPath())) {
+      print("DEBUG: LM Building Rates route detected - returning index 7");
+      return 7; // Land Miscellaneous
+    }
 
     // Check for selectedIndex in query parameters first
     if (state.uri.queryParameters.containsKey('selectedIndex')) {
@@ -723,10 +905,28 @@ class AppRouter {
         );
         break;
       case 2:
+        // Mass Rating
+        context.goNamed(
+          Pages.routeI3MasterFileList.toPathName(),
+          queryParameters: {'selectedIndex': index.toString()},
+        );
+        break;
       case 3:
+        // Rating Assessment - show requests table first
+        context.goNamed(
+          Pages.routeI3MasterFileList.toPathName(),
+          queryParameters: {'selectedIndex': index.toString()},
+        );
+        break;
       case 4:
+        // Rating Building - show requests table first
+        context.goNamed(
+          Pages.routeI3MasterFileList.toPathName(),
+          queryParameters: {'selectedIndex': index.toString()},
+        );
+        break;
       case 5:
-        // Mass Rating section
+        // Rating Object - show requests table first
         context.goNamed(
           Pages.routeI3MasterFileList.toPathName(),
           queryParameters: {'selectedIndex': index.toString()},

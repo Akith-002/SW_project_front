@@ -7,6 +7,7 @@ import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/iconButtonWidget/icon_button_widget.dart';
 import 'package:land_asset_valuation/application/core/widgets/editRatingCardDialog/edit_rating_card_dialog.dart';
+import 'package:land_asset_valuation/application/core/widgets/advanced_search_dialog.dart';
 import 'package:land_asset_valuation/data/models/asset.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -21,6 +22,9 @@ class AssetListTable extends StatefulWidget {
   final Function(Asset)? onAssetSelected;
   final Function(List<Asset>)? onAssetsSelected;
   final VoidCallback? onRefresh;
+  final TextEditingController? searchController;
+  final Function(String)? onSearch;
+  final String? ratingReferenceNo;
 
   const AssetListTable({
     super.key,
@@ -29,6 +33,9 @@ class AssetListTable extends StatefulWidget {
     this.onAssetSelected,
     this.onAssetsSelected,
     this.onRefresh,
+    this.searchController,
+    this.onSearch,
+    this.ratingReferenceNo,
   });
 
   @override
@@ -38,6 +45,9 @@ class AssetListTable extends StatefulWidget {
 class _AssetListTableState extends State<AssetListTable> {
   late List<bool> isChecked; // Tracks checkbox state for each asset
   bool isSidebarExtended = true;
+  bool _showFilterDropdown = false;
+  String? _selectedSortColumn;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -136,14 +146,25 @@ class _AssetListTableState extends State<AssetListTable> {
       6: FlexColumnWidth(), // Action buttons
     };
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Header row with title, controls, and search
-            Row(
-              children: [
+    return GestureDetector(
+      onTap: () {
+        // Close dropdown when tapping outside
+        if (_showFilterDropdown) {
+          setState(() {
+            _showFilterDropdown = false;
+          });
+        }
+      },
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Header row with title, controls, and search
+                  Row(
+                    children: [
                 Text(
                   "${AppString.allAssets.localize(context)!}${widget.assets.length}",
                   style: AppStyling.semiBoldTextSize16.copyWith(
@@ -169,12 +190,18 @@ class _AssetListTableState extends State<AssetListTable> {
                         if (selectedAsset.isRatingCard) {
                           // Edit existing rating card
                           EditRatingCardDialog.showEditRatingCardDialog(context,
-                              asset: selectedAsset);
+                              asset: selectedAsset,
+                              ratingReferenceNo: widget.ratingReferenceNo);
                         } else {
                           // Create new rating card
+                          debugPrint('AssetListTable - Creating rating card with:');
+                          debugPrint('  sourceContext: ${widget.assetType}');
+                          debugPrint('  assetNo: ${selectedAsset.assetNo}');
+                          debugPrint('  ratingReferenceNo: ${widget.ratingReferenceNo}');
                           EditRatingCardDialog.showAddRatingCardDialog(context,
                               sourceContext: widget.assetType,
-                              asset: selectedAsset);
+                              asset: selectedAsset,
+                              ratingReferenceNo: widget.ratingReferenceNo);
                         }
                       } else {
                         // Handle multiple asset selection
@@ -227,6 +254,8 @@ class _AssetListTableState extends State<AssetListTable> {
                   width: 290,
                   height: 37,
                   child: TextField(
+                    controller: widget.searchController,
+                    onChanged: widget.onSearch,
                     decoration: InputDecoration(
                       hintText: AppString.search.localize(context),
                       hintStyle: AppStyling.regularTextSize14,
@@ -243,6 +272,15 @@ class _AssetListTableState extends State<AssetListTable> {
                         horizontal: 12,
                         vertical: 8,
                       ),
+                      suffixIcon: widget.searchController?.text.isNotEmpty ?? false
+                          ? IconButton(
+                              icon: Icon(Icons.clear),
+                              onPressed: () {
+                                widget.searchController?.clear();
+                                widget.onSearch?.call('');
+                              },
+                            )
+                          : null,
                     ),
                   ),
                 ),
@@ -251,12 +289,30 @@ class _AssetListTableState extends State<AssetListTable> {
                 iconButtonWidget(
                   iconName: PhosphorIconsRegular.funnelSimple,
                   color: colors(context).colorBlack!,
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      _showFilterDropdown = !_showFilterDropdown;
+                    });
+                  },
                 ),
                 SizedBox(width: 12),
                 // Advanced button
                 OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AdvancedSearchDialog(
+                        onSearch: (searchCriteria) {
+                          Navigator.pop(context);
+                          // Handle advanced search
+                          _performAdvancedSearch(searchCriteria);
+                        },
+                        onCancel: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    );
+                  },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
                       color: colors(context).colorGrey9!,
@@ -329,8 +385,82 @@ class _AssetListTableState extends State<AssetListTable> {
                 ),
               ),
             ),
-          ],
-        ),
+                ],
+              ),
+            ),
+          ),
+          // Filter dropdown overlay
+          if (_showFilterDropdown)
+            Positioned(
+              top: 80, // Adjust based on your layout
+              right: 100,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colors(context).colorWhite,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors(context).colorGrey3!.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _sortOptions.entries.map((entry) {
+                    final isSelected = _selectedSortColumn == entry.value;
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedSortColumn = entry.value;
+                          _showFilterDropdown = false;
+                        });
+                        // Call sort on the assets
+                        _sortAssets(entry.value);
+                      },
+                      child: Container(
+                        width: 200,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? colors(context).colorGrey9!.withOpacity(0.1)
+                              : null,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              entry.key,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isSelected
+                                    ? colors(context).colorPrimary1
+                                    : colors(context).colorBlack,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                            const Spacer(),
+                            if (isSelected)
+                              Icon(
+                                Icons.check,
+                                size: 16,
+                                color: colors(context).colorPrimary1,
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -414,6 +544,22 @@ class _AssetListTableState extends State<AssetListTable> {
                     ? PhosphorIconsRegular.pencilSimpleLine // Edit existing
                     : PhosphorIconsRegular.folderSimplePlus, // Add new
                 onPressed: () {
+                  if (asset.isRatingCard) {
+                    // Edit existing rating card
+                    EditRatingCardDialog.showEditRatingCardDialog(context,
+                        asset: asset,
+                        ratingReferenceNo: widget.ratingReferenceNo);
+                  } else {
+                    // Create new rating card
+                    debugPrint('AssetListTable - Creating rating card with:');
+                    debugPrint('  sourceContext: ${widget.assetType}');
+                    debugPrint('  assetNo: ${asset.assetNo}');
+                    debugPrint('  ratingReferenceNo: ${widget.ratingReferenceNo}');
+                    EditRatingCardDialog.showAddRatingCardDialog(context,
+                        sourceContext: widget.assetType,
+                        asset: asset,
+                        ratingReferenceNo: widget.ratingReferenceNo);
+                  }
                   widget.onAssetSelected?.call(asset);
                 },
               ),
@@ -439,6 +585,45 @@ class _AssetListTableState extends State<AssetListTable> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  // Define sort options for assets
+  final Map<String, String> _sortOptions = {
+    'Asset No': 'assetNo',
+    'Ward': 'ward',
+    'Road/Street': 'rdSt',
+    'Owner': 'owner',
+    'Status': 'status',
+  };
+
+  void _sortAssets(String sortBy) {
+    // Since assets are passed as props, we need to trigger a parent callback
+    // For now, we'll just show a message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Sorting by $sortBy'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _performAdvancedSearch(Map<String, String> searchCriteria) {
+    // Build search query from criteria
+    String searchQuery = searchCriteria.entries
+        .map((e) => '${e.key}:${e.value}')
+        .join(' ');
+    
+    // Trigger search with advanced criteria
+    widget.onSearch?.call(searchQuery);
+    
+    // Show feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Searching with ${searchCriteria.length} criteria'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
 
@@ -12,6 +13,10 @@ class LabeledTextField extends StatefulWidget {
   // Add validator property
   final FormFieldValidator<String>? validator;
   final Function(bool)? onErrorChange; // Add this new property
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final AutovalidateMode? autovalidateMode;
+  final bool readOnly;
 
   const LabeledTextField({
     super.key,
@@ -24,6 +29,10 @@ class LabeledTextField extends StatefulWidget {
     // Include validator in constructor
     this.validator,
     this.onErrorChange, // Add this to constructor
+    this.keyboardType,
+    this.inputFormatters,
+    this.autovalidateMode,
+    this.readOnly = false,
   });
 
   @override
@@ -52,10 +61,15 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
 
   void _clearError() {
     if (_errorMessage != null) {
-      setState(() {
-        _errorMessage = null;
+      // Defer setState to avoid calling it during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = null;
+          });
+          widget.onErrorChange?.call(false);
+        }
       });
-      widget.onErrorChange?.call(false);
     }
   }
 
@@ -96,8 +110,11 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
               Expanded(
                 child: TextFormField(
                   controller: _controller,
-                  enabled: true,
-                  readOnly: false,
+                  enabled: !widget.readOnly,
+                  readOnly: widget.readOnly,
+                  keyboardType: widget.keyboardType,
+                  inputFormatters: widget.inputFormatters,
+                  autovalidateMode: widget.autovalidateMode ?? AutovalidateMode.disabled,
                   style: const TextStyle(color: Colors.black, fontSize: 14),
                   decoration: InputDecoration(
                     border: InputBorder.none,
@@ -129,22 +146,47 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
                     _clearError();
                   },
                   onChanged: (value) {
-                    setState(() {
-                      _isTyping = value.isNotEmpty;
-                      _errorMessage = null; // Clear error on change
+                    // Defer setState to next frame to avoid calling during build
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      
+                      setState(() {
+                        _isTyping = value.isNotEmpty;
+                        // Only clear error if autovalidate is not on user interaction
+                        if (widget.autovalidateMode != AutovalidateMode.onUserInteraction) {
+                          _errorMessage = null;
+                        }
+                      });
+                      
+                      // If autovalidating on user interaction, validate now
+                      if (widget.autovalidateMode == AutovalidateMode.onUserInteraction) {
+                        final result = widget.validator?.call(value);
+                        if (mounted) {
+                          setState(() {
+                            _errorMessage = result;
+                          });
+                          widget.onErrorChange?.call(result != null);
+                        }
+                      } else {
+                        widget.onErrorChange?.call(false);
+                      }
                     });
-                    widget.onErrorChange?.call(false);
                   },
                   validator: (value) {
                     if (!mounted) return null;
 
                     final result = widget.validator?.call(value);
-                    if (mounted) {
-                      setState(() {
-                        _errorMessage = result;
-                      });
-                      widget.onErrorChange?.call(result != null);
-                    }
+                    
+                    // Defer setState to avoid calling during build
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          _errorMessage = result;
+                        });
+                        widget.onErrorChange?.call(result != null);
+                      }
+                    });
+                    
                     // Return null instead of the error to prevent Flutter from showing it below
                     return null;
                   },

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/app/base_view.dart';
 import 'package:land_asset_valuation/app/cubit/base_cubit.dart';
 import 'package:land_asset_valuation/app/cubit/base_state.dart';
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/light_color_list.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
@@ -20,6 +21,7 @@ import 'package:land_asset_valuation/application/pages/rental_evidence/cubit/ren
 import 'package:land_asset_valuation/application/pages/rental_evidence/cubit/rental_evidence_state.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:http/http.dart' as http;
+import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 /// RentalEvidenceView is the main view for displaying the rental evidence form.
 class RentalEvidenceView extends BasePage {
@@ -55,6 +57,48 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
   // List to store uploaded images.
   List<dynamic> uploadedImages = []; // Track submission state
   bool _isSubmitting = false;
+
+  // Master file data from query parameters
+  String? _masterFileId;
+  String? _masterFileNo;
+  String? _masterFileRefNo;
+  double? _initialLatitude;
+  double? _initialLongitude;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _extractMasterFileData();
+  }
+
+  void _extractMasterFileData() {
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+
+    _masterFileId = queryParams['masterFileId'];
+    _masterFileNo = queryParams['masterFileNo'];
+    _masterFileRefNo = queryParams['masterFileRefNo'];
+
+    // Pre-fill form fields with data from query parameters
+    if (_masterFileRefNo != null && _masterFileRefNo!.isNotEmpty) {
+      _masterFileRefNoController.text = _masterFileRefNo!;
+    }
+
+    // Set initial coordinates if provided
+    final latitudeStr = queryParams['latitude'];
+    final longitudeStr = queryParams['longitude'];
+    if (latitudeStr != null && longitudeStr != null) {
+      _initialLatitude = double.tryParse(latitudeStr);
+      _initialLongitude = double.tryParse(longitudeStr);
+      if (_initialLatitude != null && _initialLongitude != null) {
+        _latitudeController.text = latitudeStr;
+        _longitudeController.text = longitudeStr;
+      }
+    }
+
+    debugPrint(
+        "RentalEvidence: Master File Data extracted - ID: $_masterFileId, Ref: $_masterFileRefNo, Coords: ($_initialLatitude, $_initialLongitude)");
+  }
 
   @override
   void dispose() {
@@ -148,7 +192,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
 
         // Send data to the backend
         _cubit.sendRentalEvidence(
-          masterFileId: "56249", // You can get this dynamically
+          masterFileId: _masterFileId ?? "0", // Use extracted master file ID
           masterFileRefNo: _masterFileRefNoController.text,
           assessmentNo: _assessmentNoController.text,
           owner: _ownerController.text,
@@ -247,7 +291,7 @@ class _RentalEvidenceViewState extends BasePageState<RentalEvidenceView> {
     print('DEBUG: Number of images to upload: ${uploadedImages.length}');
     if (uploadedImages.isEmpty) return;
     var uri = Uri.parse(
-        'http://10.0.2.2:5221/api/ImageData/upload'); // Make sure this matches your backend
+        '${AppConfig.apiBaseUrl}ImageData/upload'); // Make sure this matches your backend
     var request = http.MultipartRequest('POST', uri)
       ..fields['reportId'] = reportId;
     for (var image in uploadedImages) {

@@ -373,4 +373,5 @@ class AppString {
   static const String atLeastOneLowercase = 'atLeastOneLowercase';
   static const String atLeastOneNumber = 'atLeastOneNumber';
   static const String setNewPassword = 'setNewPassword';
+  static const String mrRentalEvidence = 'mrRentalEvidence';
 }

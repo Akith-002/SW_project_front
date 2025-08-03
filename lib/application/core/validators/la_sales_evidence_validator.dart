@@ -95,28 +95,43 @@ class LaSalesEvidenceValidator {
 
   /// Validates a required alphanumeric field with max length
   static String? requiredAlphaNum(String? value, int max, String fieldName) {
-    return required(value, fieldName) ??
-        alphanumeric(value, fieldName) ??
-        maxLength(value, max, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    String? alphanumericError = alphanumeric(value, fieldName);
+    if (alphanumericError != null) return alphanumericError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates a required numeric field with max length
   static String? requiredNumeric(String? value, int max, String fieldName) {
-    return required(value, fieldName) ??
-        numeric(value, fieldName) ??
-        maxLength(value, max, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    String? numericError = numeric(value, fieldName);
+    if (numericError != null) return numericError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates a required integer field with max length
   static String? requiredInteger(String? value, int max, String fieldName) {
-    return required(value, fieldName) ??
-        integer(value, fieldName) ??
-        maxLength(value, max, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    String? integerError = integer(value, fieldName);
+    if (integerError != null) return integerError;
+
+    return maxLength(value, max, fieldName);
   }
 
   /// Validates a coordinate field (latitude/longitude)
   static String? requiredCoordinate(String? value, String fieldName) {
-    return required(value, fieldName) ?? coordinate(value, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    return coordinate(value, fieldName);
   }
 
   /// Validates an optional coordinate field
@@ -142,7 +157,10 @@ class LaSalesEvidenceValidator {
 
   /// Validates a required date field
   static String? requiredDate(String? value, String fieldName) {
-    return required(value, fieldName) ?? date(value, fieldName);
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    return date(value, fieldName);
   }
 
   /// Validates an optional date field
@@ -165,10 +183,11 @@ class LaSalesEvidenceValidator {
   }
 
   /// Validates a required deed number field
-  static String? requiredDeedNumber(String? value, int max, String fieldName) {
-    return required(value, fieldName) ??
-        deedNumber(value, fieldName) ??
-        maxLength(value, max, fieldName);
+  static String? requiredDeedNumber(String? value, String fieldName) {
+    String? requiredError = required(value, fieldName);
+    if (requiredError != null) return requiredError;
+
+    return null; // Additional deed number specific validations can be added here
   }
 
   /// Validates an optional deed number field

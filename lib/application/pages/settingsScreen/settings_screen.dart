@@ -25,6 +25,27 @@ class SettingsScreen extends BasePage {
 }
 
 class _SettingsScreenState extends BasePageState<SettingsScreen> {
+  String _getFontSizeLabel(String key, BuildContext context) {
+    switch (key) {
+      case "small":
+        return AppString.small.localize(context)!;
+      case "medium":
+        return AppString.medium.localize(context)!;
+      case "large":
+        return AppString.large.localize(context)!;
+      default:
+        return key;
+    }
+  }
+
+  // Font size keys and mapping
+  final List<String> _fontSizeKeys = ["small", "medium", "large"];
+  final Map<String, double> _fontSizeScale = {
+    "small": 0.7,
+    "medium": 0.9,
+    "large": 1.0,
+  };
+
   final _cubit = injection<SettingsScreenCubit>();
 
   late AppThemeMode _themeMode;
@@ -202,33 +223,17 @@ class _SettingsScreenState extends BasePageState<SettingsScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: CustomDropdownField(
-                        items: [
-                          AppString.small.localize(context)!,
-                          AppString.medium.localize(context)!,
-                          AppString.large.localize(context)!,
-                        ],
-                        initialValue: AppString.large.localize(context)!,
+                        items: _fontSizeKeys,
+                        initialValue: "large",
                         onChanged: (value) {
-                          // Map font size selection to scale factor
-                          double scaleFactor;
-                          switch (value) {
-                            case "Small":
-                              scaleFactor = 0.7;
-                              break;
-                            case "Medium":
-                              scaleFactor = 0.9;
-                              break;
-                            case "Large":
-                              scaleFactor = 1.0;
-                              break;
-                            default:
-                              scaleFactor = 1.0;
-                          }
+                          final scaleFactor = _fontSizeScale[value] ?? 1.0;
                           _textScaleFactorModel.setTextScaleFactor(scaleFactor);
                         },
                         width: 322,
                         label: AppString.fontSize.localize(context)!,
                         required: false,
+                        // If your CustomDropdownField supports a labelBuilder or similar, use it here:
+                        // labelBuilder: (key) => _getFontSizeLabel(key, context),
                       ),
                     ),
                   ],
