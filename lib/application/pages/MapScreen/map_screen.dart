@@ -473,28 +473,33 @@ class _MapScreenState extends State<MapScreen> {
         final img = _markerLoader.getImage(selectedOption);
         if (img.isNotEmpty) {
           mapboxKey.currentState?.addMarkerAtPoint(point, img, selectedOption);
-          
+
           // _showSnackbar("$selectedOption marker added.");
-                    _saveMarkerCoordinate(point, selectedOption);
+          _saveMarkerCoordinate(point, selectedOption);
 
           // Get the current source from route parameters
           final GoRouterState state = GoRouterState.of(context);
           final String source = state.uri.queryParameters['source'] ?? '';
-          
-          debugPrint("MapScreen: Marker placed - Type: $selectedOption, Source: $source");
-          debugPrint("MapScreen: Marker coordinates - Longitude: ${point.coordinates.lng}, Latitude: ${point.coordinates.lat}");
-          
+
+          debugPrint(
+              "MapScreen: Marker placed - Type: $selectedOption, Source: $source");
+          debugPrint(
+              "MapScreen: Marker coordinates - Longitude: ${point.coordinates.lng}, Latitude: ${point.coordinates.lat}");
+
           // If source is MRrentalEvidence and it's a rental marker, navigate to I2RentalEvidence immediately
-          if (source == 'MRrentalEvidence' && selectedOption == MapMarkerLoader.markerTypeRental) {
+          if (source == 'MRrentalEvidence' &&
+              selectedOption == MapMarkerLoader.markerTypeRental) {
             final queryParams = {
               'longitude': point.coordinates.lng.toString(),
               'latitude': point.coordinates.lat.toString(),
             };
-            final uri = Uri(path: Pages.routeI2RentalEvidence.toPath(), queryParameters: queryParams);
-            debugPrint("MapScreen: Auto-navigating to I2RentalEvidence with URL: ${uri.toString()}");
+            final uri = Uri(
+                path: Pages.routeI2RentalEvidence.toPath(),
+                queryParameters: queryParams);
+            debugPrint(
+                "MapScreen: Auto-navigating to I2RentalEvidence with URL: ${uri.toString()}");
             context.push(uri.toString());
           }
-
         } else {
           // _showSnackbar("Failed to load icon for '$selectedOption'.",
           // isError: true);
@@ -516,8 +521,9 @@ class _MapScreenState extends State<MapScreen> {
   /// Handles when a marker on the map is clicked
   void _handlePointAnnotationClick(PointAnnotation annotation, String? type) {
     debugPrint("MapScreen: Marker Clicked - ID: ${annotation.id}, Type: $type");
-    debugPrint("MapScreen: Marker Coordinates - Longitude: ${annotation.geometry.coordinates.lng}, Latitude: ${annotation.geometry.coordinates.lat}");
-    
+    debugPrint(
+        "MapScreen: Marker Coordinates - Longitude: ${annotation.geometry.coordinates.lng}, Latitude: ${annotation.geometry.coordinates.lat}");
+
     if (isDrawingMode || isSketchingMode) {
       debugPrint("Ignoring marker click - active drawing/sketching mode.");
       // _showSnackbar("Exit current mode to interact with markers.");
@@ -674,14 +680,15 @@ class _MapScreenState extends State<MapScreen> {
   void _loadSurroundingDataForm(String? type) {
     if (!mounted) return;
     debugPrint("MapScreen: Navigating to form for type: $type");
-    
+
     // Get the coordinates from the selected marker if available
     Point? markerCoordinates;
     if (_selectedMarkerForSketching != null) {
       markerCoordinates = _selectedMarkerForSketching!.geometry;
-      debugPrint("MapScreen: Marker coordinates - Longitude: ${markerCoordinates.coordinates.lng}, Latitude: ${markerCoordinates.coordinates.lat}");
+      debugPrint(
+          "MapScreen: Marker coordinates - Longitude: ${markerCoordinates.coordinates.lng}, Latitude: ${markerCoordinates.coordinates.lat}");
     }
-    
+
     String? targetPath;
     Map<String, String>? queryParams;
 
@@ -718,9 +725,9 @@ class _MapScreenState extends State<MapScreen> {
         // Get the current source from route parameters
         final GoRouterState state = GoRouterState.of(context);
         final String source = state.uri.queryParameters['source'] ?? '';
-        
+
         debugPrint("MapScreen: Rental evidence navigation - Source: $source");
-        
+
         // If source is MRrentalEvidence, navigate to I2RentalEvidence with coordinates
         if (source == 'MRrentalEvidence' && markerCoordinates != null) {
           targetPath = Pages.routeI2RentalEvidence.toPath();
@@ -728,70 +735,17 @@ class _MapScreenState extends State<MapScreen> {
             'longitude': markerCoordinates.coordinates.lng.toString(),
             'latitude': markerCoordinates.coordinates.lat.toString(),
           };
-          debugPrint("MapScreen: Navigating to I2RentalEvidence with coordinates - Longitude: ${queryParams['longitude']}, Latitude: ${queryParams['latitude']}");
+          debugPrint(
+              "MapScreen: Navigating to I2RentalEvidence with coordinates - Longitude: ${queryParams['longitude']}, Latitude: ${queryParams['latitude']}");
         } else {
-          
           final targetUri = Uri(
-          path: Pages.routeRentalEvidence.toPath(),
-          queryParameters:
-              commonQueryParams.isNotEmpty ? commonQueryParams : null,
-        );
-    
-        
-        targetPath = targetUri.toString();
-        debugPrint(
-            "MapScreen: Navigating to Rental Evidence with masterFileId: $_id");
-        break;
-      case MapMarkerLoader.markerTypeSales:
-        final targetUri = Uri(
-          path: Pages.routeLaSalesEvidence.toPath(),
-          queryParameters:
-              commonQueryParams.isNotEmpty ? commonQueryParams : null,
-        );
-        targetPath = targetUri.toString();
-        debugPrint(
-            "MapScreen: Navigating to Sales Evidence with masterFileId: $_id");
-        break;
-      case MapMarkerLoader.markerTypeValuations:
-        final targetUri = Uri(
-          path: Pages.routePastValuation.toPath(),
-          queryParameters:
-              commonQueryParams.isNotEmpty ? commonQueryParams : null,
-        );
-        targetPath = targetUri.toString();
-        debugPrint(
-            "MapScreen: Navigating to Past Valuation with masterFileId: $_id");
-        // Context-aware navigation for Rental Evidence
-        if (source == 'landMiscellaneous') {
-          // Pass masterFileNo and coordinates as query parameters for LM Rental Evidence
-          final queryParams = <String, String>{};
-          if (_masterFileNo != null) {
-            queryParams['masterFileNo'] = _masterFileNo!;
-          }
-          if (_masterFileRefNo != null) {
-            queryParams['masterFileRefNo'] = _masterFileRefNo!;
-          }
-
-          // Add coordinates from the selected marker
-          if (_selectedMarkerForSketching != null) {
-            final coords = _selectedMarkerForSketching!.geometry.coordinates;
-            queryParams['latitude'] = coords.lat.toString();
-            queryParams['longitude'] = coords.lng.toString();
-            debugPrint(
-                "MapScreen: Adding coordinates to navigation - Lat: ${coords.lat}, Lng: ${coords.lng}");
-          }
-
-          final targetUri = Uri(
-            path: Pages.routeLmRentalEvidences.toPath(),
-            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+            path: Pages.routeRentalEvidence.toPath(),
+            queryParameters:
+                commonQueryParams.isNotEmpty ? commonQueryParams : null,
           );
           targetPath = targetUri.toString();
           debugPrint(
-              "MapScreen: Navigating to LM Rental Evidence (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
-        } else {
-          targetPath = Pages.routeRentalEvidence.toPath();
-          debugPrint(
-              "MapScreen: Navigating to LA Rental Evidence (source: $source)");
+              "MapScreen: Navigating to Rental Evidence with masterFileId: $_id");
         }
         break;
       case MapMarkerLoader.markerTypeSales:
@@ -823,9 +777,14 @@ class _MapScreenState extends State<MapScreen> {
           debugPrint(
               "MapScreen: Navigating to LM Sales Evidence (source: $source, masterFileNo: $_masterFileNo, coordinates: ${_selectedMarkerForSketching?.geometry.coordinates})");
         } else {
-          targetPath = Pages.routeLaSalesEvidence.toPath();
+          final targetUri = Uri(
+            path: Pages.routeLaSalesEvidence.toPath(),
+            queryParameters:
+                commonQueryParams.isNotEmpty ? commonQueryParams : null,
+          );
+          targetPath = targetUri.toString();
           debugPrint(
-              "MapScreen: Navigating to LA Sales Evidence (source: $source)");
+              "MapScreen: Navigating to LA Sales Evidence with masterFileId: $_id");
         }
         break;
       case MapMarkerLoader.markerTypeValuations:
@@ -835,9 +794,14 @@ class _MapScreenState extends State<MapScreen> {
           debugPrint(
               "MapScreen: Navigating to LM Past Valuations (source: $source)");
         } else {
-          targetPath = Pages.routePastValuation.toPath();
+          final targetUri = Uri(
+            path: Pages.routePastValuation.toPath(),
+            queryParameters:
+                commonQueryParams.isNotEmpty ? commonQueryParams : null,
+          );
+          targetPath = targetUri.toString();
           debugPrint(
-              "MapScreen: Navigating to LA Past Valuations (source: $source)");
+              "MapScreen: Navigating to LA Past Valuations with masterFileId: $_id");
         }
         break;
       case MapMarkerLoader.markerTypeBuildingRates:
