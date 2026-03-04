@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 import 'package:land_asset_valuation/application/core/widgets/tableForLM/planLM.dart';
-import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 class PlanlmRepository {
   static Future<PaginatedResponseLM<Planlm>> getPlans({

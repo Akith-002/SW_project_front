@@ -11,7 +11,7 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 
 class VerifyOtpForm extends StatefulWidget {
   final String email;
-  const VerifyOtpForm({Key? key, required this.email}) : super(key: key);
+  const VerifyOtpForm({super.key, required this.email});
 
   @override
   State<VerifyOtpForm> createState() => _VerifyOtpFormState();

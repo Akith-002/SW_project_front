@@ -101,7 +101,7 @@ class _LmRentalEvidencesViewState extends BasePageState<LmRentalEvidencesView> {
       // Create a unique identifier using coordinates (rounded to avoid floating point precision issues)
       final roundedLat = double.parse(lat).toStringAsFixed(6);
       final roundedLng = double.parse(lng).toStringAsFixed(6);
-      _markerId = '${roundedLat}_${roundedLng}';
+      _markerId = '${roundedLat}_$roundedLng';
       debugPrint('Generated marker ID: $_markerId');
     } else {
       // Fallback to timestamp if coordinates are not available

@@ -8,12 +8,12 @@ class OverviewChart extends StatelessWidget {
   final double tasksDone;
 
   const OverviewChart({
-    Key? key,
+    super.key,
     required this.landAcquisition,
     required this.massRating,
     required this.miscAcquisition,
     required this.tasksDone,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

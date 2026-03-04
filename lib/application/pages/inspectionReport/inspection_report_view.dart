@@ -121,8 +121,8 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
   bool _dataExtracted = false;
 
   // Building form completion tracking
-  Map<String, bool> _buildingFormCompletionStatus = {};
-  Map<String, Map<String, dynamic>> _savedBuildingForms = {};
+  final Map<String, bool> _buildingFormCompletionStatus = {};
+  final Map<String, Map<String, dynamic>> _savedBuildingForms = {};
 
   @override
   void initState() {
@@ -601,7 +601,7 @@ class _InspectionReportViewState extends BasePageState<InspectionReportView>
           .where((completed) => completed)
           .length;
       message =
-          'Please complete all building forms (${completedBuildings}/${_availableBuildings.length} completed)';
+          'Please complete all building forms ($completedBuildings/${_availableBuildings.length} completed)';
     } else if (!_isOtherConstructionsComplete()) {
       message = 'Please complete the Other Constructions tab';
     }

@@ -3,7 +3,6 @@ import 'package:logger/logger.dart';
 import 'package:land_asset_valuation/data/datasource/local/condition_report_local_database.dart';
 import 'package:land_asset_valuation/data/datasource/remote/condition_report_remote_data_source.dart';
 import 'package:land_asset_valuation/data/services/connectivity_service.dart';
-import 'package:land_asset_valuation/data/models/condition_report_model.dart';
 
 class ConditionReportSyncService {
   final ConditionReportLocalDatabase _localDatabase;

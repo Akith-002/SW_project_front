@@ -17,16 +17,15 @@ import 'package:land_asset_valuation/application/core/validators/i2_rental_evide
 import 'package:land_asset_valuation/injection.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
 import 'package:http/http.dart' as http;
-import 'package:land_asset_valuation/application/core/configurations/app_config.dart';
 
 /// Main page widget for displaying rental evidence.
 class I2RentalEvidence extends BasePage {
   final MasterDataResponse masterData;
   final double? longitude;
   final double? latitude;
-  
+
   const I2RentalEvidence({
-    super.key, 
+    super.key,
     required this.masterData,
     this.longitude,
     this.latitude,
@@ -69,18 +68,20 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
     print('I2RentalEvidence: initState called');
     print('I2RentalEvidence: Received longitude: ${widget.longitude}');
     print('I2RentalEvidence: Received latitude: ${widget.latitude}');
-    
+
     // Initialize coordinate controllers with passed values
     if (widget.longitude != null) {
       _longitudeController.text = widget.longitude.toString();
-      print('I2RentalEvidence: Set longitude controller text: ${_longitudeController.text}');
+      print(
+          'I2RentalEvidence: Set longitude controller text: ${_longitudeController.text}');
     } else {
       print('I2RentalEvidence: Longitude is null - no value to set');
     }
-    
+
     if (widget.latitude != null) {
       _latitudeController.text = widget.latitude.toString();
-      print('I2RentalEvidence: Set latitude controller text: ${_latitudeController.text}');
+      print(
+          'I2RentalEvidence: Set latitude controller text: ${_latitudeController.text}');
     } else {
       print('I2RentalEvidence: Latitude is null - no value to set');
     }
@@ -126,7 +127,67 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
 
   // Add this function to handle validation, submission, and image upload
   void _validateAndSubmit() async {
-    if (_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.validate()) {
+      _showErrorMessage('Please fix the validation errors in the form');
+      return;
+    }
+
+    try {
+      final validationErrors = <String, String>{};
+
+      void addError(String field, String? error) {
+        if (error != null) {
+          validationErrors[field] = error;
+        }
+      }
+
+      // Validate dropdowns are selected properly
+      addError('Building',
+          I2RentalEvidenceValidator.dropdown(_selectedBuilding, 'Building'));
+      addError(
+          'Property Category',
+          I2RentalEvidenceValidator.dropdown(
+              _selectedPropertyCategory, 'Property Category'));
+      addError(
+          'Property Subcategory',
+          I2RentalEvidenceValidator.dropdown(
+              _selectedPropertySubcategory, 'Property Subcategory'));
+      addError(
+          'Property Type 1',
+          I2RentalEvidenceValidator.dropdown(
+              _selectedPropertyType1, 'Property Type'));
+      addError(
+          'Property Type 2',
+          I2RentalEvidenceValidator.dropdown(
+              _selectedPropertyType2, 'Property Type'));
+
+      // Validate text fields for proper content
+      addError(
+          'Assessment Number',
+          I2RentalEvidenceValidator.alphanumeric(
+              _assessmentNoController.text, 'Assessment Number'));
+      addError(
+          'Owner Name',
+          I2RentalEvidenceValidator.alphanumeric(
+              _ownerNameController.text, 'Owner Name'));
+      addError(
+          'Occupier Name',
+          I2RentalEvidenceValidator.alphanumeric(
+              _occupierNameController.text, 'Occupier Name'));
+      addError(
+          'Description',
+          I2RentalEvidenceValidator.required(
+              _descriptionController.text, 'Description'));
+
+      if (validationErrors.isNotEmpty) {
+        final errorMessage = StringBuffer('Validation errors:\n');
+        validationErrors.forEach((field, error) {
+          errorMessage.writeln('• $field: $error');
+        });
+        _showErrorMessage(errorMessage.toString());
+        return;
+      }
+
       final reportId = await _submitFormData();
       if (reportId != null) {
         await _uploadImages(reportId);
@@ -134,8 +195,8 @@ class _I2RentalEvidenceState extends BasePageState<I2RentalEvidence> {
       } else {
         _showErrorMessage('Failed to submit rental evidence.');
       }
-    } else {
-      _showErrorMessage('Please fix the validation errors in the form');
+    } catch (e) {
+      _showErrorMessage('Error validating form data: $e');
     }
   }
 

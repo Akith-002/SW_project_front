@@ -701,14 +701,17 @@ class _MapScreenState extends State<MapScreen> {
 
     // Add master file data if available
     if (_id != null) commonQueryParams['masterFileId'] = _id!;
-    if (_masterFileNo != null)
+    if (_masterFileNo != null) {
       commonQueryParams['masterFileNo'] = _masterFileNo!;
-    if (_masterFileRefNo != null)
+    }
+    if (_masterFileRefNo != null) {
       commonQueryParams['masterFileRefNo'] = _masterFileRefNo!;
+    }
     if (_planType != null) commonQueryParams['planType'] = _planType!;
     if (_planNo != null) commonQueryParams['planNo'] = _planNo!;
-    if (_authorityRefNo != null)
+    if (_authorityRefNo != null) {
       commonQueryParams['authorityRefNo'] = _authorityRefNo!;
+    }
     if (_status != null) commonQueryParams['status'] = _status!;
 
     // Add coordinates from the selected marker if available
@@ -1798,7 +1801,7 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Displays a snackbar message to the user
   void _showSnackbar(String message,
-      {bool isError = false, int durationSeconds = 3}) {
+      {bool isError = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     // ScaffoldMessenger.of(context).showSnackBar(

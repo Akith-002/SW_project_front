@@ -16,7 +16,7 @@ class MasterDataRemoteDataSourceImpl implements MasterDataRemoteDataSource {
     try {
       final response = await dioClient.get('/MasterData');
       return MasterDataResponse.fromJson(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       throw Exception('Failed to fetch master data: ${e.message}');
     }
   }

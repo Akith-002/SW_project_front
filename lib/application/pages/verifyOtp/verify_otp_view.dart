@@ -7,7 +7,7 @@ import 'package:land_asset_valuation/injection.dart';
 
 class VerifyOtpView extends BasePage {
   final String email;
-  const VerifyOtpView({Key? key, required this.email}) : super(key: key);
+  const VerifyOtpView({super.key, required this.email});
 
   @override
   State<VerifyOtpView> createState() => _VerifyOtpViewState();

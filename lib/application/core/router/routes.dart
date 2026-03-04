@@ -32,8 +32,6 @@ import 'package:land_asset_valuation/application/pages/test.dart';
 import 'package:land_asset_valuation/application/pages/resetPassword/reset_password_view.dart';
 import 'package:land_asset_valuation/application/pages/verifyOtp/verify_otp_view.dart';
 import 'package:land_asset_valuation/application/pages/createPassword/create_password_view.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:land_asset_valuation/application/pages/resetPassword/cubit/reset_password_cubit.dart';
 
 import '../../pages/I2_rental_evidence/i2_rental_evidence.dart';
 
@@ -44,8 +42,6 @@ import 'package:land_asset_valuation/application/pages/RatingCardForms/agricultu
 import 'package:land_asset_valuation/application/pages/RatingCardForms/shops/shops_rating_card.dart';
 import 'package:land_asset_valuation/application/pages/RatingCardForms/special/special_rating_card.dart';
 import 'package:land_asset_valuation/data/models/master_data_model.dart';
-import 'package:land_asset_valuation/data/repositories/master_data_repository_impl.dart';
-import 'package:land_asset_valuation/data/datasource/remote/master_data_remote_data_source.dart';
 import 'package:land_asset_valuation/domain/usecases/get_master_data_usecase.dart';
 import 'package:land_asset_valuation/injection.dart';
 import 'package:get_it/get_it.dart';

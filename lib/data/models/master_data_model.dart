@@ -48,35 +48,35 @@ class MasterDataResponse {
   });
 
   factory MasterDataResponse.fromJson(Map<String, dynamic> json) {
-    List<String> _parseList(dynamic value) {
+    List<String> parseList(dynamic value) {
       if (value == null) return [];
       return List<String>.from(value);
     }
 
     return MasterDataResponse(
-      buildingCategory: _parseList(json['buildingCategory']),
-      buildingClass: _parseList(json['buildingClass']),
-      conviences: _parseList(json['conviences']),
-      natureOfConstruction: _parseList(json['natureOfConstruction']),
-      roofMaterial: _parseList(json['roofMaterial']),
-      roofFrame: _parseList(json['roofFrame']),
-      roofFinisher: _parseList(json['roofFinisher']),
-      celing: _parseList(json['celing']),
-      foundationStructure: _parseList(json['foundationStructure']),
-      wallStructure: _parseList(json['wallStructure']),
-      floorStructure: _parseList(json['floorStructure']),
-      door: _parseList(json['door']),
-      window: _parseList(json['window']),
-      windowProtection: _parseList(json['windowProtection']),
+      buildingCategory: parseList(json['buildingCategory']),
+      buildingClass: parseList(json['buildingClass']),
+      conviences: parseList(json['conviences']),
+      natureOfConstruction: parseList(json['natureOfConstruction']),
+      roofMaterial: parseList(json['roofMaterial']),
+      roofFrame: parseList(json['roofFrame']),
+      roofFinisher: parseList(json['roofFinisher']),
+      celing: parseList(json['celing']),
+      foundationStructure: parseList(json['foundationStructure']),
+      wallStructure: parseList(json['wallStructure']),
+      floorStructure: parseList(json['floorStructure']),
+      door: parseList(json['door']),
+      window: parseList(json['window']),
+      windowProtection: parseList(json['windowProtection']),
       doorsBathroomAndToiletFittings:
-          _parseList(json['doorsBathroomAndToiletFittings']),
-      doorsHandRail: _parseList(json['doorsHandRail']),
-      doorsPantryCupboard: _parseList(json['doorsPantryCupboard']),
-      doorsOther: _parseList(json['doorsOther']),
-      wallFinisher: _parseList(json['wallFinisher']),
-      floorFinisher: _parseList(json['floorFinisher']),
-      bathroomAndToilet: _parseList(json['bathroomAndToilet']),
-      services: _parseList(json['services']),
+          parseList(json['doorsBathroomAndToiletFittings']),
+      doorsHandRail: parseList(json['doorsHandRail']),
+      doorsPantryCupboard: parseList(json['doorsPantryCupboard']),
+      doorsOther: parseList(json['doorsOther']),
+      wallFinisher: parseList(json['wallFinisher']),
+      floorFinisher: parseList(json['floorFinisher']),
+      bathroomAndToilet: parseList(json['bathroomAndToilet']),
+      services: parseList(json['services']),
     );
   }
 }

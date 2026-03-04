@@ -12,8 +12,7 @@ import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 class CreatePasswordForm extends StatefulWidget {
   final String email;
   final String otp;
-  const CreatePasswordForm({Key? key, required this.email, required this.otp})
-      : super(key: key);
+  const CreatePasswordForm({super.key, required this.email, required this.otp});
 
   @override
   State<CreatePasswordForm> createState() => _CreatePasswordFormState();

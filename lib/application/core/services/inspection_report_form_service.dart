@@ -109,8 +109,9 @@ class InspectionReportFormService {
   }) {
     if (masterFileId != null) formData.masterFileId = masterFileId;
     if (masterFileRefNo != null) formData.masterFileRefNo = masterFileRefNo;
-    if (inspectionDate != null)
+    if (inspectionDate != null) {
       formData.inspectionDate = inspectionDate.toUtc();
+    }
     if (dsDivision != null) formData.dsDivision = dsDivision;
     if (district != null) formData.district = district;
     if (province != null) formData.province = province;
@@ -148,8 +149,9 @@ class InspectionReportFormService {
     if (detailsOfAssestsInventoryItems != null) {
       formData.detailsOfAssestsInventoryItems = detailsOfAssestsInventoryItems;
     }
-    if (detailsOfBusiness != null)
+    if (detailsOfBusiness != null) {
       formData.detailsOfBusiness = detailsOfBusiness;
+    }
     if (remark != null) formData.remark = remark;
   }
 

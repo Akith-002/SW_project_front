@@ -15,16 +15,17 @@ class StorageService {
       required Uint8List fileData,
       Function(XFile)? onComplete,
       Function(String)? onError}) async {
-    Directory? directory;
+    Directory directory;
     try {
       if (!Platform.isAndroid) {
-        directory = await getApplicationDocumentsDirectory();
-        directory = Directory('${directory.path}/$directoryName');
+        final appDirectory = await getApplicationDocumentsDirectory();
+        directory = Directory('${appDirectory.path}/$directoryName');
       } else {
-        directory = await getExternalStorageDirectory();
+        directory = await getExternalStorageDirectory() ??
+            await getApplicationDocumentsDirectory();
       }
 
-      if (!await directory!.exists()) {
+      if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
 

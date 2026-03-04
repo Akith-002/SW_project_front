@@ -42,7 +42,7 @@ Future<Map<String, dynamic>> fetchTaskOverviewAndSummary(
 
 class ProfileScreen extends StatelessWidget {
   final String username;
-  const ProfileScreen({Key? key, required this.username}) : super(key: key);
+  const ProfileScreen({super.key, required this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
     if (username == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    print('ProfileScreen username: ' + username);
+    print('ProfileScreen username: $username');
     return FutureBuilder<UserProfile>(
       future: fetchUserProfile(username),
       builder: (context, snapshot) {
@@ -77,8 +77,8 @@ class ProfileScreen extends StatelessWidget {
             final summary =
                 taskSnapshot.data!['summary'] as Map<String, dynamic>;
             // Debug: Print the overview object and its keys
-            print('DEBUG: Overview object: ' + overview.toString());
-            print('DEBUG: Overview keys: ' + overview.keys.toString());
+            print('DEBUG: Overview object: $overview');
+            print('DEBUG: Overview keys: ${overview.keys}');
             // Map overview data (use correct camelCase keys)
             final double landAcquisition =
                 (overview['laTaskAssigned'] ?? 0).toDouble();
@@ -225,7 +225,7 @@ class ProfileScreen extends StatelessWidget {
 
 class ProfileCard extends StatelessWidget {
   final UserProfile profile;
-  const ProfileCard({Key? key, required this.profile}) : super(key: key);
+  const ProfileCard({super.key, required this.profile});
 
   @override
   Widget build(BuildContext context) {

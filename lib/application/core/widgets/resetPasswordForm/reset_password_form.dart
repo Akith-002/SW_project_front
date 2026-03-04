@@ -11,7 +11,7 @@ import 'package:land_asset_valuation/application/core/utils/app_colors/theme_dat
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 
 class ResetPasswordForm extends StatefulWidget {
-  const ResetPasswordForm({Key? key}) : super(key: key);
+  const ResetPasswordForm({super.key});
 
   @override
   State<ResetPasswordForm> createState() => _ResetPasswordFormState();

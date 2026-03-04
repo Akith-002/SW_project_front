@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 class LineChartSample2 extends StatefulWidget {
   final List<double> monthlyValues;
-  const LineChartSample2({Key? key, required this.monthlyValues})
-      : super(key: key);
+  const LineChartSample2({super.key, required this.monthlyValues});
 
   @override
   State<LineChartSample2> createState() => _LineChartSample2State();

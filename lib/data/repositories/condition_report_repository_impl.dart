@@ -69,10 +69,12 @@ class ConditionReportRepositoryImpl implements ConditionReportRepository {
   }
 
   // Additional methods for offline functionality
+  @override
   Future<List<ConditionReportModel>> getPendingReports() async {
     return await localDataSource.getPendingReports();
   }
 
+  @override
   Future<int> getPendingReportsCount() async {
     return await localDataSource.getPendingReportsCount();
   }

@@ -98,7 +98,7 @@ class _OfficesRatingCardState extends State<OfficesRatingCard> {
   final _parkingSpaceController = TextEditingController();
   
   // List to store office suite tags
-  List<String> _officeSuiteTags = [];
+  final List<String> _officeSuiteTags = [];
 
   @override
   void initState() {

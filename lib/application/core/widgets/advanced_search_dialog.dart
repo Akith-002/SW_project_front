@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
-import 'package:land_asset_valuation/application/core/utils/app_strings.dart';
 import 'package:land_asset_valuation/application/core/utils/app_styling.dart';
 import 'package:land_asset_valuation/application/core/widgets/labeled_text_field.dart';
 import 'package:land_asset_valuation/application/core/widgets/custom_dropdown_field.dart';

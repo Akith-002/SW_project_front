@@ -32,7 +32,7 @@ class TableScaffoldMrState extends State<TableScaffoldMr> {
   late int _pageSize;
   late List<int> _pageSizeOptions;
   int _currentPage = 1;
-  int _totalItems = 0;
+  final int _totalItems = 0;
   String _searchQuery = '';
   String? _sortBy;
   List<MrRequest> _allRequests = [];

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 /// Model class for LM Sales Evidences data
 /// Used to serialize and deserialize sales evidence form data for Land Management module

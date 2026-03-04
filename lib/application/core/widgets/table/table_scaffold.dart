@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:land_asset_valuation/application/core/utils/app_colors/theme_data.dart';
-import 'package:land_asset_valuation/application/core/widgets/iconButtonWidget/icon_button_widget.dart';
 import 'package:land_asset_valuation/application/core/router/pages.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:land_asset_valuation/data/models/paginated_response.dart';
 import 'package:land_asset_valuation/data/models/land_acquisition_master_file_model.dart';
 import 'package:land_asset_valuation/domain/repositories/land_acquisition_repository.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:math' as math;
 
 class TableScaffold extends StatefulWidget {
   final int initialPageSize;

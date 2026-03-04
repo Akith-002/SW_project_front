@@ -6,7 +6,7 @@ import 'package:land_asset_valuation/application/core/widgets/resetPasswordForm/
 import 'package:land_asset_valuation/injection.dart';
 
 class ResetPasswordView extends BasePage {
-  const ResetPasswordView({Key? key}) : super(key: key);
+  const ResetPasswordView({super.key});
 
   @override
   State<ResetPasswordView> createState() => _ResetPasswordViewState();

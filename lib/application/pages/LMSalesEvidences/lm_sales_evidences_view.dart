@@ -35,7 +35,7 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
   final _formKey = GlobalKey<FormState>();
 
   // Auto-validation mode
-  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
+  final AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
   // Controllers for form fields (21 fields)
   final _assetNumberController = TextEditingController();
@@ -129,7 +129,7 @@ class _LmSalesEvidencesViewState extends BasePageState<LmSalesEvidencesView> {
       // Create a unique identifier using coordinates (rounded to avoid floating point precision issues)
       final roundedLat = double.parse(latStr).toStringAsFixed(6);
       final roundedLng = double.parse(lngStr).toStringAsFixed(6);
-      _markerId = '${roundedLat}_${roundedLng}';
+      _markerId = '${roundedLat}_$roundedLng';
       debugPrint('Generated marker ID: $_markerId');
     } else {
       // Fallback to timestamp if coordinates are not available

@@ -8,8 +8,7 @@ import 'package:land_asset_valuation/injection.dart';
 class CreatePasswordView extends BasePage {
   final String email;
   final String otp;
-  const CreatePasswordView({Key? key, required this.email, required this.otp})
-      : super(key: key);
+  const CreatePasswordView({super.key, required this.email, required this.otp});
 
   @override
   State<CreatePasswordView> createState() => _CreatePasswordViewState();

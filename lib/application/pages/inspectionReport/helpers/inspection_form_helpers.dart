@@ -68,13 +68,16 @@ class InspectionFormHelpers {
         9; // Floors G+, Floors G-, Age, Expected Life, Structure + 4 dropdowns
 
     // Don't count auto-filled fields: buildingIdController and buildingNameController
-    if (noOfFloorsGPlusController.text.trim().isNotEmpty)
+    if (noOfFloorsGPlusController.text.trim().isNotEmpty) {
       filledRequiredFields++;
-    if (noOfFloorsGMinusController.text.trim().isNotEmpty)
+    }
+    if (noOfFloorsGMinusController.text.trim().isNotEmpty) {
       filledRequiredFields++;
+    }
     if (ageController.text.trim().isNotEmpty) filledRequiredFields++;
-    if (expectedLifePeriodController.text.trim().isNotEmpty)
+    if (expectedLifePeriodController.text.trim().isNotEmpty) {
       filledRequiredFields++;
+    }
     if (structureController.text.trim().isNotEmpty) filledRequiredFields++;
     if (selectedBuildingCategory != null) filledRequiredFields++;
     if (selectedBuildingClass != null) filledRequiredFields++;
